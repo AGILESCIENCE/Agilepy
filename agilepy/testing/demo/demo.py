@@ -31,10 +31,9 @@ from agilepy.api.AgileAnalysis import AgileAnalysis
 from agilepy.config.XMLconfig import SourcesConfig
 
 aa = AgileAnalysis("./agilepy/testing/demo/conf.yaml")
-
 aa.setup()
 
-print("Sources xml:")
-sc = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
 
-print(sc.getConf())
+
+sc = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
+#print("xml source config: ", sc.getConf())

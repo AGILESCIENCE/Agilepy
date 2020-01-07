@@ -3,27 +3,38 @@ from typing import List
 
 @dataclass
 class Parameter:
+    name: str
+    value: float
     free: int = None
-    name: str = None
-    value: float = None
+    scale: float = None
     min: float = None
     max: float = None
-    scale: float = None
+
+class ValueParamFinder:
+    def getParamAttributeWhere(self, attributeName, key, value):
+        return [getattr(param, attributeName) for param in self.parameters if getattr(param, key) == value].pop()
 
 @dataclass
-class SourceDescription:
+class Spectrum(ValueParamFinder):
+    type: str
     parameters: List[Parameter]
-    name: str = None #spectrum or spatialModel
-    type: str = None
+
+@dataclass
+class SpatialModel(ValueParamFinder):
+    type: str
+    location_limit: int
+    free: int
+    parameters: List[Parameter]
 
 @dataclass
 class Source:
-    SourceDescription: List[SourceDescription]
-    name: str = None
-    type: str = None
-    ROI_Center_Distance: float = None
+    name: str
+    type: str
+    spatialModel: SpatialModel = None
+    spectrum: Spectrum = None
+
 
 @dataclass
 class SourceLibrary:
-    sources: List[Source]
     title: str
+    sources: List[Source]

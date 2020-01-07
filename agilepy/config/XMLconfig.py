@@ -28,6 +28,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import xml.etree.ElementTree as ET
+from os.path import split, join
+
+
 from agilepy.dataclasses.Source import *
 
 class SourcesConfig:
@@ -37,13 +40,11 @@ class SourcesConfig:
     def __init__(self, configurationFilePath):
 
         self.configurationFilePath = configurationFilePath
+        self.configurationFilePathPrefix,_ = split(self.configurationFilePath)
 
-        self.sourcesConfig = {}
-        self.sourcesConfigAgileFormat = {}
+        self.sourcesConfig = self.parseSourceXml()
 
-        self.parseSourceXml()
-
-        self.convertToAgileFormat()
+        self.sourcesConfigAgileFormat = self.convertToAgileFormat()
 
 
 
@@ -51,40 +52,45 @@ class SourcesConfig:
 
         xmlRoot = ET.parse(self.configurationFilePath).getroot()
 
-        sourceConfig = SourceLibrary([], xmlRoot.attrib["title"])
+        sourceConfig = SourceLibrary(**xmlRoot.attrib, sources=[])
 
         for source in xmlRoot:
 
             if source.tag != "source":
                 self.fail("Tag <source> expected, %s found."%(source.tag))
 
-            sourceDC = Source([], source.attrib["name"], source.attrib["type"])
+            sourceDC = Source(**source.attrib)
 
-            for sourceDescr in source:
+            for sourceDescription in source:
 
-                if sourceDescr.tag not in ["spectrum", "spatialModel"]:
+                if sourceDescription.tag not in ["spectrum", "spatialModel"]:
                     self.fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescr.tag))
 
-                sourceDescrDC = SourceDescription([], sourceDescr.tag, sourceDescr.attrib["type"])
+                if sourceDescription.tag == "spectrum":
+                    sourceDescrDC = Spectrum(**sourceDescription.attrib, parameters=[])
+                    sourceDescrDC = self.checkAndAddParameters(sourceDescrDC, sourceDescription)
+                    sourceDC.spectrum = sourceDescrDC
+                else:
+                    sourceDescrDC = SpatialModel(**sourceDescription.attrib, parameters=[])
+                    sourceDescrDC = self.checkAndAddParameters(sourceDescrDC, sourceDescription)
+                    sourceDC.spatialModel = sourceDescrDC
 
-                for parameter in sourceDescr:
-
-                    if parameter.tag != "parameter":
-                        self.fail("Tag <parameter> expected, %s found."%(parameter.tag))
-
-                    paramDC = Parameter(**parameter.attrib)
-
-                    sourceDescrDC.parameters.append(paramDC)
-
-                sourceDC.SourceDescription.append(sourceDescrDC)
 
             sourceConfig.sources.append(sourceDC)
 
         return sourceConfig
 
+    def checkAndAddParameters(self, sourceDescrDC, sourceDescription):
+        for parameter in sourceDescription:
 
-    def convertToAgileFormat(self):
-        pass
+            if parameter.tag != "parameter":
+                self.fail("Tag <parameter> expected, %s found."%(parameter.tag))
+
+            paramDC = Parameter(**parameter.attrib)
+
+            sourceDescrDC.parameters.append(paramDC)
+
+        return sourceDescrDC
 
     def getConf(self, key=None):
         if not key:
@@ -94,3 +100,80 @@ class SourcesConfig:
     def fail(self, msg):
         print("[SourcesConfig] Parsing failed: {}".format(self.configurationFilePath, e))
         exit(1)
+
+    def convertToAgileFormat(self):
+
+        with open(join(self.configurationFilePathPrefix,"agileSources.txt"), "w") as agileConf:
+
+            sourceStr = ""
+
+            for source in self.sourcesConfig.sources:
+
+                # get flux value
+                flux = [param.value for param in source.spectrum.parameters if param.name == "Flux"].pop()
+                sourceStr += flux+" "
+
+                # glon e glat
+                sourceStr += source.spatialModel.getParamAttributeWhere("value", "name", "GLON") + " "
+                sourceStr += source.spatialModel.getParamAttributeWhere("value", "name", "GLAT") + " "
+
+                if source.spectrum.type == "PLSuperExpCutoff":
+                    sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index1") + " "
+                else:
+                    sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index") + " "
+
+                sourceStr += "0 2 "
+
+                sourceStr += source.name + " "
+
+                sourceStr += "X "
+
+                if source.spectrum.type == "PowerLaw":
+                    sourceStr += "0 0 0"
+
+                elif source.spectrum.type == "PLExpCutoff":
+                    cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy")
+                    sourceStr += "1 "+str(cutoffenergy)+" 0 "
+
+                elif source.spectrum.type == "PLSuperExpCutoff":
+                    cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy")
+                    index2 = source.spectrum.getParamAttributeWhere("value", "name", "Index2")
+                    sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
+
+                else:
+                    pivotenergy = source.spectrum.getParamAttributeWhere("value", "name", "PivotEnergy")
+                    curvature = source.spectrum.getParamAttributeWhere("value", "name", "Curvature")
+                    sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
+
+
+
+                if source.spectrum.type == "PLSuperExpCutoff":
+                    sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index1") + " " + source.spectrum.getParamAttributeWhere("max", "name", "Index1") + " "
+                else:
+                    sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index") + " " + source.spectrum.getParamAttributeWhere("max", "name", "Index") + " "
+
+
+                if source.spectrum.type == "PowerLaw":
+                    sourceStr += "-1 -1 -1 -1"
+
+                elif source.spectrum.type == "PLExpCutoff":
+                    sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy") +" "\
+                               + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy") +" "\
+                               + " -1 -1"
+
+                elif source.spectrum.type == "PLSuperExpCutoff":
+                    sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy") +" "\
+                               + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy") +" "\
+                               + source.spectrum.getParamAttributeWhere("min", "name", "Index2") +" "\
+                               + source.spectrum.getParamAttributeWhere("max", "name", "Index2")
+
+                else:
+                    sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "PivotEnergy") +" "\
+                               + source.spectrum.getParamAttributeWhere("max", "name", "PivotEnergy") +" "\
+                               + source.spectrum.getParamAttributeWhere("min", "name", "Curvature") +" "\
+                               + source.spectrum.getParamAttributeWhere("max", "name", "Curvature")
+
+
+                sourceStr += "\n"
+
+            print("sourceStr:\n",sourceStr)
