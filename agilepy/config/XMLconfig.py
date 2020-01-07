@@ -103,7 +103,11 @@ class SourcesConfig:
 
     def convertToAgileFormat(self):
 
-        with open(join(self.configurationFilePathPrefix,"agileSources.txt"), "w") as agileConf:
+        outfilepath = join(self.configurationFilePathPrefix,"agileSources.txt")
+
+        print("[SourcesConfig] outfilepath: ",outfilepath)
+
+        with open(outfilepath, "w") as agileConf:
 
             sourceStr = ""
 
@@ -126,7 +130,7 @@ class SourcesConfig:
 
                 sourceStr += source.name + " "
 
-                sourceStr += "X "
+                sourceStr += computeOpMode()
 
                 if source.spectrum.type == "PowerLaw":
                     sourceStr += "0 0 0"
@@ -176,4 +180,9 @@ class SourcesConfig:
 
                 sourceStr += "\n"
 
+
+            agileConf.write(sourceStr)
             print("sourceStr:\n",sourceStr)
+
+    def computeOpMode(self):
+        return "X"
