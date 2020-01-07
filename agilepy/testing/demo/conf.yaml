@@ -1,0 +1,31 @@
+data:
+  evfile : ft1.lst
+  scfile : ft2.fits
+  ltcube : ltcube.fits
+
+binning:
+  roiwidth   : 10.0
+  binsz      : 0.1
+  binsperdec : 8
+
+selection :
+  emin : 100
+  emax : 316227.76
+  zmax    : 90
+  evclass : 128
+  evtype  : 3
+  tmin    : 239557414
+  tmax    : 428903014
+  filter  : null
+  target : 'mkn421'
+
+gtlike:
+  edisp : True
+  irfs : 'P8R2_SOURCE_V6'
+  edisp_disable : ['isodiff','galdiff']
+
+model:
+  src_roiwidth : 15.0
+  galdiff  : '$FERMI_DIFFUSE_DIR/gll_iem_v06.fits'
+  isodiff  : 'iso_P8R2_SOURCE_V6_v06.txt'
+  catalogs : ['3FGL']
