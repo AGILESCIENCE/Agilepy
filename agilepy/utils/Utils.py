@@ -77,8 +77,10 @@ class AgilepyLogger(metaclass=Singleton):
         self.logger.info("[%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
 
     def info(self, context, message, arguments):
-        self.logger.info("[%s] "+message, type(context).__name__, *arguments)
+        self.logger.info("[%s] " + message, type(context).__name__, *arguments)
+
     def warning(self, context, arguments):
-        self.logger.warning("[%s] "+message, type(context).__name__, *arguments)
+        self.logger.warning("[%s] " + message, type(context).__name__, *arguments)
+
     def debug(self, context, arguments):
-        self.logger.debug("[%s] "+message, type(context).__name__, *arguments)
+        self.logger.debug("[%s] " + message, type(context).__name__, *arguments)

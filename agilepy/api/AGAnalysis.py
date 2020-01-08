@@ -31,7 +31,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.config.XMLconfig import SourcesConfig
 from agilepy.utils.Utils import AgilepyLogger
 
-class AgileAnalysis:
+class AGAnalysis:
 
     def __init__(self, configurationFilePath):
 

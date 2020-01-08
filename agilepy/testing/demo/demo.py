@@ -27,6 +27,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from agilepy.api.AgileAnalysis import AgileAnalysis
+from agilepy.api.AGAnalysis import AGAnalysis
 
-aa = AgileAnalysis("./agilepy/testing/demo/conf.yaml")
+aa = AGAnalysis("./agilepy/testing/demo/conf.yaml")
