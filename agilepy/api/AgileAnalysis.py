@@ -28,12 +28,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.config.XMLconfig import SourcesConfig
+from agilepy.utils.Utils import AgilepyLogger
 
 class AgileAnalysis:
 
     def __init__(self, configurationFilePath):
 
         self.config = AgilepyConfig(configurationFilePath)
+
+        self.logger = AgilepyLogger(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
+
+        self.sourcesconfig = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
+
 
     def setup(self):
 

@@ -26,6 +26,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import sys
+import logging
+from os.path import join
+from pathlib import Path
 
 class Singleton(type):
     _instances = {}
@@ -33,3 +37,48 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+class AgilepyLogger(metaclass=Singleton):
+
+    def __init__(self, outputDirectory = None, logFilename = None, debug_lvl = 2):
+
+        self.debug_lvl = debug_lvl
+
+        # WARNING: An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
+        if self.debug_lvl == 0: debug_lvl_enum = logging.WARNING
+
+        # INFO: Confirmation that things are working as expected.
+        if self.debug_lvl == 1: debug_lvl_enum = logging.INFO
+
+        # DEBUG: Detailed information, typically of interest only when diagnosing problems.
+        if self.debug_lvl == 2: debug_lvl_enum = logging.DEBUG
+
+        Path(outputDirectory).mkdir(parents=True, exist_ok=True)
+
+        if logFilename:
+
+            logFilename = join(outputDirectory, logFilename)
+
+
+            logging.basicConfig(  format='%(asctime)s %(message)s',
+                                  datefmt='%m/%d/%Y %I:%M:%S %p',
+                                  filename=logFilename, filemode='w', level=debug_lvl_enum
+                               )
+        else:
+
+            logging.basicConfig(  format='%(asctime)s %(message)s',
+                                  datefmt='%m/%d/%Y %I:%M:%S %p',
+                                  stream=sys.stdout, level=debug_lvl_enum
+                               )
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(debug_lvl_enum)
+
+        self.logger.info("[%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
+
+    def info(self, context, message, arguments):
+        self.logger.info("[%s] "+message, type(context).__name__, *arguments)
+    def warning(self, context, arguments):
+        self.logger.warning("[%s] "+message, type(context).__name__, *arguments)
+    def debug(self, context, arguments):
+        self.logger.debug("[%s] "+message, type(context).__name__, *arguments)

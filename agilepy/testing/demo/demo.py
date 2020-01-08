@@ -28,12 +28,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from agilepy.api.AgileAnalysis import AgileAnalysis
-from agilepy.config.XMLconfig import SourcesConfig
 
 aa = AgileAnalysis("./agilepy/testing/demo/conf.yaml")
-aa.setup()
-
-
-
-sc = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
-print("xml source config: ", sc.getConf())

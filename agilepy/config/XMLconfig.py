@@ -32,6 +32,7 @@ from os.path import split, join
 
 
 from agilepy.dataclasses.Source import *
+from agilepy.utils.Utils import AgilepyLogger
 
 class SourcesConfig:
     """
@@ -46,6 +47,7 @@ class SourcesConfig:
 
         self.sourcesConfigAgileFormat = self.convertToAgileFormat()
 
+        self.logger = AgilepyLogger()
 
 
     def parseSourceXml(self):
@@ -105,7 +107,6 @@ class SourcesConfig:
 
         outfilepath = join(self.configurationFilePathPrefix,"agileSources.txt")
 
-        print("[SourcesConfig] outfilepath: ",outfilepath)
 
         with open(outfilepath, "w") as agileConf:
 
@@ -186,17 +187,28 @@ class SourcesConfig:
 
             agileConf.write(sourceStr)
 
+        # self.logger.info("Sources configuration in AGILE format placed at: %s", outfilepath)
+
 
     def computeFixFlag(self, source):
         if source.spectrum.getFreeAttributeValueOf("name", "Flux") == 0:
             return "0"
 
+        if source.spatialModel.free == 2:
 
-        bitmask = source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
-                  source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
-                  source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
-                  source.spatialModel.free + \
-                  source.spectrum.getFreeAttributeValueOf("name", "Flux")
+            bitmask = source.spatialModel.free + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
+                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
+                      "0" + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Flux")
+
+        else:
+            bitmask = source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
+                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
+                      source.spatialModel.free + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Flux")
 
         #print("bitmask:\n",bitmask)
         # '{0:08b}'.format(6)
