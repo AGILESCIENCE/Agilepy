@@ -185,7 +185,7 @@ class SourcesConfig:
 
 
             agileConf.write(sourceStr)
-            print("sourceStr:\n",sourceStr)
+
 
     def computeFixFlag(self, source):
         if source.spectrum.getFreeAttributeValueOf("name", "Flux") == 0:

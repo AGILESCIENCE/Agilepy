@@ -36,4 +36,4 @@ aa.setup()
 
 
 sc = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
-#print("xml source config: ", sc.getConf())
+print("xml source config: ", sc.getConf())

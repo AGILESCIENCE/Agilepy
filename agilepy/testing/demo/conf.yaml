@@ -1,31 +1,45 @@
-data:
-  evfile : ft1.lst
-  scfile : ft2.fits
-  ltcube : ltcube.fits
+input:
+  evfile : null
+  logfile : null
 
-binning:
-  roiwidth   : 10.0
-  binsz      : 0.1
-  binsperdec : 8
+output:
+  outdir: null
+  logfilename: "agilepy.log"
 
-selection :
-  emin : 100
-  emax : 316227.76
-  zmax    : 90
-  evclass : 128
-  evtype  : 3
-  tmin    : 239557414
-  tmax    : 428903014
-  filter  : null
-  target : 'mkn421'
+selection:
+  emin: 100
+  emax: 10000
+  glat: null
+  glon: null
+  tmin: null
+  tmax: null
+  timelist: null
+  timetype: "MJD"
+  projtype: "WCS"
+  proj: "ARC"
+  filtercode: 5
+  fovradmin: 0
+  fovradmax: 60
+  albedorad: 80
+  dq: 0
+  phasecode: null
 
-gtlike:
-  edisp : True
-  irfs : 'P8R2_SOURCE_V6'
-  edisp_disable : ['isodiff','galdiff']
+maps:
+  mapsize: 40
+  useEDPmatrixforEXP: True
+  expstep: null
+  spectralindex: 2.1
+  timestep: 160
+  skytype: 4
+  binsize: 0.1
+  energybin: 0
+  fovbinnumber: 1
 
 model:
-  src_roiwidth : 15.0
-  galdiff  : '$FERMI_DIFFUSE_DIR/gll_iem_v06.fits'
-  isodiff  : 'iso_P8R2_SOURCE_V6_v06.txt'
-  catalogs : ['3FGL']
+  modelfile: null
+  galmode: 1
+  isomode: 1
+  galcoeff: -1
+  isocoeff: -1
+  emin_sources: 100
+  emax_sources: 10000
