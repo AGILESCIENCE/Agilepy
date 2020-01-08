@@ -26,8 +26,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
 import yaml
+import pprint
 from os.path import dirname, realpath, join
 
 from agilepy.utils.Utils import Singleton
@@ -37,6 +37,8 @@ class AgilepyConfig(metaclass=Singleton):
 
     """
     def __init__(self, configurationFilePath = None):
+
+        self.pp = pprint.PrettyPrinter(indent=2)
 
         self.configurationFilePath = configurationFilePath
 
@@ -50,6 +52,40 @@ class AgilepyConfig(metaclass=Singleton):
 
         self.conf = {**default_conf, **user_conf} # user conf will ovveride default conf
 
+    def returnSectionOfParam(self, paramName):
+
+        for paramSection in self.conf:
+
+            if paramName in self.conf[paramSection]:
+
+                return paramSection
+
+        return None
+
+    def printOptions(self):
+
+        self.pp.pprint(self.conf)
+
+    def setOptions(self, **kwargs):
+        """
+        Returns a dictionary of rejected parameters
+        """
+
+        rejected = {}
+
+        for paramName, paramValue in kwargs.items():
+
+            paramSection = self.returnSectionOfParam(paramName)
+
+            if paramSection:
+
+                self.conf[paramSection][paramName] = paramValue
+
+            else:
+
+                rejected[paramName] = paramValue
+
+        return rejected
 
     def getConf(self, key=None, subkey=None):
         if key and key in self.conf:

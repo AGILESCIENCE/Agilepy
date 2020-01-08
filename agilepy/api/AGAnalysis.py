@@ -41,6 +41,16 @@ class AGAnalysis:
 
         self.sourcesconfig = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
 
+    def setOptions(self, **kwargs):
+
+        rejected = self.config.setOptions(**kwargs)
+
+        if rejected:
+
+            self.logger.warning(self, "Some options have not been set: {}".format(rejected))
+
+    def printOptions(self):
+        self.config.printOptions()
 
     def setup(self):
 
