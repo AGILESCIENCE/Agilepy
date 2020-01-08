@@ -2,7 +2,7 @@
 
 ## Installation
 
-Create a virtual environment
+Create a virtual environment with Python >= 3.7:
 
 ```bash
   conda create --name agilepy python=3.7

@@ -13,7 +13,11 @@ class Parameter:
 class ValueParamFinder:
     def getParamAttributeWhere(self, attributeName, key, value):
         return [getattr(param, attributeName) for param in self.parameters if getattr(param, key) == value].pop()
-
+    def getFreeAttributeValueOf(self, key, value):
+        try:
+            return [getattr(param, "free") for param in self.parameters if getattr(param, key) == value].pop()
+        except Exception:
+            return ""
 @dataclass
 class Spectrum(ValueParamFinder):
     type: str

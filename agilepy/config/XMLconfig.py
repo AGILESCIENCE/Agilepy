@@ -126,14 +126,17 @@ class SourcesConfig:
                 else:
                     sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index") + " "
 
-                sourceStr += "0 2 "
+                sourceStr += self.computeFixFlag(source)+" "
+
+                sourceStr += "2 "
 
                 sourceStr += source.name + " "
 
-                sourceStr += computeOpMode()
+                sourceStr += source.spatialModel.location_limit + " "
+
 
                 if source.spectrum.type == "PowerLaw":
-                    sourceStr += "0 0 0"
+                    sourceStr += "0 0 0 "
 
                 elif source.spectrum.type == "PLExpCutoff":
                     cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy")
@@ -184,5 +187,20 @@ class SourcesConfig:
             agileConf.write(sourceStr)
             print("sourceStr:\n",sourceStr)
 
-    def computeOpMode(self):
-        return "X"
+    def computeFixFlag(self, source):
+        if source.spectrum.getFreeAttributeValueOf("name", "Flux") == 0:
+            return "0"
+
+
+        bitmask = source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
+                  source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
+                  source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
+                  source.spatialModel.free + \
+                  source.spectrum.getFreeAttributeValueOf("name", "Flux")
+
+        #print("bitmask:\n",bitmask)
+        # '{0:08b}'.format(6)
+        fixflag = int(bitmask, 2)
+        #print("fixflag: ",fixflag)
+
+        return str(fixflag)
