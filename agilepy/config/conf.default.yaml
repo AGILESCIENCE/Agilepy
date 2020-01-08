@@ -1,0 +1,54 @@
+input:
+  evfile : null #required
+  logfile : null #required
+
+output:
+  outdir: null #required
+  logfilename: null #required
+  debuglvl: null #required
+
+selection:
+  emin: 100
+  emax: 10000
+  glat: null
+  glon: null
+  tmin: null
+  tmax: null
+  timelist: null
+  timetype: "MJD"
+  projtype: "WCS"
+  proj: "ARC"
+  filtercode: 5
+  fovradmin: 0
+  fovradmax: 60
+  albedorad: 80
+  dq: 0
+  phasecode: null
+
+maps:
+  mapsize: 40
+  useEDPmatrixforEXP: True
+  expstep: null
+  spectralindex: 2.1
+  timestep: 160
+  skytype: 4
+  binsize: 0.1
+  energybin: 0
+  fovbinnumber: 1
+
+model:
+  modelfile: null
+  galmode: 1
+  isomode: 1
+  galcoeff: -1
+  isocoeff: -1
+  emin_sources: 100
+  emax_sources: 10000
+
+alike:
+  ranal: 10
+  ulcl: 2
+  loccl: 95
+  expratioevaluationminThreshold:
+  expratioevaluationMaxThreshold:
+  expratioevaluationSquareSize:

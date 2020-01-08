@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import yaml
+from os.path import dirname, realpath, join
 
 from agilepy.utils.Utils import Singleton
 
@@ -35,23 +36,40 @@ class AgilepyConfig(metaclass=Singleton):
     """
 
     """
-    def __init__(self, configurationFilePath):
+    def __init__(self, configurationFilePath = None):
 
         self.configurationFilePath = configurationFilePath
 
-        with open(configurationFilePath, 'r') as yamlfile:
+        currentDir = dirname(realpath(__file__))
+
+        default_conf = self.loadFromYaml(join(currentDir,"./conf.default.yaml"))
+
+        if self.configurationFilePath:
+
+            user_conf = self.loadFromYaml(self.configurationFilePath)
+
+        self.conf = {**default_conf, **user_conf} # user conf will ovveride default conf
+
+
+    def getConf(self, key=None, subkey=None):
+        if key and key in self.conf:
+            if subkey and subkey in self.conf[key]:
+                return self.conf[key][subkey]
+            else:
+                return self.conf[key]
+        else:
+            return self.conf
+
+    def loadFromYaml(self,file):
+
+        with open(file, 'r') as yamlfile:
 
             try:
 
-                self.conf = yaml.safe_load(yamlfile)
+                return yaml.safe_load(yamlfile)
 
             except yaml.YAMLError as exc:
 
                 print("[AgilepyConfig] exception:", exc)
 
                 exit(1)
-
-    def getConf(self, key=None):
-        if not key:
-            return self.conf
-        else: return self.conf[key]
