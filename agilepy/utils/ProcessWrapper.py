@@ -65,6 +65,11 @@ class ProcessWrapper(ABC):
                 ok = False
         return ok
 
+    def parsePFILES(self, PFILES):
+        if ":" in PFILES:
+            return PFILES.split(":")[1]
+        else:
+            return PFILES
 
     def call(self):
 
@@ -73,7 +78,8 @@ class ProcessWrapper(ABC):
             exit(1)
 
         # copy par file
-        command = "cp "+os.environ["PFILES"]+"/"+self.exeName+".par ./"
+        pfile_location = self.parsePFILES(os.environ["PFILES"])
+        command = "cp "+pfile_location+"/"+self.exeName+".par ./"
         self.executeCommand(command)
 
         # starting the tool
