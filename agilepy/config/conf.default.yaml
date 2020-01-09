@@ -15,8 +15,8 @@ selection:
   glon: null
   tmin: null
   tmax: null
+  timetype: null
   timelist: "None"
-  timetype: "MJD"
   projtype: "WCS"
   proj: "ARC"
   filtercode: 5
