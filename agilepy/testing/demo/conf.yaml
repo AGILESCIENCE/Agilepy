@@ -2,3 +2,7 @@ output:
   outdir: "/home/leofaber/Documents/inaf/tasks/Agilepy/agilepy/testing/demo/out"
   logfilename: null
   debuglvl: 2
+
+selection:
+  tmin: 58800.39009
+  tmax: 58857.39009

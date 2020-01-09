@@ -36,11 +36,16 @@ class Singleton(type):
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        else:
+            cls._instances[cls].__init__(*args, **kwargs)
         return cls._instances[cls]
 
 class AgilepyLogger(metaclass=Singleton):
 
-    def __init__(self, outputDirectory = None, logFilename = None, debug_lvl = 2):
+    def __init__(self, outputDirectory = None, logFilename = None, debug_lvl = 2, init = False):
+
+        if not init:
+            return
 
         self.debug_lvl = debug_lvl
 
@@ -76,11 +81,21 @@ class AgilepyLogger(metaclass=Singleton):
 
         self.logger.info("[%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
 
-    def info(self, context, message, arguments):
+    def info(self, context, message, arguments=[]):
         self.logger.info("[%s] " + message, type(context).__name__, *arguments)
 
-    def warning(self, context, arguments):
+    def warning(self, context, message, arguments=[]):
         self.logger.warning("[%s] " + message, type(context).__name__, *arguments)
 
-    def debug(self, context, arguments):
+    def debug(self, context, message, arguments=[]):
         self.logger.debug("[%s] " + message, type(context).__name__, *arguments)
+
+class DataUtils:
+
+    @staticmethod
+    def time_mjd_to_tt(timemjd):
+        return (timemjd - 53005.0) *  86400.0
+
+    @staticmethod
+    def time_tt_to_mjd(timett):
+        return (timett / 86400.0) + 53005.0

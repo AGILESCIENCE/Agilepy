@@ -31,6 +31,7 @@ import pprint
 from os.path import dirname, realpath, join
 
 from agilepy.utils.Utils import Singleton
+from agilepy.utils.Utils import DataUtils
 
 class AgilepyConfig(metaclass=Singleton):
     """
@@ -50,7 +51,46 @@ class AgilepyConfig(metaclass=Singleton):
 
             user_conf = self.loadFromYaml(self.configurationFilePath)
 
-        self.conf = {**default_conf, **user_conf} # user conf will ovveride default conf
+        mergedConf = self.mergeConfigurations(default_conf, user_conf)
+
+        self.conf = self.completeConfiguration(mergedConf)
+
+    def mergeConfigurations(self, dict1, dict2):
+        """
+        Merge dict2 with dict1 (this op is not symmetric)
+        """
+        merged = {}
+        for sectionName in dict1.keys():
+            merged[sectionName] = {}
+
+        for sectionName in dict1.keys():
+            for key in dict1[sectionName].keys():
+                if sectionName in dict2 and key in dict2[sectionName].keys():
+                    merged[sectionName][key] = dict2[sectionName][key]
+                else:
+                    merged[sectionName][key] = dict1[sectionName][key]
+
+        return merged
+
+    def completeConfiguration(self, confDict):
+        self.setTime(confDict)
+        self.setPhaseCode(confDict)
+        return confDict
+
+    def setPhaseCode(self, confDict):
+        if not confDict["selection"]["phasecode"]:
+            if confDict["selection"]["tmax"] >= 182692800.0:
+                confDict["selection"]["phasecode"] = 6 #SPIN
+            else:
+                confDict["selection"]["phasecode"] = 18 #POIN
+
+
+    def setTime(self, confDict):
+        if confDict["selection"]["timetype"] == "MJD":
+            confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
+            confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
+            confDict["selection"]["timetype"] = "TT"
+
 
     def returnSectionOfParam(self, paramName):
 
