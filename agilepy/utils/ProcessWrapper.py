@@ -131,4 +131,4 @@ class GasMapGenerator(ProcessWrapper):
 """
 
 
-ctsMapGenerator = CtsMapGenerator("bin/AG_ctsmapgen")
+ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")
