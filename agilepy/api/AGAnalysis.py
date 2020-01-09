@@ -26,10 +26,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import os
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.config.XMLconfig import SourcesConfig
 from agilepy.utils.Utils import AgilepyLogger
+from agilepy.utils.ProcessWrapper import ctsMapGenerator
 
 class AGAnalysis:
 
@@ -37,7 +39,7 @@ class AGAnalysis:
 
         self.config = AgilepyConfig(configurationFilePath)
 
-        self.logger = AgilepyLogger(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
+        self.logger = AgilepyLogger(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"), init=True)
 
         self.sourcesconfig = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
 
@@ -50,8 +52,23 @@ class AGAnalysis:
             self.logger.warning(self, "Some options have not been set: {}".format(rejected))
 
     def printOptions(self):
+
         self.config.printOptions()
 
-    def setup(self):
+    def generateMaps(self):
 
-        print(self.config.getConf())
+        if "PFILES" not in os.environ:
+            self.logger.critical(self, "Please, set PFILES environment variable.")
+            exit(1)
+
+        # check energybin
+
+        # check fovbinnumber
+
+        # for energy
+        # for fovbinnumber
+
+        #compute newmape = prefix+mapname self.setOptions(mapname=newmapname)
+        #
+        ctsMapGenerator.setArguments(self.config)
+        ctsMapGenerator.call()

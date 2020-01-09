@@ -37,19 +37,15 @@ class AgilepyConfig(metaclass=Singleton):
     """
 
     """
-    def __init__(self, configurationFilePath = None):
+    def __init__(self, configurationFilePath):
 
         self.pp = pprint.PrettyPrinter(indent=2)
-
-        self.configurationFilePath = configurationFilePath
 
         currentDir = dirname(realpath(__file__))
 
         default_conf = self.loadFromYaml(join(currentDir,"./conf.default.yaml"))
 
-        if self.configurationFilePath:
-
-            user_conf = self.loadFromYaml(self.configurationFilePath)
+        user_conf = self.loadFromYaml(configurationFilePath)
 
         mergedConf = self.mergeConfigurations(default_conf, user_conf)
 
@@ -57,7 +53,7 @@ class AgilepyConfig(metaclass=Singleton):
 
     def mergeConfigurations(self, dict1, dict2):
         """
-        Merge dict2 with dict1 (this op is not symmetric)
+        Merge dict2 (user defined conf) with dict1 (default conf) (this op is not symmetric)
         """
         merged = {}
         for sectionName in dict1.keys():
@@ -66,7 +62,10 @@ class AgilepyConfig(metaclass=Singleton):
         for sectionName in dict1.keys():
             for key in dict1[sectionName].keys():
                 if sectionName in dict2 and key in dict2[sectionName].keys():
-                    merged[sectionName][key] = dict2[sectionName][key]
+                    if key=="glon":
+                        merged[sectionName]["glon"] = dict2[sectionName]["glon"] + 0.000001
+                    else:
+                        merged[sectionName][key] = dict2[sectionName][key]
                 else:
                     merged[sectionName][key] = dict1[sectionName][key]
 
@@ -76,6 +75,9 @@ class AgilepyConfig(metaclass=Singleton):
         self.setTime(confDict)
         self.setPhaseCode(confDict)
         return confDict
+
+
+
 
     def setPhaseCode(self, confDict):
         if not confDict["selection"]["phasecode"]:
@@ -92,19 +94,28 @@ class AgilepyConfig(metaclass=Singleton):
             confDict["selection"]["timetype"] = "TT"
 
 
-    def returnSectionOfParam(self, paramName):
+    def getSectionOfOption(self, optionName):
 
-        for paramSection in self.conf:
+        for optionSection in self.conf:
 
-            if paramName in self.conf[paramSection]:
+            if optionName in self.conf[optionSection]:
 
-                return paramSection
+                return optionSection
 
         return None
 
     def printOptions(self):
 
         self.pp.pprint(self.conf)
+
+    def getOptionValue(self, optionName):
+
+        optionSection = self.getSectionOfOption(optionName)
+
+        if not optionSection:
+            return None
+
+        return self.conf[optionSection][optionName]
 
     def setOptions(self, **kwargs):
         """
@@ -113,17 +124,17 @@ class AgilepyConfig(metaclass=Singleton):
 
         rejected = {}
 
-        for paramName, paramValue in kwargs.items():
+        for optionName, optionValue in kwargs.items():
 
-            paramSection = self.returnSectionOfParam(paramName)
+            optionSection = self.getSectionOfOption(optionName)
 
-            if paramSection:
+            if optionSection:
 
-                self.conf[paramSection][paramName] = paramValue
+                self.conf[optionSection][optionName] = optionValue
 
             else:
 
-                rejected[paramName] = paramValue
+                rejected[optionName] = optionValue
 
         return rejected
 

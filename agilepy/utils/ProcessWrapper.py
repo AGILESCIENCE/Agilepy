@@ -30,37 +30,105 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import subprocess
 from abc import ABC, abstractmethod
 
+from agilepy.utils.Utils import AgilepyLogger
+
 class ProcessWrapper(ABC):
 
-    def __init__(self, exeName, exeParams):
+    def __init__(self, exeName):
+
+        self.logger = AgilepyLogger()
+        self.exeName = exeName
+        self.args = []
+
+    @abstractmethod
+    def setArguments(self, confDict):
         pass
 
     @abstractmethod
-    def call(self):
+    def parseOutput(self):
         pass
 
     @abstractmethod
-    def parseOutput(self):
+    def getOutputName(self):
         pass
 
-class ComputeFlux(ProcessWrapper):
+    @abstractmethod
+    def getRequiredOptions(self):
+        pass
 
-    def __init__(self, exeName, exeParams):
-        super().__init__(exeName, exeParams)
+    def allRequiredOptionsSet(self, confDict, requiredOptions):
+        ok = True
+        for option in requiredOptions:
+            if not confDict.getOptionValue(option):
+                optionSection = confDict.getSectionOfOption(option)
+                self.logger.critical(self,"Option '%s' of section '%s' has not been set.", [option, optionSection])
+                ok = False
+        return ok
+
 
     def call(self):
-        pass
+
+        command = self.exeName + " " + " ".join(map(str, self.args))
+
+        self.logger.info(self, "Executing command >>"+command)
+
+        completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
+
+        if completedProcess.returncode != 0:
+            self.logger.warning(self, "Non zero return status. stderr >>" + completedProcess.stderr.strip() )
+
+        self.logger.info(self, "stout >>"+completedProcess.stdout)
+
+
+
+class CtsMapGenerator(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+    def getRequiredOptions(self):
+        return ["evtfile", "glat", "glon", "tmin", "tmax"]
+
+    def setArguments(self, confDict):
+
+        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
+            self.logger.critical(self,"Some options have not been set.")
+            exit(1)
+
+        self.args = [ self.getOutputName(confDict.getOptionValue("mapname")),  \
+                      confDict.getOptionValue("evfile"), #indexfiler\
+                      confDict.getOptionValue("timelist"), \
+                      confDict.getOptionValue("mapsize"), \
+                      confDict.getOptionValue("binsize"), \
+                      confDict.getOptionValue("glon"), \
+                      confDict.getOptionValue("glat"), \
+                      confDict.getOptionValue("lonpole"), \
+                      confDict.getOptionValue("albedorad"), \
+                      confDict.getOptionValue("phasecode"), \
+                      confDict.getOptionValue("filtercode"), \
+                      confDict.getOptionValue("proj"), \
+                      confDict.getOptionValue("tmin"), \
+                      confDict.getOptionValue("tmax"), \
+                      confDict.getOptionValue("emin"), \
+                      confDict.getOptionValue("emax"), \
+                      confDict.getOptionValue("fovradmin"), \
+                      confDict.getOptionValue("fovradmax"), \
+                    ]
+
 
     def parseOutput(self):
         pass
 
-class ComputeTS(ProcessWrapper):
+    def getOutputName(self, mapname):
+        return mapname+".cts.gz"
+"""
+class GasMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName, exeParams):
-        super().__init__(exeName, exeParams)
+    Il parametro skymalL e skymapH si calcola così:
+    emin+"_"+emax+".SKY002.SFMG_H0025.disp.conv.sky.gz"
 
-    def call(self):
-        pass
+    pass
+"""
 
-    def parseOutput(self):
-        pass
+
+ctsMapGenerator = CtsMapGenerator("bin/AG_ctsmapgen")

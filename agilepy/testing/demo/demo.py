@@ -32,4 +32,7 @@ from agilepy.api.AGAnalysis import AGAnalysis
 aa = AGAnalysis("./agilepy/testing/demo/conf.yaml")
 
 aa.setOptions(demo=True, demoz=False, emin=1000)
+
 aa.printOptions()
+
+aa.generateMaps()

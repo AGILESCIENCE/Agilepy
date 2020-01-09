@@ -79,16 +79,20 @@ class AgilepyLogger(metaclass=Singleton):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(debug_lvl_enum)
 
-        self.logger.info("[%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
+        self.logger.info("[INFO   ] [%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
+
+    def critical(self, context, message, arguments=[]):
+        self.logger.critical("[ERROR  ] [%s] " + message, type(context).__name__, *arguments)
 
     def info(self, context, message, arguments=[]):
-        self.logger.info("[%s] " + message, type(context).__name__, *arguments)
+        self.logger.info("[INFO   ] [%s] " + message, type(context).__name__, *arguments)
 
     def warning(self, context, message, arguments=[]):
-        self.logger.warning("[%s] " + message, type(context).__name__, *arguments)
+        self.logger.warning("[WARNING] [%s] " + message, type(context).__name__, *arguments)
 
     def debug(self, context, message, arguments=[]):
-        self.logger.debug("[%s] " + message, type(context).__name__, *arguments)
+        self.logger.debug("[DEBUG  ] [%s] " + message, type(context).__name__, *arguments)
+
 
 class DataUtils:
 

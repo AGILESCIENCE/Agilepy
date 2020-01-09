@@ -1,11 +1,12 @@
 input:
-  evfile : null #required
-  logfile : null #required
+  evtfile : null
+  logfile : null
 
 output:
-  outdir: null #required
-  logfilename: null #required
-  debuglvl: null #required
+  outdir: null
+  mapname: null
+  logfilename: null
+  debuglvl: null
 
 selection:
   emin: 100
@@ -14,7 +15,7 @@ selection:
   glon: null
   tmin: null
   tmax: null
-  timelist: null
+  timelist: "None"
   timetype: "MJD"
   projtype: "WCS"
   proj: "ARC"
@@ -28,7 +29,7 @@ selection:
   lonpole: 180
   lpointing: null
   bpointing: null
-  maplistgen: null
+  maplistgen: "None"
 
 maps:
   mapsize: 40
