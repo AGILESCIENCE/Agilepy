@@ -12,13 +12,8 @@ setup( name='Agilepy',
        install_requires=requires,
        author='Addis Antonio, Baroncelli Leonardo, Parmiggiani Nicolò',
        author_email='antonio.addis@inaf.it leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
-       packages=["api", "config", "dataclasses", "utils"],
-       package_dir = {
-           "api" : "agilepy/api",
-           "config" : "agilepy/config",
-           "dataclasses" : "agilepy/dataclasses",
-           "utils" : "agilepy/utils"
-       }   
+       packages=['agilepy'],
+       package_dir={ 'agilepy': 'agilepy' }
        
         
      )
