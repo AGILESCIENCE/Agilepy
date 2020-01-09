@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 requires = [
     'pyyaml'
@@ -12,6 +12,8 @@ setup( name='Agilepy',
        install_requires=requires,
        author='Addis Antonio, Baroncelli Leonardo, Parmiggiani Nicolò',
        author_email='antonio.addis@inaf.it leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
-       packages=['agilepy'],
+       packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' }
-    )
+       
+        
+     )
