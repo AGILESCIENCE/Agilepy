@@ -111,7 +111,7 @@ class CtsMapGenerator(ProcessWrapper):
             exit(1)
 
         self.args = [ self.getOutputName(confDict.getOptionValue("mapname")),  \
-                      confDict.getOptionValue("evfile"), #indexfiler\
+                      confDict.getOptionValue("evtfile"), #indexfiler\
                       confDict.getOptionValue("timelist"), \
                       confDict.getOptionValue("mapsize"), \
                       confDict.getOptionValue("binsize"), \
