@@ -2,3 +2,4 @@
 __pycache__
 agilepy/testing/demo/out
 dist/
+build/
