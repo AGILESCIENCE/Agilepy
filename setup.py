@@ -12,7 +12,7 @@ setup( name='Agilepy',
        install_requires=requires,
        author='Addis Antonio, Baroncelli Leonardo, Parmiggiani Nicolò',
        author_email='antonio.addis@inaf.it leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
-       packages=find_packages("agilepy"),
+       packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' }
        
         
