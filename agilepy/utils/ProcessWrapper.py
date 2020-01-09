@@ -26,7 +26,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+import os
 import subprocess
 from abc import ABC, abstractmethod
 
@@ -68,17 +68,26 @@ class ProcessWrapper(ABC):
 
     def call(self):
 
+        if "PFILES" not in os.environ:
+            self.logger.critical(self, "Please, set PFILES environment variable.")
+            exit(1)
+
+        # copy par file
+        command = "cp "+os.environ["PFILES"]+"/"+self.exeName+".par ./"
+        self.executeCommand(command)
+
+        # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
+        self.executeCommand(command)
 
+
+    def executeCommand(self, command):
         self.logger.info(self, "Executing command >>"+command)
-
         completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
-
         if completedProcess.returncode != 0:
-            self.logger.warning(self, "Non zero return status. stderr >>" + completedProcess.stderr.strip() )
-
+            self.logger.critical(self, "Non zero return status. stderr >>" + completedProcess.stderr.strip() )
+            exit(1)
         self.logger.info(self, "stout >>"+completedProcess.stdout)
-
 
 
 class CtsMapGenerator(ProcessWrapper):

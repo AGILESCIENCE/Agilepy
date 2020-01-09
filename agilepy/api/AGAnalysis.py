@@ -26,8 +26,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
-
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.config.XMLconfig import SourcesConfig
 from agilepy.utils.Utils import AgilepyLogger
@@ -57,9 +55,6 @@ class AGAnalysis:
 
     def generateMaps(self):
 
-        if "PFILES" not in os.environ:
-            self.logger.critical(self, "Please, set PFILES environment variable.")
-            exit(1)
 
         # check energybin
 
