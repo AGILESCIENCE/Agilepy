@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 
 requires = [
     'pyyaml'
+    'astropy >= 2.0.7'
 ]
 
 setup( name='Agilepy',
