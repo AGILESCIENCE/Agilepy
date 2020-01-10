@@ -49,7 +49,7 @@ class ProcessWrapper(ABC):
         pass
 
     @abstractmethod
-    def getOutputName(self):
+    def getOutputName(self, prefix):
         pass
 
     @abstractmethod
@@ -73,10 +73,6 @@ class ProcessWrapper(ABC):
 
     def call(self):
 
-        if "PFILES" not in os.environ:
-            self.logger.critical(self, "Please, set PFILES environment variable.")
-            exit(1)
-
         # copy par file
         pfile_location = self.parsePFILES(os.environ["PFILES"])
         command = "cp "+pfile_location+"/"+self.exeName+".par ./"
@@ -84,6 +80,10 @@ class ProcessWrapper(ABC):
 
         # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
+        self.executeCommand(command)
+
+        # remove par file
+        command = "rm ./"+self.exeName+".par"
         self.executeCommand(command)
 
 
@@ -134,8 +134,8 @@ class CtsMapGenerator(ProcessWrapper):
     def parseOutput(self):
         pass
 
-    def getOutputName(self, mapname):
-        return mapname+".cts.gz"
+    def getOutputName(self, prefix):
+        return prefix+".cts.gz"
 """
 class GasMapGenerator(ProcessWrapper):
 
@@ -144,6 +144,3 @@ class GasMapGenerator(ProcessWrapper):
 
     pass
 """
-
-
-ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")

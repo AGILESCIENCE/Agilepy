@@ -9,8 +9,6 @@ output:
   debuglvl: null
 
 selection:
-  emin: 100
-  emax: 10000
   glat: null
   glon: null
   tmin: null
@@ -39,7 +37,8 @@ maps:
   timestep: 160
   skytype: 4
   binsize: 0.1
-  energybin: 0
+  energybins:
+    - "[100, 10000]"
   fovbinnumber: 1
   # Advanced parameters
   offaxisangle: 30

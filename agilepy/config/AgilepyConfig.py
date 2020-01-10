@@ -72,11 +72,19 @@ class AgilepyConfig(metaclass=Singleton):
         return merged
 
     def completeConfiguration(self, confDict):
+        self.convertEnergyBinsStrings(confDict)
         self.setTime(confDict)
         self.setPhaseCode(confDict)
         return confDict
 
 
+    def convertEnergyBinsStrings(self, confDict):
+        l = []
+        for stringList in confDict["maps"]["energybins"]:
+            res = stringList.strip('][').split(', ')
+            l.append(res)
+        confDict["maps"]["energybins"] = l
+        
 
 
     def setPhaseCode(self, confDict):

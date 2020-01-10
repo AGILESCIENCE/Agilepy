@@ -12,3 +12,10 @@ selection:
   tmax: 58857.39009
   glat: 25.4124
   glon: 56.123
+
+maps:
+  energybins:
+    - "[100, 10000]"
+    - "[300, 10000]"
+    # - "[500, 10000]"
+  fovbinnumber: 6

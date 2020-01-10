@@ -26,10 +26,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.config.XMLconfig import SourcesConfig
 from agilepy.utils.Utils import AgilepyLogger
-from agilepy.utils.ProcessWrapper import ctsMapGenerator
+from agilepy.parameters.Parameters import Parameters
+from agilepy.api.ScienceTools import ctsMapGenerator
 
 class AGAnalysis:
 
@@ -55,15 +57,66 @@ class AGAnalysis:
 
     def generateMaps(self):
 
+        fovbinnumber = self.config.getOptionValue("fovbinnumber")
+        energybins = self.config.getOptionValue("energybins")
 
-        # check energybin
+        initialFovmin = self.config.getOptionValue("fovradmin")
+        initialFovmax = self.config.getOptionValue("fovradmax")
 
-        # check fovbinnumber
+        for stepi in range(1, fovbinnumber):
 
-        # for energy
-        # for fovbinnumber
+            if fovbinnumber == 1:
+                bincenter = 30
+            else:
+                bincenter, fovmin, fovmax = self.updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi)
 
-        #compute newmape = prefix+mapname self.setOptions(mapname=newmapname)
-        #
-        ctsMapGenerator.setArguments(self.config)
-        ctsMapGenerator.call()
+
+            for stepe in energybins:
+
+                if Parameters.checkEnergyBin(stepe):
+
+                    emin = stepe[0]
+                    emax = stepe[1]
+
+                    skymapL = Parameters.getSkyMap(emin, emax)
+                    skymapH = Parameters.getSkyMap(emin, emax)
+                    mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi)
+
+                    # self.logger.info(self, "\n\nMap generation for %d fovmin %f and fovmax %f with center %f. Energy bin: [%s, %s]", [stepi, fovmin, fovmax, bincenter, emin, emax])
+
+                    outFilePath = ctsMapGenerator.getOutputName(mapNamePrefix)
+
+                    self.config.setOptions(mapname=outFilePath)
+                    self.config.setOptions(fovradmin=fovmin)
+                    self.config.setOptions(fovradmax=fovmax)
+
+
+                    ctsMapGenerator.setArguments(self.config)
+
+                    # print(ctsMapGenerator.args)
+
+                    ctsMapGenerator.call()
+
+
+                else:
+
+                    self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", [stepe[0], stepe[1]])
+
+
+
+    def updateFovMinMaxValues(self, fovbinnumber, fovradmin, fovradmax, stepi):
+
+        # print("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
+        A = float(fovradmax) - float(fovradmin)
+        B = float(fovbinnumber)
+        C = stepi
+
+        binleft =  ( (A / B) * C )
+        binright = ( A / B  )
+        bincenter = binleft - binright / 2.0
+        fovmin = bincenter - ( A / B ) / 2.0
+        fovmax = bincenter + ( A / B ) / 2.0
+
+        # print("bincenter {}, fovmin {}, fovmax {}".format(bincenter, fovmin, fovmax))
+
+        return bincenter, fovmin, fovmax

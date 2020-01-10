@@ -27,12 +27,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import os
+from agilepy.utils.ProcessWrapper import *
 
-if "PFILES" not in os.environ:
-    print("Please, set PFILES environment variable.")
-    exit(1)
-
-if "AGILE" not in os.environ:
-    print("Please, set AGILE environment variable.")
-    exit(1)
+ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")
