@@ -33,6 +33,6 @@ aa = AGAnalysis("./agilepy/testing/demo/conf.yaml")
 
 aa.setOptions(demo=True, demoz=False, emin=1000)
 
-aa.printOptions()
+# aa.printOptions()
 
 aa.generateMaps()

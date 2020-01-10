@@ -63,10 +63,12 @@ class AGAnalysis:
         initialFovmin = self.config.getOptionValue("fovradmin")
         initialFovmax = self.config.getOptionValue("fovradmax")
 
-        for stepi in range(1, fovbinnumber):
+        for stepi in range(0, fovbinnumber):
 
             if fovbinnumber == 1:
                 bincenter = 30
+                fovmin = initialFovmin
+                fovmax = initialFovmax
             else:
                 bincenter, fovmin, fovmax = self.updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi)
 
@@ -80,7 +82,7 @@ class AGAnalysis:
 
                     skymapL = Parameters.getSkyMap(emin, emax)
                     skymapH = Parameters.getSkyMap(emin, emax)
-                    mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi)
+                    mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
                     # self.logger.info(self, "\n\nMap generation for %d fovmin %f and fovmax %f with center %f. Energy bin: [%s, %s]", [stepi, fovmin, fovmax, bincenter, emin, emax])
 
