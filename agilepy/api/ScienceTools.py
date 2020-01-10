@@ -29,4 +29,172 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from agilepy.utils.ProcessWrapper import *
 
+
+class CtsMapGenerator(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+    def getRequiredOptions(self):
+        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
+
+    def setArguments(self, confDict):
+
+        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
+            self.logger.critical(self,"Some options have not been set.")
+            exit(1)
+
+        outDir = confDict.getOptionValue("outdir")
+        outputName = confDict.getOptionValue("mapnameprefix")+".cts.gz"
+
+        self.outfilePath = os.path.join(outDir, outputName)
+
+        self.args = [ self.outfilePath,  \
+                      confDict.getOptionValue("evtfile"), #indexfiler\
+                      confDict.getOptionValue("timelist"), \
+                      confDict.getOptionValue("mapsize"), \
+                      confDict.getOptionValue("binsize"), \
+                      confDict.getOptionValue("glon"), \
+                      confDict.getOptionValue("glat"), \
+                      confDict.getOptionValue("lonpole"), \
+                      confDict.getOptionValue("albedorad"), \
+                      confDict.getOptionValue("phasecode"), \
+                      confDict.getOptionValue("filtercode"), \
+                      confDict.getOptionValue("proj"), \
+                      confDict.getOptionValue("tmin"), \
+                      confDict.getOptionValue("tmax"), \
+                      confDict.getOptionValue("emin"), \
+                      confDict.getOptionValue("emax"), \
+                      confDict.getOptionValue("fovradmin"), \
+                      confDict.getOptionValue("fovradmax"), \
+                    ]
+
+
+    def parseOutput(self):
+        pass
+
+
+
+class ExpMapGenerator(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+
+    def getRequiredOptions(self):
+        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+
+    def setArguments(self, confDict):
+
+        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
+            self.logger.critical(self,"Some options have not been set.")
+            exit(1)
+
+        outDir = confDict.getOptionValue("outdir")
+        outputName = confDict.getOptionValue("mapnameprefix")+".exp.gz"
+
+        edpmatrix = "None"
+        if confDict.getOptionValue("useEDPmatrixforEXP"):
+            edpmatrix = Parameters.edpmatrix
+
+        self.outfilePath = os.path.join(outDir, outputName)
+
+        self.args = [ self.outfilePath,  \
+                      confDict.getOptionValue("evtfile"), #indexfiler\
+                      Parameters.sarmatrix, \
+                      Parameters.edpmatrix, \
+                      confDict.getOptionValue("maplistgen"), \
+                      confDict.getOptionValue("timelist"), \
+                      confDict.getOptionValue("mapsize"), \
+                      confDict.getOptionValue("binsize"), \
+                      confDict.getOptionValue("glon"), \
+                      confDict.getOptionValue("glat"), \
+                      confDict.getOptionValue("lonpole"), \
+                      confDict.getOptionValue("albedorad"), \
+                      0.5, \
+                      360, \
+                      5.0, \
+                      confDict.getOptionValue("phasecode"), \
+                      confDict.getOptionValue("proj"), \
+                      confDict.getOptionValue("expstep"), \
+                      confDict.getOptionValue("timestep"), \
+                      confDict.getOptionValue("spectralindex"), \
+                      confDict.getOptionValue("tmin"), \
+                      confDict.getOptionValue("tmax"), \
+                      confDict.getOptionValue("emin"), \
+                      confDict.getOptionValue("emax"), \
+                      confDict.getOptionValue("fovradmin"), \
+                      confDict.getOptionValue("fovradmax"), \
+                    ]
+
+
+    def parseOutput(self):
+        pass
+
+
+class GasMapGenerator(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+    def getRequiredOptions(self):
+        return ["outdir", "mapnameprefix", "expmap"]
+
+    def setArguments(self, confDict):
+
+        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
+            self.logger.critical(self,"Some options have not been set.")
+            exit(1)
+
+        outDir = confDict.getOptionValue("outdir")
+        outputName = confDict.getOptionValue("mapnameprefix")+".gas.gz"
+
+        self.outfilePath = os.path.join(outDir, outputName)
+
+        self.args = [ expMapGenerator.outfilePath, \
+                      self.outfilePath,  \
+                      confDict.getOptionValue("skymapL"), \
+                      confDict.getOptionValue("skymaH"), \
+                    ]
+
+
+    def parseOutput(self):
+        pass
+
+
+class IntMapGenerator(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+    def getRequiredOptions(self):
+        return ["outdir", "mapnameprefix", "expmap", "ctsmap"]
+
+    def setArguments(self, confDict):
+
+        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
+            self.logger.critical(self,"Some options have not been set.")
+            exit(1)
+
+        outDir = confDict.getOptionValue("outdir")
+        outputName = confDict.getOptionValue("mapnameprefix")+".int.gz"
+        self.outfilePath = os.path.join(outDir, outputName)
+
+
+        self.args = [ expMapGenerator.outfilePath, \
+                      self.outfilePath,  \
+                      ctsMapGenerator.outfilePath, \
+                    ]
+
+
+    def parseOutput(self):
+        pass
+
+
+
+
+
 ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")
+expMapGenerator = ExpMapGenerator("AG_expmapgen")
+gasMapGenerator = GasMapGenerator("AG_gasmapgen")
+intMapGenerator = IntMapGenerator("AG_intmapgen")

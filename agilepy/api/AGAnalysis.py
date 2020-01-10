@@ -31,7 +31,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.config.XMLconfig import SourcesConfig
 from agilepy.utils.Utils import AgilepyLogger
 from agilepy.parameters.Parameters import Parameters
-from agilepy.api.ScienceTools import ctsMapGenerator
+from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator
 
 class AGAnalysis:
 
@@ -72,7 +72,7 @@ class AGAnalysis:
                 fovmin = initialFovmin
                 fovmax = initialFovmax
             else:
-                bincenter, fovmin, fovmax = self.updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi)
+                bincenter, fovmin, fovmax = self.updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
             for stepe in energybins:
@@ -88,16 +88,26 @@ class AGAnalysis:
 
                     # self.logger.info(self, "\n\nMap generation for %d fovmin %f and fovmax %f with center %f. Energy bin: [%s, %s]", [stepi, fovmin, fovmax, bincenter, emin, emax])
                     self.config.setOptions(mapnameprefix=initialMapNamePrefix+"_"+mapNamePrefix)
-                    self.config.setOptions(fovradmin=fovmin)
-                    self.config.setOptions(fovradmax=fovmax)
+                    self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
                     self.config.addOptions("selection", emin=emin, emax=emax)
+                    self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
+
+                    self.logger.debug(self, "fovradmin %s fovradmax %s bincenter %s emin %s emax %s mapNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,mapNamePrefix,skymapL,skymapH])
+
 
                     ctsMapGenerator.setArguments(self.config)
-
-                    # print(ctsMapGenerator.args)
-
                     ctsMapGenerator.call()
 
+                    expMapGenerator.setArguments(self.config)
+                    expMapGenerator.call()
+
+                    #self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+
+                    #gasMapGenerator.setArguments(self.config)
+                    #gasMapGenerator.call()
+
+                    #intMapGenerator.setArguments(self.config)
+                    #intMapGenerator.call()
 
                 else:
 

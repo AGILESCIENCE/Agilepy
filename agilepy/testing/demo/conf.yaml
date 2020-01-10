@@ -15,6 +15,5 @@ selection:
 
 maps:
   energybins:
-    - "[100, 10000]"
     - "[300, 10000]"
-  fovbinnumber: 6
+  fovbinnumber: 1

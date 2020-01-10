@@ -31,6 +31,7 @@ import subprocess
 from abc import ABC, abstractmethod
 
 from agilepy.utils.Utils import AgilepyLogger
+from agilepy.parameters.Parameters import Parameters
 
 class ProcessWrapper(ABC):
 
@@ -39,6 +40,7 @@ class ProcessWrapper(ABC):
         self.logger = AgilepyLogger()
         self.exeName = exeName
         self.args = []
+        self.outfilePath = None
 
     @abstractmethod
     def setArguments(self, confDict):
@@ -46,10 +48,6 @@ class ProcessWrapper(ABC):
 
     @abstractmethod
     def parseOutput(self):
-        pass
-
-    @abstractmethod
-    def getOutputName(self, prefix):
         pass
 
     @abstractmethod
@@ -93,49 +91,3 @@ class ProcessWrapper(ABC):
             self.logger.critical(self, "Non zero return status. stderr >>" + completedProcess.stderr.strip() )
             exit(1)
         # self.logger.info(self, "stout >>"+completedProcess.stdout)
-
-
-class CtsMapGenerator(ProcessWrapper):
-
-    def __init__(self, exeName):
-        super().__init__(exeName)
-
-    def getRequiredOptions(self):
-        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
-
-    def setArguments(self, confDict):
-
-        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
-            self.logger.critical(self,"Some options have not been set.")
-            exit(1)
-
-        outDir = confDict.getOptionValue("outdir")
-        outputName = self.getOutputName(confDict.getOptionValue("mapnameprefix"))
-
-
-        self.args = [ os.path.join(outDir, outputName),  \
-                      confDict.getOptionValue("evtfile"), #indexfiler\
-                      confDict.getOptionValue("timelist"), \
-                      confDict.getOptionValue("mapsize"), \
-                      confDict.getOptionValue("binsize"), \
-                      confDict.getOptionValue("glon"), \
-                      confDict.getOptionValue("glat"), \
-                      confDict.getOptionValue("lonpole"), \
-                      confDict.getOptionValue("albedorad"), \
-                      confDict.getOptionValue("phasecode"), \
-                      confDict.getOptionValue("filtercode"), \
-                      confDict.getOptionValue("proj"), \
-                      confDict.getOptionValue("tmin"), \
-                      confDict.getOptionValue("tmax"), \
-                      confDict.getOptionValue("emin"), \
-                      confDict.getOptionValue("emax"), \
-                      confDict.getOptionValue("fovradmin"), \
-                      confDict.getOptionValue("fovradmax"), \
-                    ]
-
-
-    def parseOutput(self):
-        pass
-
-    def getOutputName(self, prefix):
-        return prefix+".cts.gz"

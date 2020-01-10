@@ -2,10 +2,13 @@ import os
 
 class Parameters:
 
-    skymap = os.path.join(os.environ["AGILE"], "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
 
-    mapNamePrefix = "EMIN{}_EMAX{}_{}"
+    _skymap = os.path.join(os.environ["AGILE"], "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
+    _mapNamePrefix = "EMIN{}_EMAX{}_{}"
 
+    # constants
+    sarmatrix = "AG_GRID_G0017_SFMG_H0025.sar.gz"
+    edpmatrix = "AG_GRID_G0017_SFMG_H0025.edp.gz"
     energybins = [[10000,50000],
                   [1000,3000],
                   [1000,50000],
@@ -45,8 +48,8 @@ class Parameters:
 
     @staticmethod
     def getSkyMap(emin, emax):
-        return Parameters.skymap.format(emin, emax)
+        return Parameters._skymap.format(emin, emax)
 
     @staticmethod
     def getMapNamePrefix(emin, emax, stepi):
-        return Parameters.mapNamePrefix.format(emin.zfill(5), emax.zfill(5), str(stepi).zfill(2))
+        return Parameters._mapNamePrefix.format(emin.zfill(5), emax.zfill(5), str(stepi).zfill(2))

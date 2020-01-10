@@ -43,65 +43,18 @@ class AgilepyConfig(metaclass=Singleton):
 
         currentDir = dirname(realpath(__file__))
 
-        default_conf = self.loadFromYaml(join(currentDir,"./conf.default.yaml"))
+        default_conf = self._loadFromYaml(join(currentDir,"./conf.default.yaml"))
 
-        user_conf = self.loadFromYaml(configurationFilePath)
+        user_conf = self._loadFromYaml(configurationFilePath)
 
-        mergedConf = self.mergeConfigurations(default_conf, user_conf)
+        mergedConf = self._mergeConfigurations(default_conf, user_conf)
 
-        self.conf = self.completeConfiguration(mergedConf)
-
-    def mergeConfigurations(self, dict1, dict2):
-        """
-        Merge dict2 (user defined conf) with dict1 (default conf) (this op is not symmetric)
-        """
-        merged = {}
-        for sectionName in dict1.keys():
-            merged[sectionName] = {}
-
-        for sectionName in dict1.keys():
-            for key in dict1[sectionName].keys():
-                if sectionName in dict2 and key in dict2[sectionName].keys():
-                    if key=="glon":
-                        merged[sectionName]["glon"] = dict2[sectionName]["glon"] + 0.000001
-                    else:
-                        merged[sectionName][key] = dict2[sectionName][key]
-                else:
-                    merged[sectionName][key] = dict1[sectionName][key]
-
-        return merged
-
-    def completeConfiguration(self, confDict):
-        self.convertEnergyBinsStrings(confDict)
-        self.setTime(confDict)
-        self.setPhaseCode(confDict)
-        return confDict
+        self.conf = self._completeConfiguration(mergedConf)
 
 
-    def convertEnergyBinsStrings(self, confDict):
-        l = []
-        for stringList in confDict["maps"]["energybins"]:
-            res = stringList.strip('][').split(', ')
-            l.append(res)
-        confDict["maps"]["energybins"] = l
-
-
-
-    def setPhaseCode(self, confDict):
-        if not confDict["selection"]["phasecode"]:
-            if confDict["selection"]["tmax"] >= 182692800.0:
-                confDict["selection"]["phasecode"] = 6 #SPIN
-            else:
-                confDict["selection"]["phasecode"] = 18 #POIN
-
-
-    def setTime(self, confDict):
-        if confDict["selection"]["timetype"] == "MJD":
-            confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
-            confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
-            confDict["selection"]["timetype"] = "TT"
-
-
+    """
+        PUBLIC API
+    """
     def getSectionOfOption(self, optionName):
 
         for optionSection in self.conf:
@@ -112,9 +65,11 @@ class AgilepyConfig(metaclass=Singleton):
 
         return None
 
+
     def printOptions(self):
 
         self.pp.pprint(self.conf)
+
 
     def getOptionValue(self, optionName):
 
@@ -125,6 +80,7 @@ class AgilepyConfig(metaclass=Singleton):
 
         return self.conf[optionSection][optionName]
 
+
     def addOptions(self, section , **kwargs):
         """
         More generic than setOptions.
@@ -132,7 +88,7 @@ class AgilepyConfig(metaclass=Singleton):
         for optionName, optionValue in kwargs.items():
             if section not in self.conf:
                 self.conf[section] = {}
-                
+
             self.conf[section][optionName] = optionValue
 
 
@@ -156,6 +112,7 @@ class AgilepyConfig(metaclass=Singleton):
 
         return rejected
 
+
     def getConf(self, key=None, subkey=None):
         if key and key in self.conf:
             if subkey and subkey in self.conf[key]:
@@ -165,7 +122,71 @@ class AgilepyConfig(metaclass=Singleton):
         else:
             return self.conf
 
-    def loadFromYaml(self,file):
+
+
+
+
+
+    """
+        PRIVATE API
+    """
+    def _mergeConfigurations(self, dict1, dict2):
+        """
+        Merge dict2 (user defined conf) with dict1 (default conf) (this op is not symmetric)
+        """
+        merged = {}
+        for sectionName in dict1.keys():
+            merged[sectionName] = {}
+
+        for sectionName in dict1.keys():
+            for key in dict1[sectionName].keys():
+                if sectionName in dict2 and key in dict2[sectionName].keys():
+                    if key=="glon":
+                        merged[sectionName]["glon"] = dict2[sectionName]["glon"] + 0.000001
+                    else:
+                        merged[sectionName][key] = dict2[sectionName][key]
+                else:
+                    merged[sectionName][key] = dict1[sectionName][key]
+
+        return merged
+
+
+    def _completeConfiguration(self, confDict):
+        self._convertEnergyBinsStrings(confDict)
+        self._setTime(confDict)
+        self._setPhaseCode(confDict)
+        self._setExpStep(confDict)
+        return confDict
+
+
+    def _convertEnergyBinsStrings(self, confDict):
+        l = []
+        for stringList in confDict["maps"]["energybins"]:
+            res = stringList.strip('][').split(', ')
+            l.append(res)
+        confDict["maps"]["energybins"] = l
+
+
+    def _setPhaseCode(self, confDict):
+        if not confDict["selection"]["phasecode"]:
+            if confDict["selection"]["tmax"] >= 182692800.0:
+                confDict["selection"]["phasecode"] = 6 #SPIN
+            else:
+                confDict["selection"]["phasecode"] = 18 #POIN
+
+
+    def _setTime(self, confDict):
+        if confDict["selection"]["timetype"] == "MJD":
+            confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
+            confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
+            confDict["selection"]["timetype"] = "TT"
+
+
+    def _setExpStep(self, confDict):
+        if not confDict["maps"]["expstep"]:
+             confDict["maps"]["expstep"] = round(1 / confDict["maps"]["binsize"], 2)
+
+    def _loadFromYaml(self,file):
 
         with open(file, 'r') as yamlfile:
 
