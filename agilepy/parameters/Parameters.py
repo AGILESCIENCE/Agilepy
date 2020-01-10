@@ -4,7 +4,7 @@ class Parameters:
 
     skymap = os.path.join(os.environ["AGILE"], "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
 
-    mapNamePrefix = "EMIN{}_EMAX{}_{}_"
+    mapNamePrefix = "EMIN{}_EMAX{}_{}"
 
     energybins = [[10000,50000],
                   [1000,3000],

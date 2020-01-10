@@ -84,7 +84,7 @@ class AgilepyConfig(metaclass=Singleton):
             res = stringList.strip('][').split(', ')
             l.append(res)
         confDict["maps"]["energybins"] = l
-        
+
 
 
     def setPhaseCode(self, confDict):
@@ -125,11 +125,21 @@ class AgilepyConfig(metaclass=Singleton):
 
         return self.conf[optionSection][optionName]
 
+    def addOptions(self, section , **kwargs):
+        """
+        More generic than setOptions.
+        """
+        for optionName, optionValue in kwargs.items():
+            if section not in self.conf:
+                self.conf[section] = {}
+                
+            self.conf[section][optionName] = optionValue
+
+
     def setOptions(self, **kwargs):
         """
         Returns a dictionary of rejected parameters
         """
-
         rejected = {}
 
         for optionName, optionValue in kwargs.items():

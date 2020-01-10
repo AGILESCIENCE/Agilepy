@@ -1,14 +1,20 @@
 input:
-  evtfile: "/home/lol.txt"
+  evtfile: "/ASDC_PROC3/FM3.119_ASDCSTD/INDEX/EVT.index"
 
 output:
-  outdir: "/home/leofaber/Documents/inaf/tasks/Agilepy/agilepy/testing/demo/out"
-  mapname: "testmap"
-  logfilename: null
+  outdir: "/tmp/agilepy_test/Agilepy/out"
+  mapnameprefix: "testmap"
   debuglvl: 2
 
 selection:
-  tmin: 58800.39009
-  tmax: 58857.39009
+  tmin: 58255.0
+  tmax: 58265.0
+  timetype: "MJD"
   glat: 25.4124
   glon: 56.123
+
+maps:
+  energybins:
+    - "[100, 10000]"
+    - "[300, 10000]"
+  fovbinnumber: 6

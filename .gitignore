@@ -1,5 +1,7 @@
 *.egg-info/
+*.par
 __pycache__
 agilepy/testing/demo/out
 dist/
 build/
+out/

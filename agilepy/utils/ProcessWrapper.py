@@ -68,6 +68,8 @@ class ProcessWrapper(ABC):
 
     def call(self):
 
+        self.logger.info(self, "Science tool called!", newline=True)
+
         # copy par file
         pfile_location = os.path.join(os.environ["AGILE"],"share")
         pfile = os.path.join(pfile_location,self.exeName+".par")
@@ -85,12 +87,12 @@ class ProcessWrapper(ABC):
 
 
     def executeCommand(self, command):
-        self.logger.info(self, "Executing command >>"+command)
+        self.logger.info(self, "Executing command >> "+command)
         completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
         if completedProcess.returncode != 0:
             self.logger.critical(self, "Non zero return status. stderr >>" + completedProcess.stderr.strip() )
             exit(1)
-        self.logger.info(self, "stout >>"+completedProcess.stdout)
+        # self.logger.info(self, "stout >>"+completedProcess.stdout)
 
 
 class CtsMapGenerator(ProcessWrapper):
@@ -99,7 +101,7 @@ class CtsMapGenerator(ProcessWrapper):
         super().__init__(exeName)
 
     def getRequiredOptions(self):
-        return ["evtfile", "glat", "glon", "tmin", "tmax"]
+        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def setArguments(self, confDict):
 
@@ -107,7 +109,11 @@ class CtsMapGenerator(ProcessWrapper):
             self.logger.critical(self,"Some options have not been set.")
             exit(1)
 
-        self.args = [ self.getOutputName(confDict.getOptionValue("mapname")),  \
+        outDir = confDict.getOptionValue("outdir")
+        outputName = self.getOutputName(confDict.getOptionValue("mapnameprefix"))
+
+
+        self.args = [ os.path.join(outDir, outputName),  \
                       confDict.getOptionValue("evtfile"), #indexfiler\
                       confDict.getOptionValue("timelist"), \
                       confDict.getOptionValue("mapsize"), \

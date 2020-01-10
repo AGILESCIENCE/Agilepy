@@ -63,6 +63,8 @@ class AGAnalysis:
         initialFovmin = self.config.getOptionValue("fovradmin")
         initialFovmax = self.config.getOptionValue("fovradmax")
 
+        initialMapNamePrefix = self.config.getOptionValue("mapnameprefix")
+
         for stepi in range(0, fovbinnumber):
 
             if fovbinnumber == 1:
@@ -85,13 +87,10 @@ class AGAnalysis:
                     mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
                     # self.logger.info(self, "\n\nMap generation for %d fovmin %f and fovmax %f with center %f. Energy bin: [%s, %s]", [stepi, fovmin, fovmax, bincenter, emin, emax])
-
-                    outFilePath = ctsMapGenerator.getOutputName(mapNamePrefix)
-
-                    self.config.setOptions(mapname=outFilePath)
+                    self.config.setOptions(mapnameprefix=initialMapNamePrefix+"_"+mapNamePrefix)
                     self.config.setOptions(fovradmin=fovmin)
                     self.config.setOptions(fovradmax=fovmax)
-
+                    self.config.addOptions("selection", emin=emin, emax=emax)
 
                     ctsMapGenerator.setArguments(self.config)
 
