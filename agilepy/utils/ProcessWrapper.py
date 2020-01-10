@@ -65,17 +65,14 @@ class ProcessWrapper(ABC):
                 ok = False
         return ok
 
-    def parsePFILES(self, PFILES):
-        if ":" in PFILES:
-            return PFILES.split(":")[1]
-        else:
-            return PFILES
 
     def call(self):
 
         # copy par file
-        pfile_location = self.parsePFILES(os.environ["PFILES"])
-        command = "cp "+pfile_location+"/"+self.exeName+".par ./"
+        pfile_location = os.path.join(os.environ["AGILE"],"share")
+        pfile = os.path.join(pfile_location,self.exeName+".par")
+
+        command = "cp "+pfile+" ./"
         self.executeCommand(command)
 
         # starting the tool
@@ -136,11 +133,3 @@ class CtsMapGenerator(ProcessWrapper):
 
     def getOutputName(self, prefix):
         return prefix+".cts.gz"
-"""
-class GasMapGenerator(ProcessWrapper):
-
-    Il parametro skymalL e skymapH si calcola così:
-    emin+"_"+emax+".SKY002.SFMG_H0025.disp.conv.sky.gz"
-
-    pass
-"""

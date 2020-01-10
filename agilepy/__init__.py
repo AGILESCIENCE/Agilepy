@@ -29,8 +29,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 
+
 if "PFILES" not in os.environ:
-    print("Please, set PFILES environment variable.")
+    print("Please, set PFILES environment variable. export PFILES=.")
     exit(1)
 
 if "AGILE" not in os.environ:
