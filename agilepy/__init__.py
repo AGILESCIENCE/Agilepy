@@ -29,11 +29,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 
-
-if "PFILES" not in os.environ:
-    print("Please, set PFILES environment variable. export PFILES=.")
-    exit(1)
-
 if "AGILE" not in os.environ:
     print("Please, set AGILE environment variable.")
+    exit(1)
+
+if "agile-B25-r5-cat2-B5" not in os.environ["AGILE"]:
+    print("Please, set the agile-B25-r5-cat2-B5 AGILE environment:\n\n >>source /opt/module/agile-B25-r5-cat2-B5")
+    exit(1)
+
+if "PFILES" not in os.environ:
+    print("Please, set PFILES environment variable:\n\n >>export PFILES=.")
     exit(1)
