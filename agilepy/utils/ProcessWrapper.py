@@ -54,9 +54,9 @@ class ProcessWrapper(ABC):
     def getRequiredOptions(self):
         pass
 
-    def allRequiredOptionsSet(self, confDict, requiredOptions):
+    def allRequiredOptionsSet(self, confDict):
         ok = True
-        for option in requiredOptions:
+        for option in self.getRequiredOptions():
             if not confDict.getOptionValue(option):
                 optionSection = confDict.getSectionOfOption(option)
                 self.logger.critical(self,"Option '%s' of section '%s' has not been set.", [option, optionSection])

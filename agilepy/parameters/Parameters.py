@@ -2,13 +2,14 @@ import os
 
 class Parameters:
 
+    datapath = os.path.join(os.environ["AGILE"], "model/scientific_analysis/data")
 
-    _skymap = os.path.join(os.environ["AGILE"], "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
+    _skymap = os.path.join(datapath, "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
     _mapNamePrefix = "EMIN{}_EMAX{}_{}"
 
     # constants
-    sarmatrix = "AG_GRID_G0017_SFMG_H0025.sar.gz"
-    edpmatrix = "AG_GRID_G0017_SFMG_H0025.edp.gz"
+    sarmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.sar.gz")
+    edpmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.edp.gz")
     energybins = [[10000,50000],
                   [1000,3000],
                   [1000,50000],

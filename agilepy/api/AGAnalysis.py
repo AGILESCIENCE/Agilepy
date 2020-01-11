@@ -86,34 +86,38 @@ class AGAnalysis:
                     skymapH = Parameters.getSkyMap(emin, emax)
                     mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
-                    # self.logger.info(self, "\n\nMap generation for %d fovmin %f and fovmax %f with center %f. Energy bin: [%s, %s]", [stepi, fovmin, fovmax, bincenter, emin, emax])
+                    self.logger.info(self, "\n\nMap generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s mapNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,mapNamePrefix,skymapL,skymapH])
+
+                    tools = [ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator]
+
                     self.config.setOptions(mapnameprefix=initialMapNamePrefix+"_"+mapNamePrefix)
                     self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
                     self.config.addOptions("selection", emin=emin, emax=emax)
                     self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
-                    self.logger.debug(self, "fovradmin %s fovradmax %s bincenter %s emin %s emax %s mapNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,mapNamePrefix,skymapL,skymapH])
+                    for tool in tools:
+                        tool.setArguments(self.config)
+
+                    self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+
+                    for tool in tools:
+                        if not tool.allRequiredOptionsSet(self.config):
+                            self.logger.critical(self,"Some options have not been set.")
+                            exit(1)
 
 
-                    ctsMapGenerator.setArguments(self.config)
-                    ctsMapGenerator.call()
 
-                    expMapGenerator.setArguments(self.config)
-                    expMapGenerator.call()
+                    for tool in tools:
+                        tool.call()
 
-                    #self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
-
-                    #gasMapGenerator.setArguments(self.config)
-                    #gasMapGenerator.call()
-
-                    #intMapGenerator.setArguments(self.config)
-                    #intMapGenerator.call()
 
                 else:
 
                     self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", [stepe[0], stepe[1]])
 
+    def mle(self):
 
+        pass
 
     def updateFovMinMaxValues(self, fovbinnumber, fovradmin, fovradmax, stepi):
 

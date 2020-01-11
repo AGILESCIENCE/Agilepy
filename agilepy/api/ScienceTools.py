@@ -40,10 +40,6 @@ class CtsMapGenerator(ProcessWrapper):
 
     def setArguments(self, confDict):
 
-        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
-            self.logger.critical(self,"Some options have not been set.")
-            exit(1)
-
         outDir = confDict.getOptionValue("outdir")
         outputName = confDict.getOptionValue("mapnameprefix")+".cts.gz"
 
@@ -82,13 +78,9 @@ class ExpMapGenerator(ProcessWrapper):
 
 
     def getRequiredOptions(self):
-        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "outdir", "mapnameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
     def setArguments(self, confDict):
-
-        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
-            self.logger.critical(self,"Some options have not been set.")
-            exit(1)
 
         outDir = confDict.getOptionValue("outdir")
         outputName = confDict.getOptionValue("mapnameprefix")+".exp.gz"
@@ -100,7 +92,7 @@ class ExpMapGenerator(ProcessWrapper):
         self.outfilePath = os.path.join(outDir, outputName)
 
         self.args = [ self.outfilePath,  \
-                      confDict.getOptionValue("evtfile"), #indexfiler\
+                      confDict.getOptionValue("logfile"), #indexfiler\
                       Parameters.sarmatrix, \
                       Parameters.edpmatrix, \
                       confDict.getOptionValue("maplistgen"), \
@@ -142,10 +134,6 @@ class GasMapGenerator(ProcessWrapper):
 
     def setArguments(self, confDict):
 
-        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
-            self.logger.critical(self,"Some options have not been set.")
-            exit(1)
-
         outDir = confDict.getOptionValue("outdir")
         outputName = confDict.getOptionValue("mapnameprefix")+".gas.gz"
 
@@ -172,10 +160,6 @@ class IntMapGenerator(ProcessWrapper):
 
     def setArguments(self, confDict):
 
-        if not self.allRequiredOptionsSet(confDict, self.getRequiredOptions()):
-            self.logger.critical(self,"Some options have not been set.")
-            exit(1)
-
         outDir = confDict.getOptionValue("outdir")
         outputName = confDict.getOptionValue("mapnameprefix")+".int.gz"
         self.outfilePath = os.path.join(outDir, outputName)
@@ -184,6 +168,57 @@ class IntMapGenerator(ProcessWrapper):
         self.args = [ expMapGenerator.outfilePath, \
                       self.outfilePath,  \
                       ctsMapGenerator.outfilePath, \
+                    ]
+
+
+    def parseOutput(self):
+        pass
+
+
+
+
+class Multi(ProcessWrapper):
+
+    def __init__(self, exeName):
+        super().__init__(exeName)
+
+    def getRequiredOptions(self):
+        return []
+
+    def setArguments(self, confDict):
+
+        #outDir = confDict.getOptionValue("outdir")
+        #outputName = confDict.getOptionValue("mapnameprefix")+".int.gz"
+        #self.outfilePath = os.path.join(outDir, outputName)
+
+        """
+        inputfilemaps22.to_s + " " +
+        matrixconf.to_s + " "  +
+        p.ranal.to_s + " " + p.galmode.to_s + " " +
+        p.isomode.to_s +  " " +
+        newlistsource.to_s + " " +
+        outfile22.to_s + " " +
+        ulcl.to_s + " " +
+        loccl.to_s + " " +
+        p.galmode2.to_s + " " +
+        p.galmode2fit.to_s + " " +
+        p.isomode2.to_s + " " +
+        p.isomode2fit.to_s + " " +
+        p.edpcorrection.to_s + " " +
+        p.fluxcorrection.to_s + " " +
+        p.minimizertype.to_s +  " " +
+        p.minimizeralg.to_s + " " +
+        p.minimizerdefstrategy.to_s + " " +
+        p.mindefaulttolerance.to_s + " " +
+        p.integratortype + " " +
+        p.expratioevaluation.to_s + " " +
+        p.minThreshold.to_s + " " +
+        p.maxThreshold.to_s + " " +
+        p.squareSize.to_s + " " +
+        p.contourpoints.to_s;
+        """
+        self.args = [
+
                     ]
 
 

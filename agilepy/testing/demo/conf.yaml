@@ -1,6 +1,7 @@
 input:
   evtfile: "/ASDC_PROC3/FM3.119_ASDCSTD/INDEX/EVT.index"
-
+  logfile: "/AGILE_PROC3//DATA_ASDCSTD/INDEX/LOG.log.index"
+  
 output:
   outdir: "/tmp/agilepy_test/Agilepy/out"
   mapnameprefix: "testmap"
