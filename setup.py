@@ -8,12 +8,10 @@ requires = [
 ]
 
 setup( name='Agilepy',
-       version='0.0.0',
+       version='25-1.0.0',
        install_requires=requires,
-       author='Addis Antonio, Baroncelli Leonardo, Parmiggiani Nicolò',
-       author_email='antonio.addis@inaf.it leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
+       author='Baroncelli Leonardo, Addis Antonio, Bulgarelli Andrea, Parmiggiani Nicolò',
+       author_email='antonio.addis@inaf.it, andrea.bulgarelli@inaf.it, leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' }
-       
-        
      )

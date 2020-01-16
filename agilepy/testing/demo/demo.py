@@ -7,8 +7,8 @@
        is property of the AGILE TEAM and is strictly
        private and confidential.
        Copyright (C) 2005-2020 AGILE Team.
-           Addis Antonio <antonio.addis@inaf.it>
            Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+           Addis Antonio <antonio.addis@inaf.it>
            Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
            Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
        All rights reserved.
@@ -27,21 +27,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+
 from agilepy.api import AGAnalysis, SourcesLibrary, ScienceTools
 
 
 aga = AGAnalysis("./agilepy/testing/demo/examples/conf.yaml", "/tmp/agilepy_test/Agilepy/agilepy/testing/demo/examples/sourceconf.xml")
 
+"""
 aga.setOptions(binsize=99999)
 aga.printOptions("maps")
 aga.resetConf()
-aga.printOptions("maps")
-
+"""
+aga.printOptions("selection")
 
 # Usage of the SourcesLibrary class
 sourcesLib = aga.getSourcesLibrary()
 
-sources = sourcesLib.selectSourcesWithLambda(lambda Name : Name == "2AGLJ0835-4514")
+sources = sourcesLib.selectSourcesWithLambda(lambda Name : Name == "2AGLJ2021+4029")
 for s in sources:
     print("\nSource found!")
     print(s)
@@ -64,12 +66,12 @@ aga.mle(maplistFilePath)
 
 # sources = aga.freeSources("Name == '2AGLJ0835-4514' and Dist > 0 and Flux > 0", "Flux", False)
 
-sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0, "Flux", False)
+sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", False)
 print("\n\nSource with Flux NOT freed: " )
 for s in sources:
     print(s)
 
-sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0, "Flux", True)
+sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
 print("\n\nSource with Flux freed: " )
 for s in sources:
     print(s)
@@ -78,7 +80,7 @@ for s in sources:
 print("\n\nNumber of sources: ", len(sourcesLib.getSources()))
 
 
-deleted = aga.deleteSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0)
+deleted = aga.deleteSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0)
 print("\n\nDeleted sources:")
 for s in deleted:
     print(s)

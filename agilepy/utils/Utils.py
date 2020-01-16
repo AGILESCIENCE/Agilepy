@@ -7,8 +7,8 @@
        is property of the AGILE TEAM and is strictly
        private and confidential.
        Copyright (C) 2005-2020 AGILE Team.
-           Addis Antonio <antonio.addis@inaf.it>
            Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+           Addis Antonio <antonio.addis@inaf.it>
            Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
            Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
        All rights reserved.
@@ -26,6 +26,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
+
 import sys
 import logging
 from os.path import join
@@ -61,10 +63,12 @@ class Decorators:
 
 class AgilepyLogger(metaclass=Singleton):
 
-    def __init__(self, outputDirectory = None, logFilename = None, debug_lvl = 2, init = False):
+    def __init__(self):
+        self.debug_lvl = None
+        self.logger = None
 
-        if not init:
-            return
+
+    def initialize(self, outputDirectory = None, logFilename = None, debug_lvl = 2):
 
         self.debug_lvl = debug_lvl
 
@@ -101,18 +105,22 @@ class AgilepyLogger(metaclass=Singleton):
         self.logger.info("[INFO   ] [%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
 
     def critical(self, context, message, arguments=[], newline=False):
+        if not self.logger: return
         if newline: print("\n")
         self.logger.critical("[ERROR  ] [%s] " + message, type(context).__name__, *arguments)
 
     def info(self, context, message, arguments=[], newline=False):
+        if not self.logger: return
         if newline: print("\n")
         self.logger.info("[INFO   ] [%s] " + message, type(context).__name__, *arguments)
 
     def warning(self, context, message, arguments=[], newline=False):
+        if not self.logger: return
         if newline: print("\n")
         self.logger.warning("[WARNING] [%s] " + message, type(context).__name__, *arguments)
 
     def debug(self, context, message, arguments=[], newline=False):
+        if not self.logger: return
         if newline: print("\n")
         self.logger.debug("[DEBUG  ] [%s] " + message, type(context).__name__, *arguments)
 
@@ -151,3 +159,6 @@ class Astro:
             except Exception as e:
                 print("\nException in Astro.distance (error in acos() ): ", e)
                 return math.sqrt(d1*d1 + d2 * d2);
+
+
+agilepyLogger = AgilepyLogger()

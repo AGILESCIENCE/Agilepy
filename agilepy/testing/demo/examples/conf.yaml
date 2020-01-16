@@ -1,20 +1,22 @@
 input:
-  evtfile: "/ASDC_PROC3/FM3.119_ASDCSTD/INDEX/EVT.index"
-  logfile: "/AGILE_PROC3//DATA_ASDCSTD/INDEX/LOG.log.index"
+  evtfile: "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index"
+  logfile: "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
 
 output:
   outdir: "/tmp/agilepy_test/Agilepy/out"
-  filenameprefix: "testfile"
+  filenameprefix: "testcase1"
   debuglvl: 1
 
 selection:
-  tmin: 58255.0
-  tmax: 58265.0
+  tmin: 58287
+  tmax: 58297
   timetype: "MJD"
-  glat: 25.4124
-  glon: 56.123
+  glon: 80
+  glat: 0
 
 maps:
   energybins:
-    - "[300, 10000]"
+    - "[100, 10000]"
+    # 100-300 , 300-1000, 1000-3000, 3000-10000
   fovbinnumber: 1
+  binsize: 0.2

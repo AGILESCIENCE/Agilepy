@@ -7,8 +7,8 @@
        is property of the AGILE TEAM and is strictly
        private and confidential.
        Copyright (C) 2005-2020 AGILE Team.
-           Addis Antonio <antonio.addis@inaf.it>
            Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+           Addis Antonio <antonio.addis@inaf.it>
            Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
            Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
        All rights reserved.
@@ -34,7 +34,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
-from agilepy.utils.Utils import AgilepyLogger, Decorators
+from agilepy.utils.Utils import agilepyLogger, Decorators
 from agilepy.utils.Parameters import Parameters
 
 class AGAnalysis:
@@ -52,9 +52,13 @@ class AGAnalysis:
         """
         self.config = AgilepyConfig(configurationFilePath)
 
-        self.logger = AgilepyLogger(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"), init=True)
+        self.logger = agilepyLogger
 
-        self.sourcesLibrary = SourcesLibrary(sourcesFilePath)
+        self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
+
+        self.sourcesLibrary = SourcesLibrary()
+
+        self.sourcesLibrary.loadSourceLibraryXML(sourcesFilePath)
 
 
     @Decorators.accepts(object)
@@ -150,10 +154,10 @@ class AGAnalysis:
                     self.config.addOptions("selection", emin=emin, emax=emax)
                     self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
-                    ctsMapGenerator.setArguments(self.config)
-                    expMapGenerator.setArguments(self.config)
-                    gasMapGenerator.setArguments(self.config)
-                    intMapGenerator.setArguments(self.config)
+                    ctsMapGenerator.setArgumentsAndProducts(self.config)
+                    expMapGenerator.setArgumentsAndProducts(self.config)
+                    gasMapGenerator.setArgumentsAndProducts(self.config)
+                    intMapGenerator.setArgumentsAndProducts(self.config)
 
                     self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
@@ -161,10 +165,18 @@ class AGAnalysis:
                         self.logger.critical(self,"Some options have not been set.")
                         exit(1)
 
-                    ctsMapGenerator.call()
-                    expMapGenerator.call()
-                    gasMapGenerator.call()
-                    intMapGenerator.call()
+                    f1 = ctsMapGenerator.call()
+                    self.logger.info(self, "Science tool ctsMapGenerator produced %s", [f1])
+
+                    f2 = expMapGenerator.call()
+                    self.logger.info(self, "Science tool expMapGenerator produced %s", [f2])
+
+                    f3 = gasMapGenerator.call()
+                    self.logger.info(self, "Science tool gasMapGenerator produced %s", [f3])
+
+                    f4 = intMapGenerator.call()
+                    self.logger.info(self, "Science tool intMapGenerator produced %s", [f4])
+
 
                     mapListFileContent.append(ctsMapGenerator.outfilePath + " " + expMapGenerator.outfilePath + " " + gasMapGenerator.outfilePath + " " + str(bincenter) + " " + str(self.config.getOptionValue("galcoeff")) + " " + str(self.config.getOptionValue("isocoeff")) )
 
@@ -193,18 +205,32 @@ class AGAnalysis:
             self.logger.critical(self, "The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
             exit(1)
 
-        sourceListFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix="sourceLibrary", format="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix="sourceLibrary", format="AG")
+        self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
-        self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListFilePath)
-
-        multi.setArguments(self.config)
-
-        source = multi.call()
-
-        self.sourcesLibrary.updateMulti(source)
+        multisources = self.sourcesLibrary.getSourcesNames()
+        self.config.addOptions("selection", multisources=multisources)
 
 
+        multi.setArgumentsAndProducts(self.config)
 
+        sourceFiles = multi.call()
+
+        if len(sourceFiles) == 0:
+            self.logger.warning(self, "The number of .source files is 0.", [])
+
+        self.logger.info(self,"AG_multi produced: %s", [ " ".join(sourceFiles) ])
+
+        for sourceFile in sourceFiles:
+
+            source = self.sourcesLibrary.parseSourceFile(sourceFile)
+
+            mapCenterL = float(self.config.getOptionValue("glon"))
+            mapCenterB = float(self.config.getOptionValue("glat"))
+            self.sourcesLibrary.updateMulti(source, mapCenterL, mapCenterB)
+
+
+        self.config.reset()
 
 
 

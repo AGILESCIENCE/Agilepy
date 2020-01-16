@@ -7,8 +7,8 @@
        is property of the AGILE TEAM and is strictly
        private and confidential.
        Copyright (C) 2005-2020 AGILE Team.
-           Addis Antonio <antonio.addis@inaf.it>
            Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+           Addis Antonio <antonio.addis@inaf.it>
            Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
            Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
        All rights reserved.
@@ -32,7 +32,7 @@ from os.path import split, join
 from inspect import signature
 
 from agilepy.dataclasses.Source import *
-from agilepy.utils.Utils import AgilepyLogger, Astro, Decorators
+from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
 
 class SourcesLibrary:
 
@@ -42,20 +42,32 @@ class SourcesLibrary:
 
     """
 
-    @Decorators.accepts(object, str)
-    def __init__(self, xmlFilePath):
+    @Decorators.accepts(object)
+    def __init__(self):
         """
         This method ... blabla ...
         """
-        self.logger = AgilepyLogger()
+        self.logger = agilepyLogger
+        self.xmlFilePath = None
+        self.xmlFilePathPrefix = None
+        self.sourcesLibrary = None
+
+
+    @Decorators.accepts(object, str)
+    def loadSourceLibraryXML(self, xmlFilePath):
+        """
+        This method ... blabla ...
+        """
         self.xmlFilePath = xmlFilePath
         self.xmlFilePathPrefix,_ = split(self.xmlFilePath)
 
-        self.sourcesLibrary = self._parseSourceXml()
+        self.sourcesLibrary = self._parseSourceXml(self.xmlFilePath)
 
-        # self.sourcesXML = self._convertToXML() TO BE IMPLEMENTED
-        self.sourcesAgileFormat = self._convertToAgileFormat()
-
+        if not self.sourcesLibrary:
+            self.logger.warning(self, "Errors during %s parsing", [self.xmlFilePath])
+            return False
+        else:
+            return True
 
     @Decorators.accepts(object, str, str)
     def writeToFile(self, outfileNamePrefix = "sourceLibrary", format="AG"):
@@ -69,9 +81,13 @@ class SourcesLibrary:
         outfilepath = join(self.xmlFilePathPrefix, outfileNamePrefix)
 
         if format == "AG":
+
+            sourcesAgileFormat = self._convertToAgileFormat()
+
             outfilepath += ".txt"
             with open(outfilepath, "w") as sourceLibraryFile:
-                sourceLibraryFile.write(self.sourcesAgileFormat)
+
+                sourceLibraryFile.write(sourcesAgileFormat)
 
         else:
             pass
@@ -89,7 +105,12 @@ class SourcesLibrary:
         """
         return self.sourcesLibrary.sources
 
-
+    @Decorators.accepts(object)
+    def getSourcesNames(self):
+        """
+        This methods ... blabla ...
+        """
+        return [s.name for s in self.sourcesLibrary.sources]
 
     @Decorators.accepts(object, "*")
     def selectSourcesWithLambda(self, selectionLambda):
@@ -165,11 +186,110 @@ class SourcesLibrary:
         return sourcesToBeDeleted
 
 
+    @Decorators.accepts(object, str)
+    def parseSourceFile(self, sourceFilePath):
+        """
+        This method ... blabla ...
+
+        returns: a MultiOutput object
+        """        # self.logger.info(self, "Parsing output file of AG_multi: %s", [self.outfilePath])
+
+        with open(sourceFilePath, 'r') as sf:
+            lines = sf.readlines()
+
+        body = [line for line in lines if line[0] != "!"]
+
+        if len(body) != 17:
+            self.logger.critical(self, "The number of lines of the %s source file is not 17!", [sourceFilePath])
+            exit(1)
+
+        allValues = []
+
+        for lin_num,line in enumerate(body):
+
+            values = line.split(" ")
+
+            values = [v.strip() for v in values if v!='']
+
+            if lin_num == 0:
+                values = [v for v in values if v!='[' and v!=']' and v!=',']
+
+            elif lin_num == 5:
+                fluxperchannel = values[-1].split(",")
+                values = [*values[:-1], fluxperchannel]
+
+            elif lin_num == 8:
+                galcoeffs  = line.split(" ")[0].split(",")
+                galcoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [galcoeffs, galcoeffserr]
+
+            elif lin_num == 9:
+                galzerocoeffs  = line.split(" ")[0].split(",")
+                galzerocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [galzerocoeffs, galzerocoeffserr]
+
+            elif lin_num == 10:
+                isocoeffs  = line.split(" ")[0].split(",")
+                isocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [isocoeffs, isocoeffserr]
+
+            elif lin_num == 11:
+                isozerocoeffs  = line.split(" ")[0].split(",")
+                isozerocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [isozerocoeffs, isozerocoeffserr]
+
+            elif lin_num == 13:
+                energybins = line.split(" ")[0].split(",")
+                emins = [e.split("..")[0] for e in energybins]
+                emaxs = [e.split("..")[1] for e in energybins]
+                fovbinnumbers = line.split(" ")[1].split(",")
+                fovmin = [e.split("..")[0] for e in fovbinnumbers]
+                fovmax = [e.split("..")[1] for e in fovbinnumbers]
+                values = [emins, emaxs, fovmin, fovmax, *values[-5:]]
 
 
+            values = [v for v in values if v!='']
+
+            # print("LINE %d ELEMENTS %d"%(lin_num, len(values)))
+            allValues += values
+
+        #print("allValues: ", allValues)
+        #print("allValues sum: ", len(allValues))
+
+        return MultiOutput(*allValues)
 
 
+    @Decorators.accepts(object, object, float, float)
+    def updateMulti(self, data, mapCenterL, mapCenterB):
 
+        sourcesFound = self.selectSourcesWithLambda(lambda Name : Name == data.label)
+
+        if len(sourcesFound) == 0:
+            self.logger.critical(self, "Source '%s' has not been found in the sources library", [data.label])
+            exit(1)
+
+        for sourceFound in sourcesFound:
+
+            sourceFound.multi = data
+
+            # Computing the distances from maps centers
+            # Longitude
+            sourceL = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLON"))
+            # Latitude
+            sourceB = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLAT"))
+
+            sourceL = float(data.L)
+            sourceB = float(data.B)
+
+            if sourceL == -1:
+                sourceL = float(data.start_l)
+            if sourceB == -1:
+                sourceB = float(data.start_b)
+
+
+            sourceFound.multi.Dist = Astro.distance(sourceL, sourceB, mapCenterL, mapCenterB)
+
+            self.logger.info(self, "Source '%s' has been updated with 'AG_multi' analysis output", [data.label])
 
 
 
@@ -203,40 +323,12 @@ class SourcesLibrary:
         return [param for param in userSelectionParams if param in selectionParams]
 
 
-    def _updateMulti(self, data):
 
-        sourcesFound = self.selectSourcesWithLambda(lambda Name : Name == data.label)
+    def _parseSourceXml(self, xmlFilePath):
 
-        if len(sourcesFound) == 0:
-            self.logger.critical(self, "Source '%s' has not been found in the sources library", [data.label])
-            exit(1)
+        self.logger.info(self, "Parsing %s ...", [xmlFilePath])
 
-        for sourceFound in sourcesFound:
-
-            sourceFound.multi = data
-
-            # Computing the distances from maps centers
-            # Longitude
-            sourceL = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLON"))
-            # Latitude
-            sourceB = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLAT"))
-
-            mapCenterL = float(data.L)
-            mapCenterB = float(data.B)
-
-            if mapCenterL == -1:
-                mapCenterL = float(data.start_l)
-            if mapCenterB == -1:
-                mapCenterB = float(data.start_b)
-
-            sourceFound.multi.Dist = Astro.distance(sourceL, sourceB, mapCenterL, mapCenterB)
-
-            self.logger.info(self, "Source '%s' has been updated with 'AG_multi' analysis output", [data.label])
-
-
-    def _parseSourceXml(self):
-
-        xmlRoot = ET.parse(self.xmlFilePath).getroot()
+        xmlRoot = ET.parse(xmlFilePath).getroot()
 
         sourceConfig = SourceLibrary(**xmlRoot.attrib, sources=[])
 

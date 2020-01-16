@@ -1,6 +1,61 @@
 <?xml version="1.0" ?>
 <source_library title="source library">
 
+  <source name="2AGLJ2021+4029" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter name="Flux" free="1"  value="119.3e-08"/>
+      <parameter name="Index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
+      <parameter name="CutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
+    </spectrum>
+    <spatialModel type="PointSource" location_limit="0" free="0">
+      <parameter name="GLON" value="78.2375" />
+      <parameter name="GLAT" value="2.12298" />
+    </spatialModel>
+  </source>
+
+  <source name="2AGLJ2021+3654" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter name="Flux" free="1"  value="70.89e-08"/>
+      <parameter name="Index" free="0" scale="-1.0" value="1.38" min="0.5" max="5"/>
+      <parameter name="CutoffEnergy" free="0" value="960.59" min="20" max="10000"/>
+    </spectrum>
+    <spatialModel type="PointSource" location_limit="0" free="0">
+      <parameter name="GLON" value="75.2562" />
+      <parameter name="GLAT" value="0.151831" />
+    </spatialModel>
+  </source>
+
+
+
+  <!-- Diffuse Sources
+  <source name="gal" type="DiffuseEmission">
+      <spatialModel type="ConstantValue">
+          <parameter free="0" name="gal" value="1.0"/>  galCoeff
+      </spatialModel>
+
+  </source>
+  <source name="iso" type="IsotropicEmission">
+      <spatialModel type="ConstantValue">
+          <parameter free="0" name="iso" value="7.0"/> isoCoeff
+      </spatialModel>
+  </source>
+  -->
+  <!--
+
+  <source name="2AGLJ0835-4514" type="PointSource">
+    <spectrum type="PLSuperExpCutoff">
+      <parameter name="Flux" free="1"  value="969.539e-08"/>
+      <parameter name="Index1" free="0" scale="-1.0" value="1.71345" min="0.5" max="5"/>
+      <parameter name="CutoffEnergy" free="0" value="3913.06" min="20" max="10000"/>
+      <parameter name="Index2" free="0" value="1.3477" min="0" max="100"/>
+    </spectrum>
+    <spatialModel type="PointSource" location_limit="0" free="0">
+      <parameter name="GLON" value="263.585" />
+      <parameter name="GLAT" value="-2.84083" />
+    </spatialModel>
+  </source>
+
+
   <source name="2AGLJ2202+4214" type="PointSource">
     <spectrum type="PowerLaw">
       <parameter name="Flux" free="1"  value="7.45398e-08"/>
@@ -24,19 +79,6 @@
     </spatialModel>
   </source>
 
-  <source name="2AGLJ0835-4514" type="PointSource">
-    <spectrum type="PLSuperExpCutoff">
-      <parameter name="Flux" free="1"  value="969.539e-08"/>
-      <parameter name="Index1" free="1" scale="-1.0" value="1.71345" min="0.5" max="5"/>
-      <parameter name="CutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
-      <parameter name="Index2" free="1" value="1.3477" min="0" max="100"/>
-    </spectrum>
-    <spatialModel type="PointSource" location_limit="0" free="0">
-      <parameter name="GLON" value="263.585" />
-      <parameter name="GLAT" value="-2.84083" />
-    </spatialModel>
-  </source>
-
   <source name="2AGLJ1801-2334" type="PointSource">
     <spectrum type="LogParabola">
       <parameter name="Flux" free="1"  value="35.79e-08"/>
@@ -50,5 +92,6 @@
     </spatialModel>
   </source>
 
+-->
 
 </source_library>

@@ -27,6 +27,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from agilepy.api.AGAnalysis import AGAnalysis
+
+import unittest
+
 from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import *
+from agilepy.dataclasses.Source import MultiOutput
+
+class SourcesLibraryUnittesting(unittest.TestCase):
+
+   def test_source_file_parsing(self):
+
+       sl = SourcesLibrary()
+
+       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/multi.multimaps.source")
+       self.assertEqual(True, bool(res))
+
+       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/multi.source")
+       self.assertEqual(True, bool(res))
+
+       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase1_2AGLJ0835-4514.source")
+       self.assertEqual(True, bool(res))
+
+
+if __name__ == '__main__':
+    unittest.main()
