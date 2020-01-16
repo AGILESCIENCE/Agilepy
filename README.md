@@ -1,5 +1,11 @@
 # Agilepy
 
+[![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
+
+## Documentation
+
+https://agilepy.readthedocs.io/en/latest/
+
 ## Installation
 
 Create a virtual environment with Python >= 3.7:
