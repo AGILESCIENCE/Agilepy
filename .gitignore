@@ -5,3 +5,6 @@ agilepy/testing/demo/out
 dist/
 build/
 out/
+
+
+load_env.sh

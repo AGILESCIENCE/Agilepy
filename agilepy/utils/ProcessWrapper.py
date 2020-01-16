@@ -31,23 +31,24 @@ import subprocess
 from abc import ABC, abstractmethod
 
 from agilepy.utils.Utils import AgilepyLogger
-from agilepy.parameters.Parameters import Parameters
+from agilepy.utils.Parameters import Parameters
 
 class ProcessWrapper(ABC):
 
-    def __init__(self, exeName):
+    def __init__(self, exeName, parseOutput = False):
 
         self.logger = AgilepyLogger()
         self.exeName = exeName
         self.args = []
         self.outfilePath = None
+        self.parseOutput = parseOutput
 
     @abstractmethod
     def setArguments(self, confDict):
         pass
 
     @abstractmethod
-    def parseOutput(self):
+    def parseOutputFile(self):
         pass
 
     @abstractmethod
@@ -82,6 +83,9 @@ class ProcessWrapper(ABC):
         # remove par file
         command = "rm ./"+self.exeName+".par"
         self.executeCommand(command)
+
+        if self.parseOutput:
+            return self.parseOutputFile()
 
 
     def executeCommand(self, command):

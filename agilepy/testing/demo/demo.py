@@ -27,12 +27,61 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from agilepy.api.AGAnalysis import AGAnalysis
+from agilepy.api import AGAnalysis, SourcesLibrary, ScienceTools
 
-aa = AGAnalysis("./agilepy/testing/demo/conf.yaml")
 
-# aa.setOptions(demo=True, demoz=False, emin=1000)
+aga = AGAnalysis("./agilepy/testing/demo/examples/conf.yaml", "/tmp/agilepy_test/Agilepy/agilepy/testing/demo/examples/sourceconf.xml")
 
-aa.printOptions()
+aga.setOptions(binsize=99999)
+aga.printOptions("maps")
+aga.resetConf()
+aga.printOptions("maps")
 
-aa.generateMaps()
+
+# Usage of the SourcesLibrary class
+sourcesLib = aga.getSourcesLibrary()
+
+sources = sourcesLib.selectSourcesWithLambda(lambda Name : Name == "2AGLJ0835-4514")
+for s in sources:
+    print("\nSource found!")
+    print(s)
+
+print("\n\n")
+
+
+
+# mimic mle()
+#data = ScienceTools.multi.parseOutputFile()
+#sourcesLib._updateMulti(data)
+
+maplistFilePath = aga.generateMaps()
+
+print("\n\nMaplist file: ", maplistFilePath)
+
+aga.mle(maplistFilePath)
+
+
+
+# sources = aga.freeSources("Name == '2AGLJ0835-4514' and Dist > 0 and Flux > 0", "Flux", False)
+
+sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0, "Flux", False)
+print("\n\nSource with Flux NOT freed: " )
+for s in sources:
+    print(s)
+
+sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0, "Flux", True)
+print("\n\nSource with Flux freed: " )
+for s in sources:
+    print(s)
+
+
+print("\n\nNumber of sources: ", len(sourcesLib.getSources()))
+
+
+deleted = aga.deleteSources(lambda Name, Dist, Flux : Name == "2AGLJ0835-4514" and Dist > 0 and Flux > 0)
+print("\n\nDeleted sources:")
+for s in deleted:
+    print(s)
+
+
+print("\n\nNumber of sources: ", len(sourcesLib.getSources()))

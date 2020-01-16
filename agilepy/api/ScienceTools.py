@@ -28,20 +28,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from agilepy.utils.ProcessWrapper import *
-
+from agilepy.dataclasses.Source import MultiOutput
 
 class CtsMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, parseOutput = False):
+        super().__init__(exeName, parseOutput)
 
     def getRequiredOptions(self):
-        return ["evtfile", "outdir", "mapnameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
+        return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def setArguments(self, confDict):
 
         outDir = confDict.getOptionValue("outdir")
-        outputName = confDict.getOptionValue("mapnameprefix")+".cts.gz"
+        outputName = confDict.getOptionValue("filenameprefix")+".cts.gz"
 
         self.outfilePath = os.path.join(outDir, outputName)
 
@@ -66,24 +66,24 @@ class CtsMapGenerator(ProcessWrapper):
                     ]
 
 
-    def parseOutput(self):
+    def parseOutputFile(self):
         pass
 
 
 
 class ExpMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, parseOutput = False):
+        super().__init__(exeName, parseOutput)
 
 
     def getRequiredOptions(self):
-        return ["logfile", "outdir", "mapnameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
     def setArguments(self, confDict):
 
         outDir = confDict.getOptionValue("outdir")
-        outputName = confDict.getOptionValue("mapnameprefix")+".exp.gz"
+        outputName = confDict.getOptionValue("filenameprefix")+".exp.gz"
 
         edpmatrix = "None"
         if confDict.getOptionValue("useEDPmatrixforEXP"):
@@ -120,22 +120,22 @@ class ExpMapGenerator(ProcessWrapper):
                     ]
 
 
-    def parseOutput(self):
+    def parseOutputFile(self):
         pass
 
 
 class GasMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, parseOutput = False):
+        super().__init__(exeName, parseOutput)
 
     def getRequiredOptions(self):
-        return ["outdir", "mapnameprefix", "expmap"]
+        return ["outdir", "filenameprefix", "expmap"]
 
     def setArguments(self, confDict):
 
         outDir = confDict.getOptionValue("outdir")
-        outputName = confDict.getOptionValue("mapnameprefix")+".gas.gz"
+        outputName = confDict.getOptionValue("filenameprefix")+".gas.gz"
 
         self.outfilePath = os.path.join(outDir, outputName)
 
@@ -146,22 +146,22 @@ class GasMapGenerator(ProcessWrapper):
                     ]
 
 
-    def parseOutput(self):
+    def parseOutputFile(self):
         pass
 
 
 class IntMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, parseOutput = False):
+        super().__init__(exeName, parseOutput)
 
     def getRequiredOptions(self):
-        return ["outdir", "mapnameprefix", "expmap", "ctsmap"]
+        return ["outdir", "filenameprefix", "expmap", "ctsmap"]
 
     def setArguments(self, confDict):
 
         outDir = confDict.getOptionValue("outdir")
-        outputName = confDict.getOptionValue("mapnameprefix")+".int.gz"
+        outputName = confDict.getOptionValue("filenameprefix")+".int.gz"
         self.outfilePath = os.path.join(outDir, outputName)
 
 
@@ -171,7 +171,7 @@ class IntMapGenerator(ProcessWrapper):
                     ]
 
 
-    def parseOutput(self):
+    def parseOutputFile(self):
         pass
 
 
@@ -179,57 +179,119 @@ class IntMapGenerator(ProcessWrapper):
 
 class Multi(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, parseOutput = False):
+        super().__init__(exeName, parseOutput)
 
     def getRequiredOptions(self):
-        return []
+        return ["outdir", "filenameprefix"]
 
     def setArguments(self, confDict):
 
-        #outDir = confDict.getOptionValue("outdir")
-        #outputName = confDict.getOptionValue("mapnameprefix")+".int.gz"
-        #self.outfilePath = os.path.join(outDir, outputName)
+        outDir = confDict.getOptionValue("outdir")
+        outputName = confDict.getOptionValue("filenameprefix")
+        self.outfilePath = os.path.join(outDir, outputName)
 
-        """
-        inputfilemaps22.to_s + " " +
-        matrixconf.to_s + " "  +
-        p.ranal.to_s + " " + p.galmode.to_s + " " +
-        p.isomode.to_s +  " " +
-        newlistsource.to_s + " " +
-        outfile22.to_s + " " +
-        ulcl.to_s + " " +
-        loccl.to_s + " " +
-        p.galmode2.to_s + " " +
-        p.galmode2fit.to_s + " " +
-        p.isomode2.to_s + " " +
-        p.isomode2fit.to_s + " " +
-        p.edpcorrection.to_s + " " +
-        p.fluxcorrection.to_s + " " +
-        p.minimizertype.to_s +  " " +
-        p.minimizeralg.to_s + " " +
-        p.minimizerdefstrategy.to_s + " " +
-        p.mindefaulttolerance.to_s + " " +
-        p.integratortype + " " +
-        p.expratioevaluation.to_s + " " +
-        p.minThreshold.to_s + " " +
-        p.maxThreshold.to_s + " " +
-        p.squareSize.to_s + " " +
-        p.contourpoints.to_s;
-        """
+        expratioevaluation = 0
+        if confDict.getOptionValue("expratioevaluation"):
+            expratioevaluation = 1
+
         self.args = [
+            confDict.getOptionValue("maplist"), \
+            Parameters.matrixconf, \
+            confDict.getOptionValue("ranal"), \
+            confDict.getOptionValue("galmode"), \
+            confDict.getOptionValue("isomode"), \
+            confDict.getOptionValue("sourcelist"), \
+            self.outfilePath, \
+            confDict.getOptionValue("ulcl"), \
+            confDict.getOptionValue("loccl"), \
+            confDict.getOptionValue("galmode2"), \
+            confDict.getOptionValue("galmode2fit"), \
+            confDict.getOptionValue("isomode2"), \
+            confDict.getOptionValue("isomode2fit"), \
+            confDict.getOptionValue("edpcorrection"), \
+            confDict.getOptionValue("fluxcorrection"), \
+            confDict.getOptionValue("minimizertype"), \
+            confDict.getOptionValue("minimizeralg"), \
+            confDict.getOptionValue("minimizerdefstrategy"), \
+            confDict.getOptionValue("mindefaulttolerance"), \
+            confDict.getOptionValue("integratortype"), \
+            expratioevaluation, \
+            confDict.getOptionValue("expratio_minthr"), \
+            confDict.getOptionValue("expratio_maxthr"), \
+            confDict.getOptionValue("expratio_size"), \
+            confDict.getOptionValue("contourpoints"),
+        ]
 
-                    ]
+
+    def parseOutputFile(self):
+
+        # self.logger.info(self, "Parsing output file of AG_multi: %s", [self.outfilePath])
+
+        with open(self.outfilePath, 'r') as sf:
+            lines = sf.readlines()
+
+        body = [line for line in lines if line[0] != "!"]
+        assert 17==len(body)
 
 
-    def parseOutput(self):
-        pass
+        allValues = []
+
+        for lin_num,line in enumerate(body):
+
+            values = line.split(" ")
+
+            values = [v.strip() for v in values if v!='']
+
+            if lin_num == 0:
+                values = [v for v in values if v!='[' and v!=']' and v!=',']
+
+            elif lin_num == 5:
+                fluxperchannel = values[-1].split(",")
+                values = [*values[:-1], fluxperchannel]
+
+            elif lin_num == 8:
+                galcoeffs  = line.split(" ")[0].split(",")
+                galcoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [galcoeffs, galcoeffserr]
+
+            elif lin_num == 9:
+                galzerocoeffs  = line.split(" ")[0].split(",")
+                galzerocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [galzerocoeffs, galzerocoeffserr]
+
+            elif lin_num == 10:
+                isocoeffs  = line.split(" ")[0].split(",")
+                isocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [isocoeffs, isocoeffserr]
+
+            elif lin_num == 11:
+                isozerocoeffs  = line.split(" ")[0].split(",")
+                isozerocoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]
+                values = [isozerocoeffs, isozerocoeffserr]
+
+            elif lin_num == 13:
+                energybins = line.split(" ")[0].split(",")
+                emins = [e.split("..")[0] for e in energybins]
+                emaxs = [e.split("..")[1] for e in energybins]
+                fovbinnumbers = line.split(" ")[1].split(",")
+                fovmin = [e.split("..")[0] for e in fovbinnumbers]
+                fovmax = [e.split("..")[1] for e in fovbinnumbers]
+                values = [emins, emaxs, fovmin, fovmax, *values[-5:]]
 
 
+            # print("LINE %d ELEMENTS %d"%(lin_num, len(values)))
+            allValues += values
 
+        #print("allValues: ", allValues)
+        #print("allValues sum: ", len(allValues))
+
+        return MultiOutput(*allValues)
 
 
 ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")
 expMapGenerator = ExpMapGenerator("AG_expmapgen")
 gasMapGenerator = GasMapGenerator("AG_gasmapgen")
 intMapGenerator = IntMapGenerator("AG_intmapgen")
+
+multi = Multi("AG_multi", parseOutput=True)

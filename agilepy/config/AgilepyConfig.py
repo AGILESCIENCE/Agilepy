@@ -28,10 +28,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import yaml
 import pprint
+from copy import deepcopy
 from os.path import dirname, realpath, join
 
-from agilepy.utils.Utils import Singleton
-from agilepy.utils.Utils import DataUtils
+from agilepy.utils.Utils import Singleton, DataUtils
+
 
 class AgilepyConfig(metaclass=Singleton):
     """
@@ -51,10 +52,12 @@ class AgilepyConfig(metaclass=Singleton):
 
         self.conf = self._completeConfiguration(mergedConf)
 
+        self.conf_bkp = deepcopy(self.conf)
 
-    """
-        PUBLIC API
-    """
+
+    def reset(self):
+        self.conf = deepcopy(self.conf_bkp)
+
     def getSectionOfOption(self, optionName):
 
         for optionSection in self.conf:
@@ -66,9 +69,11 @@ class AgilepyConfig(metaclass=Singleton):
         return None
 
 
-    def printOptions(self):
-
-        self.pp.pprint(self.conf)
+    def printOptions(self, section=None):
+        if section and section in self.conf:
+            self.pp.pprint(self.conf[section])
+        else:
+            self.pp.pprint(self.conf)
 
 
     def getOptionValue(self, optionName):

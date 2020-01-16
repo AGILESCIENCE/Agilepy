@@ -10,6 +10,10 @@ class Parameters:
     # constants
     sarmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.sar.gz")
     edpmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.edp.gz")
+    psdmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.psd.gz")
+
+    matrixconf = sarmatrix + " " + edpmatrix + " " + psdmatrix
+
     energybins = [[10000,50000],
                   [1000,3000],
                   [1000,50000],

@@ -27,43 +27,100 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from os.path import join
+
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.config.XMLconfig import SourcesConfig
-from agilepy.utils.Utils import AgilepyLogger
-from agilepy.parameters.Parameters import Parameters
-from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator
+
+from agilepy.api.SourcesLibrary import SourcesLibrary
+from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
+
+from agilepy.utils.Utils import AgilepyLogger, Decorators
+from agilepy.utils.Parameters import Parameters
 
 class AGAnalysis:
 
-    def __init__(self, configurationFilePath):
+    """
 
+        Public interface
+
+    """
+
+    @Decorators.accepts(object, str, str)
+    def __init__(self, configurationFilePath, sourcesFilePath):
+        """
+        This method ... blabla ...
+        """
         self.config = AgilepyConfig(configurationFilePath)
 
         self.logger = AgilepyLogger(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"), init=True)
 
-        self.sourcesconfig = SourcesConfig("./agilepy/testing/demo/sourceconf.xml")
+        self.sourcesLibrary = SourcesLibrary(sourcesFilePath)
+
+
+    @Decorators.accepts(object)
+    def resetConf(self):
+        self.config.reset()
+
 
     def setOptions(self, **kwargs):
-
+        """
+        This method ... blabla ...
+        """
         rejected = self.config.setOptions(**kwargs)
 
         if rejected:
 
             self.logger.warning(self, "Some options have not been set: {}".format(rejected))
 
-    def printOptions(self):
 
-        self.config.printOptions()
+    @Decorators.accepts(object, str)
+    def printOptions(self, section=None):
+        """
+        This method ... blabla ...
+        """
+        self.config.printOptions(section)
 
+
+    @Decorators.accepts(object)
+    def getSourcesLibrary(self):
+        """
+        This method ... blabla ...
+        """
+        return self.sourcesLibrary
+
+
+    @Decorators.accepts(object, "*", str, bool)
+    def freeSources(self, selectionLamda, parameterName, free):
+        """
+        This method ... blabla ...
+        """
+        return self.sourcesLibrary.freeSources(selectionLamda, parameterName, free)
+
+
+    @Decorators.accepts(object, "*")
+    def deleteSources(self, selectionLamda):
+        """
+        This method ... blabla ...
+        """
+        return self.sourcesLibrary.deleteSources(selectionLamda)
+
+
+    @Decorators.accepts(object)
     def generateMaps(self):
-
+        """
+        This method ... blabla ...
+        """
         fovbinnumber = self.config.getOptionValue("fovbinnumber")
         energybins = self.config.getOptionValue("energybins")
 
         initialFovmin = self.config.getOptionValue("fovradmin")
         initialFovmax = self.config.getOptionValue("fovradmax")
 
-        initialMapNamePrefix = self.config.getOptionValue("mapnameprefix")
+        initialFileNamePrefix = self.config.getOptionValue("filenameprefix")
+        outdir = self.config.getOptionValue("outdir")
+
+        mapListFileContent = []
+        maplistFilePath = join(outdir, initialFileNamePrefix+".maplist4")
 
         for stepi in range(0, fovbinnumber):
 
@@ -72,7 +129,7 @@ class AGAnalysis:
                 fovmin = initialFovmin
                 fovmax = initialFovmax
             else:
-                bincenter, fovmin, fovmax = self.updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
+                bincenter, fovmin, fovmax = self._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
             for stepe in energybins:
@@ -84,43 +141,97 @@ class AGAnalysis:
 
                     skymapL = Parameters.getSkyMap(emin, emax)
                     skymapH = Parameters.getSkyMap(emin, emax)
-                    mapNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
+                    fileNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
-                    self.logger.info(self, "\n\nMap generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s mapNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,mapNamePrefix,skymapL,skymapH])
+                    self.logger.info(self, "\n\nMap generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
 
-                    tools = [ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator]
-
-                    self.config.setOptions(mapnameprefix=initialMapNamePrefix+"_"+mapNamePrefix)
+                    self.config.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
                     self.config.addOptions("selection", emin=emin, emax=emax)
                     self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
-                    for tool in tools:
-                        tool.setArguments(self.config)
+                    ctsMapGenerator.setArguments(self.config)
+                    expMapGenerator.setArguments(self.config)
+                    gasMapGenerator.setArguments(self.config)
+                    intMapGenerator.setArguments(self.config)
 
                     self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
-                    for tool in tools:
-                        if not tool.allRequiredOptionsSet(self.config):
-                            self.logger.critical(self,"Some options have not been set.")
-                            exit(1)
+                    if not ctsMapGenerator.allRequiredOptionsSet(self.config) or not expMapGenerator.allRequiredOptionsSet(self.config) or not gasMapGenerator.allRequiredOptionsSet(self.config) or not intMapGenerator.allRequiredOptionsSet(self.config):
+                        self.logger.critical(self,"Some options have not been set.")
+                        exit(1)
 
+                    ctsMapGenerator.call()
+                    expMapGenerator.call()
+                    gasMapGenerator.call()
+                    intMapGenerator.call()
 
-
-                    for tool in tools:
-                        tool.call()
-
+                    mapListFileContent.append(ctsMapGenerator.outfilePath + " " + expMapGenerator.outfilePath + " " + gasMapGenerator.outfilePath + " " + str(bincenter) + " " + str(self.config.getOptionValue("galcoeff")) + " " + str(self.config.getOptionValue("isocoeff")) )
 
                 else:
 
                     self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", [stepe[0], stepe[1]])
 
-    def mle(self):
 
-        pass
+        with open(maplistFilePath,"w") as mlf:
+            for line in mapListFileContent:
+                mlf.write(line+"\n")
 
-    def updateFovMinMaxValues(self, fovbinnumber, fovradmin, fovradmax, stepi):
+        self.logger.info(self, "Maplist file created in %s", [maplistFilePath])
 
+        self.config.reset()
+
+
+        return maplistFilePath
+
+    @Decorators.accepts(object, str)
+    def mle(self, maplistFilePath):
+        """
+        This method ... blabla ...
+        """
+        if not maplistFilePath:
+            self.logger.critical(self, "The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
+            exit(1)
+
+        sourceListFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix="sourceLibrary", format="AG")
+
+        self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListFilePath)
+
+        multi.setArguments(self.config)
+
+        source = multi.call()
+
+        self.sourcesLibrary.updateMulti(source)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    """
+
+        Private methods
+
+    """
+
+    def _updateFovMinMaxValues(self, fovbinnumber, fovradmin, fovradmax, stepi):
+        """
+        This method ... blabla ...
+        """
         # print("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
         A = float(fovradmax) - float(fovradmin)
         B = float(fovbinnumber)
