@@ -16,9 +16,8 @@ Create a virtual environment with Python >= 3.7:
   python setup.py develop
 ```
 
-## Demo usage
+## Running the unit tests
 
 ```bash
-  cd agilepy/testing/demo
-  python demo.py
+  bash agilepy/testing/unittesting/start_test.sh
 ```
