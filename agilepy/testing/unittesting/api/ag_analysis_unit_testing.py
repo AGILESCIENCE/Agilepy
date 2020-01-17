@@ -96,7 +96,5 @@ class AGAnalysisUnittesting(unittest.TestCase):
     print("\n\nNumber of sources: ", len(sourcesLib.getSources()))
     """
 
- 
-
 if __name__ == '__main__':
     unittest.main()
