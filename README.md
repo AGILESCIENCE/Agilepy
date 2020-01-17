@@ -1,24 +1,24 @@
 # Agilepy
 
+Version: 1.0.0
 
 [![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
 
 ## Documentation
-
 https://agilepy.readthedocs.io/en/latest/
 
 ## Installation
-
-Create a virtual environment with Python >= 3.7:
-
 ```bash
-  conda create --name agilepy python=3.7
-  conda activate agilepy
-  python setup.py develop
+conda create -n <envname> -c addis.inaf agilepy
 ```
 
 ## Running the unit tests
-
 ```bash
+  conda activate <envname>
   bash agilepy/testing/unittesting/start_test.sh
+```
+
+## Removing the package
+```bash
+  conda env remove --name <envname>
 ```

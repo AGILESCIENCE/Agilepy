@@ -1,5 +1,13 @@
 include README.md
-include agilepy/testing/unittesting/api/conf/sourceconf.yaml
-include agilepy/testing/unittesting/api/conf/agilepyconf.yaml
-include agilepy/testing/unittesting/api/data/testcase0.source
-include agilepy/testing/unittesting/api/data/testcase1_2AGLJ0835-4514.source
+
+include *.py
+include *.yaml
+include *.xml
+include *.source
+include *.sh
+
+recursive-exclude * __pycache__
+recursive-exclude * *.egg-info
+recursive-exclude * *.pyc
+recursive-exclude * *.out
+prune out*
