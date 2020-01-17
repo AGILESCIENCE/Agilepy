@@ -1,5 +1,7 @@
 # Agilepy
 
+Version: 1.0.0
+
 [![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
 
 ## Documentation
@@ -21,5 +23,3 @@ Create a virtual environment with Python >= 3.7:
 ```bash
   bash agilepy/testing/unittesting/start_test.sh
 ```
-
-(master)
