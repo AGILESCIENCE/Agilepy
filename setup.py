@@ -10,6 +10,5 @@ setup( name='Agilepy',
        author_email='antonio.addis@inaf.it, andrea.bulgarelli@inaf.it, leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
-       include_package_data=True,
-       project_urls='https://agilepy.readthedocs.io/en/latest/'
+       include_package_data=True
      )
