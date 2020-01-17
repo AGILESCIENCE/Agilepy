@@ -30,6 +30,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 import subprocess
+from pathlib import Path
 from abc import ABC, abstractmethod
 
 from agilepy.utils.Utils import agilepyLogger
@@ -42,14 +43,15 @@ class ProcessWrapper(ABC):
         self.logger = agilepyLogger
         self.exeName = exeName
         self.args = []
+        self.outputDir = None
         self.outfilePath = None
         self.products = []
         self.callCounter = 0
 
     @abstractmethod
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
         """
-        This method must initialize the 'args' and 'products' attributes of the object.
+        This method must initialize the 'args', 'products' and 'outputDir' attributes of the object.
         """
         pass
 
@@ -74,6 +76,8 @@ class ProcessWrapper(ABC):
         if not self.args:
             self.logger.warning(self, "The 'args' attribute has not been set! Please, call setArguments() before call()! ", [])
             return []
+
+        Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 
         # copy par file
         pfile_location = os.path.join(os.environ["AGILE"],"share")

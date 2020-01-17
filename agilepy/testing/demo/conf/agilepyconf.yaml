@@ -4,7 +4,7 @@ input:
 
 output:
   outdir: "/tmp/agilepy_test/Agilepy/out"
-  filenameprefix: "testcase1"
+  filenameprefix: "testcase"
   debuglvl: 1
 
 selection:

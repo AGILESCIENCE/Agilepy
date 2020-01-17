@@ -27,7 +27,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from os.path import join
+from os.path import join, exists
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
@@ -52,9 +52,15 @@ class AGAnalysis:
         """
         self.config = AgilepyConfig(configurationFilePath)
 
+        self.outdir = self.config.getConf("output","outdir")
+
+        if exists(self.outdir):
+            print("The output directory %s already exists! Please, delete it or specify another output directory!"%(self.outdir))
+            exit(1)
+
         self.logger = agilepyLogger
 
-        self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
+        self.logger.initialize(self.outdir, self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
 
         self.sourcesLibrary = SourcesLibrary()
 
@@ -154,10 +160,10 @@ class AGAnalysis:
                     self.config.addOptions("selection", emin=emin, emax=emax)
                     self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
-                    ctsMapGenerator.setArgumentsAndProducts(self.config)
-                    expMapGenerator.setArgumentsAndProducts(self.config)
-                    gasMapGenerator.setArgumentsAndProducts(self.config)
-                    intMapGenerator.setArgumentsAndProducts(self.config)
+                    ctsMapGenerator.configure(self.config)
+                    expMapGenerator.configure(self.config)
+                    gasMapGenerator.configure(self.config)
+                    intMapGenerator.configure(self.config)
 
                     self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
@@ -205,14 +211,14 @@ class AGAnalysis:
             self.logger.critical(self, "The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
             exit(1)
 
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix="sourceLibrary", format="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, "sourceLibrary"+(str(multi.callCounter).zfill(5)) ), format="AG")
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
         multisources = self.sourcesLibrary.getSourcesNames()
         self.config.addOptions("selection", multisources=multisources)
 
 
-        multi.setArgumentsAndProducts(self.config)
+        multi.configure(self.config)
 
         sourceFiles = multi.call()
 

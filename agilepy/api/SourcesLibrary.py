@@ -70,7 +70,7 @@ class SourcesLibrary:
             return True
 
     @Decorators.accepts(object, str, str)
-    def writeToFile(self, outfileNamePrefix = "sourceLibrary", format="AG"):
+    def writeToFile(self, outfileNamePrefix, format="AG"):
         """
         This method ... blabla ...
         """

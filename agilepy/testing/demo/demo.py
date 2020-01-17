@@ -31,7 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from agilepy.api import AGAnalysis, SourcesLibrary, ScienceTools
 
 
-aga = AGAnalysis("./agilepy/testing/demo/examples/conf.yaml", "/tmp/agilepy_test/Agilepy/agilepy/testing/demo/examples/sourceconf.xml")
+aga = AGAnalysis("./agilepy/testing/demo/conf/agilepyconf.yaml", "/tmp/agilepy_test/Agilepy/agilepy/testing/demo/conf/sourceconf.xml")
 
 """
 aga.setOptions(binsize=99999)
@@ -59,6 +59,8 @@ print("\n\n")
 maplistFilePath = aga.generateMaps()
 
 print("\n\nMaplist file: ", maplistFilePath)
+
+aga.mle(maplistFilePath)
 
 aga.mle(maplistFilePath)
 

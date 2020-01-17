@@ -34,10 +34,6 @@ if "AGILE" not in os.environ:
     print("\nPlease, set $AGILE.\n")
     exit(1)
 
-if "agile-B25-r5-cat2-B5" not in os.environ["AGILE"]:
-    print("\nPlease, load the 'agile-B25-r5-cat2-B5' AGILE environment:\n\n >>source /opt/module/agile-B25-r5-cat2-B5\n")
-    exit(1)
-
 if "PFILES" not in os.environ:
     print("\nPlease, set PFILES environment variable:\n\n >>export PFILES=.\n")
     exit(1)

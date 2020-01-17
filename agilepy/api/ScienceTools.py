@@ -37,12 +37,12 @@ class CtsMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
 
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
 
-        outDir = confDict.getOptionValue("outdir")
+        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".cts.gz"
 
-        self.outfilePath = os.path.join(outDir, outputName)
+        self.outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = [self.outfilePath]
 
@@ -79,16 +79,16 @@ class ExpMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
 
-        outDir = confDict.getOptionValue("outdir")
+        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".exp.gz"
 
         edpmatrix = "None"
         if confDict.getOptionValue("useEDPmatrixforEXP"):
             edpmatrix = Parameters.edpmatrix
 
-        self.outfilePath = os.path.join(outDir, outputName)
+        self.outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = [self.outfilePath]
 
@@ -131,12 +131,12 @@ class GasMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap"]
 
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
 
-        outDir = confDict.getOptionValue("outdir")
+        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".gas.gz"
 
-        self.outfilePath = os.path.join(outDir, outputName)
+        self.outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = [self.outfilePath]
 
@@ -157,11 +157,11 @@ class IntMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap", "ctsmap"]
 
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
 
-        outDir = confDict.getOptionValue("outdir")
+        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".int.gz"
-        self.outfilePath = os.path.join(outDir, outputName)
+        self.outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = [self.outfilePath]
 
@@ -183,15 +183,15 @@ class Multi(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix"]
 
-    def setArgumentsAndProducts(self, confDict):
+    def configure(self, confDict):
 
-        outDir = confDict.getOptionValue("outdir")
-        outputName = confDict.getOptionValue("filenameprefix")
-        self.outfilePath = os.path.join(outDir, outputName)
+        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "mle")
+        outputName = confDict.getOptionValue("filenameprefix")+(str(self.callCounter).zfill(4))
+        self.outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = []
         for sourceName in confDict.getOptionValue("multisources"):
-            prodName = os.path.join(outDir, outputName+"_"+sourceName+".source")
+            prodName = os.path.join(self.outputDir, outputName+"_"+sourceName+".source")
             self.products.append(prodName)
 
         expratioevaluation = 0
