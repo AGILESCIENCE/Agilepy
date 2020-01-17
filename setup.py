@@ -13,5 +13,6 @@ setup( name='Agilepy',
        author='Baroncelli Leonardo, Addis Antonio, Bulgarelli Andrea, Parmiggiani Nicolò',
        author_email='antonio.addis@inaf.it, andrea.bulgarelli@inaf.it, leonardo.baroncelli@inaf.it, nicolo.parmiggiani@inaf.it',
        packages=find_packages(),
-       package_dir={ 'agilepy': 'agilepy' }
+       package_dir={ 'agilepy': 'agilepy' },
+       include_package_data=True
      )
