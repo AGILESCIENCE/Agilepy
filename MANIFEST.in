@@ -1,3 +1,4 @@
-include agilepy/testing/demo/conf/agilepyconf.yaml
-include agilepy/testing/demo/conf/sourceconf.yaml
+include agilepy/testing/unittesting/api/conf/sourceconf.yaml
+include agilepy/testing/unittesting/api/conf/agilepyconf.yaml
+include agilepy/testing/unittesting/api/data/testcase0.source
 include agilepy/testing/unittesting/api/data/testcase1_2AGLJ0835-4514.source
