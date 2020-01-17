@@ -57,6 +57,7 @@ class AgilepyConfig(metaclass=Singleton):
         self.conf_bkp = deepcopy(self.conf)
 
 
+
     def reset(self):
         self.conf = deepcopy(self.conf_bkp)
 

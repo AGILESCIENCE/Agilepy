@@ -30,7 +30,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest
 
-from agilepy.api.SourcesLibrary import SourcesLibrary
+from agilepy.api import SourcesLibrary
 from agilepy.dataclasses.Source import MultiOutput
 
 class SourcesLibraryUnittesting(unittest.TestCase):

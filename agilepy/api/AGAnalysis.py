@@ -52,6 +52,8 @@ class AGAnalysis:
         """
         self.config = AgilepyConfig(configurationFilePath)
 
+        self.config.printOptions("output")
+
         self.outdir = self.config.getConf("output","outdir")
 
         if exists(self.outdir):
@@ -238,7 +240,7 @@ class AGAnalysis:
 
         self.config.reset()
 
-
+        return sourceFiles
 
 
 
