@@ -1,10 +1,10 @@
 include README.md
 
-include *.py
-include *.yaml
-include *.xml
-include *.source
-include *.sh
+recursive-include * *.py
+recursive-include * *.yaml
+recursive-include * *.xml
+recursive-include * *.source
+recursive-include * *.sh
 
 recursive-exclude * __pycache__
 recursive-exclude * *.egg-info
