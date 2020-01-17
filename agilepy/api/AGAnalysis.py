@@ -153,7 +153,7 @@ class AGAnalysis:
                     skymapH = Parameters.getSkyMap(emin, emax)
                     fileNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
-                    self.logger.info(self, "\n\nMap generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
+                    self.logger.info(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
 
                     self.config.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
@@ -191,7 +191,7 @@ class AGAnalysis:
                     self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", [stepe[0], stepe[1]])
 
 
-        with open(maplistFilePath,"w") as mlf:
+        with open(maplistFilePath,"a") as mlf:
             for line in mapListFileContent:
                 mlf.write(line+"\n")
 
