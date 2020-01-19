@@ -1,18 +1,17 @@
-"""
-https://gist.githubusercontent.com/leehsueh/1290686/raw/36b0baa053072c377ac7fc801d53200d17039674/boolparser.py
 
-Grammar:
+#https://gist.githubusercontent.com/leehsueh/1290686/raw/36b0baa053072c377ac7fc801d53200d17039674/boolparser.py
 
-Expression --> AndTerm { OR AndTerm}+
-AndTerm --> Condition { AND Condition}+
-Condition --> Terminal (>,<,>=,<=,==) Terminal | (Expression)
-Terminal --> Number or String or Variable
+#Grammar:
 
-Usage:
-from boolparser import *
-p = BooleanParser('<expression text>')
-p.evaluate(variable_dict) # variable_dict is a dictionary providing values for variables that appear in <expression text>
-"""
+#Expression --> AndTerm { OR AndTerm}+
+#AndTerm --> Condition { AND Condition}+
+#Condition --> Terminal (>,<,>=,<=,==) Terminal | (Expression)
+#Terminal --> Number or String or Variable
+
+#Usage:
+#from boolparser import *
+#p = BooleanParser('<expression text>')
+#p.evaluate(variable_dict) # variable_dict is a dictionary providing values for variables that appear in <expression text>
 
 class TokenType:
 	NUM, STR, VAR, GT, GTE, LT, LTE, EQ, NEQ, LP, RP, AND, OR = range(13)
