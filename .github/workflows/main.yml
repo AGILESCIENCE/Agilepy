@@ -27,4 +27,8 @@ jobs:
         conda create -n agilepydevops -c addis.inaf agilepy
 
     - name: Running unit tests
-      run: start_agilepy_tests.sh
+      run: |
+        conda activate agilepydevops
+        chmod +x start_agilepy_tests.sh
+        start_agilepy_tests.sh
+ 
