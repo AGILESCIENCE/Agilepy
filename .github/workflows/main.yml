@@ -26,19 +26,8 @@ jobs:
         conda config --add channels conda-forge
         conda create -n agilepydevops -c addis.inaf agilepy
 
-    - name: debug
-      run: |
-        source activate agilepydevops        
-        echo $PATH
-        echo $AGILE
-        ls $AGILE/scripts
-        source deactivate
-
-        
-
     - name: Running unit tests
       run: |
         source activate agilepydevops
-        bash $AGILE/scripts/start_agilepy_tests.sh
         bash start_agilepy_tests.sh
  
