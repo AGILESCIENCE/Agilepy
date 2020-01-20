@@ -56,11 +56,6 @@ class AgilepyConfig(metaclass=Singleton):
         self.conf_bkp = deepcopy(self.conf)
 
 
-
-    def validate(self):
-        self._checkBackgroundCoeff(confDict)
-
-
     def reset(self):
         self.conf = deepcopy(self.conf_bkp)
 

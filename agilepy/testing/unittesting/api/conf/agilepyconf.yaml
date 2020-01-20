@@ -22,9 +22,9 @@ maps:
     # - 1000, 3000
     # - 3000,10000
 
-  fovbinnumber: 1
+  fovbinnumber: 2
   binsize: 0.2
 
 model:
-  galcoeff: -1
-  isocoeff: -1
+  galcoeff: 10, 15
+  isocoeff: 0.6, 0.8

@@ -174,7 +174,7 @@ class AGAnalysis:
                 bincenter, fovmin, fovmax = self._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
-            for stepe in energybins:
+            for bgCoeffIdx, stepe in enumerate(energybins):
 
                 if Parameters.checkEnergyBin(stepe):
 
@@ -215,7 +215,7 @@ class AGAnalysis:
                     self.logger.info(self, "Science tool intMapGenerator produced %s", [f4])
 
 
-                    mapListFileContent.append(ctsMapGenerator.outfilePath + " " + expMapGenerator.outfilePath + " " + gasMapGenerator.outfilePath + " " + str(bincenter) + " " + str(self.config.getOptionValue("galcoeff")) + " " + str(self.config.getOptionValue("isocoeff")) )
+                    mapListFileContent.append(ctsMapGenerator.outfilePath + " " + expMapGenerator.outfilePath + " " + gasMapGenerator.outfilePath + " " + str(bincenter) + " " + str(self.config.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + str(self.config.getOptionValue("isocoeff")[bgCoeffIdx]) )
 
                 else:
 
