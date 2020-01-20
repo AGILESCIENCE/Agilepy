@@ -1,9 +1,10 @@
 input:
-  evtfile: "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index"
-  logfile: "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
+  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
+  logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+
 
 output:
-  outdir: "$AGILE/agilepy_testing/api/out"
+  outdir: "$AGILE/agilepy-test-data/unittesting-output/api"
   filenameprefix: "testcase"
   debuglvl: 1
 
