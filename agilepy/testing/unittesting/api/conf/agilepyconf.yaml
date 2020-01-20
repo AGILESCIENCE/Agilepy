@@ -3,7 +3,7 @@ input:
   logfile: "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
 
 output:
-  outdir: "/tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out"
+  outdir: "$AGILE/agilepy_testing/api/out"
   filenameprefix: "testcase"
   debuglvl: 1
 
@@ -16,10 +16,14 @@ selection:
 
 maps:
   energybins:
-    - "[100, 300]"
-    # - "[300, 1000]"
-    # - "[1000, 3000]"
-    # - "[3000,10000]"
-    
+    - 100, 300
+    - 300, 1000
+    # - 1000, 3000
+    # - 3000,10000
+
   fovbinnumber: 1
   binsize: 0.2
+
+model:
+  galcoeff: -1
+  isocoeff: -1

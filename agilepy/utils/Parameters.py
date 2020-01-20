@@ -87,4 +87,4 @@ class Parameters:
 
     @staticmethod
     def getMapNamePrefix(emin, emax, stepi):
-        return Parameters._mapNamePrefix.format(emin.zfill(5), emax.zfill(5), str(stepi).zfill(2))
+        return Parameters._mapNamePrefix.format(str(emin).zfill(5), str(emax).zfill(5), str(stepi).zfill(2))

@@ -30,8 +30,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import yaml
 import pprint
+import numbers
 from copy import deepcopy
-from os.path import dirname, realpath, join
+from os.path import dirname, realpath, join, expandvars
 
 from agilepy.utils.Utils import Singleton, DataUtils
 
@@ -56,6 +57,10 @@ class AgilepyConfig(metaclass=Singleton):
 
         self.conf_bkp = deepcopy(self.conf)
 
+
+
+    def validate(self):
+        self._checkBackgroundCoeff(confDict)
 
 
     def reset(self):
@@ -161,18 +166,74 @@ class AgilepyConfig(metaclass=Singleton):
 
     def _completeConfiguration(self, confDict):
         self._convertEnergyBinsStrings(confDict)
+        self._convertBackgroundCoeff(confDict)
         self._setTime(confDict)
         self._setPhaseCode(confDict)
         self._setExpStep(confDict)
+        self._checkBackgroundCoeff(confDict)
+        self._expandEnvVars(confDict)
         return confDict
+
+    def _parseListNotation(self, str):
+        # check regular expression??
+        return [float(elem.strip()) for elem in str.split(',')]
 
 
     def _convertEnergyBinsStrings(self, confDict):
         l = []
         for stringList in confDict["maps"]["energybins"]:
-            res = stringList.strip('][').split(', ')
-            l.append(res)
+            res = self._parseListNotation(stringList)
+            l.append([int(r) for r in res])
         confDict["maps"]["energybins"] = l
+
+    def _convertBackgroundCoeff(self, confDict):
+
+        isocoeffVal = confDict["model"]["isocoeff"]
+        numberOfEnergyBins = len(confDict["maps"]["energybins"])
+
+        if isocoeffVal != -1:
+
+            if isinstance(isocoeffVal, numbers.Number):
+                confDict["model"]["isocoeff"] = [isocoeffVal]
+            else:
+                confDict["model"]["isocoeff"] = self._parseListNotation(isocoeffVal)
+
+        else:
+
+            confDict["model"]["isocoeff"] = [-1 for i in range(numberOfEnergyBins)]
+
+
+        galcoeffVal = confDict["model"]["galcoeff"]
+
+        if galcoeffVal != -1:
+
+            if isinstance(galcoeffVal, numbers.Number):
+                confDict["model"]["galcoeff"] = [galcoeffVal]
+            else:
+                confDict["model"]["galcoeff"] = self._parseListNotation(galcoeffVal)
+
+        else:
+
+            confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
+
+    def _checkBackgroundCoeff(self, confDict):
+
+        numberOfEnergyBins = len(confDict["maps"]["energybins"])
+
+        numberOfIsoCoeff = len(confDict["model"]["isocoeff"])
+
+        if numberOfIsoCoeff != numberOfEnergyBins:
+
+            print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfIsoCoeff (%d)" % (numberOfEnergyBins, numberOfIsoCoeff))
+            exit(1)
+
+        numberOfGalCoeff = len(confDict["model"]["galcoeff"])
+
+        if numberOfGalCoeff != numberOfEnergyBins:
+
+            print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfGalCoeff (%d)" % (numberOfEnergyBins, numberOfGalCoeff))
+            exit(1)
+
 
 
     def _setPhaseCode(self, confDict):
@@ -193,6 +254,23 @@ class AgilepyConfig(metaclass=Singleton):
     def _setExpStep(self, confDict):
         if not confDict["maps"]["expstep"]:
              confDict["maps"]["expstep"] = round(1 / confDict["maps"]["binsize"], 2)
+
+    def _expandEnvVars(self, confDict):
+        confDict["input"]["evtfile"] = self._expandEnvVar(confDict["input"]["evtfile"])
+        confDict["input"]["logfile"] = self._expandEnvVar(confDict["input"]["logfile"])
+        confDict["output"]["outdir"] = self._expandEnvVar(confDict["output"]["outdir"])
+
+    def _expandEnvVar(self, path):
+        if "$" in path:
+            expanded = expandvars(path)
+            if expanded == path:
+                print("[AgilepyConfig] Environment variable has not been expanded in {}".format(expanded))
+                exit(1)
+            else:
+                return expanded
+        else:
+            return path
+
 
     def _loadFromYaml(self,file):
 

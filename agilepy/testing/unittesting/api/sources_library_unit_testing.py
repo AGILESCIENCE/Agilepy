@@ -39,10 +39,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
        sl = SourcesLibrary()
 
-       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/multi.multimaps.source")
-       self.assertEqual(True, bool(res))
-
-       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/multi.source")
+       res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase0.source")
        self.assertEqual(True, bool(res))
 
        res = sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase1_2AGLJ0835-4514.source")
