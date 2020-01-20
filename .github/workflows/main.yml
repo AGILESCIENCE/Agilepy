@@ -1,0 +1,34 @@
+name: CI/CD
+
+on:
+  push:
+    branches: 
+      - master
+      - release/*
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v1
+    
+    - uses: s-weigand/setup-conda@v1
+    - run: conda --version
+    - run: which python      
+    
+    - name: Installing conda-build
+      run: conda install conda-build
+    
+    - name: Download the Agilepy environment
+      run: |
+        conda config --add channels conda-forge
+        conda create -n agilepydevops -c addis.inaf agilepy
+
+    - name: Running unit tests
+      run: |
+        source activate agilepydevops
+        chmod +x start_agilepy_tests.sh
+        start_agilepy_tests.sh
+ 
