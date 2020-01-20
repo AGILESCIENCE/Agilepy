@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../../agilepy'))
 # -- Project information -----------------------------------------------------
 
 project = 'Agilepy'
-copyright = '2020, Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
+copyright = '2020, AGILE TEAM'
 author = 'Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
 
 # The short X.Y version
@@ -135,7 +135,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Agilepy.tex', 'Agilepy Documentation',
-     'Baroncelli Leonardo \\textless{}leonardo.baroncelli@inaf.it\\textgreater{}, Addis Antonio \\textless{}antonio.addis@inaf.it\\textgreater{}, Bulgarelli Andrea \\textless{}andrea.bulgarelli@inaf.it\\textgreater{}, Parmiggiani Nicolò \\textless{}nicolo.parmiggiani@inaf.it\\textgreater{}', 'manual'),
+     'AGILE Team', 'manual'),
 ]
 
 
