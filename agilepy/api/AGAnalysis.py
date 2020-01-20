@@ -43,10 +43,21 @@ class AGAnalysis:
         Public interface
 
     """
-    @Decorators.accepts(object, str, str)
+
     def __init__(self, configurationFilePath, sourcesFilePath):
         """
-        This method ... blabla ...
+        AGAnalysis constructor
+
+            It returs an object of type AGAnalysis.
+            It will raise a FileExistsError exception if the output directory already exists.
+            It will raise a AGILENotFoundError exception if the AGILE environment variable is not set.
+            It will raise a PFILESNotFoundError exception if the PFILES environment variable is not set.
+
+            :param configurationFilePath:
+            :param sourcesFilePath:
+
+
+            :returns: AGAnalysis object.
         """
         self.config = AgilepyConfig(configurationFilePath)
 
@@ -71,28 +82,43 @@ class AGAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
-
-
     @Decorators.accepts(object)
     def resetConf(self):
-        self.config.reset()
+        """
+        Reset the configuration to default values.
 
+            :returns: None
+        """
+        self.config.reset()
 
     def setOptions(self, **kwargs):
         """
-        This method ... blabla ...
+        Update the configuration.
+
+            You can specify one or more key=value pairs to update configuration values.
+
+            :param \*\*kwargs: key-values pairs, separated by a comma.
+
+            :returns: True if all the input options are sucessfully updated, False otherwise.
         """
         rejected = self.config.setOptions(**kwargs)
 
         if rejected:
-
             self.logger.warning(self, "Some options have not been set: {}".format(rejected))
-
+            return False
+        else:
+            return True
 
     @Decorators.accepts(object, str)
     def printOptions(self, section=None):
         """
-        This method ... blabla ...
+        Update the configuration.
+
+            You can specify one or more key=value pairs to update configuration values.
+
+            :param \*\*kwargs: key-values pairs, separated by a comma.
+
+            :returns: True if all the input options are sucessfully updated, False otherwise.
         """
         self.config.printOptions(section)
 
