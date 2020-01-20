@@ -28,7 +28,7 @@ jobs:
 
     - name: Running unit tests
       run: |
-        conda activate agilepydevops
+        source activate agilepydevops
         chmod +x start_agilepy_tests.sh
         start_agilepy_tests.sh
  
