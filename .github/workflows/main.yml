@@ -28,9 +28,12 @@ jobs:
 
     - name: debug
       run: |
+        source activate agilepydevops        
         echo $PATH
         echo $AGILE
         ls $AGILE/scripts
+        source deactivate
+
         
 
     - name: Running unit tests
