@@ -1,32 +1,31 @@
-"""
- DESCRIPTION
-       Agilepy software
+# DESCRIPTION
+#       Agilepy software
+#
+# NOTICE
+#      Any information contained in this software
+#      is property of the AGILE TEAM and is strictly
+#      private and confidential.
+#      Copyright (C) 2005-2020 AGILE Team.
+#          Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+#          Addis Antonio <antonio.addis@inaf.it>
+#          Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
+#          Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
+#      All rights reserved.
 
- NOTICE
-       Any information contained in this software
-       is property of the AGILE TEAM and is strictly
-       private and confidential.
-       Copyright (C) 2005-2020 AGILE Team.
-           Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
-           Addis Antonio <antonio.addis@inaf.it>
-           Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
-           Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
-       All rights reserved.
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+import os
 from os.path import join, exists
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
@@ -35,16 +34,15 @@ from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
 from agilepy.utils.Utils import agilepyLogger, Decorators
+from agilepy.utils.CustomExceptions import *
 from agilepy.utils.Parameters import Parameters
 
 class AGAnalysis:
-
     """
 
         Public interface
 
     """
-
     @Decorators.accepts(object, str, str)
     def __init__(self, configurationFilePath, sourcesFilePath):
         """
@@ -57,8 +55,7 @@ class AGAnalysis:
         self.outdir = self.config.getConf("output","outdir")
 
         if exists(self.outdir):
-            print("The output directory %s already exists! Please, delete it or specify another output directory!"%(self.outdir))
-            exit(1)
+            raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(self.outdir))
 
         self.logger = agilepyLogger
 
@@ -67,6 +64,13 @@ class AGAnalysis:
         self.sourcesLibrary = SourcesLibrary()
 
         self.sourcesLibrary.loadSourceLibraryXML(sourcesFilePath)
+
+        if "AGILE" not in os.environ:
+            raise AGILENotFoundError("$AGILE is not set.")
+
+        if "PFILES" not in os.environ:
+            raise PFILESNotFoundError("$PFILES is not set.")
+
 
 
     @Decorators.accepts(object)
@@ -170,8 +174,7 @@ class AGAnalysis:
                     self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
                     if not ctsMapGenerator.allRequiredOptionsSet(self.config) or not expMapGenerator.allRequiredOptionsSet(self.config) or not gasMapGenerator.allRequiredOptionsSet(self.config) or not intMapGenerator.allRequiredOptionsSet(self.config):
-                        self.logger.critical(self,"Some options have not been set.")
-                        exit(1)
+                        raise ScienceToolInputArgMissing("Some options have not been set.")
 
                     f1 = ctsMapGenerator.call()
                     self.logger.info(self, "Science tool ctsMapGenerator produced %s", [f1])
@@ -210,8 +213,7 @@ class AGAnalysis:
         This method ... blabla ...
         """
         if not maplistFilePath:
-            self.logger.critical(self, "The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
-            exit(1)
+            raise MaplistIsNone("The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
 
         sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, "sourceLibrary"+(str(multi.callCounter).zfill(5)) ), format="AG")
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)

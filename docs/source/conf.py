@@ -12,16 +12,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../agilepy'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Agilepy'
-copyright = '2020, Addis Antonio <antonio.addis@inaf.it>, Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
-author = 'Addis Antonio <antonio.addis@inaf.it>, Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
+copyright = '2020, Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
+author = 'Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
 
 # The short X.Y version
 version = ''
@@ -43,6 +43,9 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
 ]
+autodoc_typehints='none'
+
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -88,7 +91,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -116,7 +119,7 @@ latex_elements = {
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    # 'pointsize': '10pt',
+    'pointsize': '12pt',
 
     # Additional stuff for the LaTeX preamble.
     #
@@ -132,7 +135,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Agilepy.tex', 'Agilepy Documentation',
-     'Addis Antonio \\textless{}antonio.addis@inaf.it\\textgreater{}, Baroncelli Leonardo \\textless{}leonardo.baroncelli@inaf.it\\textgreater{}, Bulgarelli Andrea \\textless{}andrea.bulgarelli@inaf.it\\textgreater{}, Parmiggiani Nicolò \\textless{}nicolo.parmiggiani@inaf.it\\textgreater{}', 'manual'),
+     'Baroncelli Leonardo \\textless{}leonardo.baroncelli@inaf.it\\textgreater{}, Addis Antonio \\textless{}antonio.addis@inaf.it\\textgreater{}, Bulgarelli Andrea \\textless{}andrea.bulgarelli@inaf.it\\textgreater{}, Parmiggiani Nicolò \\textless{}nicolo.parmiggiani@inaf.it\\textgreater{}', 'manual'),
 ]
 
 

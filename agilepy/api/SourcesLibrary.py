@@ -1,38 +1,37 @@
-"""
- DESCRIPTION
-       Agilepy software
+# DESCRIPTION
+#       Agilepy software
+#
+# NOTICE
+#      Any information contained in this software
+#      is property of the AGILE TEAM and is strictly
+#      private and confidential.
+#      Copyright (C) 2005-2020 AGILE Team.
+#          Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+#          Addis Antonio <antonio.addis@inaf.it>
+#          Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
+#          Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
+#      All rights reserved.
 
- NOTICE
-       Any information contained in this software
-       is property of the AGILE TEAM and is strictly
-       private and confidential.
-       Copyright (C) 2005-2020 AGILE Team.
-           Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
-           Addis Antonio <antonio.addis@inaf.it>
-           Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
-           Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
-       All rights reserved.
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import xml.etree.ElementTree as ET
 from os.path import split, join
 from inspect import signature
 
-from agilepy.dataclasses.Source import *
+from agilepy.utils.SourceModel import *
 from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
+from agilepy.utils.CustomExceptions import *
 
 class SourcesLibrary:
 
@@ -75,8 +74,7 @@ class SourcesLibrary:
         This method ... blabla ...
         """
         if format not in ["AG"]:#, "XML"]:
-            self.logger.critical(self, "Format %s not supported. Supported formats: 'AG'", format)
-            exit(1)
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG".format(format))
 
         outfilepath = join(self.xmlFilePathPrefix, outfileNamePrefix)
 
@@ -200,8 +198,7 @@ class SourcesLibrary:
         body = [line for line in lines if line[0] != "!"]
 
         if len(body) != 17:
-            self.logger.critical(self, "The number of lines of the %s source file is not 17!", [sourceFilePath])
-            exit(1)
+            raise FileSourceParsingError("The number of body lines of the %s source file is not 17."%(sourceFilePath))
 
         allValues = []
 
@@ -265,8 +262,7 @@ class SourcesLibrary:
         sourcesFound = self.selectSourcesWithLambda(lambda Name : Name == data.label)
 
         if len(sourcesFound) == 0:
-            self.logger.critical(self, "Source '%s' has not been found in the sources library", [data.label])
-            exit(1)
+            raise SourceNotFound("Source '%s' has not been found in the sources library"%(data.label))
 
         for sourceFound in sourcesFound:
 
@@ -379,8 +375,8 @@ class SourcesLibrary:
 
 
     def _fail(self, msg):
-        print("[SourcesConfig] Parsing _failed: {}".format(self.xmlFilePath, e))
-        exit(1)
+        raise FileSourceParsingError("File source parsing failed: {}".format(msg))
+
 
 
     def _convertToAgileFormat(self):
