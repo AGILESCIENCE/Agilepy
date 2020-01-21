@@ -37,3 +37,7 @@ class ScienceToolErrorCodeReturned(Exception):
 class SelectionStringToLambdaConversioFailed(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class SelectionParamNotSupported(Exception):
+    def __init__(self, message):
+        super().__init__(message)

@@ -28,4 +28,8 @@
 
 from agilepy.api.AGAnalysis import AGAnalysis
 from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import *
+from agilepy.api.ScienceTools import CtsMapGenerator, \
+                                     ExpMapGenerator, \
+                                     GasMapGenerator, \
+                                     IntMapGenerator, \
+                                     Multi

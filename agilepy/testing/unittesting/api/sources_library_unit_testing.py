@@ -32,7 +32,7 @@ import os
 import shutil
 
 from agilepy.api import SourcesLibrary
-from agilepy.utils.SourceModel import MultiOutput
+
 
 class SourcesLibraryUnittesting(unittest.TestCase):
 

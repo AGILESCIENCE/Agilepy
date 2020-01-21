@@ -84,7 +84,6 @@ class Spectrum(ValueParamFinder):
             paramsStr += f'\n      {p.name}={p.value} free={p.free}'
         return f'\n - Spectrum type: {self.type} {paramsStr}'
 
-
 @dataclass
 class MultiOutput:
     """
@@ -244,8 +243,9 @@ class MultiOutput:
     Dist: float = None
 
     def __str__(self):
-        return f'\n - MultiOutput  emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} fovmax: {self.fovmax} start_flux: {self.start_flux} sqrt(TS): {self.SqrtTS} multiDistanceFromMapCenter: {self.Dist}'
-
+        return f'\n - MultiOutput  emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
+                      fovmax: {self.fovmax} start_flux: {self.start_flux} sqrt(TS): {self.SqrtTS} \
+                      multiDistanceFromMapCenter: {self.Dist}'
 
 @dataclass(order=True)
 class Source:

@@ -30,7 +30,6 @@ import os
 import shutil
 from pathlib import Path
 
-from agilepy.config import AgilepyConfig
 from agilepy.api import AGAnalysis
 
 class AGAnalysisUnittesting(unittest.TestCase):

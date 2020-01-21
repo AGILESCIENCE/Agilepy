@@ -34,7 +34,7 @@ from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
 from agilepy.utils.Utils import agilepyLogger, Decorators
-from agilepy.utils.CustomExceptions import *
+from agilepy.utils.CustomExceptions import AGILENotFoundError, PFILESNotFoundError, ScienceToolInputArgMissing, MaplistIsNone
 from agilepy.utils.Parameters import Parameters
 
 class AGAnalysis:
@@ -199,7 +199,11 @@ class AGAnalysis:
 
                     self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
-                    if not ctsMapGenerator.allRequiredOptionsSet(self.config) or not expMapGenerator.allRequiredOptionsSet(self.config) or not gasMapGenerator.allRequiredOptionsSet(self.config) or not intMapGenerator.allRequiredOptionsSet(self.config):
+                    if not ctsMapGenerator.allRequiredOptionsSet(self.config) or \
+                       not expMapGenerator.allRequiredOptionsSet(self.config) or \
+                       not gasMapGenerator.allRequiredOptionsSet(self.config) or \
+                       not intMapGenerator.allRequiredOptionsSet(self.config):
+
                         raise ScienceToolInputArgMissing("Some options have not been set.")
 
                     f1 = ctsMapGenerator.call()
@@ -215,7 +219,12 @@ class AGAnalysis:
                     self.logger.info(self, "Science tool intMapGenerator produced %s", [f4])
 
 
-                    mapListFileContent.append(ctsMapGenerator.outfilePath + " " + expMapGenerator.outfilePath + " " + gasMapGenerator.outfilePath + " " + str(bincenter) + " " + str(self.config.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + str(self.config.getOptionValue("isocoeff")[bgCoeffIdx]) )
+                    mapListFileContent.append( ctsMapGenerator.outfilePath + " " + \
+                                               expMapGenerator.outfilePath + " " + \
+                                               gasMapGenerator.outfilePath + " " + \
+                                               str(bincenter) + " " + \
+                                               str(self.config.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + \
+                                               str(self.config.getOptionValue("isocoeff")[bgCoeffIdx]) )
 
                 else:
 
@@ -239,9 +248,12 @@ class AGAnalysis:
         This method ... blabla ...
         """
         if not maplistFilePath:
-            raise MaplistIsNone("The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist file as argument (perhaps you want to call generateMaps() first). ")
+            raise MaplistIsNone("The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist \
+                                 file as argument (perhaps you want to call generateMaps() first). ")
 
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, "sourceLibrary"+(str(multi.callCounter).zfill(5)) ), format="AG")
+        sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
+
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
         multisources = self.sourcesLibrary.getSourcesNames()

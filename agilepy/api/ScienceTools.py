@@ -25,7 +25,10 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from agilepy.utils.ProcessWrapper import *
+import os
+
+from agilepy.utils.Parameters import Parameters
+from agilepy.utils.ProcessWrapper import ProcessWrapper
 
 class CtsMapGenerator(ProcessWrapper):
 
@@ -93,7 +96,7 @@ class ExpMapGenerator(ProcessWrapper):
         self.args = [ self.outfilePath,  \
                       confDict.getOptionValue("logfile"), #indexfiler\
                       Parameters.sarmatrix, \
-                      Parameters.edpmatrix, \
+                      edpmatrix, \
                       confDict.getOptionValue("maplistgen"), \
                       confDict.getOptionValue("timelist"), \
                       confDict.getOptionValue("mapsize"), \

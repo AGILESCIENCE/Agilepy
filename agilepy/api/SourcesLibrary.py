@@ -25,15 +25,18 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import xml.etree.ElementTree as ET
-from os.path import split, join
 from inspect import signature
+from os.path import split, join
+import xml.etree.ElementTree as ET
 from functools import singledispatch
 
-from agilepy.utils.SourceModel import *
-from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
-from agilepy.utils.CustomExceptions import *
 from agilepy.utils.BooleanExpressionParser import BooleanParser
+from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
+from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
+from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
+                                           FileSourceParsingError, \
+                                           SourceNotFound, \
+                                           SelectionParamNotSupported
 
 class SourcesLibrary:
 
@@ -196,7 +199,8 @@ class SourcesLibrary:
 
             elif lin_num == 5:
                 fluxperchannel = values[-1].split(",")
-                values = [*values[:-1], fluxperchannel]
+                values = values[:-1]
+                values = [*values, fluxperchannel]
 
             elif lin_num == 8:
                 galcoeffs  = line.split(" ")[0].split(",")
@@ -309,7 +313,9 @@ class SourcesLibrary:
 
                 if paramName in self._getSelectionParams(onlyMultiParams=True) and not source.multi:
 
-                    self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because the mle() analysis has not been performed yet on that source.", [paramName, source.name])
+                    self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because \
+                                               the mle() analysis has not been performed yet on that source.", \
+                                               [paramName, source.name])
 
                     paramsOk = False
 
@@ -375,7 +381,8 @@ class SourcesLibrary:
 
             if up not in selectionParams:
 
-                self.logger.critical(self, "The selectionParam %s is not supported and it is not going to be used! Supported params: %s", [up, self._getSelectionParams(tostr=True)])
+                self.logger.critical(self, "The selectionParam %s is not supported and it is not going to be used! \
+                                            Supported params: %s", [up, self._getSelectionParams(tostr=True)])
 
                 notSupported.append(up)
 
@@ -490,9 +497,11 @@ class SourcesLibrary:
 
 
             if source.spectrum.type == "PLSuperExpCutoff":
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index1") + " " + source.spectrum.getParamAttributeWhere("max", "name", "Index1") + " "
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index1") + " " + \
+                             source.spectrum.getParamAttributeWhere("max", "name", "Index1") + " "
             else:
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index") + " " + source.spectrum.getParamAttributeWhere("max", "name", "Index") + " "
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index") + " " + \
+                             source.spectrum.getParamAttributeWhere("max", "name", "Index") + " "
 
 
             if source.spectrum.type == "PowerLaw":

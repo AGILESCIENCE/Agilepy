@@ -31,8 +31,7 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 
 from agilepy.utils.Utils import agilepyLogger
-from agilepy.utils.Parameters import Parameters
-from agilepy.utils.CustomExceptions import *
+from agilepy.utils.CustomExceptions import ScienceToolProductNotFound, ScienceToolErrorCodeReturned
 
 class ProcessWrapper(ABC):
 

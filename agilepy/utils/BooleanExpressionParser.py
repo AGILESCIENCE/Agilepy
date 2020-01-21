@@ -94,7 +94,7 @@ class Tokenizer:
 					t = t[1:-1].strip()
 				else:
 					try:
-						number = float(t)
+						float(t)
 						self.tokenTypes.append(TokenType.NUM)
 					except:
 						if re.search('^[a-zA-Z_]+$', t):
