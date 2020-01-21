@@ -40,12 +40,10 @@ class AGAnalysisUnittesting(unittest.TestCase):
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
         self.sourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
 
-        outDir = Path("/tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out")
+        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
-
-
 
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 

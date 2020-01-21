@@ -32,6 +32,7 @@ from abc import ABC, abstractmethod
 
 from agilepy.utils.Utils import agilepyLogger
 from agilepy.utils.Parameters import Parameters
+from agilepy.utils.CustomExceptions import *
 
 class ProcessWrapper(ABC):
 
@@ -96,7 +97,7 @@ class ProcessWrapper(ABC):
         products = []
         for product in self.products:
             if not os.path.isfile(product):
-                raise ScienceToolProductNotFound("Product %s has NOT been produced by science tool. \nScience tool stdout: %s"%(product, toolstdout))
+                raise ScienceToolProductNotFound("Product %s has NOT been produced by science tool. \nScience tool stdout:\n\n%s"%(product, toolstdout))
             else:
                 products.append(product)
 

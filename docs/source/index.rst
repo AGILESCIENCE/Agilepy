@@ -22,3 +22,4 @@ It will be available soon!
    :caption: Help
 
    help/help
+   help/development

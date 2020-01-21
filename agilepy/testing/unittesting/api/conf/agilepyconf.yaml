@@ -1,5 +1,5 @@
 input:
-  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
+  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.indexx"
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
 
 
@@ -26,5 +26,5 @@ maps:
   binsize: 0.2
 
 model:
-  galcoeff: 10, 15
-  isocoeff: 0.6, 0.8
+  galcoeff: 0.6, 0.8
+  isocoeff: 10, 15
