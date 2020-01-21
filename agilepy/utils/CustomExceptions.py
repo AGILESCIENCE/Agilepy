@@ -33,4 +33,7 @@ class ScienceToolProductNotFound(Exception):
 class ScienceToolErrorCodeReturned(Exception):
     def __init__(self, message):
         super().__init__(message)
-    
+
+class SelectionStringToLambdaConversioFailed(Exception):
+    def __init__(self, message):
+        super().__init__(message)

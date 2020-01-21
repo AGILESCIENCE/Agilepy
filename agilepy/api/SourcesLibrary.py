@@ -28,10 +28,12 @@
 import xml.etree.ElementTree as ET
 from os.path import split, join
 from inspect import signature
+from functools import singledispatch
 
 from agilepy.utils.SourceModel import *
 from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
 from agilepy.utils.CustomExceptions import *
+from agilepy.utils.BooleanExpressionParser import BooleanParser
 
 class SourcesLibrary:
 
@@ -41,7 +43,7 @@ class SourcesLibrary:
 
     """
 
-    @Decorators.accepts(object)
+
     def __init__(self):
         """
         This method ... blabla ...
@@ -49,10 +51,9 @@ class SourcesLibrary:
         self.logger = agilepyLogger
         self.xmlFilePath = None
         self.xmlFilePathPrefix = None
-        self.sourcesLibrary = None
+        self.sources = None
 
 
-    @Decorators.accepts(object, str)
     def loadSourceLibraryXML(self, xmlFilePath):
         """
         This method ... blabla ...
@@ -60,15 +61,15 @@ class SourcesLibrary:
         self.xmlFilePath = xmlFilePath
         self.xmlFilePathPrefix,_ = split(self.xmlFilePath)
 
-        self.sourcesLibrary = self._parseSourceXml(self.xmlFilePath)
+        self.sources = self._parseSourceXml(self.xmlFilePath)
 
-        if not self.sourcesLibrary:
+        if not self.sources:
             self.logger.warning(self, "Errors during %s parsing", [self.xmlFilePath])
             return False
         else:
             return True
 
-    @Decorators.accepts(object, str, str)
+
     def writeToFile(self, outfileNamePrefix, format="AG"):
         """
         This method ... blabla ...
@@ -96,95 +97,77 @@ class SourcesLibrary:
         return outfilepath
 
 
-    @Decorators.accepts(object)
     def getSources(self):
         """
         This method ... blabla...
         """
-        return self.sourcesLibrary.sources
+        return self.sources
 
-    @Decorators.accepts(object)
+
     def getSourcesNames(self):
         """
         This methods ... blabla ...
         """
-        return [s.name for s in self.sourcesLibrary.sources]
+        return [s.name for s in self.sources]
 
-    @Decorators.accepts(object, "*")
-    def selectSourcesWithLambda(self, selectionLambda):
+
+    def selectSources(self, selection):
         """
-        This method ... blabla...
+        This method ... blablabla..
         """
-        userSelectionParams = list(signature(selectionLambda).parameters)
+        selectionParamsNames = SourcesLibrary._extractSelectionParams(selection)
 
-        validatedUserSelectionParams = self._validateSelectionParams(userSelectionParams)
+        self._checkSelectionParams(selectionParamsNames)
 
-        if len(validatedUserSelectionParams) == 0:
-            self.logger.warning(self, "No selection params are used.")
+        sources = self._getCompatibleSources(selectionParamsNames)
+
+        selected = []
+
+        for source in sources:
+
+            if self._selectSource(selection, source, selectionParamsNames):
+
+                selected.append(source)
+
+        return selected
+
+
+
+
+
+
+
+    def freeSources(self, selection, parameterName, free):
+        """
+        Returns the list of sources matching the selection
+        """
+        sources = self.selectSources(selection)
+
+        if len(sources) == 0:
+            self.logger.warning(self, "No sources have been selected.")
             return []
 
-        sources = []
-
-        for source in self.sourcesLibrary.sources:
-
-            if self._needMultiParams(validatedUserSelectionParams) and not source.multi:
-                continue
-
-            selectionParamsValues = []
-
-            for param in validatedUserSelectionParams:
-
-                if param == "Name":
-                    paramValue = getattr(source, "name")
-
-                else:
-                    paramValue = float(getattr(source.multi, param))
-
-                selectionParamsValues.append(paramValue)
-
-
-            if selectionLambda(*selectionParamsValues):
-
-                sources.append(source)
-
-        return sources
-
-
-    @Decorators.accepts(object, "*", str, bool)
-    def freeSources(self, selectionLambda, parameterName, free):
-        """
-        This method ... blabla ...
-
-        returns: the list of the sources affected by the 'free' update
-        """
-        sources = self.selectSourcesWithLambda(selectionLambda)
-
-        if parameterName not in self.sourcesLibrary.getFreeParams():
-            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', [selectionParam, self.sourcesLibrary.getFreeParams(tostr=True)])
+        if parameterName not in self._getFreeParams():
+            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', [selectionParam, self._getFreeParams(tostr=True)])
             return []
 
-        for s in sources:
-
-            s.setFreeAttributeValueOf(parameterName, free)
-
-        return sources
+        return self._setFree(sources, parameterName, free)
 
 
-    @Decorators.accepts(object, "*")
-    def deleteSources(self, selectionLambda):
+    def deleteSources(self, selection):
         """
         This method ... blabla ...
 
         returns: the list of the deleted sources
         """
-        sourcesToBeDeleted = self.selectSourcesWithLambda(selectionLambda)
+        sourcesToBeDeleted = self.selectSources(selection)
 
-        self.sourcesLibrary.sources = [s for s in self.getSources() if s not in sourcesToBeDeleted]
+        self.sources = [s for s in self.getSources() if s not in sourcesToBeDeleted]
 
         return sourcesToBeDeleted
 
 
-    @Decorators.accepts(object, str)
+
     def parseSourceFile(self, sourceFilePath):
         """
         This method ... blabla ...
@@ -256,10 +239,10 @@ class SourcesLibrary:
         return MultiOutput(*allValues)
 
 
-    @Decorators.accepts(object, object, float, float)
+
     def updateMulti(self, data, mapCenterL, mapCenterB):
 
-        sourcesFound = self.selectSourcesWithLambda(lambda Name : Name == data.label)
+        sourcesFound = self.selectSources(lambda Name : Name == data.label)
 
         if len(sourcesFound) == 0:
             raise SourceNotFound("Source '%s' has not been found in the sources library"%(data.label))
@@ -299,25 +282,106 @@ class SourcesLibrary:
         Private methods
 
     """
+    @singledispatch
+    def _extractSelectionParams(selection):
+        raise NotImplementedError('Unsupported type: {}'.format(type(selection)))
 
-    def _needMultiParams(self, validatedUserSelectionParams):
-        multiParams = self.sourcesLibrary.getSelectionParams(multi=True)
-        for p in validatedUserSelectionParams:
-            if p in multiParams:
-                return True
-        return False
+    @_extractSelectionParams.register(str)
+    def _(selectionString):
+        bp = BooleanParser(selectionString)
+        return bp.getVARTokens()
+
+    @_extractSelectionParams.register(object)
+    def _(selectionLambda):
+        return list(signature(selectionLambda).parameters)
 
 
-    def _validateSelectionParams(self, userSelectionParams):
 
-        selectionParams = self.sourcesLibrary.getSelectionParams()
+    def _getCompatibleSources(self, validatedUserSelectionParams):
+
+        sources = []
+
+        for source in self.sources:
+
+            paramsOk = True
+
+            for paramName in validatedUserSelectionParams:
+
+                if paramName in self._getSelectionParams(onlyMultiParams=True) and not source.multi:
+
+                    self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because the mle() analysis has not been performed yet on that source.", [paramName, source.name])
+
+                    paramsOk = False
+
+            if paramsOk:
+
+                sources.append(source)
+
+        return sources
+
+
+
+    def _selectSource(self, selection, source, selectionParamsNames):
+
+        selectionParamsValues = []
+
+        for paramName in selectionParamsNames:
+
+            if paramName == "Name":
+                paramValue = getattr(source, "name")
+            else:
+                paramValue = float(getattr(source.multi, paramName))
+
+            selectionParamsValues.append(paramValue)
+
+        return SourcesLibrary.__selectSource(selection, source, selectionParamsNames, selectionParamsValues)
+
+    @singledispatch
+    def __selectSource(selection, source, selectionParamsNames, selectionParamsValues):
+        raise NotImplementedError('Unsupported type: {}'.format(type(selection)))
+
+    @__selectSource.register(str)
+    def _(selectionStr, source, selectionParamsNames, selectionParamsValues):
+        bp = BooleanParser(selectionStr)
+        variable_dict = dict(zip(selectionParamsNames, selectionParamsValues))
+        return bp.evaluate(variable_dict)
+
+    @__selectSource.register(object)
+    def _(selectionLambda, source, selectionParamsNames, selectionParamsValues):
+        return selectionLambda(*selectionParamsValues)
+
+
+
+
+    def _setFree(self, sources, parameterName, free):
+
+        for s in sources:
+
+            s.setFreeAttributeValueOf(parameterName, free)
+
+        return sources
+
+
+
+    def _checkSelectionParams(self, userSelectionParams):
+        """
+        Raise exception if at least one param is not supported
+        """
+        selectionParams = self._getSelectionParams()
+
+        notSupported = []
 
         for up in userSelectionParams:
+
             if up not in selectionParams:
-                self.logger.warning(self, "The selectionParam %s is not supported and it is not going to be used! Supported params: %s", [up, self.sourcesLibrary.getSelectionParams(tostr=True)])
 
-        return [param for param in userSelectionParams if param in selectionParams]
+                self.logger.critical(self, "The selectionParam %s is not supported and it is not going to be used! Supported params: %s", [up, self._getSelectionParams(tostr=True)])
 
+                notSupported.append(up)
+
+        if len(notSupported) > 0:
+
+            raise SelectionParamNotSupported("The following selection params are not supported: {}".format(' '.join(notSupported)))
 
 
     def _parseSourceXml(self, xmlFilePath):
@@ -326,7 +390,7 @@ class SourcesLibrary:
 
         xmlRoot = ET.parse(xmlFilePath).getroot()
 
-        sourceConfig = SourceLibrary(**xmlRoot.attrib, sources=[])
+        sources = []
 
         for source in xmlRoot:
 
@@ -350,9 +414,9 @@ class SourcesLibrary:
                     sourceDC.spatialModel = sourceDescrDC
 
 
-            sourceConfig.sources.append(sourceDC)
+            sources.append(sourceDC)
 
-        return sourceConfig
+        return sources
 
 
     def _checkAndAddParameters(self, sourceDescrDC, sourceDescription):
@@ -370,20 +434,19 @@ class SourcesLibrary:
 
     def _getConf(self, key=None):
         if not key:
-            return self.sourcesLibrary
-        else: return self.sourcesLibrary[key]
+            return self.sources
+        else: return self.sources[key]
 
 
     def _fail(self, msg):
         raise FileSourceParsingError("File source parsing failed: {}".format(msg))
 
 
-
     def _convertToAgileFormat(self):
 
         sourceStr = ""
 
-        for source in self.sourcesLibrary.sources:
+        for source in self.sources:
 
             # get flux value
             flux = [param.value for param in source.spectrum.parameters if param.name == "Flux"].pop()
@@ -489,3 +552,19 @@ class SourcesLibrary:
 
     def _convertToXML(self):
         pass
+
+    def _getSelectionParams(self, tostr = False, onlyMultiParams = False):
+        sp = ["Name","Dist", "Flux", "SqrtTS"]
+        if onlyMultiParams:
+            sp = ["Dist", "Flux", "SqrtTS"]
+        if not tostr:
+            return sp
+        else:
+            return ' '.join(sp)
+
+    def _getFreeParams(self, tostr = False):
+        fp = ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature", "Index2", "Loc"]
+        if not tostr:
+            return fp
+        else:
+            return ' '.join(fp)

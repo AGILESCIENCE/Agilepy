@@ -282,28 +282,3 @@ class Source:
 
     def __eq__(self, other):
         return self.name == other.name
-
-
-"""
-DONT NEED THIS CLASS
-"""
-@dataclass(eq=False)
-class SourceLibrary:
-    title: str
-    sources: List[Source]
-
-    def getSelectionParams(self, tostr = False, multi=False):
-        sp = ["Dist", "Flux", "SqrtTS"]
-        if not multi:
-            sp.append("Name")
-        if not tostr:
-            return sp
-        else:
-            return ' '.join(sp)
-
-    def getFreeParams(self, tostr = False):
-        fp = ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature", "Index2", "Loc"]
-        if not tostr:
-            return fp
-        else:
-            return ' '.join(fp)

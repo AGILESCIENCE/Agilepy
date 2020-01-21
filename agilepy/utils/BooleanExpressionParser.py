@@ -1,5 +1,5 @@
 
-#https://gist.githubusercontent.com/leehsueh/1290686/raw/36b0baa053072c377ac7fc801d53200d17039674/boolparser.py
+# https://gist.github.com/leehsueh/1290686
 
 #Grammar:
 
@@ -15,6 +15,7 @@
 
 class TokenType:
 	NUM, STR, VAR, GT, GTE, LT, LTE, EQ, NEQ, LP, RP, AND, OR = range(13)
+	T = ["NUM", "STR", "VAR", "GT", "GTE", "LT", "LTE", "EQ", "NEQ", "LP", "RP", "AND", "OR"]
 
 class TreeNode:
 	tokenType = None
@@ -24,6 +25,9 @@ class TreeNode:
 
 	def __init__(self, tokenType):
 		self.tokenType = tokenType
+
+	def __str__(self):
+		return "Treenode: type:"+TokenType.T[self.tokenType]+" val:("+str(self.value)+") left: ("+str(self.left)+")"+") right: ("+str(self.right)+")"
 
 class Tokenizer:
 	expression = None
@@ -56,12 +60,13 @@ class Tokenizer:
 	def tokenize(self):
 		import re
 		reg = re.compile(r'(\bAND\b|\bOR\b|!=|==|<=|>=|<|>|\(|\))')
-		self.tokens = reg.split(self.expression)
-		self.tokens = [t.strip() for t in self.tokens if t.strip() != '']
-
+		tokens = reg.split(self.expression)
+		tokens = [t.strip() for t in tokens if t.strip() != '']
+		self.tokens = []
 
 		self.tokenTypes = []
-		for t in self.tokens:
+
+		for t in tokens:
 			if t == 'AND':
 				self.tokenTypes.append(TokenType.AND)
 			elif t == 'OR':
@@ -86,6 +91,7 @@ class Tokenizer:
 				# number of string or variable
 				if t[0] == '"' and t[-1] == '"':
 					self.tokenTypes.append(TokenType.STR)
+					t = t[1:-1].strip()
 				else:
 					try:
 						number = float(t)
@@ -95,8 +101,9 @@ class Tokenizer:
 							self.tokenTypes.append(TokenType.VAR)
 						else:
 							self.tokenTypes.append(None)
-		print(self.tokens)
-		print(self.tokenTypes)
+
+			self.tokens.append(t)
+
 
 class BooleanParser:
 	tokenizer = None
@@ -170,40 +177,54 @@ class BooleanParser:
 		else:
 			raise Exception('NUM, STR, or VAR expected, but got ' + self.tokenizer.next())
 
+	def getVARTokens(self):
+		vars = []
+		for idx,t in enumerate(self.tokenizer.tokens):
+
+			if self.tokenizer.tokenTypes[idx] == 2:
+
+				vars.append(t)
+		return vars
+
 	def evaluate(self, variable_dict):
 		return self.evaluateRecursive(self.root, variable_dict)
 
 	def evaluateRecursive(self, treeNode, variable_dict):
+
 		if treeNode.tokenType == TokenType.NUM or treeNode.tokenType == TokenType.STR:
 			return treeNode.value
+
 		if treeNode.tokenType == TokenType.VAR:
 			return variable_dict.get(treeNode.value)
 
 		left = self.evaluateRecursive(treeNode.left, variable_dict)
+
 		right = self.evaluateRecursive(treeNode.right, variable_dict)
+
 		if treeNode.tokenType == TokenType.GT:
+			#print("left > right?",left > right, "left,right: ", left, right)
 			return left > right
 		elif treeNode.tokenType == TokenType.GTE:
+			#print(left, right)
 			return left >= right
 		elif treeNode.tokenType == TokenType.LT:
+			#print(left, right)
 			return left < right
 		elif treeNode.tokenType == TokenType.LTE:
+			#print(left, right)
 			return left <= right
 		elif treeNode.tokenType == TokenType.EQ:
+			#print("left == right?",left == right, "left:"+left+" right:"+right)
+			#print("left == right?",type(left), type(right))
 			return left == right
 		elif treeNode.tokenType == TokenType.NEQ:
+			#print(left, right)
 			return left != right
 		elif treeNode.tokenType == TokenType.AND:
+			#print(left, right)
 			return left and right
 		elif treeNode.tokenType == TokenType.OR:
+			#print(left, right)
 			return left or right
 		else:
 			raise Exception('Unexpected type ' + str(treeNode.tokenType))
-
-
-p = BooleanParser('Name == akowdoawi AND Flux > 1')
-variable_dict = {
-	'Name' : "akowdoawi",
-	'Flux' : 3
-}
-print(p.evaluate(variable_dict))

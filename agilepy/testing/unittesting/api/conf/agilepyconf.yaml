@@ -1,5 +1,5 @@
 input:
-  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.indexx"
+  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
 
 
@@ -18,13 +18,13 @@ selection:
 maps:
   energybins:
     - 100, 300
-    - 300, 1000
+    # - 300, 1000
     # - 1000, 3000
     # - 3000,10000
 
-  fovbinnumber: 2
+  fovbinnumber: 1
   binsize: 0.2
 
 model:
-  galcoeff: 0.6, 0.8
-  isocoeff: 10, 15
+  galcoeff: 0.6
+  isocoeff: 10
