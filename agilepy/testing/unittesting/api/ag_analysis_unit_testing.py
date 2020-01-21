@@ -62,34 +62,5 @@ class AGAnalysisUnittesting(unittest.TestCase):
 
 
 
-    """
-    aga.setOptions(binsize=99999)
-    aga.printOptions("maps")
-    aga.resetConf()
-    # sources = aga.freeSources("Name == '2AGLJ2021+4029' and Dist > 0 and Flux > 0", "Flux", False)
-
-    sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", False)
-    print("\n\nSource with Flux NOT freed: " )
-    for s in sources:
-        print(s)
-
-    sources = aga.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
-    print("\n\nSource with Flux freed: " )
-    for s in sources:
-        print(s)
-
-
-    print("\n\nNumber of sources: ", len(sourcesLib.getSources()))
-
-
-    deleted = aga.deleteSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0)
-    print("\n\nDeleted sources:")
-    for s in deleted:
-        print(s)
-
-
-    print("\n\nNumber of sources: ", len(sourcesLib.getSources()))
-    """
-
 if __name__ == '__main__':
     unittest.main()

@@ -33,7 +33,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
-from agilepy.utils.Utils import agilepyLogger, Decorators
+from agilepy.utils.Utils import agilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, PFILESNotFoundError, ScienceToolInputArgMissing, MaplistIsNone
 from agilepy.utils.Parameters import Parameters
 
@@ -82,7 +82,7 @@ class AGAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
-    @Decorators.accepts(object)
+
     def resetConf(self):
         """
         Reset the configuration to default values.
@@ -109,7 +109,7 @@ class AGAnalysis:
         else:
             return True
 
-    @Decorators.accepts(object, str)
+
     def printOptions(self, section=None):
         """
         Update the configuration.
@@ -123,7 +123,7 @@ class AGAnalysis:
         self.config.printOptions(section)
 
 
-    @Decorators.accepts(object)
+
     def getSourcesLibrary(self):
         """
         This method ... blabla ...
@@ -131,7 +131,7 @@ class AGAnalysis:
         return self.sourcesLibrary
 
 
-    @Decorators.accepts(object, "*", str, bool)
+
     def freeSources(self, selectionLamda, parameterName, free):
         """
         This method ... blabla ...
@@ -139,7 +139,7 @@ class AGAnalysis:
         return self.sourcesLibrary.freeSources(selectionLamda, parameterName, free)
 
 
-    @Decorators.accepts(object, "*")
+
     def deleteSources(self, selectionLamda):
         """
         This method ... blabla ...
@@ -147,7 +147,7 @@ class AGAnalysis:
         return self.sourcesLibrary.deleteSources(selectionLamda)
 
 
-    @Decorators.accepts(object)
+
     def generateMaps(self):
         """
         This method ... blabla ...
@@ -171,7 +171,7 @@ class AGAnalysis:
                 fovmin = initialFovmin
                 fovmax = initialFovmax
             else:
-                bincenter, fovmin, fovmax = self._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
+                bincenter, fovmin, fovmax = AGAnalysis._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
             for bgCoeffIdx, stepe in enumerate(energybins):
@@ -185,7 +185,8 @@ class AGAnalysis:
                     skymapH = Parameters.getSkyMap(emin, emax)
                     fileNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
-                    self.logger.info(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
+                    self.logger.info(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s \
+                                            skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
 
                     self.config.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
@@ -242,7 +243,7 @@ class AGAnalysis:
 
         return maplistFilePath
 
-    @Decorators.accepts(object, str)
+
     def mle(self, maplistFilePath):
         """
         This method ... blabla ...
@@ -252,7 +253,7 @@ class AGAnalysis:
                                  file as argument (perhaps you want to call generateMaps() first). ")
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeSourcesModelsToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
 
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
@@ -271,7 +272,7 @@ class AGAnalysis:
 
         for sourceFile in sourceFiles:
 
-            source = self.sourcesLibrary.parseSourceFile(sourceFile)
+            source = SourcesLibrary.parseSourceFile(sourceFile)
 
             mapCenterL = float(self.config.getOptionValue("glon"))
             mapCenterB = float(self.config.getOptionValue("glat"))
@@ -294,15 +295,8 @@ class AGAnalysis:
 
 
 
-
-
-    """
-
-        Private methods
-
-    """
-
-    def _updateFovMinMaxValues(self, fovbinnumber, fovradmin, fovradmax, stepi):
+    @staticmethod
+    def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):
         """
         This method ... blabla ...
         """

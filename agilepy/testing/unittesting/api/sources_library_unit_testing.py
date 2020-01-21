@@ -53,10 +53,10 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_source_file_parsing(self):
 
-        res = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase0.source")
+        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase0.source")
         self.assertEqual(True, bool(res))
 
-        res = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.assertEqual(True, bool(res))
 
 
@@ -68,7 +68,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.selectSources('Name == "2AGLJ2021+4029"')
         self.assertEqual(1, len(sources))
 
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0')
@@ -85,7 +85,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+4029" )
         self.assertEqual(1, len(sources))
 
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 
         sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0)
@@ -97,7 +97,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_string(self):
 
         self.sl.loadSourceLibraryXML(self.sourcesconfPath)
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 
 
@@ -119,7 +119,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_lambda(self):
 
         self.sl.loadSourceLibraryXML(self.sourcesconfPath)
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 
 

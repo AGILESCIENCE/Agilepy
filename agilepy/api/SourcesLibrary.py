@@ -31,7 +31,7 @@ import xml.etree.ElementTree as ET
 from functools import singledispatch
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
-from agilepy.utils.Utils import agilepyLogger, Astro, Decorators
+from agilepy.utils.Utils import agilepyLogger, Astro
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
 from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
                                            FileSourceParsingError, \
@@ -73,7 +73,7 @@ class SourcesLibrary:
             return True
 
 
-    def writeToFile(self, outfileNamePrefix, format="AG"):
+    def writeSourcesModelsToFile(self, outfileNamePrefix, format="AG"):
         """
         This method ... blabla ...
         """
@@ -128,7 +128,7 @@ class SourcesLibrary:
 
         for source in sources:
 
-            if self._selectSource(selection, source, selectionParamsNames):
+            if SourcesLibrary._selectSource(selection, source, selectionParamsNames):
 
                 selected.append(source)
 
@@ -150,11 +150,11 @@ class SourcesLibrary:
             self.logger.warning(self, "No sources have been selected.")
             return []
 
-        if parameterName not in self._getFreeParams():
-            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', [selectionParam, self._getFreeParams(tostr=True)])
+        if parameterName not in SourcesLibrary._getFreeParams():
+            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', [selectionParam, SourcesLibrary._getFreeParams(tostr=True)])
             return []
 
-        return self._setFree(sources, parameterName, free)
+        return SourcesLibrary._setFree(sources, parameterName, free)
 
 
     def deleteSources(self, selection):
@@ -170,10 +170,10 @@ class SourcesLibrary:
         return sourcesToBeDeleted
 
 
-
-    def parseSourceFile(self, sourceFilePath):
+    @staticmethod
+    def parseSourceFile(sourceFilePath):
         """
-        This method ... blabla ...
+        Static method
 
         returns: a MultiOutput object
         """        # self.logger.info(self, "Parsing output file of AG_multi: %s", [self.outfilePath])
@@ -281,11 +281,6 @@ class SourcesLibrary:
 
 
 
-    """
-
-        Private methods
-
-    """
     @singledispatch
     def _extractSelectionParams(selection):
         raise NotImplementedError('Unsupported type: {}'.format(type(selection)))
@@ -311,7 +306,7 @@ class SourcesLibrary:
 
             for paramName in validatedUserSelectionParams:
 
-                if paramName in self._getSelectionParams(onlyMultiParams=True) and not source.multi:
+                if paramName in SourcesLibrary._getSelectionParams(onlyMultiParams=True) and not source.multi:
 
                     self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because \
                                                the mle() analysis has not been performed yet on that source.", \
@@ -326,8 +321,8 @@ class SourcesLibrary:
         return sources
 
 
-
-    def _selectSource(self, selection, source, selectionParamsNames):
+    @staticmethod
+    def _selectSource(selection, source, selectionParamsNames):
 
         selectionParamsValues = []
 
@@ -358,8 +353,8 @@ class SourcesLibrary:
 
 
 
-
-    def _setFree(self, sources, parameterName, free):
+    @staticmethod
+    def _setFree(sources, parameterName, free):
 
         for s in sources:
 
@@ -373,7 +368,7 @@ class SourcesLibrary:
         """
         Raise exception if at least one param is not supported
         """
-        selectionParams = self._getSelectionParams()
+        selectionParams = SourcesLibrary._getSelectionParams()
 
         notSupported = []
 
@@ -382,7 +377,7 @@ class SourcesLibrary:
             if up not in selectionParams:
 
                 self.logger.critical(self, "The selectionParam %s is not supported and it is not going to be used! \
-                                            Supported params: %s", [up, self._getSelectionParams(tostr=True)])
+                                            Supported params: %s", [up, SourcesLibrary._getSelectionParams(tostr=True)])
 
                 notSupported.append(up)
 
@@ -402,14 +397,14 @@ class SourcesLibrary:
         for source in xmlRoot:
 
             if source.tag != "source":
-                self._fail("Tag <source> expected, %s found."%(source.tag))
+                SourcesLibrary._fail("Tag <source> expected, %s found."%(source.tag))
 
             sourceDC = Source(**source.attrib)
 
             for sourceDescription in source:
 
                 if sourceDescription.tag not in ["spectrum", "spatialModel"]:
-                    self._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescr.tag))
+                    SourcesLibrary._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescr.tag))
 
                 if sourceDescription.tag == "spectrum":
                     sourceDescrDC = Spectrum(**sourceDescription.attrib, parameters=[])
@@ -430,7 +425,7 @@ class SourcesLibrary:
         for parameter in sourceDescription:
 
             if parameter.tag != "parameter":
-                self._fail("Tag <parameter> expected, %s found."%(parameter.tag))
+                SourcesLibrary._fail("Tag <parameter> expected, %s found."%(parameter.tag))
 
             paramDC = Parameter(**parameter.attrib)
 
@@ -445,7 +440,8 @@ class SourcesLibrary:
         else: return self.sources[key]
 
 
-    def _fail(self, msg):
+    @staticmethod
+    def _fail(msg):
         raise FileSourceParsingError("File source parsing failed: {}".format(msg))
 
 
@@ -468,7 +464,7 @@ class SourcesLibrary:
             else:
                 sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index") + " "
 
-            sourceStr += self._computeFixFlag(source)+" "
+            sourceStr += SourcesLibrary._computeFixFlag(source)+" "
 
             sourceStr += "2 "
 
@@ -531,7 +527,8 @@ class SourcesLibrary:
         return sourceStr
 
 
-    def _computeFixFlag(self, source):
+    @staticmethod
+    def _computeFixFlag(source):
         if source.spectrum.getFreeAttributeValueOf("name", "Flux") == 0:
             return "0"
 
@@ -562,7 +559,8 @@ class SourcesLibrary:
     def _convertToXML(self):
         pass
 
-    def _getSelectionParams(self, tostr = False, onlyMultiParams = False):
+    @staticmethod
+    def _getSelectionParams(tostr = False, onlyMultiParams = False):
         sp = ["Name","Dist", "Flux", "SqrtTS"]
         if onlyMultiParams:
             sp = ["Dist", "Flux", "SqrtTS"]
@@ -571,7 +569,8 @@ class SourcesLibrary:
         else:
             return ' '.join(sp)
 
-    def _getFreeParams(self, tostr = False):
+    @staticmethod
+    def _getFreeParams(tostr = False):
         fp = ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature", "Index2", "Loc"]
         if not tostr:
             return fp

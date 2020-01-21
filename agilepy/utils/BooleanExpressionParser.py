@@ -96,7 +96,7 @@ class Tokenizer:
 					try:
 						float(t)
 						self.tokenTypes.append(TokenType.NUM)
-					except:
+					except ValueError:
 						if re.search('^[a-zA-Z_]+$', t):
 							self.tokenTypes.append(TokenType.VAR)
 						else:
@@ -178,13 +178,13 @@ class BooleanParser:
 			raise Exception('NUM, STR, or VAR expected, but got ' + self.tokenizer.next())
 
 	def getVARTokens(self):
-		vars = []
+		varTokens = []
 		for idx,t in enumerate(self.tokenizer.tokens):
 
 			if self.tokenizer.tokenTypes[idx] == 2:
 
-				vars.append(t)
-		return vars
+				varTokens.append(t)
+		return varTokens
 
 	def evaluate(self, variable_dict):
 		return self.evaluateRecursive(self.root, variable_dict)

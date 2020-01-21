@@ -26,7 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
 import datetime
 
@@ -256,16 +256,16 @@ class Source:
     spectrum: Spectrum = None
 
     def __str__(self):
-        repr = '----------------------------------------------------------------'
-        repr += f'\nSource name: {self.name}\nSource type: {self.type}'
+        strRepr = '----------------------------------------------------------------'
+        strRepr += f'\nSource name: {self.name}\nSource type: {self.type}'
         if self.spectrum:
-            repr += f'{self.spectrum}'
+            strRepr += f'{self.spectrum}'
         if self.spatialModel:
-            repr += f'{self.spatialModel}'
+            strRepr += f'{self.spatialModel}'
         if self.multi:
-            repr += f'{self.multi}'
-        repr += '\n----------------------------------------------------------------'
-        return repr
+            strRepr += f'{self.multi}'
+        strRepr += '\n----------------------------------------------------------------'
+        return strRepr
 
     def setFreeAttributeValueOf(self, parameterName, free):
 

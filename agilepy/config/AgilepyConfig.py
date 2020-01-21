@@ -45,13 +45,13 @@ class AgilepyConfig(metaclass=Singleton):
 
         currentDir = dirname(realpath(__file__))
 
-        default_conf = self._loadFromYaml(join(currentDir,"./conf.default.yaml"))
+        default_conf = AgilepyConfig._loadFromYaml(join(currentDir,"./conf.default.yaml"))
 
-        user_conf = self._loadFromYaml(configurationFilePath)
+        user_conf = AgilepyConfig._loadFromYaml(configurationFilePath)
 
-        mergedConf = self._mergeConfigurations(default_conf, user_conf)
+        mergedConf = AgilepyConfig._mergeConfigurations(default_conf, user_conf)
 
-        self.conf = self._completeConfiguration(mergedConf)
+        self.conf = AgilepyConfig._completeConfiguration(mergedConf)
 
         self.conf_bkp = deepcopy(self.conf)
 
@@ -132,11 +132,8 @@ class AgilepyConfig(metaclass=Singleton):
 
 
 
-
-    """
-        PRIVATE API
-    """
-    def _mergeConfigurations(self, dict1, dict2):
+    @staticmethod
+    def _mergeConfigurations(dict1, dict2):
         """
         Merge dict2 (user defined conf) with dict1 (default conf) (this op is not symmetric)
         """
@@ -156,30 +153,32 @@ class AgilepyConfig(metaclass=Singleton):
 
         return merged
 
-
-    def _completeConfiguration(self, confDict):
-        self._convertEnergyBinsStrings(confDict)
-        self._convertBackgroundCoeff(confDict)
-        self._setTime(confDict)
-        self._setPhaseCode(confDict)
-        self._setExpStep(confDict)
-        self._checkBackgroundCoeff(confDict)
-        self._expandEnvVars(confDict)
+    @staticmethod
+    def _completeConfiguration(confDict):
+        AgilepyConfig._convertEnergyBinsStrings(confDict)
+        AgilepyConfig._convertBackgroundCoeff(confDict)
+        AgilepyConfig._setTime(confDict)
+        AgilepyConfig._setPhaseCode(confDict)
+        AgilepyConfig._setExpStep(confDict)
+        AgilepyConfig._checkBackgroundCoeff(confDict)
+        AgilepyConfig._expandEnvVars(confDict)
         return confDict
 
-    def _parseListNotation(self, str):
+    @staticmethod
+    def _parseListNotation(str):
         # check regular expression??
         return [float(elem.strip()) for elem in str.split(',')]
 
-
-    def _convertEnergyBinsStrings(self, confDict):
+    @staticmethod
+    def _convertEnergyBinsStrings(confDict):
         l = []
         for stringList in confDict["maps"]["energybins"]:
-            res = self._parseListNotation(stringList)
+            res = AgilepyConfig._parseListNotation(stringList)
             l.append([int(r) for r in res])
         confDict["maps"]["energybins"] = l
 
-    def _convertBackgroundCoeff(self, confDict):
+    @staticmethod
+    def _convertBackgroundCoeff(confDict):
 
         isocoeffVal = confDict["model"]["isocoeff"]
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
@@ -189,7 +188,7 @@ class AgilepyConfig(metaclass=Singleton):
             if isinstance(isocoeffVal, numbers.Number):
                 confDict["model"]["isocoeff"] = [isocoeffVal]
             else:
-                confDict["model"]["isocoeff"] = self._parseListNotation(isocoeffVal)
+                confDict["model"]["isocoeff"] = AgilepyConfig._parseListNotation(isocoeffVal)
 
         else:
 
@@ -203,13 +202,14 @@ class AgilepyConfig(metaclass=Singleton):
             if isinstance(galcoeffVal, numbers.Number):
                 confDict["model"]["galcoeff"] = [galcoeffVal]
             else:
-                confDict["model"]["galcoeff"] = self._parseListNotation(galcoeffVal)
+                confDict["model"]["galcoeff"] = AgilepyConfig._parseListNotation(galcoeffVal)
 
         else:
 
             confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
 
-    def _checkBackgroundCoeff(self, confDict):
+    @staticmethod
+    def _checkBackgroundCoeff(confDict):
 
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
 
@@ -228,8 +228,8 @@ class AgilepyConfig(metaclass=Singleton):
             exit(1)
 
 
-
-    def _setPhaseCode(self, confDict):
+    @staticmethod
+    def _setPhaseCode(confDict):
         if not confDict["selection"]["phasecode"]:
             if confDict["selection"]["tmax"] >= 182692800.0:
                 confDict["selection"]["phasecode"] = 6 #SPIN
@@ -237,23 +237,27 @@ class AgilepyConfig(metaclass=Singleton):
                 confDict["selection"]["phasecode"] = 18 #POIN
 
 
-    def _setTime(self, confDict):
+    @staticmethod
+    def _setTime(confDict):
         if confDict["selection"]["timetype"] == "MJD":
             confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
             confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
             confDict["selection"]["timetype"] = "TT"
 
 
-    def _setExpStep(self, confDict):
+    @staticmethod
+    def _setExpStep(confDict):
         if not confDict["maps"]["expstep"]:
              confDict["maps"]["expstep"] = round(1 / confDict["maps"]["binsize"], 2)
 
-    def _expandEnvVars(self, confDict):
-        confDict["input"]["evtfile"] = self._expandEnvVar(confDict["input"]["evtfile"])
-        confDict["input"]["logfile"] = self._expandEnvVar(confDict["input"]["logfile"])
-        confDict["output"]["outdir"] = self._expandEnvVar(confDict["output"]["outdir"])
+    @staticmethod
+    def _expandEnvVars(confDict):
+        confDict["input"]["evtfile"] = AgilepyConfig._expandEnvVar(confDict["input"]["evtfile"])
+        confDict["input"]["logfile"] = AgilepyConfig._expandEnvVar(confDict["input"]["logfile"])
+        confDict["output"]["outdir"] = AgilepyConfig._expandEnvVar(confDict["output"]["outdir"])
 
-    def _expandEnvVar(self, path):
+    @staticmethod
+    def _expandEnvVar(path):
         if "$" in path:
             expanded = expandvars(path)
             if expanded == path:
@@ -264,8 +268,8 @@ class AgilepyConfig(metaclass=Singleton):
         else:
             return path
 
-
-    def _loadFromYaml(self,file):
+    @staticmethod
+    def _loadFromYaml(file):
 
         with open(file, 'r') as yamlfile:
 

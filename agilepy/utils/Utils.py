@@ -41,23 +41,6 @@ class Singleton(type):
             cls._instances[cls].__init__(*args, **kwargs)
         return cls._instances[cls]
 
-class Decorators:
-    @staticmethod
-    def accepts(*types):
-        # https://stackoverflow.com/questions/15299878/how-to-use-python-decorators-to-check-function-arguments
-        def check_accepts(f):
-            LAMBDA = lambda:0
-            assert len(types) == f.__code__.co_argcount
-            def new_f(*args, **kwds):
-                for (a, t) in zip(args, types):
-                    if t == "*":
-                        assert isinstance(a, type(LAMBDA)) and a.__name__ == LAMBDA.__name__ , "arg %r does not match lamdba" % (a)
-                    else:
-                        assert isinstance(a, t), "arg %r does not match %s" % (a,t)
-                return f(*args, **kwds)
-            new_f.__name__ = f.__name__
-            return new_f
-        return check_accepts
 
 class AgilepyLogger(metaclass=Singleton):
 
