@@ -29,6 +29,5 @@ jobs:
     - name: Running unit tests
       run: |
         source activate agilepydevops
-        chmod +x start_agilepy_tests.sh
-        start_agilepy_tests.sh
+        bash start_agilepy_tests.sh
  
