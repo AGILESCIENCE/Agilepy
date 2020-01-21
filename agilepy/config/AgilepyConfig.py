@@ -165,9 +165,9 @@ class AgilepyConfig(metaclass=Singleton):
         return confDict
 
     @staticmethod
-    def _parseListNotation(str):
+    def _parseListNotation(strList):
         # check regular expression??
-        return [float(elem.strip()) for elem in str.split(',')]
+        return [float(elem.strip()) for elem in strList.split(',')]
 
     @staticmethod
     def _convertEnergyBinsStrings(confDict):

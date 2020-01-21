@@ -151,7 +151,8 @@ class SourcesLibrary:
             return []
 
         if parameterName not in SourcesLibrary._getFreeParams():
-            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', [selectionParam, SourcesLibrary._getFreeParams(tostr=True)])
+            self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', \
+                                       [selectionParam, SourcesLibrary._getFreeParams(tostr=True)])
             return []
 
         return SourcesLibrary._setFree(sources, parameterName, free)
