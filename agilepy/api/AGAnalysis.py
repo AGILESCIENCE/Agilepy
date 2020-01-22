@@ -40,7 +40,8 @@ from agilepy.utils.Parameters import Parameters
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
 
-    This class is a wrapper around the ``SourcesLibrary``
+    This class is a wrapper around the ``SourcesLibrary``, ``ScienceTools`` and ``AgilepyConfig`` classes and implements
+    high level functionality.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour
     and a ``xml descriptor file`` that contains a list of all the sources you want to consider.
