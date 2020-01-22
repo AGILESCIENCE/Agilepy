@@ -42,10 +42,10 @@ class SelectionParamNotSupported(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-class EnergyBinsNumNotCompatibleWithBgCoeffNum(Exception):
+class EnvironmentVariableNotExpanded(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-class EnvironmentVariableNotExpanded(Exception):
+class ConfigurationsNotValidError(Exception):
     def __init__(self, message):
         super().__init__(message)

@@ -4,13 +4,13 @@ input:
 
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/api"
+  outdir: "$AGILE/agilepy-test-data/unittesting-output/config"
   filenameprefix: "testcase"
   debuglvl: 1
 
 selection:
-  tmin: 456361778 #58287
-  tmax: 456537945 #58297
+  tmin: 456361778
+  tmax: 456537945
   timetype: "TT"
   glon: 80
   glat: 0

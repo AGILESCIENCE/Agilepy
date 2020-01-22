@@ -25,24 +25,29 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+import os
 import yaml
 import pprint
 import numbers
 from copy import deepcopy
 from os.path import dirname, realpath, join, expandvars
+from pathlib import Path
 
 from agilepy.utils.Utils import Singleton, DataUtils
-from agilepy.utils.CustomExceptions import EnergyBinsNumNotCompatibleWithBgCoeffNum
+from agilepy.utils.CustomExceptions import ConfigurationsNotValidError
+
 
 
 class AgilepyConfig(metaclass=Singleton):
     """
 
     """
-    def __init__(self, configurationFilePath):
+    def __init__(self):
 
         self.pp = pprint.PrettyPrinter(indent=2)
+
+
+    def loadConfigurations(self, configurationFilePath, validate = True):
 
         currentDir = dirname(realpath(__file__))
 
@@ -52,13 +57,29 @@ class AgilepyConfig(metaclass=Singleton):
 
         mergedConf = AgilepyConfig._mergeConfigurations(default_conf, user_conf)
 
-        self.conf = AgilepyConfig._completeConfiguration(mergedConf)
+        AgilepyConfig._checkRequiredParams(mergedConf)
 
+        conf = AgilepyConfig._completeConfiguration(mergedConf)
+
+        self.conf = conf
         self.conf_bkp = deepcopy(self.conf)
+
+        if validate:
+
+            self.validateConfiguration(conf)
+
+    def validateConfiguration(self, confDict):
+
+        errors = AgilepyConfig._validateConfiguration(confDict)
+
+        if errors:
+            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
 
 
     def reset(self):
         self.conf = deepcopy(self.conf_bkp)
+
 
     def getSectionOfOption(self, optionName):
 
@@ -133,6 +154,7 @@ class AgilepyConfig(metaclass=Singleton):
 
 
 
+
     @staticmethod
     def _mergeConfigurations(dict1, dict2):
         """
@@ -161,9 +183,43 @@ class AgilepyConfig(metaclass=Singleton):
         AgilepyConfig._setTime(confDict)
         AgilepyConfig._setPhaseCode(confDict)
         AgilepyConfig._setExpStep(confDict)
-        AgilepyConfig._checkBackgroundCoeff(confDict)
         AgilepyConfig._expandEnvVars(confDict)
         return confDict
+
+    @staticmethod
+    def _checkRequiredParams(confDict):
+
+        errors = []
+
+        if confDict["input"]["evtfile"] is None:
+            errors.append("Please, set input/evtfile")
+
+        if confDict["input"]["logfile"] is None:
+            errors.append("Please, set input/logfile")
+
+        if confDict["output"]["outdir"] is None:
+            errors.append("Please, set output/outdir")
+
+        if confDict["output"]["filenameprefix"] is None:
+            errors.append("Please, set output/filenameprefix")
+
+        if confDict["selection"]["timetype"] is None:
+            errors.append("Please, set selection/timetype (MJD or TT)")
+
+        if confDict["selection"]["tmin"] is None:
+            errors.append("Please, set selection/tmin")
+
+        if confDict["selection"]["tmax"] is None:
+            errors.append("Please, set selection/tmax")
+
+        if confDict["selection"]["glon"] is None:
+            errors.append("Please, set selection/glon")
+
+        if confDict["selection"]["glat"] is None:
+            errors.append("Please, set selection/glat")
+
+        if errors:
+            raise ConfigurationsNotValidError("{}".format(errors))
 
     @staticmethod
     def _parseListNotation(strList):
@@ -210,28 +266,6 @@ class AgilepyConfig(metaclass=Singleton):
             confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
 
     @staticmethod
-    def _checkBackgroundCoeff(confDict):
-
-        numberOfEnergyBins = len(confDict["maps"]["energybins"])
-
-        numberOfIsoCoeff = len(confDict["model"]["isocoeff"])
-
-        if numberOfIsoCoeff != numberOfEnergyBins:
-
-            print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfIsoCoeff (%d)" % (numberOfEnergyBins, numberOfIsoCoeff))
-
-            raise EnergyBinsNumNotCompatibleWithBgCoeffNum("Energy bins: {} Isotropic Background Coefficents: {}".format(confDict["maps"]["energybins"],confDict["maps"]["isocoeff"]))
-
-        numberOfGalCoeff = len(confDict["model"]["galcoeff"])
-
-        if numberOfGalCoeff != numberOfEnergyBins:
-
-            print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfGalCoeff (%d)" % (numberOfEnergyBins, numberOfGalCoeff))
-
-            raise EnergyBinsNumNotCompatibleWithBgCoeffNum("Energy bins: {} Isotropic Background Coefficents: {}".format(confDict["maps"]["energybins"],confDict["maps"]["galcoeff"]))
-
-
-    @staticmethod
     def _setPhaseCode(confDict):
         if not confDict["selection"]["phasecode"]:
             if confDict["selection"]["tmax"] >= 182692800.0:
@@ -239,14 +273,12 @@ class AgilepyConfig(metaclass=Singleton):
             else:
                 confDict["selection"]["phasecode"] = 18 #POIN
 
-
     @staticmethod
     def _setTime(confDict):
         if confDict["selection"]["timetype"] == "MJD":
             confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
             confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
             confDict["selection"]["timetype"] = "TT"
-
 
     @staticmethod
     def _setExpStep(confDict):
@@ -277,3 +309,108 @@ class AgilepyConfig(metaclass=Singleton):
         with open(file, 'r') as yamlfile:
 
             return yaml.safe_load(yamlfile)
+
+    @staticmethod
+    def _validateConfiguration(confDict):
+        errors = {}
+
+        errors.update( AgilepyConfig._validateBackgroundCoeff(confDict) )
+        errors.update( AgilepyConfig._validateIndexFiles(confDict) )
+        errors.update( AgilepyConfig._validateTimeInIndex(confDict) )
+
+        return errors
+
+    @staticmethod
+    def _validateBackgroundCoeff(confDict):
+
+        errors = {}
+
+        numberOfEnergyBins = len(confDict["maps"]["energybins"])
+
+        numberOfIsoCoeff = len(confDict["model"]["isocoeff"])
+
+        if numberOfIsoCoeff != numberOfEnergyBins:
+
+            error_str = "The number of energy bins {} is not equal to the number \
+                         of bg isotropic coefficients {}.".format(confDict["maps"]["energybins"], confDict["maps"]["isocoeff"])
+
+            errors["model/isocoeff"]=error_str
+
+        numberOfGalCoeff = len(confDict["model"]["galcoeff"])
+
+        if numberOfGalCoeff != numberOfEnergyBins:
+
+
+            error_str = "The number of energy bins {} is not equal to the number \
+                         of bg galactic coefficients {}.".format(confDict["maps"]["energybins"], confDict["maps"]["galcoeff"])
+
+            errors["model/galcoeff"]=error_str
+
+        return errors
+
+    @staticmethod
+    def _validateIndexFiles(confDict):
+
+        errors = {}
+
+        pathEvt = Path(confDict["input"]["evtfile"])
+
+        if not pathEvt.exists() or not pathEvt.is_file():
+            errors["input/evtfile"]="File {} not exists".format(confDict["input"]["evtfile"])
+
+        pathLog = Path(confDict["input"]["logfile"])
+
+        if not pathLog.exists() or not pathLog.is_file():
+            errors["input/logfile"]="File {} not exists".format(confDict["input"]["logfile"])
+
+        return errors
+
+    @staticmethod
+    def _validateTimeInIndex(confDict):
+        errors = {}
+
+        (first, last, lineSize) = AgilepyConfig._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
+
+        idxTmin = AgilepyConfig._extractTimes(first)[0]
+        idxTmax = AgilepyConfig._extractTimes(last)[1]
+
+        if lineSize > 1024:
+            print("[AgilepyConfig] ! WARNING ! The byte size of the first input/evtfile line {} is {} B.\
+                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(firstLine, lineSize, tmin, tmax))
+
+        userTmin = confDict["selection"]["tmin"]
+        userTmax = confDict["selection"]["tmax"]
+
+        if float(userTmin) < float(idxTmin):
+            errors["input/tmin"]="tmin: {} is outside the time range of {} ( < idxTmin). Time range: [{}, {}]" \
+                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+
+        if float(userTmin) > float(idxTmax):
+            errors["input/tmin"]="tmin: {} is outside the time range of {} ( > idxTmax). Time range: [{}, {}]" \
+                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+
+
+        if float(userTmax) > float(idxTmax):
+            errors["input/tmax"]="tmax: {} is outside the time range of {} ( > idxTmax). Time range: [{}, {}]" \
+                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+
+        if float(userTmax) < float(idxTmin):
+            errors["input/tmax"]="tmax: {} is outside the time range of {} ( < idxTmin). Time range: [{}, {}]" \
+                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+
+
+        return errors
+
+    @staticmethod
+    def _getFirstAndLastLineInFile(file):
+        with open(file, 'rb') as evtindex:
+            firstLine = next(evtindex).decode()
+            lineSize = len(firstLine.encode('utf-8'))
+            evtindex.seek(-500, os.SEEK_END)
+            lastLine = evtindex.readlines()[-1].decode()
+            return (firstLine, lastLine, lineSize)
+
+    @staticmethod
+    def _extractTimes(indexFileLine):
+        elements = indexFileLine.split(" ")
+        return (elements[1], elements[2])

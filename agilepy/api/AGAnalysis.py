@@ -73,7 +73,9 @@ class AGAnalysis:
 
         """
 
-        self.config = AgilepyConfig(configurationFilePath)
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(configurationFilePath, validate=True)
 
         self.config.printOptions("output")
 

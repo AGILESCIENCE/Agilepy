@@ -6,7 +6,7 @@ output:
   outdir: null
   filenameprefix: null
   logfilename: null
-  debuglvl: null
+  debuglvl: 1
 
 selection:
   glat: null
