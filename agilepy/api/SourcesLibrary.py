@@ -40,13 +40,6 @@ from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
 
 class SourcesLibrary:
 
-    """
-
-        Public Interface
-
-    """
-
-
     def __init__(self):
         """
         This method ... blabla ...
@@ -164,11 +157,11 @@ class SourcesLibrary:
 
         returns: the list of the deleted sources
         """
-        sourcesToBeDeleted = self.selectSources(selection)
+        deletedSources = self.selectSources(selection)
 
-        self.sources = [s for s in self.getSources() if s not in sourcesToBeDeleted]
+        self.sources = [s for s in self.getSources() if s not in deletedSources]
 
-        return sourcesToBeDeleted
+        return deletedSources
 
 
     @staticmethod

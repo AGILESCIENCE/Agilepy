@@ -123,16 +123,16 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.updateMulti(source, 80, 0)
 
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", False)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", True)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Index", True)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Index", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Index", False)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Index", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
 

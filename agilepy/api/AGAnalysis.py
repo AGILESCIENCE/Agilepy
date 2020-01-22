@@ -38,27 +38,40 @@ from agilepy.utils.CustomExceptions import AGILENotFoundError, PFILESNotFoundErr
 from agilepy.utils.Parameters import Parameters
 
 class AGAnalysis:
-    """
+    """This class contains the high-level API methods you can use to run scientific analysis.
 
-        Public interface
+    This class is a wrapper around the ``SourcesLibrary``
+
+    This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour
+    and a ``xml descriptor file`` that contains a list of all the sources you want to consider.
+
+    Class attributes:
+
+    Attributes:
+        config (:obj:`AgilepyConfig`): it is used to read/update configuration values.
+        logger (:obj:`AgilepyLogger`): it is used to log messages with different importance levels.
+        sourcesLibrary (:obj:`SourcesLibrary`): it contains the list of the sources and several useful methods.
 
     """
 
     def __init__(self, configurationFilePath, sourcesFilePath):
+        """AGAnalysis constructor.
+
+        Args:
+            configurationFilePath (str): the relative or absolute path to the yaml configuration file.
+            sourcesFilePath (str): the relative or absolute path to the xml sources descriptor file.
+
+        Raises:
+            FileExistsError: if the output directory already exists.
+            AGILENotFoundError: if the AGILE environment variable is not set.
+            PFILESNotFoundError: if the PFILES environment variable is not set.
+
+        Example:
+            >>> from agilepy.api import AGAnalysis
+            >>> aganalysis = AGAnalysis('agconfig.yaml', 'sources.xml')
+
         """
-        AGAnalysis constructor
 
-            It returs an object of type AGAnalysis.
-            It will raise a FileExistsError exception if the output directory already exists.
-            It will raise a AGILENotFoundError exception if the AGILE environment variable is not set.
-            It will raise a PFILESNotFoundError exception if the PFILES environment variable is not set.
-
-            :param configurationFilePath:
-            :param sourcesFilePath:
-
-
-            :returns: AGAnalysis object.
-        """
         self.config = AgilepyConfig(configurationFilePath)
 
         self.config.printOptions("output")
@@ -83,23 +96,27 @@ class AGAnalysis:
             raise PFILESNotFoundError("$PFILES is not set.")
 
 
-    def resetConf(self):
-        """
-        Reset the configuration to default values.
 
-            :returns: None
-        """
-        self.config.reset()
 
     def setOptions(self, **kwargs):
-        """
-        Update the configuration.
+        """It updates configuration options specifying one or more key=value pairs at once.
 
-            You can specify one or more key=value pairs to update configuration values.
+        Args:
+            \*\*kwargs: key-values pairs, separated by a comma.
 
-            :param \*\*kwargs: key-values pairs, separated by a comma.
+        Returns:
+            True if all the input options are sucessfully updated, False otherwise.
 
-            :returns: True if all the input options are sucessfully updated, False otherwise.
+        Note:
+            The ``config`` attribute is initialized by reading the corresponding
+            yaml configuration file, loading its contents in memory. Updating the values
+            held by this object will not affect the original values written on disk.
+
+        Example:
+
+            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
+            True
+
         """
         rejected = self.config.setOptions(**kwargs)
 
@@ -109,48 +126,47 @@ class AGAnalysis:
         else:
             return True
 
+    def resetOptions(self):
+        """It resets the configuration options to their original values.
+
+        Returns:
+            None.
+        """
+        return self.config.reset()
 
     def printOptions(self, section=None):
+        """It prints the configuration options in the console.
+
+        Args:
+            section (str): you can specify a configuration file section to be printed out.
+
+        Returns:
+            None
         """
-        Update the configuration.
-
-            You can specify one or more key=value pairs to update configuration values.
-
-            :param \*\*kwargs: key-values pairs, separated by a comma.
-
-            :returns: True if all the input options are sucessfully updated, False otherwise.
-        """
-        self.config.printOptions(section)
+        return self.config.printOptions(section)
 
 
-
-    def getSourcesLibrary(self):
-        """
-        This method ... blabla ...
-        """
-        return self.sourcesLibrary
-
-
-
-    def freeSources(self, selectionLamda, parameterName, free):
-        """
-        This method ... blabla ...
-        """
-        return self.sourcesLibrary.freeSources(selectionLamda, parameterName, free)
-
-
-
-    def deleteSources(self, selectionLamda):
-        """
-        This method ... blabla ...
-        """
-        return self.sourcesLibrary.deleteSources(selectionLamda)
 
 
 
     def generateMaps(self):
-        """
-        This method ... blabla ...
+        """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
+
+        The method's behaviour varies according to several configuration options (see docs here).
+
+        Note:
+            It resets the configuration options to their original values before exiting.
+
+        Returns:
+            The absolute path to the generated ``maplist file``.
+
+        Raises:
+            ScienceToolInputArgMissing: if not all the required configuration options have been set.
+
+        Example:
+            >>> aganalysis.generateMaps()
+            /home/rt/agilepy/output/testcase.maplist4
+
         """
         fovbinnumber = self.config.getOptionValue("fovbinnumber")
         energybins = self.config.getOptionValue("energybins")
@@ -244,9 +260,33 @@ class AGAnalysis:
         return maplistFilePath
 
 
+
+
+
     def mle(self, maplistFilePath):
-        """
-        This method ... blabla ...
+        """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
+
+        The outputfiles have the ``.source`` extension.
+
+        The method's behaviour varies according to several configuration options (see docs here).
+
+        Note:
+            It resets the configuration options to their original values before exiting.
+
+        Args:
+            maplistFilePath (str): the absolute path to the ``maplist file`` generated by ``generateMaps()``.
+
+        Returns:
+            A list of absolute paths to the output ``.source`` files.
+
+        Raises:
+            MaplistIsNone: is the input argument is None.
+
+        Example:
+            >>> maplistFilePath = aganalysis.generateMaps()
+            >>> aganalysis.mle(maplistFilePath)
+            [/home/rt/agilepy/output/testcase0001_2AGLJ2021+4029.source /home/rt/agilepy/output/testcase0001_2AGLJ2021+3654.source]
+
         """
         if not maplistFilePath:
             raise MaplistIsNone("The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist \
@@ -294,12 +334,103 @@ class AGAnalysis:
 
 
 
+    def freeSources(self, selection, parameterName, free):
+        """It can set to True or False a parameter's ``free`` attribute of one or more source.
+
+        Example of source model:
+        ::
+
+            <source name="2AGLJ2021+4029" type="PointSource">
+                <spectrum type="PLExpCutoff">
+                  <parameter name="Flux" free="1"  value="119.3e-08"/>
+                  <parameter name="Index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
+                  <parameter name="CutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
+                </spectrum>
+                <spatialModel type="PointSource" location_limit="0" free="0">
+                  <parameter name="GLON" value="78.2375" />
+                  <parameter name="GLAT" value="2.12298" />
+                </spatialModel>
+            </source>
+
+        The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
+        ``boolean expression strings``.
+
+        The selection criteria can be expressed using the following ``Source`` class's parameters:
+
+        - Name: the unique code identifying the source.
+        - Dist: the distance of the source from the center of the maps (generated with ``generateMaps()``)
+        - Flux: the flux value.
+        - SqrtTS: the radix square of the ts.
+
+        Warning:
+
+            The Dist, Flux and SqrtTS parameters are available only after the maximum likelihood estimation analysis.
+
+
+        The supported ``parameterName`` are:
+
+        - Flux
+        - Index
+        - Index1
+        - Index2
+        - CutoffEnergy
+        - PivotEnergy
+        - Curvature
+        - Index2
+        - Loc
+
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+            parameterName (str): the ``free`` attribute of this parameter will be updated.
+            free (bool): the boolean value used.
+
+        Returns:
+            The list of the sources matching the selection criteria.
+
+        Note:
+            The ``sourcesLibrary`` attribute is initialized by reading the corresponding
+            xml descriptor file, loading its contents in memory. Updating the values
+            held by this object will not affect the original values written on disk.
+
+        Example:
+
+            The following calls are equivalent and they set to True the ``free`` attribute of the "Flux" parameter for all the sources
+            named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
+            is greater than zero.
+
+            >>> aganalysis.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
+            [..]
+
+            >>> aganalysis.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", True)
+            [..]
+
+
+
+        """
+        return self.sourcesLibrary.freeSources(selection, parameterName, free)
+
+
+
+    def deleteSources(self, selection):
+        """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+
+        Returns:
+            The list containing the deleted sources.
+        """
+        return self.sourcesLibrary.deleteSources(selection)
+
+
+
+
+
+
 
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):
-        """
-        This method ... blabla ...
-        """
         # print("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
         A = float(fovradmax) - float(fovradmin)
         B = float(fovbinnumber)

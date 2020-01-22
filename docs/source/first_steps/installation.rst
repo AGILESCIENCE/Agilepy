@@ -1,5 +1,8 @@
-Installing Agilepy
-==================
+Installation
+============
+
+Installation with Anaconda
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Agilepy (and its dependencies) can be easily installed using Anaconda. You just
 need to decide the name of the virtual environment that will be created by anaconda.

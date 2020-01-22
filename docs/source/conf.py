@@ -42,9 +42,11 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon'
 ]
 autodoc_typehints='none'
-
+autodoc_member_order='bysource' #groupwise  alphabetical
+napoleon_include_init_with_doc=True
 
 
 # Add any paths that contain templates here, relative to this directory.
