@@ -23,3 +23,4 @@ It will be available soon!
 
    help/help
    help/development
+   help/troubleshooting
