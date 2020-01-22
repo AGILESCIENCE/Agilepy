@@ -24,12 +24,3 @@
 
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
-from agilepy.api.AGAnalysis import AGAnalysis
-from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import CtsMapGenerator, \
-                                     ExpMapGenerator, \
-                                     GasMapGenerator, \
-                                     IntMapGenerator, \
-                                     Multi

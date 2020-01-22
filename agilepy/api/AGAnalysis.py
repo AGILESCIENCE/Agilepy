@@ -96,8 +96,6 @@ class AGAnalysis:
             raise PFILESNotFoundError("$PFILES is not set.")
 
 
-
-
     def setOptions(self, **kwargs):
         """It updates configuration options specifying one or more key=value pairs at once.
 
@@ -126,6 +124,7 @@ class AGAnalysis:
         else:
             return True
 
+
     def resetOptions(self):
         """It resets the configuration options to their original values.
 
@@ -133,6 +132,7 @@ class AGAnalysis:
             None.
         """
         return self.config.reset()
+
 
     def printOptions(self, section=None):
         """It prints the configuration options in the console.
@@ -144,9 +144,6 @@ class AGAnalysis:
             None
         """
         return self.config.printOptions(section)
-
-
-
 
 
     def generateMaps(self):
@@ -260,9 +257,6 @@ class AGAnalysis:
         return maplistFilePath
 
 
-
-
-
     def mle(self, maplistFilePath):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
@@ -322,16 +316,6 @@ class AGAnalysis:
         self.config.reset()
 
         return sourceFiles
-
-
-
-
-
-
-
-
-
-
 
 
     def freeSources(self, selection, parameterName, free):
@@ -411,7 +395,6 @@ class AGAnalysis:
         return self.sourcesLibrary.freeSources(selection, parameterName, free)
 
 
-
     def deleteSources(self, selection):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
 
@@ -422,9 +405,6 @@ class AGAnalysis:
             The list containing the deleted sources.
         """
         return self.sourcesLibrary.deleteSources(selection)
-
-
-
 
 
 

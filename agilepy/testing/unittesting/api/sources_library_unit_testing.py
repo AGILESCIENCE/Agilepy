@@ -31,7 +31,7 @@ from pathlib import Path
 import os
 import shutil
 
-from agilepy.api import SourcesLibrary
+from agilepy.api.SourcesLibrary import SourcesLibrary
 
 
 class SourcesLibraryUnittesting(unittest.TestCase):
