@@ -33,6 +33,7 @@ from copy import deepcopy
 from os.path import dirname, realpath, join, expandvars
 
 from agilepy.utils.Utils import Singleton, DataUtils
+from agilepy.utils.CustomExceptions import EnergyBinsNumNotCompatibleWithBgCoeffNum
 
 
 class AgilepyConfig(metaclass=Singleton):
@@ -218,14 +219,16 @@ class AgilepyConfig(metaclass=Singleton):
         if numberOfIsoCoeff != numberOfEnergyBins:
 
             print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfIsoCoeff (%d)" % (numberOfEnergyBins, numberOfIsoCoeff))
-            exit(1)
+
+            raise EnergyBinsNumNotCompatibleWithBgCoeffNum("Energy bins: {} Isotropic Background Coefficents: {}".format(confDict["maps"]["energybins"],confDict["maps"]["isocoeff"]))
 
         numberOfGalCoeff = len(confDict["model"]["galcoeff"])
 
         if numberOfGalCoeff != numberOfEnergyBins:
 
             print("[AgilepyConfig] numberOfEnergyBins (%d) is not equal to numberOfGalCoeff (%d)" % (numberOfEnergyBins, numberOfGalCoeff))
-            exit(1)
+
+            raise EnergyBinsNumNotCompatibleWithBgCoeffNum("Energy bins: {} Isotropic Background Coefficents: {}".format(confDict["maps"]["energybins"],confDict["maps"]["galcoeff"]))
 
 
     @staticmethod
@@ -262,7 +265,7 @@ class AgilepyConfig(metaclass=Singleton):
             expanded = expandvars(path)
             if expanded == path:
                 print("[AgilepyConfig] Environment variable has not been expanded in {}".format(expanded))
-                exit(1)
+                raise EnvironmentVariableNotExpanded("[AgilepyConfig] Environment variable has not been expanded in {}".format(expanded))
             else:
                 return expanded
         else:

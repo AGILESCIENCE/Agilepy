@@ -41,3 +41,11 @@ class SelectionStringToLambdaConversioFailed(Exception):
 class SelectionParamNotSupported(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class EnergyBinsNumNotCompatibleWithBgCoeffNum(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class EnvironmentVariableNotExpanded(Exception):
+    def __init__(self, message):
+        super().__init__(message)
