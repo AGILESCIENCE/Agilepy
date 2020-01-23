@@ -10,6 +10,7 @@ agilepy_path=$((python $script_dir/get_agilepy_path.py) 2>&1)
 
 if [ $? -ne 0 ]; then
   echo "Getting agilepy library path => command failed."
+  exit 126
 else
 
   OS=$(uname -s)
@@ -22,6 +23,6 @@ else
 
   echo "agilepy_path: $agilepy_path"
 
-  python "$agilepy_path/testing/unittesting/api/ag_analysis_unit_testing.py -v"
+  python "$agilepy_path/testing/unittesting/api/ag_analysis_unit_testing.py" -v
 
 fi
