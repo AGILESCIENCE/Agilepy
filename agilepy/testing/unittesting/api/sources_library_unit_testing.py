@@ -39,7 +39,8 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-        self.sourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
+        self.xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
+        self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
@@ -48,8 +49,53 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.sl = SourcesLibrary()
 
+    def get_free_params(self, source):
+
+        return { "pos: ": source.spatialModel.free,
+                 "curvature: ": source.spectrum.getFreeAttributeValueOf("name", "Curvature"),
+                 "pivot energy: ": source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy"),
+                 "index: ": source.spectrum.getFreeAttributeValueOf("name", "Index"),
+                 "pos: ": source.spatialModel.free,
+                 "flux: ": source.spectrum.getFreeAttributeValueOf("name", "Flux")
+               }
+
+
     def test_load_xml(self):
-        self.assertEqual(True, self.sl.loadSourceLibraryXML(self.sourcesconfPath))
+        self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, format="XML"))
+
+    def test_load_txt(self):
+        agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
+        self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, format="AG"))
+        self.assertEqual(10, len(self.sl.sources))
+
+        # testing fixflags
+        f0 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":0, "flux: ":0} # special case
+        f1 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":0, "flux: ":1}
+        f2 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":1, "flux: ":0}
+        f3 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":1, "flux: ":1}
+        f4 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":0, "flux: ":0}
+        f5 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":0, "flux: ":1}
+
+        f7 = {"pos: ":0, "curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":1, "flux: ":1}
+
+        f28 = {"pos: ":0, "curvature: ":1, "pivot energy: ":1, "index: ":1, "pos: ":0, "flux: ":0}
+        f30 = {"pos: ":0, "curvature: ":1, "pivot energy: ":1, "index: ":1, "pos: ":1, "flux: ":0}
+        f32 = {"pos: ":2, "curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":0, "flux: ":0} # special case
+
+        fs = [f0,f1,f2,f3,f4,f5,f7,f28,f30,f32]
+
+        for i,d in enumerate(fs):
+            ff = i
+            if ff == 6: ff = 7
+            elif ff == 7: ff = 28
+            elif ff == 8: ff = 30
+            elif ff == 9: ff = 32
+
+            print("\nTest fixflag=%d for source with spectrum type=LogParabola"%(ff))
+            print(fs[i])
+            print(self.get_free_params(self.sl.sources[i]))
+            self.assertDictEqual(fs[i], self.get_free_params(self.sl.sources[i]))
+
 
     def test_source_file_parsing(self):
 
@@ -62,7 +108,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_string(self):
 
-        self.sl.loadSourceLibraryXML(self.sourcesconfPath)
+        self.sl.loadSources(self.xmlsourcesconfPath, format="XML")
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+4029"')
@@ -79,7 +125,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSourceLibraryXML(self.sourcesconfPath)
+        self.sl.loadSources(self.xmlsourcesconfPath, format="XML")
 
 
         sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+4029" )
@@ -96,7 +142,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_string(self):
 
-        self.sl.loadSourceLibraryXML(self.sourcesconfPath)
+        self.sl.loadSources(self.xmlsourcesconfPath, format="XML")
         source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 
@@ -118,7 +164,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_lambda(self):
 
-        self.sl.loadSourceLibraryXML(self.sourcesconfPath)
+        self.sl.loadSources(self.xmlsourcesconfPath, format="XML")
         source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
         self.sl.updateMulti(source, 80, 0)
 

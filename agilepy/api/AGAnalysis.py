@@ -34,8 +34,11 @@ from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
 from agilepy.utils.Utils import agilepyLogger
-from agilepy.utils.CustomExceptions import AGILENotFoundError, PFILESNotFoundError, ScienceToolInputArgMissing, MaplistIsNone
 from agilepy.utils.Parameters import Parameters
+from agilepy.utils.CustomExceptions import AGILENotFoundError, \
+                                           PFILESNotFoundError, \
+                                           ScienceToolInputArgMissing, \
+                                           MaplistIsNone
 
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
@@ -90,7 +93,7 @@ class AGAnalysis:
 
         self.sourcesLibrary = SourcesLibrary()
 
-        self.sourcesLibrary.loadSourceLibraryXML(sourcesFilePath)
+        self.sourcesLibrary.loadSources(sourcesFilePath)
 
         if "AGILE" not in os.environ:
             raise AGILENotFoundError("$AGILE is not set.")
@@ -290,7 +293,7 @@ class AGAnalysis:
                                  file as argument (perhaps you want to call generateMaps() first). ")
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeSourcesModelsToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
 
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 

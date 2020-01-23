@@ -27,16 +27,19 @@
 
 from inspect import signature
 from os.path import split, join
-import xml.etree.ElementTree as ET
 from functools import singledispatch
+#from ElementTree_pretty import prettify
+from xml.etree.ElementTree import parse, Element, SubElement, Comment
 
-from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.Utils import agilepyLogger, Astro
+from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
 from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
                                            FileSourceParsingError, \
                                            SourceNotFound, \
-                                           SelectionParamNotSupported
+                                           SelectionParamNotSupported, \
+                                           SourcesFileLoadingError, \
+                                           SourcesAgileFormatParsingError
 
 class SourcesLibrary:
 
@@ -45,50 +48,63 @@ class SourcesLibrary:
         This method ... blabla ...
         """
         self.logger = agilepyLogger
-        self.xmlFilePath = None
-        self.xmlFilePathPrefix = None
+
+        self.sourcesFilePath = None
+        self.sourcesFilePathPrefix = None
+        self.sourcesFilePathFormat = None
+
         self.sources = None
 
 
-    def loadSourceLibraryXML(self, xmlFilePath):
+    def loadSources(self, filePath, format="XML"):
         """
         This method ... blabla ...
         """
-        self.xmlFilePath = xmlFilePath
-        self.xmlFilePathPrefix,_ = split(self.xmlFilePath)
+        if format not in ["AG", "XML"]:
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
 
-        self.sources = self._parseSourceXml(self.xmlFilePath)
+        self.sourcesFilePathFormat = format
+        self.sourcesFilePath = filePath
+        self.sourcesFilePathPrefix,_ = split(self.sourcesFilePath)
+
+        if format == "XML":
+            self.sources = self._loadFromSourcesXml(self.sourcesFilePath)
+
+        else:
+            self.sources = self._loadFromSourcesTxt(self.sourcesFilePath)
 
         if not self.sources:
-            self.logger.warning(self, "Errors during %s parsing", [self.xmlFilePath])
-            return False
+
+            self.logger.critical(self, "Errors during %s parsing (format %s)", [self.sourcesFilePath, self.sourcesFilePathFormat])
+            raise SourcesFileLoadingError("Errors during {} parsing (format {})".format(self.sourcesFilePath, self.sourcesFilePathFormat))
+
         else:
             return True
 
 
-    def writeSourcesModelsToFile(self, outfileNamePrefix, format="AG"):
+
+
+    def writeToFile(self, outfileNamePrefix, format="AG"):
         """
         This method ... blabla ...
         """
-        if format not in ["AG"]:#, "XML"]:
-            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG".format(format))
+        if format not in ["AG", "XML"]:
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
 
-        outfilepath = join(self.xmlFilePathPrefix, outfileNamePrefix)
+        outfilepath = join(self.sourcesFilePathPrefix, outfileNamePrefix)
 
         if format == "AG":
-
-            sourcesAgileFormat = self._convertToAgileFormat()
-
+            sourceLibraryToWrite = self._convertToAgileFormat()
             outfilepath += ".txt"
-            with open(outfilepath, "w") as sourceLibraryFile:
-
-                sourceLibraryFile.write(sourcesAgileFormat)
 
         else:
-            pass
-            #outfilepath += ".xml"
-            #with open(outfilepath, "w") as sourceLibraryFile:
-            #    sourceLibraryFile.write(self.sourcesXML)
+            sourceLibraryToWrite = self._convertToXmlFormat()
+            outfilepath += ".xml"
+
+        with open(outfilepath, "w") as sourceLibraryFile:
+
+            sourceLibraryFile.write(sourceLibraryToWrite)
+
 
         return outfilepath
 
@@ -380,11 +396,11 @@ class SourcesLibrary:
             raise SelectionParamNotSupported("The following selection params are not supported: {}".format(' '.join(notSupported)))
 
 
-    def _parseSourceXml(self, xmlFilePath):
+    def _loadFromSourcesXml(self, xmlFilePath):
 
         self.logger.info(self, "Parsing %s ...", [xmlFilePath])
 
-        xmlRoot = ET.parse(xmlFilePath).getroot()
+        xmlRoot = parse(xmlFilePath).getroot()
 
         sources = []
 
@@ -413,6 +429,86 @@ class SourcesLibrary:
             sources.append(sourceDC)
 
         return sources
+
+
+    def _loadFromSourcesTxt(self, txtFilePath):
+
+        sources = []
+
+        with open(txtFilePath, "r") as txtFile:
+
+             for line in txtFile:
+
+                 # each line is a source
+                 elements = [elem.strip() for elem in line.split(" ") if elem]
+
+                 if len(elements) != 17:
+                     self.logger.critical(self, "The number of elements on the line %s is not 17", [line])
+                     raise SourcesAgileFormatParsingError("The number of elements on the line {} is not 17".format(line))
+
+                 flux = float(elements[0])
+                 glon = float(elements[1])
+                 glat = float(elements[2])
+                 index = float(elements[3])
+                 fixflag = int(elements[4])
+                 name = elements[6]
+                 location_limit = float(elements[7])
+                 spectrum_type = int(elements[8])
+
+
+                 if fixflag == 0:
+                     free_bits = [0 for i in range(6)]
+
+                 elif fixflag == 32:
+                     free_bits = [0,0,0,0,0,1]
+
+                 else:
+                     fixflagBinary = f'{fixflag:06b}'
+                     free_bits = [int(bit) for bit in reversed(fixflagBinary)]
+
+
+
+                  # COMPUTE FREE
+
+                 sourceDC = Source(name=name, type="PointSource")
+
+                 sourceDC.spectrum = Spectrum(type="", parameters=[])
+                 sourceDC.spectrum.parameters.append(Parameter(name="Flux", free=free_bits[0], value=flux))
+
+                 if spectrum_type == 0:
+                     sourceDC.spectrum.type = "PowerLaw"
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
+
+                 elif spectrum_type == 1:
+                     sourceDC.spectrum.type = "PLExpCutoff"
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+
+                 elif spectrum_type == 2:
+                     sourceDC.spectrum.type = "PLSuperExpCutoff"
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index1", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index2", free=free_bits[4], value=float(elements[10]), min=float(elements[15]), max=float(elements[16])))
+
+                 elif spectrum_type == 3:
+                     sourceDC.spectrum.type = "LogParabola"
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="PivotEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="Curvature", free=free_bits[4], value=float(elements[10]), min=float(elements[15]), max=float(elements[16])))
+
+
+                 else:
+                     self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", [spectrum_type])
+                     raise SourcesAgileFormatParsingError("spectrum_type={} not supported. Supported: [0,1,2,3]".format(spectrum_type))
+
+                 sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits[1], parameters=[])
+                 sourceDC.spatialModel.parameters.append(Parameter(name="GLON", value=glon))
+                 sourceDC.spatialModel.parameters.append(Parameter(name="GLAT", value=glat))
+
+                 sources.append(sourceDC)
+
+        return sources
+
 
 
     def _checkAndAddParameters(self, sourceDescrDC, sourceDescription):
@@ -520,6 +616,22 @@ class SourcesLibrary:
         # self.logger.info("Sources configuration in AGILE format placed at: %s", outfilepath)
         return sourceStr
 
+    def _convertToXmlFormat(self):
+        """
+        https://pymotw.com/2/xml/etree/ElementTree/create.html
+        top = Element('source_library', title="source library")
+
+        doc = SubElement(root, "doc")
+
+        SubElement(doc, "field1", name="blah").text = "some value1"
+        SubElement(doc, "field2", name="asdfasd").text = "some vlaue2"
+
+        tree = ET.ElementTree(root)
+        tree.write("filename.xml")
+        return prettify(top)
+        """
+        return ""
+
 
     @staticmethod
     def _computeFixFlag(source):
@@ -550,8 +662,6 @@ class SourcesLibrary:
         return str(fixflag)
 
 
-    def _convertToXML(self):
-        pass
 
     @staticmethod
     def _getSelectionParams(tostr = False, onlyMultiParams = False):

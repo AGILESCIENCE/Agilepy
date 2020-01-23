@@ -49,3 +49,11 @@ class EnvironmentVariableNotExpanded(Exception):
 class ConfigurationsNotValidError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class SourcesFileLoadingError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class SourcesAgileFormatParsingError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
