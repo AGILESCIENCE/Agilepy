@@ -324,6 +324,7 @@ class AGAnalysis:
         return sourceFiles
 
 
+
     def freeSources(self, selection, parameterName, free):
         """It can set to True or False a parameter's ``free`` attribute of one or more source.
 
@@ -400,6 +401,16 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.freeSources(selection, parameterName, free)
 
+    def selectSources(self, selection):
+        """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+
+        Returns:
+            List of sources.
+        """
+        return self.sourcesLibrary.selectSources(selection)
 
     def deleteSources(self, selection):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
