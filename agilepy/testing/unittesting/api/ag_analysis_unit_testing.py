@@ -62,13 +62,13 @@ class AGAnalysisUnittesting(unittest.TestCase):
     def test_source_dist_updated_after_mle(self):
         maplistFilePath = self.aga.generateMaps()
 
-        products_1 = self.aga.mle(maplistFilePath)
+        self.aga.mle(maplistFilePath)
         source_1 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+4029').pop()
         dist_1 = source_1.multi.Dist
 
         self.aga.setOptions(glon=81, glat=1)
 
-        products_1 = self.aga.mle(maplistFilePath)
+        self.aga.mle(maplistFilePath)
         source_2 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+4029').pop()
         dist_2 = source_2.multi.Dist
 

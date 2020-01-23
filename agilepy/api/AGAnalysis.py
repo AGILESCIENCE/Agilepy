@@ -293,7 +293,7 @@ class AGAnalysis:
                                  file as argument (perhaps you want to call generateMaps() first). ")
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), format="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="AG")
 
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 

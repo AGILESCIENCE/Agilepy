@@ -28,8 +28,9 @@
 from inspect import signature
 from os.path import split, join
 from functools import singledispatch
+from xml.etree.ElementTree import parse
 #from ElementTree_pretty import prettify
-from xml.etree.ElementTree import parse, Element, SubElement, Comment
+#from xml.etree.ElementTree import parse, Element, SubElement, Comment
 
 from agilepy.utils.Utils import agilepyLogger, Astro
 from agilepy.utils.BooleanExpressionParser import BooleanParser
@@ -56,18 +57,18 @@ class SourcesLibrary:
         self.sources = None
 
 
-    def loadSources(self, filePath, format="XML"):
+    def loadSources(self, filePath, fileformat="XML"):
         """
         This method ... blabla ...
         """
-        if format not in ["AG", "XML"]:
+        if fileformat not in ["AG", "XML"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
 
         self.sourcesFilePathFormat = format
         self.sourcesFilePath = filePath
         self.sourcesFilePathPrefix,_ = split(self.sourcesFilePath)
 
-        if format == "XML":
+        if fileformat == "XML":
             self.sources = self._loadFromSourcesXml(self.sourcesFilePath)
 
         else:
@@ -84,21 +85,21 @@ class SourcesLibrary:
 
 
 
-    def writeToFile(self, outfileNamePrefix, format="AG"):
+    def writeToFile(self, outfileNamePrefix, fileformat="AG"):
         """
         This method ... blabla ...
         """
-        if format not in ["AG", "XML"]:
+        if fileformat not in ["AG", "XML"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
 
         outfilepath = join(self.sourcesFilePathPrefix, outfileNamePrefix)
 
-        if format == "AG":
+        if fileformat == "AG":
             sourceLibraryToWrite = self._convertToAgileFormat()
             outfilepath += ".txt"
 
         else:
-            sourceLibraryToWrite = self._convertToXmlFormat()
+            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat()
             outfilepath += ".xml"
 
         with open(outfilepath, "w") as sourceLibraryFile:
@@ -418,11 +419,11 @@ class SourcesLibrary:
 
                 if sourceDescription.tag == "spectrum":
                     sourceDescrDC = Spectrum(**sourceDescription.attrib, parameters=[])
-                    sourceDescrDC = self._checkAndAddParameters(sourceDescrDC, sourceDescription)
+                    sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
                     sourceDC.spectrum = sourceDescrDC
                 else:
                     sourceDescrDC = SpatialModel(**sourceDescription.attrib, parameters=[])
-                    sourceDescrDC = self._checkAndAddParameters(sourceDescrDC, sourceDescription)
+                    sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
                     sourceDC.spatialModel = sourceDescrDC
 
 
@@ -439,8 +440,7 @@ class SourcesLibrary:
 
              for line in txtFile:
 
-                 # each line is a source
-                 elements = [elem.strip() for elem in line.split(" ") if elem]
+                 elements = [elem.strip() for elem in line.split(" ") if elem] # each line is a source
 
                  if len(elements) != 17:
                      self.logger.critical(self, "The number of elements on the line %s is not 17", [line])
@@ -458,17 +458,19 @@ class SourcesLibrary:
 
                  if fixflag == 0:
                      free_bits = [0 for i in range(6)]
+                     free_bits_position = 0
 
                  elif fixflag == 32:
-                     free_bits = [0,0,0,0,0,1]
+                     free_bits = [0,0,0,0,0,2]
+                     free_bits_position = free_bits[5]
 
                  else:
                      fixflagBinary = f'{fixflag:06b}'
                      free_bits = [int(bit) for bit in reversed(fixflagBinary)]
+                     free_bits_position = free_bits[1]
 
 
 
-                  # COMPUTE FREE
 
                  sourceDC = Source(name=name, type="PointSource")
 
@@ -477,31 +479,46 @@ class SourcesLibrary:
 
                  if spectrum_type == 0:
                      sourceDC.spectrum.type = "PowerLaw"
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, \
+                                                                        value=index, min=float(elements[11]), max=float(elements[12])))
 
                  elif spectrum_type == 1:
                      sourceDC.spectrum.type = "PLExpCutoff"
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
-                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, \
+                                                                        value=index, min=float(elements[11]), max=float(elements[12])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, \
+                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
 
                  elif spectrum_type == 2:
                      sourceDC.spectrum.type = "PLSuperExpCutoff"
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index1", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
-                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index2", free=free_bits[4], value=float(elements[10]), min=float(elements[15]), max=float(elements[16])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index1", free=free_bits[2], scale=-1.0, \
+                                                                        value=index, min=float(elements[11]), max=float(elements[12])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="CutoffEnergy", free=free_bits[3], scale=-1.0, \
+                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index2", free=free_bits[4], value=float(elements[10]), \
+                                                                        min=float(elements[15]), max=float(elements[16])))
 
                  elif spectrum_type == 3:
                      sourceDC.spectrum.type = "LogParabola"
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, value=index, min=float(elements[11]), max=float(elements[12])))
-                     sourceDC.spectrum.parameters.append(Parameter(name="PivotEnergy", free=free_bits[3], scale=-1.0, value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
-                     sourceDC.spectrum.parameters.append(Parameter(name="Curvature", free=free_bits[4], value=float(elements[10]), min=float(elements[15]), max=float(elements[16])))
+                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, \
+                                                                        value=index, min=float(elements[11]), max=float(elements[12])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="PivotEnergy", free=free_bits[3], scale=-1.0, \
+                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
+
+                     sourceDC.spectrum.parameters.append(Parameter(name="Curvature", free=free_bits[4], value=float(elements[10]), \
+                                                                        min=float(elements[15]), max=float(elements[16])))
 
 
                  else:
                      self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", [spectrum_type])
                      raise SourcesAgileFormatParsingError("spectrum_type={} not supported. Supported: [0,1,2,3]".format(spectrum_type))
 
-                 sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits[1], parameters=[])
+                 sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits_position, parameters=[])
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLON", value=glon))
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLAT", value=glat))
 
@@ -510,8 +527,8 @@ class SourcesLibrary:
         return sources
 
 
-
-    def _checkAndAddParameters(self, sourceDescrDC, sourceDescription):
+    @staticmethod
+    def _checkAndAddParameters(sourceDescrDC, sourceDescription):
         for parameter in sourceDescription:
 
             if parameter.tag != "parameter":
@@ -616,7 +633,8 @@ class SourcesLibrary:
         # self.logger.info("Sources configuration in AGILE format placed at: %s", outfilepath)
         return sourceStr
 
-    def _convertToXmlFormat(self):
+    @staticmethod
+    def _convertToXmlFormat():
         """
         https://pymotw.com/2/xml/etree/ElementTree/create.html
         top = Element('source_library', title="source library")

@@ -57,7 +57,7 @@ class AgilepyConfigUnittesting(unittest.TestCase):
         self.assertEqual(True, "input/tmin" in error_dict)
         self.assertEqual(1, len(error_dict))
 
-    def test_validation_tmin_not_in_index(self):
+    def test_validation_tmax_not_in_index(self):
 
         self.config.setOptions(tmax=456537946)
 

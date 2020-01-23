@@ -66,11 +66,11 @@ class AgilepyConfig(metaclass=Singleton):
 
         if validate:
 
-            self.validateConfiguration(conf)
+            self.validateConfiguration()
 
-    def validateConfiguration(self, confDict):
+    def validateConfiguration(self):
 
-        errors = AgilepyConfig._validateConfiguration(confDict)
+        errors = AgilepyConfig._validateConfiguration(self.conf)
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
