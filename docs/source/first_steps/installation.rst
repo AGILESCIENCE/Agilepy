@@ -29,7 +29,6 @@ When you activate the environment the following environment variables will be se
     PFILES=$PFILES:$AGILE/share
     ROOTSYS=$CONDA_PREFIX
     CFITSIO=$CONDA_PREFIX
-    GSL=$CONDA_PREFIX
     PATH=$AGILE/bin:$AGILE/scripts:$AGILE/scripts/extendesources:$PATH
     LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$CONDA_PREFIX/lib64:$AGILE/lib:$LD_LIBRARY_PATH
 
