@@ -9,7 +9,7 @@ need to decide the name of the virtual environment that will be created by anaco
 ::
 
     conda config --add channels conda-forge
-    conda install -n <virtualenv_name> -c addis.inaf agilepy
+    conda create -n <virtualenv_name> -c addis.inaf agilepy
 
 Supported platforms:
 
