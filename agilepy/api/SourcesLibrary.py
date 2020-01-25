@@ -248,10 +248,15 @@ class SourcesLibrary:
             # print("LINE %d ELEMENTS %d"%(lin_num, len(values)))
             allValues += values
 
+        if len(allValues) != 128:
+            self.logger.critical(self, "The values extracted from %s file are lesser then 128", [sourceFilePath])
+            raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
         #print("allValues: ", allValues)
         #print("allValues sum: ", len(allValues))
+        multiOutput = MultiOutput(*allValues)
+        multiOutput.convertToFloat()
 
-        return MultiOutput(*allValues)
+        return multiOutput
 
 
 
@@ -265,6 +270,7 @@ class SourcesLibrary:
         for sourceFound in sourcesFound:
 
             sourceFound.multi = data
+
 
             # Computing the distances from maps centers
             # Longitude
@@ -282,11 +288,15 @@ class SourcesLibrary:
 
 
             sourceFound.multi.Dist = Astro.distance(sourceL, sourceB, mapCenterL, mapCenterB)
+            self.logger.info(self, "'Dist' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Dist)])
 
-            self.logger.info(self, "Source '%s' has been updated with 'AG_multi' analysis output", [data.label])
+            if sourceFound.setParamValue("Flux", sourceFound.multi.Flux):
 
+                self.logger.info(self, "'Flux' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Flux)])
 
+            else:
 
+                self.warning.info(self, "'Flux' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Flux)])
 
 
 
@@ -418,11 +428,11 @@ class SourcesLibrary:
                     SourcesLibrary._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescr.tag))
 
                 if sourceDescription.tag == "spectrum":
-                    sourceDescrDC = Spectrum(**sourceDescription.attrib, parameters=[])
+                    sourceDescrDC = Spectrum(sourceDescription.attrib["type"])
                     sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
                     sourceDC.spectrum = sourceDescrDC
                 else:
-                    sourceDescrDC = SpatialModel(**sourceDescription.attrib, parameters=[])
+                    sourceDescrDC = SpatialModel(sourceDescription.attrib["type"], sourceDescription.attrib["location_limit"], sourceDescription.attrib["free"])
                     sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
                     sourceDC.spatialModel = sourceDescrDC
 
@@ -475,6 +485,7 @@ class SourcesLibrary:
                  sourceDC = Source(name=name, type="PointSource")
 
                  sourceDC.spectrum = Spectrum(type="", parameters=[])
+
                  sourceDC.spectrum.parameters.append(Parameter(name="Flux", free=free_bits[0], value=flux))
 
                  if spectrum_type == 0:
@@ -535,7 +546,6 @@ class SourcesLibrary:
                 SourcesLibrary._fail("Tag <parameter> expected, %s found."%(parameter.tag))
 
             paramDC = Parameter(**parameter.attrib)
-
             sourceDescrDC.parameters.append(paramDC)
 
         return sourceDescrDC
@@ -559,17 +569,22 @@ class SourcesLibrary:
         for source in self.sources:
 
             # get flux value
-            flux = [param.value for param in source.spectrum.parameters if param.name == "Flux"].pop()
-            sourceStr += flux+" "
+            flux = source.getParamValue("Flux")
+            sourceStr += str(flux)+" "
 
             # glon e glat
-            sourceStr += source.spatialModel.getParamAttributeWhere("value", "name", "GLON") + " "
-            sourceStr += source.spatialModel.getParamAttributeWhere("value", "name", "GLAT") + " "
+            glon = source.spatialModel.getParamAttributeWhere("value", "name", "GLON")
+            glat = source.spatialModel.getParamAttributeWhere("value", "name", "GLAT")
+            sourceStr += str(glon) + " "
+            sourceStr += str(glat) + " "
+
 
             if source.spectrum.type == "PLSuperExpCutoff":
-                sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index1") + " "
+                index1 = source.spectrum.getParamAttributeWhere("value", "name", "Index1")
+                sourceStr += str(index1) + " "
             else:
-                sourceStr += source.spectrum.getParamAttributeWhere("value", "name", "Index") + " "
+                index = source.spectrum.getParamAttributeWhere("value", "name", "Index")
+                sourceStr += str(index) + " "
 
             sourceStr += SourcesLibrary._computeFixFlag(source)+" "
 
@@ -577,55 +592,55 @@ class SourcesLibrary:
 
             sourceStr += source.name + " "
 
-            sourceStr += source.spatialModel.location_limit + " "
+            sourceStr += str(source.spatialModel.location_limit) + " "
 
 
             if source.spectrum.type == "PowerLaw":
                 sourceStr += "0 0 0 "
 
             elif source.spectrum.type == "PLExpCutoff":
-                cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy")
+                cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy", strRepr=True)
                 sourceStr += "1 "+str(cutoffenergy)+" 0 "
 
             elif source.spectrum.type == "PLSuperExpCutoff":
-                cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy")
-                index2 = source.spectrum.getParamAttributeWhere("value", "name", "Index2")
+                cutoffenergy = source.spectrum.getParamAttributeWhere("value", "name", "CutoffEnergy", strRepr=True)
+                index2 = source.spectrum.getParamAttributeWhere("value", "name", "Index2", strRepr=True)
                 sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
 
             else:
-                pivotenergy = source.spectrum.getParamAttributeWhere("value", "name", "PivotEnergy")
-                curvature = source.spectrum.getParamAttributeWhere("value", "name", "Curvature")
+                pivotenergy = source.spectrum.getParamAttributeWhere("value", "name", "PivotEnergy", strRepr=True)
+                curvature = source.spectrum.getParamAttributeWhere("value", "name", "Curvature", strRepr=True)
                 sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
 
 
 
             if source.spectrum.type == "PLSuperExpCutoff":
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index1") + " " + \
-                             source.spectrum.getParamAttributeWhere("max", "name", "Index1") + " "
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index1", strRepr=True) + " " + \
+                             source.spectrum.getParamAttributeWhere("max", "name", "Index1", strRepr=True) + " "
             else:
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index") + " " + \
-                             source.spectrum.getParamAttributeWhere("max", "name", "Index") + " "
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "Index", strRepr=True) + " " + \
+                             source.spectrum.getParamAttributeWhere("max", "name", "Index", strRepr=True) + " "
 
 
             if source.spectrum.type == "PowerLaw":
                 sourceStr += "-1 -1 -1 -1"
 
             elif source.spectrum.type == "PLExpCutoff":
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy") +" "\
-                           + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy") +" "\
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy", strRepr=True) +" "\
                            + " -1 -1"
 
             elif source.spectrum.type == "PLSuperExpCutoff":
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy") +" "\
-                           + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy") +" "\
-                           + source.spectrum.getParamAttributeWhere("min", "name", "Index2") +" "\
-                           + source.spectrum.getParamAttributeWhere("max", "name", "Index2")
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "CutoffEnergy", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("max", "name", "CutoffEnergy", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("min", "name", "Index2", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("max", "name", "Index2", strRepr=True)
 
             else:
-                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "PivotEnergy") +" "\
-                           + source.spectrum.getParamAttributeWhere("max", "name", "PivotEnergy") +" "\
-                           + source.spectrum.getParamAttributeWhere("min", "name", "Curvature") +" "\
-                           + source.spectrum.getParamAttributeWhere("max", "name", "Curvature")
+                sourceStr += source.spectrum.getParamAttributeWhere("min", "name", "PivotEnergy", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("max", "name", "PivotEnergy", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("min", "name", "Curvature", strRepr=True) +" "\
+                           + source.spectrum.getParamAttributeWhere("max", "name", "Curvature", strRepr=True)
 
 
             sourceStr += "\n"
@@ -653,24 +668,26 @@ class SourcesLibrary:
 
     @staticmethod
     def _computeFixFlag(source):
+
         if source.spectrum.getFreeAttributeValueOf("name", "Flux") == 0:
             return "0"
 
         if source.spatialModel.free == 2:
 
             bitmask = source.spatialModel.free + \
-                      source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
-                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
-                      source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Curvature", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "Index2", strRepr=True) + \
+                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy", strRepr=True) + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Index", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "Index1", strRepr=True) + \
                       "0" + \
-                      source.spectrum.getFreeAttributeValueOf("name", "Flux")
+                      source.spectrum.getFreeAttributeValueOf("name", "Flux", strRepr=True)
 
         else:
-            bitmask = source.spectrum.getFreeAttributeValueOf("name", "Curvature") + source.spectrum.getFreeAttributeValueOf("name", "Index2") + \
-                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy") + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy") + \
-                      source.spectrum.getFreeAttributeValueOf("name", "Index") + source.spectrum.getFreeAttributeValueOf("name", "Index1") + \
-                      source.spatialModel.free + \
-                      source.spectrum.getFreeAttributeValueOf("name", "Flux")
+
+            bitmask = source.spectrum.getFreeAttributeValueOf("name", "Curvature", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "Index2", strRepr=True) + \
+                      source.spectrum.getFreeAttributeValueOf("name", "CutoffEnergy", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy", strRepr=True) + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Index", strRepr=True) + source.spectrum.getFreeAttributeValueOf("name", "Index1", strRepr=True) + \
+                      str(source.spatialModel.free) + \
+                      source.spectrum.getFreeAttributeValueOf("name", "Flux", strRepr=True)
 
         #print("bitmask:\n",bitmask)
         # '{0:08b}'.format(6)

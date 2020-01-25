@@ -312,11 +312,11 @@ class AGAnalysis:
 
         for sourceFile in sourceFiles:
 
-            source = SourcesLibrary.parseSourceFile(sourceFile)
+            multiOutputData = SourcesLibrary.parseSourceFile(sourceFile)
 
             mapCenterL = float(self.config.getOptionValue("glon"))
             mapCenterB = float(self.config.getOptionValue("glat"))
-            self.sourcesLibrary.updateMulti(source, mapCenterL, mapCenterB)
+            self.sourcesLibrary.updateMulti(multiOutputData, mapCenterL, mapCenterB)
 
 
         self.config.reset()
