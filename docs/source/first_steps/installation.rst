@@ -9,7 +9,7 @@ need to decide the name of the virtual environment that will be created by anaco
 ::
 
     conda config --add channels conda-forge
-    conda create -n <virtualenv_name> -c agilescience agile
+    conda install -n <virtualenv_name> -c addis.inaf agilepy
 
 Supported platforms:
 
@@ -29,6 +29,7 @@ When you activate the environment the following environment variables will be se
     PFILES=$PFILES:$AGILE/share
     ROOTSYS=$CONDA_PREFIX
     CFITSIO=$CONDA_PREFIX
+    GSL=$CONDA_PREFIX
     PATH=$AGILE/bin:$AGILE/scripts:$AGILE/scripts/extendesources:$PATH
     LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$CONDA_PREFIX/lib64:$AGILE/lib:$LD_LIBRARY_PATH
 
@@ -37,6 +38,22 @@ Running tests:
 
     start_agilepy_tests.sh
 
-MORE ON THE PACKAGE DISTRIBUTION.
+Uninstalling
+^^^^^^^^^^^^
+::
 
-  - download the AGILEDATA from agilepy-extra
+    conda env remove --name <virtualenv_name>
+
+
+Package distribution structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The virtual environment <virtualenv_name> folder is under the "envs" folder within
+the root folder of your anaconda installation.
+
+It contains all the dependencies Agilepy requires. Here, there is the "agiletools"
+directory, containing AGILE's scientific software.
+
+
+How to get AGILE data
+^^^^^^^^^^^^^^^^^^^^^
+TODO
