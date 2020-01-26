@@ -30,6 +30,7 @@ import unittest
 from pathlib import Path
 import os
 import shutil
+from typing import List
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
 
@@ -121,11 +122,29 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_source_file_parsing(self):
 
-        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase0.source")
+        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data//testcase_2AGLJ2021+4029.source")
         self.assertEqual(True, bool(res))
+        self.assertEqual(True, isinstance(res.Flux, float))
+        self.assertEqual(0, res.Flux)
+        self.assertEqual(True, isinstance(res.SkytypeHFilterIrf, str))
+        self.assertEqual('SKY002.SFMG_H0025', res.SkytypeHFilterIrf)
+        self.assertEqual(True, isinstance(res.GalCoeff, List))
+        self.assertEqual(4, len(res.GalCoeff))
+        self.assertEqual(True, isinstance(res.GalCoeff[0], float))
+        self.assertEqual(None, res.Dist)
 
-        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        res = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
         self.assertEqual(True, bool(res))
+        self.assertEqual(True, isinstance(res.Flux, float))
+        self.assertEqual(6.69108e-15, res.Flux)
+        self.assertEqual(True, isinstance(res.SkytypeHFilterIrf, str))
+        self.assertEqual('SKY002.SFMG_H0025', res.SkytypeHFilterIrf)
+        self.assertEqual(True, isinstance(res.GalCoeff, List))
+        self.assertEqual(4, len(res.GalCoeff))
+        self.assertEqual(True, isinstance(res.GalCoeff[0], float))
+        self.assertEqual(None, res.Dist)
+
+
 
 
     def test_select_sources_with_selection_string(self):
