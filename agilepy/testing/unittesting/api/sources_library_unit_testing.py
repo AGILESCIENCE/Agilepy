@@ -63,6 +63,27 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_load_xml(self):
         self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML"))
+        self.assertEqual(2, len(self.sl.sources))
+
+        self.assertEqual(2, len(self.sl.sources))
+
+        sources = self.sl.selectSources('Name == "2AGLJ2021+4029"')
+        self.assertEqual(1, len(sources))
+        source = sources.pop()
+        self.assertEqual(119.3e-08, source.getParamValue("Flux"))
+        self.assertEqual(1.75, source.getParamValue("Index"))
+        self.assertEqual(78.2375, source.getParamValue("GLON"))
+
+
+        sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
+        self.assertEqual(1, len(sources))
+        source = sources.pop()
+        self.assertEqual(70.89e-08, source.getParamValue("Flux"))
+        self.assertEqual(1.38, source.getParamValue("Index"))
+        self.assertEqual(75.2562, source.getParamValue("GLON"))
+
+
+
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
