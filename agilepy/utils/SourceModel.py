@@ -317,12 +317,11 @@ class MultiOutput:
 
     def __str__(self):
 
-        return str(vars(self))
-        """
-        return f'\n - MultiOutput  Flux: {self.Flux}, emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
+
+        return f'\n - MultiOutput  Flux: {self.Flux} Dist: {self.Dist} emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
                       fovmax: {self.fovmax} start_flux: {self.start_flux} sqrt(TS): {self.SqrtTS} \
                       multiDistanceFromMapCenter: {self.Dist}'
-        """
+
 
 
 

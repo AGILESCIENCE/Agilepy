@@ -114,9 +114,9 @@ class SourcesLibraryUnittesting(unittest.TestCase):
             elif ff == 8: ff = 30
             elif ff == 9: ff = 32
 
-            print("\nTest fixflag=%d for source with spectrum type=LogParabola"%(ff))
-            print("expected: ", fs[i])
-            print("actual: ", SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
+            #print("\nTest fixflag=%d for source with spectrum type=LogParabola"%(ff))
+            #print("expected: ", fs[i])
+            #print("actual: ", SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
             self.assertDictEqual(fs[i], SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
 
 
@@ -152,13 +152,13 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
         self.assertEqual(2, len(self.sl.sources))
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+4029"')
+        sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
         self.assertEqual(1, len(sources))
 
-        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
         self.sl.updateMulti(source, 80, 0)
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0')
+        sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
         self.assertEqual(1, len(sources))
 
 
@@ -169,13 +169,13 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
 
 
-        sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+4029" )
+        sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+3654" )
         self.assertEqual(1, len(sources))
 
-        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
         self.sl.updateMulti(source, 80, 0)
 
-        sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0)
+        sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0)
         self.assertEqual(1, len(sources))
 
 
@@ -184,21 +184,22 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_string(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
-        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
         self.sl.updateMulti(source, 80, 0)
 
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", False)
+        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", False)
+        self.assertEqual(1, len(sources))
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", True)
+        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Index", True)
+        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Index", False)
+        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
 
@@ -206,20 +207,20 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_lambda(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
-        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+4029.source")
+        source = SourcesLibrary.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
         self.sl.updateMulti(source, 80, 0)
 
-
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", False)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", False)
+        self.assertEqual(1, len(sources))
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Index", True)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", True)
         self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Index", False)
+        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
 

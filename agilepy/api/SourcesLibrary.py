@@ -484,7 +484,7 @@ class SourcesLibrary:
 
                  sourceDC = Source(name=name, type="PointSource")
 
-                 sourceDC.spectrum = Spectrum(type="", parameters=[])
+                 sourceDC.spectrum = Spectrum(type="")
 
                  sourceDC.spectrum.parameters.append(Parameter(name="Flux", free=free_bits[0], value=flux))
 
@@ -529,7 +529,7 @@ class SourcesLibrary:
                      self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", [spectrum_type])
                      raise SourcesAgileFormatParsingError("spectrum_type={} not supported. Supported: [0,1,2,3]".format(spectrum_type))
 
-                 sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits_position, parameters=[])
+                 sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits_position)
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLON", value=glon))
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLAT", value=glat))
 
