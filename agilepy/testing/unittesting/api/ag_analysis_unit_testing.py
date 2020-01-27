@@ -74,6 +74,18 @@ class AGAnalysisUnittesting(unittest.TestCase):
 
         self.assertNotEqual(dist_1, dist_2)
 
+    def test_source_Flux_updated_after_mle(self):
+
+        maplistFilePath = self.aga.generateMaps()
+
+        source_1 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+3654').pop()
+        flux_1 = source_1.getParamValue("Flux")
+
+        self.aga.mle(maplistFilePath)
+        source_2 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+3654').pop()
+        flux_2 = source_2.getParamValue("Flux")
+
+        self.assertNotEqual(flux_1, flux_2)
 
 
 if __name__ == '__main__':

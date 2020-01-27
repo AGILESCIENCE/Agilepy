@@ -29,15 +29,33 @@
 from dataclasses import dataclass
 from typing import List
 import datetime
+import inspect
 
 class ValueParamFinder:
 
-    def getParamAttributeWhere(self, attributeName, key, value):
-        return [getattr(param, attributeName) for param in self.parameters if getattr(param, key) == value].pop()
+    def getParamAttributeWhere(self, attributeName, key, value, strRepr = False):
+        val = [getattr(param, attributeName) for param in self.parameters if getattr(param, key) == value].pop()
+        if strRepr:
+            return str(val)
+        else:
+            return val
 
-    def searchParamAttribute(self, attributeName):
+    def setParamValue(self, paramName, paramValue):
         for param in self.parameters:
-            if getattr(param, "name") == attributeName:
+            if getattr(param, "name") == paramName:
+                setattr(param, "value", paramValue)
+                return True
+        return False
+
+    def getParamValue(self, paramName):
+        for param in self.parameters:
+            if getattr(param, "name") == paramName:
+                return getattr(param, "value")
+        return None
+
+    def getParam(self, paramName):
+        for param in self.parameters:
+            if getattr(param, "name") == paramName:
                 return param
         return None
 
@@ -46,23 +64,39 @@ class ValueParamFinder:
             if getattr(param, "name") == parameterName:
                 setattr(param, "free", freeval)
 
-    def getFreeAttributeValueOf(self, key, value):
+    def getFreeAttributeValueOf(self, key, value, strRepr = False):
         try:
-            return [getattr(param, "free") for param in self.parameters if getattr(param, key) == value].pop()
+            val = [getattr(param, "free") for param in self.parameters if getattr(param, key) == value].pop()
+            if strRepr:
+                return str(val)
+            else:
+                return val
+
         except Exception:
             return ""
 
 @dataclass
 class Parameter:
-    """
 
-    """
     name: str
     value: float
     free: bool = None
     scale: float = None
     min: float = None
     max: float = None
+
+    def __init__(self, name, value, free=None, scale=None, min=None, max=None):
+
+        self.name = name
+        self.value = float(value)
+        if free is not None:
+            self.free = int(free)
+        if scale is not None:
+            self.scale = float(scale)
+        if min is not None:
+            self.min = float(min)
+        if max is not None:
+            self.max = float(max)
 
 @dataclass
 class SpatialModel(ValueParamFinder):
@@ -71,6 +105,13 @@ class SpatialModel(ValueParamFinder):
     free: int
     parameters: List[Parameter]
 
+    def __init__(self, type, location_limit, free):
+        self.parameters = []
+        self.type = type
+        self.location_limit = float(location_limit)
+        self.free = int(free)
+
+
     def __str__(self):
         return f'\n - SpatialModel type: {self.type} free: {self.free} glon: {self.parameters[0].value} glat: {self.parameters[1].value}'
 
@@ -78,6 +119,10 @@ class SpatialModel(ValueParamFinder):
 class Spectrum(ValueParamFinder):
     type: str
     parameters: List[Parameter]
+    def __init__(self, type):
+        self.type = type
+        self.parameters = []
+
     def __str__(self):
         paramsStr = ""
         for p in self.parameters:
@@ -124,9 +169,9 @@ class MultiOutput:
     par3_min: float = None
     par3_max: float = None
     contourpoints: float = None
-    minimizertype: float = None
+    minimizertype: str = None
     minimizeralg: str = None
-    minimizerdefstrategy: str = None
+    minimizerdefstrategy: float = None
     minimizerdeftol: float = None
 
     SqrtTS: float = None
@@ -242,10 +287,44 @@ class MultiOutput:
 
     Dist: float = None
 
+    def convertToFloat(self):
+
+        # filtering out methods
+        attributes = inspect.getmembers(self, lambda a:not(inspect.isroutine(a)))
+
+        # filtering out special names
+        attributes = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+
+        for a in attributes:
+
+            attrName = a[0]
+            attrVal = a[1]
+
+            if attrName in ["FluxPerChannel", "GalCoeff", "GalErrs", "GalZeroCoeff", "GalZeroErrs", "IsoCoeffs", "IsoErrs", "IsoZeroCoeffs", "IsoZeroErrs", "emin", "emax", "fovmin", "fovmax"]:
+                listelem = getattr(self, attrName)
+                newl = [float(elem) for elem in listelem]
+                setattr(self, attrName, newl)
+
+            elif attrName in ["label", "minimizeralg", "minimizertype", "Start_date_UTC", "End_date_UTC", "SkytypeLFilterIrf", "SkytypeHFilterIrf"]:
+                pass
+
+            else:
+                attrVal = getattr(self, attrName)
+
+                if attrVal:
+                    setattr(self, attrName, float(attrVal))
+
+
+
     def __str__(self):
-        return f'\n - MultiOutput  emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
+
+
+        return f'\n - MultiOutput  Flux: {self.Flux} Dist: {self.Dist} emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
                       fovmax: {self.fovmax} start_flux: {self.start_flux} sqrt(TS): {self.SqrtTS} \
                       multiDistanceFromMapCenter: {self.Dist}'
+
+
+
 
 @dataclass(order=True)
 class Source:
@@ -267,13 +346,37 @@ class Source:
         strRepr += '\n----------------------------------------------------------------'
         return strRepr
 
+    def setParamValue(self, key, val):
+
+        if key in ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature"] :
+            return self.spectrum.setParamValue(key, val)
+
+        elif key in ["GLON", "GLAT"]:
+            return self.spatialModel.setParamValue(key, val)
+
+        else:
+            return False
+
+
+    def getParamValue(self, key):
+
+        if key in ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature"] :
+            return self.spectrum.getParamValue(key)
+
+        elif key in ["GLON", "GLAT"]:
+            return self.spatialModel.getParamValue(key)
+
+        else:
+            return False
+
+
     def setFreeAttributeValueOf(self, parameterName, free):
 
-        if self.spatialModel.searchParamAttribute(parameterName):
+        if self.spatialModel.getParam(parameterName):
             self.spatialModel.setFreeAttributeValueOf(parameterName, free)
             return True
 
-        elif self.spectrum.searchParamAttribute(parameterName):
+        elif self.spectrum.getParam(parameterName):
             self.spectrum.setFreeAttributeValueOf(parameterName, free)
             return True
 

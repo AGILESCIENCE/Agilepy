@@ -32,6 +32,9 @@ import os
 import shutil
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
+                                           ConfigFileOptionTypeError, \
+                                           CannotSetHiddenOptionError
 
 
 class AgilepyConfigUnittesting(unittest.TestCase):
@@ -65,6 +68,31 @@ class AgilepyConfigUnittesting(unittest.TestCase):
 
         self.assertEqual(True, "input/tmax" in error_dict)
         self.assertEqual(1, len(error_dict))
+
+    def test_set_options(self):
+
+        # float instead of int is ok.
+        self.assertEqual(None, self.config.setOptions(tmin=456361777))
+
+        """
+        self.assertEqual(None, self.config.setOptions(evtfile="/data/input.evt"))
+        self.assertEqual(None, self.config.setOptions(energybins=[[100, 300], [300, 1000]]))
+
+
+        # option not found
+        self.assertRaises(OptionNotFoundInConfigFileError, self.config.setOptions(), pdor="kmer")
+
+        # type errors
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins=666)
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins="100, 300")
+
+        # type errors
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), minimizertype=666)
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins=[1,2,3])
+
+        # hidden param
+        self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions(), lonpole=100)
+        """
 
 
 if __name__ == '__main__':

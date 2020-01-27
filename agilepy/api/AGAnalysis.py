@@ -109,7 +109,12 @@ class AGAnalysis:
             \*\*kwargs: key-values pairs, separated by a comma.
 
         Returns:
-            True if all the input options are sucessfully updated, False otherwise.
+            None
+
+        Raises:
+            ConfigFileOptionTypeError: if the type of the option value is not wrong.
+            CannotSetHiddenOptionError: if the option is hidden.
+            OptionNotFoundInConfigFileError: if the option is not found.
 
         Note:
             The ``config`` attribute is initialized by reading the corresponding
@@ -122,13 +127,7 @@ class AGAnalysis:
             True
 
         """
-        rejected = self.config.setOptions(**kwargs)
-
-        if rejected:
-            self.logger.warning(self, "Some options have not been set: {}".format(rejected))
-            return False
-        else:
-            return True
+        return self.config.setOptions(**kwargs)
 
 
     def resetOptions(self):
@@ -312,11 +311,11 @@ class AGAnalysis:
 
         for sourceFile in sourceFiles:
 
-            source = SourcesLibrary.parseSourceFile(sourceFile)
+            multiOutputData = SourcesLibrary.parseSourceFile(sourceFile)
 
             mapCenterL = float(self.config.getOptionValue("glon"))
             mapCenterB = float(self.config.getOptionValue("glat"))
-            self.sourcesLibrary.updateMulti(source, mapCenterL, mapCenterB)
+            self.sourcesLibrary.updateMulti(multiOutputData, mapCenterL, mapCenterB)
 
 
         self.config.reset()

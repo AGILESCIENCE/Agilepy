@@ -29,12 +29,17 @@ import os
 import yaml
 import pprint
 import numbers
+from typing import List
 from copy import deepcopy
+from numbers import Number
 from os.path import dirname, realpath, join, expandvars
 from pathlib import Path
 
 from agilepy.utils.Utils import Singleton, DataUtils
-from agilepy.utils.CustomExceptions import ConfigurationsNotValidError
+from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
+                                           OptionNotFoundInConfigFileError, \
+                                           ConfigFileOptionTypeError, \
+                                           CannotSetHiddenOptionError
 
 
 
@@ -122,9 +127,8 @@ class AgilepyConfig(metaclass=Singleton):
 
     def setOptions(self, **kwargs):
         """
-        Returns a dictionary of rejected parameters
+
         """
-        rejected = {}
 
         for optionName, optionValue in kwargs.items():
 
@@ -132,13 +136,23 @@ class AgilepyConfig(metaclass=Singleton):
 
             if optionSection:
 
-                self.conf[optionSection][optionName] = optionValue
+                if not AgilepyConfig._isHidden(optionName):
+
+                    isOk, errorMsg = AgilepyConfig._validateOptioNameAndValue(optionName, optionValue)
+
+                    if isOk:
+
+                        self.conf[optionSection][optionName] = optionValue
+
+                    else:
+                        raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: {}".format(optionName, errorMsg))
+
+                else:
+                    raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionSection))
 
             else:
+                raise OptionNotFoundInConfigFileError("Section '{}' not found in configuration file.".format(optionSection))
 
-                rejected[optionName] = optionValue
-
-        return rejected
 
 
     def getConf(self, key=None, subkey=None):
@@ -151,9 +165,66 @@ class AgilepyConfig(metaclass=Singleton):
             return self.conf
 
 
+    @staticmethod
+    def _getOptionExpectedType(optionName):
+        """
+        None if it does not exixst
+        """
+        # int
+        if optionName in ["debuglvl", "filtercode", "emin", "emax", "fovradmin", \
+                          "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
+                          "fovbinnumber", "galmode", "isomode", "emin_sources", \
+                          "emax_sources", "loccl"]:
+            return Number
+
+        # float
+        if optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
+                          "timestep", "binsize", "galcoeff", "isocoeff", "ranal", "ulcl", \
+                          "expratio_minthr", "expratio_maxthr", "expratio_size"]:
+            return Number
+
+        elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilename", \
+                            "timetype", "timelist", "projtype", "proj", "modelfile"]:
+            return str
+
+        elif optionName in ["useEDPmatrixforEXP", "expratioevaluation"]:
+            return bool
+
+        elif optionName in ["energybins"]:
+            return List
+
+        else:
+            return None
+
+    @staticmethod
+    def _isHidden(optionName):
+
+        if optionName in [ "lonpole", "lpointing", "bpointing", "maplistgen", "offaxisangle", \
+                           "galmode2", "galmode2fit", "isomode2", "isomode2fit", "minimizertype", \
+                           "minimizeralg", "minimizerdefstrategy", "mindefaulttolerance", "integratortype", \
+                           "contourpoints", "edpcorrection", "fluxcorrection"]:
+            return True
+
+        return False
 
 
+    @staticmethod
+    def _validateOptioNameAndValue(optionName, optionValue):
 
+        expectedType = AgilepyConfig._getOptionExpectedType(optionName)
+
+        if not expectedType:
+            return (False, "Something is wrong with expectedType: %s of %s"%(expectedType, optionName))
+
+        if not isinstance(optionValue, expectedType):
+            return (False, "The option value %s has not the expected data type %s, but: %s"%(optionName, expectedType, type(optionValue)))
+
+        if optionName == "energybins":
+            for idx, elem in enumerate(optionValue):
+                if not isinstance(elem, List):
+                    return (False, "The %dth element of 'energybins' option value is not a List."%(idx))
+
+        return (True, "")
 
     @staticmethod
     def _mergeConfigurations(dict1, dict2):
@@ -317,6 +388,21 @@ class AgilepyConfig(metaclass=Singleton):
         errors.update( AgilepyConfig._validateBackgroundCoeff(confDict) )
         errors.update( AgilepyConfig._validateIndexFiles(confDict) )
         errors.update( AgilepyConfig._validateTimeInIndex(confDict) )
+        errors.update( AgilepyConfig._validateLOCCL(confDict) )
+
+
+        return errors
+
+    @staticmethod
+    def _validateLOCCL(confDict):
+
+        errors = {}
+
+        loccl = confDict["mle"]["loccl"]
+
+        if loccl not in [99, 95, 68, 50]:
+
+            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [50, 68, 95, 99]".format(loccl)
 
         return errors
 
