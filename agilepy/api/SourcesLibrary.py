@@ -481,7 +481,6 @@ class SourcesLibrary:
 
 
 
-
                  sourceDC = Source(name=name, type="PointSource")
 
                  sourceDC.spectrum = Spectrum(type="")
@@ -515,8 +514,10 @@ class SourcesLibrary:
 
                  elif spectrum_type == 3:
                      sourceDC.spectrum.type = "LogParabola"
-                     sourceDC.spectrum.parameters.append(Parameter(name="Index", free=free_bits[2], scale=-1.0, \
-                                                                        value=index, min=float(elements[11]), max=float(elements[12])))
+                     p = Parameter(name="Index", free=free_bits[2], scale=-1.0, \
+                                                                        value=index, min=float(elements[11]), max=float(elements[12]))
+                                                                        
+                     sourceDC.spectrum.parameters.append(p)
 
                      sourceDC.spectrum.parameters.append(Parameter(name="PivotEnergy", free=free_bits[3], scale=-1.0, \
                                                                         value=float(elements[9]), min=float(elements[13]), max=float(elements[14])))
@@ -532,6 +533,7 @@ class SourcesLibrary:
                  sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits_position)
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLON", value=glon))
                  sourceDC.spatialModel.parameters.append(Parameter(name="GLAT", value=glat))
+
 
                  sources.append(sourceDC)
 

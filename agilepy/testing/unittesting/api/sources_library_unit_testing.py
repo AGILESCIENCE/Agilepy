@@ -54,11 +54,11 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def get_free_params(source):
 
         return {
-                 "curvature: ": source.spectrum.getFreeAttributeValueOf("name", "Curvature"),
-                 "pivot energy: ": source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy"),
-                 "index: ": source.spectrum.getFreeAttributeValueOf("name", "Index"),
-                 "pos: ": source.spatialModel.free,
-                 "flux: ": source.spectrum.getFreeAttributeValueOf("name", "Flux")
+                 "curvature": source.spectrum.getFreeAttributeValueOf("name", "Curvature"),
+                 "pivot_energy": source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy"),
+                 "index": source.spectrum.getFreeAttributeValueOf("name", "Index"),
+                 "pos": source.spatialModel.free,
+                 "flux": source.spectrum.getFreeAttributeValueOf("name", "Flux")
                }
 
 
@@ -91,19 +91,28 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, fileformat="AG"))
         self.assertEqual(10, len(self.sl.sources))
 
+        sources = self.sl.selectSources('Name == "2AGLJ1801-2334"')
+        self.assertEqual(10, len(sources))
+        source = sources.pop()
+        self.assertEqual(3.579e-07, source.getParamValue("Flux"))
+        self.assertEqual(3.37991, source.getParamValue("Index"))
+        self.assertEqual(6.16978, source.getParamValue("GLON"))
+
+
+
         # testing fixflags
-        f0 = {"curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":0, "flux: ":0} # special case
-        f1 = {"curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":0, "flux: ":1}
-        f2 = {"curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":1, "flux: ":0}
-        f3 = {"curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":1, "flux: ":1}
-        f4 = {"curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":0, "flux: ":0}
-        f5 = {"curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":0, "flux: ":1}
+        f0 = {"curvature":0, "pivot_energy":0, "index":0, "pos":0, "flux":0} # special case
+        f1 = {"curvature":0, "pivot_energy":0, "index":0, "pos":0, "flux":1}
+        f2 = {"curvature":0, "pivot_energy":0, "index":0, "pos":1, "flux":0}
+        f3 = {"curvature":0, "pivot_energy":0, "index":0, "pos":1, "flux":1}
+        f4 = {"curvature":0, "pivot_energy":0, "index":1, "pos":0, "flux":0}
+        f5 = {"curvature":0, "pivot_energy":0, "index":1, "pos":0, "flux":1}
 
-        f7 = {"curvature: ":0, "pivot energy: ":0, "index: ":1, "pos: ":1, "flux: ":1}
+        f7 = {"curvature":0, "pivot_energy":0, "index":1, "pos":1, "flux":1}
 
-        f28 = {"curvature: ":1, "pivot energy: ":1, "index: ":1, "pos: ":0, "flux: ":0}
-        f30 = {"curvature: ":1, "pivot energy: ":1, "index: ":1, "pos: ":1, "flux: ":0}
-        f32 = {"curvature: ":0, "pivot energy: ":0, "index: ":0, "pos: ":2, "flux: ":0} # special case
+        f28 = {"curvature":1, "pivot_energy":1, "index":1, "pos":0, "flux":0}
+        f30 = {"curvature":1, "pivot_energy":1, "index":1, "pos":1, "flux":0}
+        f32 = {"curvature":0, "pivot_energy":0, "index":0, "pos":2, "flux":0} # special case
 
         fs = [f0,f1,f2,f3,f4,f5,f7,f28,f30,f32]
 
@@ -114,9 +123,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
             elif ff == 8: ff = 30
             elif ff == 9: ff = 32
 
-            #print("\nTest fixflag=%d for source with spectrum type=LogParabola"%(ff))
-            #print("expected: ", fs[i])
-            #print("actual: ", SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
             self.assertDictEqual(fs[i], SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
 
 

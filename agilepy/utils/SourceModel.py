@@ -86,15 +86,16 @@ class Parameter:
     max: float = None
 
     def __init__(self, name, value, free=None, scale=None, min=None, max=None):
+
         self.name = name
         self.value = float(value)
-        if free:
+        if free is not None:
             self.free = int(free)
-        if scale:
+        if scale is not None:
             self.scale = float(scale)
-        if min:
+        if min is not None:
             self.min = float(min)
-        if max:
+        if max is not None:
             self.max = float(max)
 
 @dataclass
