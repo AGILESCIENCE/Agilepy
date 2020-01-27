@@ -24,7 +24,7 @@ The output section collects options related to file generation. The outdir optio
    :header: "Option", "Type", "Default", "Required", "Description"
    :widths: 20, 20, 20, 20, 100
 
-   "outdir", "str", "none", "yes", "Path of the output directory"
+   "outdir", "str", "none", "yes", "Path of the output directory"qqq
    "filenameprefix", "str", "None", "Yes", ""
    "logfilename", "str", "agilepy.log", "no", "Path to the log file. If None the log file is agilepy.log and is written to the directory in which the configuration file is located"
    "debuglvl", "int", 0, "no", "| 0 ⇒ WARNING: An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
@@ -102,7 +102,7 @@ Phasecode
 
 
 Maps
--------------------------
+================================
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
@@ -152,7 +152,7 @@ where:
 The file names are separated by a space, so their name should not contain one.
 
 Model
-----------------------------
+================================
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
@@ -205,7 +205,7 @@ galmode and isomode
 
 
 mle
-----------------------------
+================================
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
