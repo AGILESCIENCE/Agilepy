@@ -11,7 +11,8 @@ It will be available soon!
    first_steps/installation
    first_steps/quick_start
    first_steps/configuration_file
-
+   first_steps/source_file
+   
 .. toctree::
    :caption: API
 
