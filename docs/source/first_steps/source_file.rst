@@ -65,7 +65,6 @@ PointSources
 
 .. code-block:: xml
 
-
   <?xml version="1.0" ?>
   <source_library title="source library">
 
@@ -120,7 +119,6 @@ PointSources
     </source>
 
   </source_library>
-
 
 The flux parameter estimates are relevant in the fitting process, as the sources are considered one by one starting with the one with the brightest initial flux value, regardless of the order they are given in the source file.
 
