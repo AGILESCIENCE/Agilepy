@@ -24,7 +24,7 @@ The output section collects options related to file generation. The outdir optio
    :header: "Option", "Type", "Default", "Required", "Description"
    :widths: 20, 20, 20, 20, 100
 
-   "outdir", "str", "none", "yes", "Path of the output directory"qqq
+   "outdir", "str", "none", "yes", "Path of the output directory"
    "filenameprefix", "str", "None", "Yes", ""
    "logfilename", "str", "agilepy.log", "no", "Path to the log file. If None the log file is agilepy.log and is written to the directory in which the configuration file is located"
    "debuglvl", "int", 0, "no", "| 0 ⇒ WARNING: An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
