@@ -3,10 +3,11 @@ input:
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/config"
+  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils/logs"
   filenameprefix: "testcase"
   logfilenameprefix: "testcase"
-  verboselvl: 1
+  verboselvl: 2
+
 
 selection:
   tmin: 456361778
@@ -14,17 +15,3 @@ selection:
   timetype: "TT"
   glon: 80
   glat: 0
-
-maps:
-  energybins:
-    - 100, 300
-    - 300, 1000
-    # - 1000, 3000
-    # - 3000,10000
-
-  fovbinnumber: 2
-  binsize: 0.2
-
-model:
-  galcoeff: 0.6, 0.8
-  isocoeff: 10, 15

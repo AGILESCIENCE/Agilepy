@@ -80,8 +80,6 @@ class AGAnalysis:
 
         self.config.loadConfigurations(configurationFilePath, validate=True)
 
-        self.config.printOptions("output")
-
         self.outdir = self.config.getConf("output","outdir")
 
         if exists(self.outdir):
@@ -89,7 +87,7 @@ class AGAnalysis:
 
         self.logger = agilepyLogger
 
-        self.logger.initialize(self.outdir, self.config.getConf("output","logfilename"), self.config.getConf("output","debuglvl"))
+        self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
         self.sourcesLibrary = SourcesLibrary()
 
@@ -134,7 +132,7 @@ class AGAnalysis:
         """It resets the configuration options to their original values.
 
         Returns:
-            None.
+            None, newline=True.
         """
         return self.config.reset()
 
@@ -203,8 +201,8 @@ class AGAnalysis:
                     skymapH = Parameters.getSkyMap(emin, emax)
                     fileNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
 
-                    self.logger.info(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s \
-                                            skymapL %s skymapH %s", [fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH])
+                    self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
+                                       fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
                     self.config.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
@@ -226,16 +224,16 @@ class AGAnalysis:
                         raise ScienceToolInputArgMissing("Some options have not been set.")
 
                     f1 = ctsMapGenerator.call()
-                    self.logger.info(self, "Science tool ctsMapGenerator produced %s", [f1])
+                    self.logger.info(self, "Science tool ctsMapGenerator produced %s", f1)
 
                     f2 = expMapGenerator.call()
-                    self.logger.info(self, "Science tool expMapGenerator produced %s", [f2])
+                    self.logger.info(self, "Science tool expMapGenerator produced %s", f2)
 
                     f3 = gasMapGenerator.call()
-                    self.logger.info(self, "Science tool gasMapGenerator produced %s", [f3])
+                    self.logger.info(self, "Science tool gasMapGenerator produced %s", f3)
 
                     f4 = intMapGenerator.call()
-                    self.logger.info(self, "Science tool intMapGenerator produced %s", [f4])
+                    self.logger.info(self, "Science tool intMapGenerator produced %s", f4)
 
 
                     mapListFileContent.append( ctsMapGenerator.outfilePath + " " + \
@@ -247,14 +245,14 @@ class AGAnalysis:
 
                 else:
 
-                    self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", [stepe[0], stepe[1]])
+                    self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", stepe[0], stepe[1])
 
 
         with open(maplistFilePath,"a") as mlf:
             for line in mapListFileContent:
                 mlf.write(line+"\n")
 
-        self.logger.info(self, "Maplist file created in %s", [maplistFilePath])
+        self.logger.info(self, "Maplist file created in %s", maplistFilePath)
 
         self.config.reset()
 
@@ -305,13 +303,13 @@ class AGAnalysis:
         sourceFiles = multi.call()
 
         if len(sourceFiles) == 0:
-            self.logger.warning(self, "The number of .source files is 0.", [])
+            self.logger.warning(self, "The number of .source files is 0.")
 
-        self.logger.info(self,"AG_multi produced: %s", [ " ".join(sourceFiles) ])
+        self.logger.info(self,"AG_multi produced: %s", sourceFiles)
 
         for sourceFile in sourceFiles:
 
-            multiOutputData = SourcesLibrary.parseSourceFile(sourceFile)
+            multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
 
             mapCenterL = float(self.config.getOptionValue("glon"))
             mapCenterB = float(self.config.getOptionValue("glat"))

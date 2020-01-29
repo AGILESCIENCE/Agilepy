@@ -144,7 +144,7 @@ class GasMapGenerator(ProcessWrapper):
         self.args = [ expMapGenerator.outfilePath, \
                       self.outfilePath,  \
                       confDict.getOptionValue("skymapL"), \
-                      confDict.getOptionValue("skymaH"), \
+                      confDict.getOptionValue("skymapH"), \
                     ]
 
 

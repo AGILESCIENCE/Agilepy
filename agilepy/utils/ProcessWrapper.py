@@ -61,17 +61,17 @@ class ProcessWrapper(ABC):
         for option in self.getRequiredOptions():
             if confDict.getOptionValue(option) is None:
                 optionSection = confDict.getSectionOfOption(option)
-                self.logger.critical(self,"Option '%s' of section '%s' has not been set.", [option, optionSection])
+                self.logger.critical(self,"Option '%s' of section '%s' has not been set.", option, optionSection)
                 ok = False
         return ok
 
 
     def call(self):
 
-        self.logger.info(self, "Science tool called!", newline=True)
+        self.logger.info(self, "Science tool called!")
 
         if not self.args:
-            self.logger.warning(self, "The 'args' attribute has not been set! Please, call setArguments() before call()! ", [])
+            self.logger.warning(self, "The 'args' attribute has not been set! Please, call setArguments() before call()! ")
             return []
 
         Path(self.outputDir).mkdir(parents=True, exist_ok=True)
@@ -81,7 +81,7 @@ class ProcessWrapper(ABC):
         pfile = os.path.join(pfile_location,self.exeName+".par")
 
         command = "cp "+pfile+" ./"
-        self.executeCommand(command)
+        self.executeCommand(command, printStdout=False)
 
         # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
@@ -89,7 +89,7 @@ class ProcessWrapper(ABC):
 
         # remove par file
         command = "rm ./"+self.exeName+".par"
-        self.executeCommand(command)
+        self.executeCommand(command, printStdout=False)
 
         self.callCounter += 1
 
@@ -103,14 +103,16 @@ class ProcessWrapper(ABC):
         return products
 
 
-    def executeCommand(self, command):
+    def executeCommand(self, command, printStdout=True):
 
-        self.logger.info(self, "Executing command >> "+command)
+        self.logger.debug(self, "Executing command >>%s ", command)
 
         completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
 
         if completedProcess.returncode != 0:
             raise ScienceToolErrorCodeReturned("Non zero return status. \nstderr:" + completedProcess.stderr.strip())
 
+        if printStdout:
+            self.logger.debug(self, "Science tool stdout:\n\n%s\n\n", completedProcess.stdout)
+
         return completedProcess.stdout
-        # self.logger.info(self, "stout >>"+completedProcess.stdout)

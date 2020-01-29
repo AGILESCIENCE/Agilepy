@@ -76,7 +76,7 @@ class SourcesLibrary:
 
         if not self.sources:
 
-            self.logger.critical(self, "Errors during %s parsing (format %s)", [self.sourcesFilePath, self.sourcesFilePathFormat])
+            self.logger.critical(self, "Errors during %s parsing (format %s)", self.sourcesFilePath, self.sourcesFilePathFormat)
             raise SourcesFileLoadingError("Errors during {} parsing (format {})".format(self.sourcesFilePath, self.sourcesFilePathFormat))
 
         else:
@@ -162,7 +162,7 @@ class SourcesLibrary:
 
         if parameterName not in SourcesLibrary._getFreeParams():
             self.logger.warning(self, 'The parameter %s cannot be released! You can set "free" to: %s', \
-                                       [selectionParam, SourcesLibrary._getFreeParams(tostr=True)])
+                                       selectionParam, SourcesLibrary._getFreeParams(tostr=True))
             return []
 
         return SourcesLibrary._setFree(sources, parameterName, free)
@@ -180,14 +180,13 @@ class SourcesLibrary:
 
         return deletedSources
 
-
-    @staticmethod
-    def parseSourceFile(sourceFilePath):
+    def parseSourceFile(self, sourceFilePath):
         """
         Static method
 
         returns: a MultiOutput object
-        """        # self.logger.info(self, "Parsing output file of AG_multi: %s", [self.outfilePath])
+        """
+        self.logger.debug(self, "Parsing output file of AG_multi: %s", sourceFilePath)
 
         with open(sourceFilePath, 'r') as sf:
             lines = sf.readlines()
@@ -249,7 +248,7 @@ class SourcesLibrary:
             allValues += values
 
         if len(allValues) != 128:
-            self.logger.critical(self, "The values extracted from %s file are lesser then 128", [sourceFilePath])
+            self.logger.critical(self, "The values extracted from %s file are lesser then 128", sourceFilePath)
             raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
         #print("allValues: ", allValues)
         #print("allValues sum: ", len(allValues))
@@ -288,15 +287,15 @@ class SourcesLibrary:
 
 
             sourceFound.multi.Dist = Astro.distance(sourceL, sourceB, mapCenterL, mapCenterB)
-            self.logger.info(self, "'Dist' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Dist)])
+            self.logger.debug(self, "'Dist' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Dist))
 
             if sourceFound.setParamValue("Flux", sourceFound.multi.Flux):
 
-                self.logger.info(self, "'Flux' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Flux)])
+                self.logger.debug(self, "'Flux' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Flux))
 
             else:
 
-                self.warning.info(self, "'Flux' parameter of '%s' has been updated: %f", [data.label, float(sourceFound.multi.Flux)])
+                self.warning.warning(self, "'Flux' parameter of '%s' has NOT been updated.", [data.label])
 
 
 
@@ -331,7 +330,7 @@ class SourcesLibrary:
 
                     self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because \
                                                the mle() analysis has not been performed yet on that source.", \
-                                               [paramName, source.name])
+                                               paramName, source.name)
 
                     paramsOk = False
 
@@ -398,7 +397,7 @@ class SourcesLibrary:
             if up not in selectionParams:
 
                 self.logger.critical(self, "The selectionParam %s is not supported and it is not going to be used! \
-                                            Supported params: %s", [up, SourcesLibrary._getSelectionParams(tostr=True)])
+                                            Supported params: %s", up, SourcesLibrary._getSelectionParams(tostr=True))
 
                 notSupported.append(up)
 
@@ -409,7 +408,7 @@ class SourcesLibrary:
 
     def _loadFromSourcesXml(self, xmlFilePath):
 
-        self.logger.info(self, "Parsing %s ...", [xmlFilePath])
+        self.logger.debug(self, "Parsing %s ...", xmlFilePath)
 
         xmlRoot = parse(xmlFilePath).getroot()
 
@@ -453,7 +452,7 @@ class SourcesLibrary:
                  elements = [elem.strip() for elem in line.split(" ") if elem] # each line is a source
 
                  if len(elements) != 17:
-                     self.logger.critical(self, "The number of elements on the line %s is not 17", [line])
+                     self.logger.critical(self, "The number of elements on the line %s is not 17", line)
                      raise SourcesAgileFormatParsingError("The number of elements on the line {} is not 17".format(line))
 
                  flux = float(elements[0])
@@ -516,7 +515,7 @@ class SourcesLibrary:
                      sourceDC.spectrum.type = "LogParabola"
                      p = Parameter(name="Index", free=free_bits[2], scale=-1.0, \
                                                                         value=index, min=float(elements[11]), max=float(elements[12]))
-                                                                        
+
                      sourceDC.spectrum.parameters.append(p)
 
                      sourceDC.spectrum.parameters.append(Parameter(name="PivotEnergy", free=free_bits[3], scale=-1.0, \
@@ -527,7 +526,7 @@ class SourcesLibrary:
 
 
                  else:
-                     self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", [spectrum_type])
+                     self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", spectrum_type)
                      raise SourcesAgileFormatParsingError("spectrum_type={} not supported. Supported: [0,1,2,3]".format(spectrum_type))
 
                  sourceDC.spatialModel = SpatialModel(type="PointSource", location_limit=location_limit, free=free_bits_position)
@@ -647,7 +646,6 @@ class SourcesLibrary:
 
             sourceStr += "\n"
 
-        # self.logger.info("Sources configuration in AGILE format placed at: %s", outfilepath)
         return sourceStr
 
     @staticmethod

@@ -31,6 +31,9 @@ import logging
 from os.path import join
 from pathlib import Path
 import math
+from time import strftime
+
+from agilepy.utils.CustomExceptions import LoggerTypeNotFound
 
 class Singleton(type):
     _instances = {}
@@ -47,11 +50,13 @@ class AgilepyLogger(metaclass=Singleton):
     def __init__(self):
         self.debug_lvl = None
         self.logger = None
+        self.initialized = False
 
-
-    def initialize(self, outputDirectory = None, logFilename = None, debug_lvl = 2):
+    def initialize(self, outputDirectory, logFilenamePrefix, debug_lvl = 2):
 
         self.debug_lvl = debug_lvl
+
+        # CRITICAL: always present in the log.
 
         # WARNING: An indication that something unexpected happened, or indicative
         # of some problem in the near future (e.g. ‘disk space low’). The software is
@@ -66,47 +71,76 @@ class AgilepyLogger(metaclass=Singleton):
 
         Path(outputDirectory).mkdir(parents=True, exist_ok=True)
 
-        if logFilename:
+        logFilenamePrefix = logFilenamePrefix+"_"+strftime("%Y%m%d-%H%M%S")
 
-            logFilename = join(outputDirectory, logFilename)
+        self.logfilePath = join(outputDirectory, logFilenamePrefix+".log")
 
 
-            logging.basicConfig(  format='%(asctime)s %(message)s',
-                                  datefmt='%m/%d/%Y %I:%M:%S %p',
-                                  filename=logFilename, filemode='w', level=debug_lvl_enum
-                               )
+        # formatter
+        logFormatter = logging.Formatter("%(asctime)s [%(levelname)-8.8s] %(message)s")
+
+
+        self.consoleLogger = self.setup_logger("Console logger", "console", logFormatter, debug_lvl_enum)
+
+        self.fileLogger = self.setup_logger("File logger", "file", logFormatter, logging.DEBUG, "{0}/{1}.log".format(outputDirectory, logFilenamePrefix))
+
+        self.fileLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
+        self.consoleLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
+
+        self.initialized = True
+
+        return Path(self.logfilePath)
+
+    def setup_logger(self, name, type, formatter, level, log_file=None):
+        """To setup as many loggers as you want"""
+
+        if type == "file":
+            handler = logging.FileHandler(log_file)
+
+        elif type== "console":
+            handler = logging.StreamHandler(sys.stdout)
+
         else:
+            raise LoggerTypeNotFound("Logger of type %s is not supported"%(type))
 
-            logging.basicConfig(  format='%(asctime)s %(message)s',
-                                  datefmt='%m/%d/%Y %I:%M:%S %p',
-                                  stream=sys.stdout, level=debug_lvl_enum
-                               )
+        handler.setFormatter(formatter)
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(debug_lvl_enum)
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        logger.addHandler(handler)
 
-        self.logger.info("[INFO   ] [%s] Logger is active. Logfile: %s", type(self).__name__, logFilename)
+        return logger
 
-    def critical(self, context, message, arguments=[], newline=False):
-        if not self.logger: return
-        if newline: print("\n")
-        self.logger.critical("[ERROR  ] [%s] " + message, type(context).__name__, *arguments)
+    def critical(self, context, message, *arguments):
+        if not self.initialized: return
+        self.fileLogger.critical("[%s] " + message, type(context).__name__, *arguments)
+        self.consoleLogger.critical("[%s] " + message, type(context).__name__, *arguments)
 
-    def info(self, context, message, arguments=[], newline=False):
-        if not self.logger: return
-        if newline: print("\n")
-        self.logger.info("[INFO   ] [%s] " + message, type(context).__name__, *arguments)
+    def info(self, context, message, *arguments):
+        if not self.initialized: return
+        self.fileLogger.info("[%s] " + message, type(context).__name__, *arguments)
+        self.consoleLogger.info("[%s] " + message, type(context).__name__, *arguments)
 
-    def warning(self, context, message, arguments=[], newline=False):
-        if not self.logger: return
-        if newline: print("\n")
-        self.logger.warning("[WARNING] [%s] " + message, type(context).__name__, *arguments)
+    def warning(self, context, message, *arguments):
+        if not self.initialized: return
+        self.fileLogger.warning("[%s] " + message, type(context).__name__, *arguments)
+        self.consoleLogger.warning("[%s] " + message, type(context).__name__, *arguments)
 
-    def debug(self, context, message, arguments=[], newline=False):
-        if not self.logger: return
-        if newline: print("\n")
-        self.logger.debug("[DEBUG  ] [%s] " + message, type(context).__name__, *arguments)
+    def debug(self, context, message, *arguments):
+        if not self.initialized: return
+        self.fileLogger.debug("[%s] " + message, type(context).__name__, *arguments)
+        self.consoleLogger.debug("[%s] " + message, type(context).__name__, *arguments)
 
+    def reset(self):
+        if self.initialized:
+
+            self.fileLogger.info("[%s] Removing logger...", type(self).__name__)
+            for handler in self.fileLogger.handlers[:]:
+                self.fileLogger.removeHandler(handler)
+
+            self.consoleLogger.info("[%s] Removing logger...", type(self).__name__)
+            for handler in self.consoleLogger.handlers[:]:
+                self.consoleLogger.removeHandler(handler)
 
 class DataUtils:
 

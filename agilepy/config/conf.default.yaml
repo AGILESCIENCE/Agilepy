@@ -5,8 +5,8 @@ input:
 output:
   outdir: null
   filenameprefix: null
-  logfilename: null
-  debuglvl: 1
+  logfilenameprefix: null
+  verboselvl: 1
 
 selection:
   emin: 100
@@ -40,7 +40,7 @@ maps:
   # skytype: 4
   binsize: 0.1
   energybins:
-    - [100, 10000]
+    - 100, 10000
   fovbinnumber: 1
   # Hidden parameters
   offaxisangle: 30

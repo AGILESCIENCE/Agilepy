@@ -109,7 +109,7 @@ class AgilepyConfig(metaclass=Singleton):
         optionSection = self.getSectionOfOption(optionName)
 
         if not optionSection:
-            return None
+            raise OptionNotFoundInConfigFileError("The option %s has not been found in the configuration."%(optionName))
 
         return self.conf[optionSection][optionName]
 
@@ -171,7 +171,7 @@ class AgilepyConfig(metaclass=Singleton):
         None if it does not exixst
         """
         # int
-        if optionName in ["debuglvl", "filtercode", "emin", "emax", "fovradmin", \
+        if optionName in ["verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                           "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                           "fovbinnumber", "galmode", "isomode", "emin_sources", \
                           "emax_sources", "loccl"]:
@@ -183,7 +183,7 @@ class AgilepyConfig(metaclass=Singleton):
                           "expratio_minthr", "expratio_maxthr", "expratio_size"]:
             return Number
 
-        elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilename", \
+        elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
                             "timetype", "timelist", "projtype", "proj", "modelfile"]:
             return str
 
@@ -273,6 +273,12 @@ class AgilepyConfig(metaclass=Singleton):
 
         if confDict["output"]["filenameprefix"] is None:
             errors.append("Please, set output/filenameprefix")
+
+        if confDict["output"]["logfilenameprefix"] is None:
+            errors.append("Please, set output/logfilenameprefix")
+
+        if confDict["output"]["verboselvl"] is None:
+            errors.append("Please, set output/verboselvl")
 
         if confDict["selection"]["timetype"] is None:
             errors.append("Please, set selection/timetype (MJD or TT)")
