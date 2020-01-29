@@ -142,17 +142,8 @@ class AgilepyLogger(metaclass=Singleton):
             for handler in self.consoleLogger.handlers[:]:
                 self.consoleLogger.removeHandler(handler)
 
-class DataUtils:
 
-    @staticmethod
-    def time_mjd_to_tt(timemjd):
-        return (timemjd - 53005.0) *  86400.0
-
-    @staticmethod
-    def time_tt_to_mjd(timett):
-        return (timett / 86400.0) + 53005.0
-
-class Astro:
+class AstroUtils:
 
     @staticmethod
     def distance(ll,bl,lf,bf):
@@ -173,9 +164,19 @@ class Astro:
 
             try:
                 return math.acos(m4) *  180.0 / math.pi;
+
             except Exception as e:
-                print("\nException in Astro.distance (error in acos() ): ", e)
+
+                print("\nException in AstroUtils.distance (error in acos() ): ", e)
+                
                 return math.sqrt(d1*d1 + d2 * d2);
 
+    @staticmethod
+    def time_mjd_to_tt(timemjd):
+        return (timemjd - 53005.0) *  86400.0
+
+    @staticmethod
+    def time_tt_to_mjd(timett):
+        return (timett / 86400.0) + 53005.0
 
 agilepyLogger = AgilepyLogger()

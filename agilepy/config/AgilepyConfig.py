@@ -35,7 +35,7 @@ from numbers import Number
 from os.path import dirname, realpath, join, expandvars
 from pathlib import Path
 
-from agilepy.utils.Utils import Singleton, DataUtils
+from agilepy.utils.Utils import Singleton, AstroUtils
 from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
                                            ConfigFileOptionTypeError, \
@@ -353,8 +353,8 @@ class AgilepyConfig(metaclass=Singleton):
     @staticmethod
     def _setTime(confDict):
         if confDict["selection"]["timetype"] == "MJD":
-            confDict["selection"]["tmax"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
-            confDict["selection"]["tmin"] = DataUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
+            confDict["selection"]["tmax"] = AstroUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
+            confDict["selection"]["tmin"] = AstroUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
             confDict["selection"]["timetype"] = "TT"
 
     @staticmethod

@@ -32,7 +32,7 @@ from xml.etree.ElementTree import parse
 #from ElementTree_pretty import prettify
 #from xml.etree.ElementTree import parse, Element, SubElement, Comment
 
-from agilepy.utils.Utils import agilepyLogger, Astro
+from agilepy.utils.Utils import agilepyLogger, AstroUtils
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
 from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
@@ -286,7 +286,7 @@ class SourcesLibrary:
                 sourceB = float(data.start_b)
 
 
-            sourceFound.multi.Dist = Astro.distance(sourceL, sourceB, mapCenterL, mapCenterB)
+            sourceFound.multi.Dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
             self.logger.debug(self, "'Dist' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Dist))
 
             if sourceFound.setParamValue("Flux", sourceFound.multi.Flux):

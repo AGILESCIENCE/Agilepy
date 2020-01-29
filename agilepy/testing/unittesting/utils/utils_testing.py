@@ -31,7 +31,7 @@ import unittest
 from pathlib import Path
 from time import sleep
 
-from agilepy.utils.Utils import agilepyLogger
+from agilepy.utils.Utils import agilepyLogger, AstroUtils
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class UtilsUnittesting(unittest.TestCase):
@@ -118,6 +118,19 @@ class UtilsUnittesting(unittest.TestCase):
             linesNumber = len(f.readlines())
             self.assertEqual(5, linesNumber)
 
+    def test_astro_utils_time_conversion(self):
+
+        # checked on https://tools.ssdc.asi.it/conversionTools
+
+        tt = AstroUtils.time_mjd_to_tt(58877.58596) #507391426.9439997
+
+        tt_from_ssdc = 507391426.944
+        self.assertEqual(True, tt_from_ssdc-tt<0.000001)
+
+        mjd = AstroUtils.time_tt_to_mjd(507391426.9447)
+        mjd_from_ssdc = 58877.58595999
+
+        self.assertEqual(True, mjd_from_ssdc-mjd<0.000001)
 
 if __name__ == '__main__':
     unittest.main()
