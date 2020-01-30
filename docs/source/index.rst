@@ -3,25 +3,32 @@ Agilepy's documentation
 
 It will be available soon!
 
-
 .. toctree::
-   :maxdepth: 2
-   :caption: First steps
+  :maxdepth: 2
+  :caption: Quick start
 
-   first_steps/installation
-   first_steps/quick_start
-   first_steps/configuration_file
-   first_steps/source_file
-   
-.. toctree::
-   :caption: API
-
-   api/analysis_api
+  quickstart/installation
+  quickstart/quick_start
 
 
 .. toctree::
-   :caption: Help
+  :maxdepth: 2
+  :caption: Manual
 
-   help/help
-   help/development
-   help/troubleshooting
+  manual/configuration_file
+  manual/source_file
+  manual/products
+  manual/advanced_configuration
+
+.. toctree::
+  :caption: API
+
+  api/analysis_api
+
+
+.. toctree::
+  :caption: Help
+
+  help/help
+  help/development
+  help/troubleshooting
