@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<source_library title="source library">
+  <source name="2AGLJ2021+4029" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter free="1" name="Flux" value="1.193e-06"/>
+      <parameter free="0" max="5.0" min="0.5" name="Index" scale="-1.0" value="1.75"/>
+      <parameter free="0" max="10000.0" min="20.0" name="CutoffEnergy" value="3307.63"/>
+    </spectrum>
+    <spatialModel free="0" location_limit="0.0" type="PointSource">
+      <parameter name="GLON" value="78.2375"/>
+      <parameter name="GLAT" value="2.12298"/>
+    </spatialModel>
+  </source>
+  <source name="2AGLJ2021+3654" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter free="1" name="Flux" value="7.089e-07"/>
+      <parameter free="0" max="5.0" min="0.5" name="Index" scale="-1.0" value="1.38"/>
+      <parameter free="0" max="10000.0" min="20.0" name="CutoffEnergy" value="960.59"/>
+    </spectrum>
+    <spatialModel free="0" location_limit="0.0" type="PointSource">
+      <parameter name="GLON" value="75.2562"/>
+      <parameter name="GLAT" value="0.151831"/>
+    </spatialModel>
+  </source>
+</source_library>

@@ -98,6 +98,13 @@ class Parameter:
         if max is not None:
             self.max = float(max)
 
+    def toDict(self):
+        d = vars(self)
+        for k,v in d.items():
+            d[k] = str(v)
+        return d
+
+
 @dataclass
 class SpatialModel(ValueParamFinder):
     type: str

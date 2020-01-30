@@ -25,15 +25,17 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from pathlib import Path
 from inspect import signature
 from os.path import split, join
-from functools import singledispatch
-from xml.etree.ElementTree import parse
-#from ElementTree_pretty import prettify
-#from xml.etree.ElementTree import parse, Element, SubElement, Comment
 
-from agilepy.utils.AgilepyLogger import agilepyLogger
+from functools import singledispatch
+from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
+from xml.dom import minidom
+
+
 from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.AgilepyLogger import agilepyLogger
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
@@ -97,11 +99,11 @@ class SourcesLibrary:
         outfilepath = join(self.sourcesFilePathPrefix, outfileNamePrefix)
 
         if fileformat == "AG":
-            sourceLibraryToWrite = self._convertToAgileFormat()
+            sourceLibraryToWrite = SourcesLibrary._convertToAgileFormat(self.sources)
             outfilepath += ".txt"
 
         else:
-            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat()
+            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat(self.sources)
             outfilepath += ".xml"
 
         with open(outfilepath, "w") as sourceLibraryFile:
@@ -259,8 +261,6 @@ class SourcesLibrary:
 
         return multiOutput
 
-
-
     def updateMulti(self, data, mapCenterL, mapCenterB):
 
         sourcesFound = self.selectSources(lambda Name : Name == data.label)
@@ -289,6 +289,7 @@ class SourcesLibrary:
 
 
             sourceFound.multi.Dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
+
             self.logger.debug(self, "'Dist' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Dist))
 
             if sourceFound.setParamValue("Flux", sourceFound.multi.Flux):
@@ -298,9 +299,6 @@ class SourcesLibrary:
             else:
 
                 self.warning.warning(self, "'Flux' parameter of '%s' has NOT been updated.", [data.label])
-
-
-
 
 
     @singledispatch
@@ -564,12 +562,12 @@ class SourcesLibrary:
     def _fail(msg):
         raise FileSourceParsingError("File source parsing failed: {}".format(msg))
 
-
-    def _convertToAgileFormat(self):
+    @staticmethod
+    def _convertToAgileFormat(sources):
 
         sourceStr = ""
 
-        for source in self.sources:
+        for source in sources:
 
             # get flux value
             flux = source.getParamValue("Flux")
@@ -651,21 +649,45 @@ class SourcesLibrary:
         return sourceStr
 
     @staticmethod
-    def _convertToXmlFormat():
+    def _convertToXmlFormat(sources):
         """
         https://pymotw.com/2/xml/etree/ElementTree/create.html
-        top = Element('source_library', title="source library")
-
-        doc = SubElement(root, "doc")
-
-        SubElement(doc, "field1", name="blah").text = "some value1"
-        SubElement(doc, "field2", name="asdfasd").text = "some vlaue2"
-
-        tree = ET.ElementTree(root)
-        tree.write("filename.xml")
-        return prettify(top)
         """
-        return ""
+        root = Element('source_library', title="source library")
+
+        for source in sources:
+
+            source_tag = SubElement(root, "source", {"name": source.name, "type": source.type})
+
+
+            spectrum_tag = Element("spectrum", {"type": source.spectrum.type})
+
+            for param in source.spectrum.parameters:
+
+                param_tag = Element("parameter", param.toDict())
+                spectrum_tag.append(param_tag)
+
+            source_tag.append(spectrum_tag)
+
+
+
+            spatial_model_tag = Element("spatialModel", { "type": source.spatialModel.type, \
+                                                          "location_limit": str(source.spatialModel.location_limit), \
+                                                          "free": str(source.spatialModel.free) })
+            for param in source.spatialModel.parameters:
+
+                param_tag = Element("parameter", param.toDict())
+                spatial_model_tag.append(param_tag)
+
+            source_tag.append(spatial_model_tag)
+
+
+        rough_string = tostring(root, 'utf-8')
+
+        reparsed = minidom.parseString(rough_string)
+
+        return reparsed.toprettyxml(indent="  ")
+
 
 
     @staticmethod

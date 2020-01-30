@@ -26,14 +26,15 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import unittest
-from pathlib import Path
 import os
 import shutil
+import unittest
 from typing import List
+from pathlib import Path
+from xml.etree.ElementTree import parse
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
-
+from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class SourcesLibraryUnittesting(unittest.TestCase):
 
@@ -61,7 +62,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
                  "flux": source.spectrum.getFreeAttributeValueOf("name", "Flux")
                }
 
-
     def test_load_xml(self):
         self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML"))
         self.assertEqual(2, len(self.sl.sources))
@@ -82,9 +82,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(70.89e-08, source.getParamValue("Flux"))
         self.assertEqual(1.38, source.getParamValue("Index"))
         self.assertEqual(75.2562, source.getParamValue("GLON"))
-
-
-
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
@@ -125,7 +122,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
             self.assertDictEqual(fs[i], SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
 
-
     def test_source_file_parsing(self):
 
         res = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data//testcase_2AGLJ2021+4029.source")
@@ -150,9 +146,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(True, isinstance(res.GalCoeff[0], float))
         self.assertEqual(None, res.Dist)
 
-
-
-
     def test_select_sources_with_selection_string(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
@@ -167,9 +160,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
         self.assertEqual(1, len(sources))
 
-
-
-
     def test_select_sources_with_selection_lambda(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
@@ -183,9 +173,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0)
         self.assertEqual(1, len(sources))
-
-
-
 
     def test_free_sources_with_selection_string(self):
 
@@ -208,8 +195,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
-
-
     def test_free_sources_with_selection_lambda(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
@@ -229,6 +214,25 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", False)
         self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
+    def test_write_to_file_xml(self):
+
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+
+        outDir = Path(self.config.getConf("output","outdir"))
+
+        outDir.mkdir(parents=True, exist_ok=True)
+
+        outputFile = Path(self.sl.writeToFile(outDir.joinpath("write_to_file_testcase"), fileformat="XML"))
+
+        self.assertEqual(True, outputFile.exists())
+
+        sourcesxml = parse(outputFile).getroot()
+
+        self.assertEqual(2, len(sourcesxml))
 
 if __name__ == '__main__':
     unittest.main()
