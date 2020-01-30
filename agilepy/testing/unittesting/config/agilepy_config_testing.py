@@ -69,6 +69,17 @@ class AgilepyConfigUnittesting(unittest.TestCase):
         self.assertEqual(True, "input/tmax" in error_dict)
         self.assertEqual(1, len(error_dict))
 
+    def test_validation_min_max(self):
+
+        self.config.setOptions(fovradmin=10, fovradmax=0, emin=10, emax=0)
+
+        error_dict = self.config._validateConfiguration(self.config.conf)
+
+        self.assertEqual(True, "selection/fovradmin" in error_dict)
+        self.assertEqual(True, "selection/emin" in error_dict)
+
+        self.assertEqual(2, len(error_dict))
+
     def test_set_options(self):
 
         # float instead of int is ok.

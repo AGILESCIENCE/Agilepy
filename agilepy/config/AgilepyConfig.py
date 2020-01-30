@@ -396,9 +396,27 @@ class AgilepyConfig(metaclass=Singleton):
         errors.update( AgilepyConfig._validateIndexFiles(confDict) )
         errors.update( AgilepyConfig._validateTimeInIndex(confDict) )
         errors.update( AgilepyConfig._validateLOCCL(confDict) )
-
+        errors.update( AgilepyConfig._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
+        errors.update( AgilepyConfig._validateMinMax(confDict, "selection", "emin", "emax") )
 
         return errors
+
+    @staticmethod
+    def _validateMinMax(confDict, section, optionMin, optionMax):
+
+        errors = {}
+
+        if confDict[section][optionMin] > confDict[section][optionMax]:
+
+            errors[section+"/"+optionMin] = "%s cannot be greater than %s" % (optionMin, optionMax)
+
+        if confDict[section][optionMin] == confDict[section][optionMax]:
+
+            errors[section+"/"+optionMin] = "%s cannot be equal to %s" % (optionMin, optionMax)
+
+        return errors
+
+
 
     @staticmethod
     def _validateLOCCL(confDict):
