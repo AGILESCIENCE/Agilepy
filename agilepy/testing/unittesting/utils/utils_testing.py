@@ -31,7 +31,8 @@ import unittest
 from pathlib import Path
 from time import sleep
 
-from agilepy.utils.Utils import agilepyLogger, AstroUtils
+from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class UtilsUnittesting(unittest.TestCase):

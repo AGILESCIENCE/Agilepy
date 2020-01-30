@@ -25,12 +25,51 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#import matplotlib.pyplot as plt
+import math
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+
+class AstroUtils:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def distance(ll,bl,lf,bf):
+
+        if ll < 0 or ll > 360 or lf < 0 or lf > 360:
+            return -2
+        elif bl < -90 or bl > 90 or bf < -90 or bf > 90:
+            return -2
         else:
-            cls._instances[cls].__init__(*args, **kwargs)
-        return cls._instances[cls]
+            d1 = bl - bf
+            d2 = ll - lf;
+
+            bl1 = math.pi / 2.0 - (bl * math.pi  / 180.0)
+            bf1 = math.pi / 2.0 - (bf * math.pi  / 180.0)
+            m4 = math.cos(bl1) * math.cos(bf1)  + math.sin(bl1) * math.sin(bf1) * math.cos(d2 * math.pi  / 180.0);
+            if m4 > 1:
+                m4 = 1
+
+            try:
+                return math.acos(m4) *  180.0 / math.pi;
+
+            except Exception as e:
+
+                print("\nException in AstroUtils.distance (error in acos() ): ", e)
+
+                return math.sqrt(d1*d1 + d2 * d2);
+
+    @staticmethod
+    def time_mjd_to_tt(timemjd):
+        return (timemjd - 53005.0) *  86400.0
+
+    @staticmethod
+    def time_tt_to_mjd(timett):
+        return (timett / 86400.0) + 53005.0
+
+
+
+if __name__ == '__main__':
+
+    print("Yo")

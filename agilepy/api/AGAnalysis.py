@@ -33,7 +33,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
-from agilepy.utils.Utils import agilepyLogger
+from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \

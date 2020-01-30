@@ -32,7 +32,9 @@ from xml.etree.ElementTree import parse
 #from ElementTree_pretty import prettify
 #from xml.etree.ElementTree import parse, Element, SubElement, Comment
 
-from agilepy.utils.Utils import agilepyLogger, AstroUtils
+from agilepy.utils.AgilepyLogger import agilepyLogger
+from agilepy.utils.AstroUtils import AstroUtils
+
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
 from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
