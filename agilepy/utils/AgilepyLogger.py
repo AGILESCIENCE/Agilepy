@@ -58,7 +58,7 @@ class AgilepyLogger(metaclass=Singleton):
         # DEBUG: Detailed information, typically of interest only when diagnosing problems.
         if self.debug_lvl == 2: debug_lvl_enum = logging.DEBUG
 
-        Path(outputDirectory).mkdir(parents=True, exist_ok=True)
+        Path(join(outputDirectory,"logs")).mkdir(parents=True, exist_ok=True)
 
         logFilenamePrefix = logFilenamePrefix+"_"+strftime("%Y%m%d-%H%M%S")
 
