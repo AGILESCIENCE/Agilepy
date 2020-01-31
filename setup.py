@@ -11,5 +11,5 @@ setup( name='Agilepy',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
        include_package_data=True,
-       install_requires=["pyyaml"]
+       install_requires=["pyyaml", "matplotlib"]
      )
