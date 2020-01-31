@@ -1,7 +1,10 @@
 Agilepy's documentation
 =======================
 
-It will be available soon!
+.. image:: static/agilecrab.jpg
+   :scale: 100 %
+   :alt: Agilepy
+   :align: center
 
 .. toctree::
   :maxdepth: 2
