@@ -10,6 +10,5 @@ setup( name='Agilepy',
        author_email='leonardo.baroncelli@inaf.it, antonio.addis@inaf.it, andrea.bulgarelli@inaf.it, nicolo.parmiggiani@inaf.it',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
-       include_package_data=True,
-       install_requires=["pyyaml", "matplotlib", "astropy", "scipy"]
+       include_package_data=True
      )
