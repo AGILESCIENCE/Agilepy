@@ -2,7 +2,6 @@ Agilepy's documentation
 =======================
 
 .. image:: static/agilecrab.jpg
-   :scale: 100 %
    :alt: Agilepy
    :align: center
 
