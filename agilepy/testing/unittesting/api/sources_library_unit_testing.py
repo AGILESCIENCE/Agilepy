@@ -44,6 +44,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
         self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
+
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
         if outDir.exists() and outDir.is_dir():
@@ -124,7 +125,9 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_source_file_parsing(self):
 
-        res = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data//testcase_2AGLJ2021+4029.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+4029.source")
+
+        res = self.sl.parseSourceFile(sourceFile)
         self.assertEqual(True, bool(res))
         self.assertEqual(True, isinstance(res.Flux, float))
         self.assertEqual(0, res.Flux)
@@ -135,7 +138,9 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(True, isinstance(res.GalCoeff[0], float))
         self.assertEqual(None, res.Dist)
 
-        res = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+
+        res = self.sl.parseSourceFile(sourceFile)
         self.assertEqual(True, bool(res))
         self.assertEqual(True, isinstance(res.Flux, float))
         self.assertEqual(6.69108e-15, res.Flux)
@@ -154,7 +159,9 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
         self.assertEqual(1, len(sources))
 
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+
+        source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source, 80, 0)
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
@@ -168,7 +175,9 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+3654" )
         self.assertEqual(1, len(sources))
 
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+
+        source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source, 80, 0)
 
         sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0)
@@ -177,7 +186,8 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_string(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+        source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source, 80, 0)
 
 
@@ -198,7 +208,8 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_free_sources_with_selection_lambda(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
-        source = self.sl.parseSourceFile("./agilepy/testing/unittesting/api/data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+        source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source, 80, 0)
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", False)
