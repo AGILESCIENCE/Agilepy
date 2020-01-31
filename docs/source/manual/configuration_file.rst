@@ -180,7 +180,6 @@ The *'fovbinnumber'* set the number of bins between *'fovradmin'* and *'fovradma
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
    :widths: 20, 100, 20, 20, 20
-   :width: 100
 
    "mapsize", "Width of the ROI in degrees","float", 40, "no"
    "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map. Possible values = [*yes*, *no*]", "boolean", "yes", "no"
