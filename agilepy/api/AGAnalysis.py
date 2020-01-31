@@ -423,7 +423,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.deleteSources(selection)
 
-    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, save_image=False, outDir="./", format="png", title=None):
+    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, save_image=False, format="png", title=None):
         """It shows fits skymap passed as first argument.
 
         Args:
@@ -431,7 +431,6 @@ class AGAnalysis:
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             save_image (bool): if set to true, saves the image into outdir directory
-            outdir (string): output directory
             format (string): the format of the image
             title: the title of the image
 
@@ -439,7 +438,7 @@ class AGAnalysis:
         Returns:
             Path to the file
         """
-        return AstroUtils.displaySkyMAp(fitsFilepath, smooth, sigma, save_image, outDir, format, title)
+        return AstroUtils.displaySkyMAp(fitsFilepath, smooth, sigma, save_image, self.outdir, format, title)
 
 
 
