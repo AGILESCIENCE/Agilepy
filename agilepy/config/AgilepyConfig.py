@@ -171,16 +171,17 @@ class AgilepyConfig(metaclass=Singleton):
         """
         None if it does not exixst
         """
+
         # int
         if optionName in ["verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                           "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                           "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                          "emax_sources", "loccl"]:
+                          "emax_sources", "loccl", "galcoeff", "isocoeff"]:
             return Number
 
         # float
         if optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
-                          "timestep", "binsize", "galcoeff", "isocoeff", "ranal", "ulcl", \
+                          "timestep", "binsize", "ranal", "ulcl", \
                           "expratio_minthr", "expratio_maxthr", "expratio_size"]:
             return Number
 
@@ -191,7 +192,7 @@ class AgilepyConfig(metaclass=Singleton):
         elif optionName in ["useEDPmatrixforEXP", "expratioevaluation"]:
             return bool
 
-        elif optionName in ["energybins"]:
+        elif optionName in ["energybins", "galcoeff", "isocoeff"]:
             return List
 
         else:
@@ -211,6 +212,10 @@ class AgilepyConfig(metaclass=Singleton):
 
     @staticmethod
     def _validateOptioNameAndValue(optionName, optionValue):
+
+        if optionName == "galcoeff" or optionName == "isocoeff":
+            if isinstance(optionValue, str) or isinstance(optionValue, float):
+                return (False, "The 'galcoeff' or 'isocoeff' option value is not an int or List but %s"%(type(optionValue)))
 
         expectedType = AgilepyConfig._getOptionExpectedType(optionName)
 

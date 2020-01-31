@@ -33,8 +33,8 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
-from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.Parameters import Parameters
+from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \
                                            ScienceToolInputArgMissing, \
@@ -152,7 +152,7 @@ class AGAnalysis:
     def generateMaps(self):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
 
-        The method's behaviour varies according to several configuration options (see docs here).
+        The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
 
         Note:
             It resets the configuration options to their original values before exiting.
@@ -262,6 +262,8 @@ class AGAnalysis:
 
     def mle(self, maplistFilePath):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
+
+        The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
 
         The outputfiles have the ``.source`` extension.
 

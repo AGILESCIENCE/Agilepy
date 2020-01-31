@@ -3,8 +3,8 @@ Products
 ********
 
 
-MAPLIST file
-============
+*'.maplist4'* file
+==================
 
 Each line contains a set of maps:
 
@@ -18,3 +18,10 @@ where:
  * galcoeff and isocoeff are the coefficients for the galactic and isotropic diffuse components. If positive they will be considered fixed (but see galmode and isomode section).
 
 The file names are separated by a space, so their name should not contain one.
+
+
+
+'*.source*' file
+================
+
+TODO

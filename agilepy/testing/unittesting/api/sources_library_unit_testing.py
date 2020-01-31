@@ -183,17 +183,17 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", False)
         self.assertEqual(1, len(sources))
-        self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
 
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", True)
-        self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", True)
-        self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", False)
-        self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
     def test_free_sources_with_selection_lambda(self):
 
@@ -203,16 +203,16 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", False)
         self.assertEqual(1, len(sources))
-        self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", True)
-        self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", True)
-        self.assertEqual(True, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", False)
-        self.assertEqual(False, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
     def test_write_to_file_xml(self):
 

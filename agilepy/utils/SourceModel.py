@@ -60,6 +60,10 @@ class ValueParamFinder:
         return None
 
     def setFreeAttributeValueOf(self, parameterName, freeval):
+        if freeval:
+            freeval = 1
+        else:
+            freeval = 0
         for param in self.parameters:
             if getattr(param, "name") == parameterName:
                 setattr(param, "free", freeval)
@@ -120,7 +124,7 @@ class SpatialModel(ValueParamFinder):
 
 
     def __str__(self):
-        return f'\n - SpatialModel type: {self.type} free: {self.free} glon: {self.parameters[0].value} glat: {self.parameters[1].value}'
+        return f'\n - SpatialModel type: {self.type} free: {self.free}\n\tglon: {self.parameters[0].value}\n\tglat: {self.parameters[1].value}'
 
 @dataclass
 class Spectrum(ValueParamFinder):
@@ -133,7 +137,7 @@ class Spectrum(ValueParamFinder):
     def __str__(self):
         paramsStr = ""
         for p in self.parameters:
-            paramsStr += f'\n      {p.name}={p.value} free={p.free}'
+            paramsStr += f'\n\t{p.name}={p.value} free={p.free}'
         return f'\n - Spectrum type: {self.type} {paramsStr}'
 
 @dataclass
@@ -321,14 +325,9 @@ class MultiOutput:
                 if attrVal:
                     setattr(self, attrName, float(attrVal))
 
-
-
     def __str__(self):
 
-
-        return f'\n - MultiOutput  Flux: {self.Flux} Dist: {self.Dist} emin: {self.emin} emax: {self.emax} fovmin: {self.fovmin} \
-                      fovmax: {self.fovmax} start_flux: {self.start_flux} sqrt(TS): {self.SqrtTS} \
-                      multiDistanceFromMapCenter: {self.Dist}'
+        return f'\n - MultiOutput\n\tstart_flux: {self.start_flux}\n\tFlux: {self.Flux}\n\tDist: {self.Dist}\n\tsqrt(TS): {self.SqrtTS}'
 
 
 

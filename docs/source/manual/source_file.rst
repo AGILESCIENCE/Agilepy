@@ -1,10 +1,6 @@
-******************
-Source file
-******************
-|
-
-AGILE technical info
-======================
+*************
+Source models
+*************
 
 Each source is described by a line containing space separated values, in the following order:
 
