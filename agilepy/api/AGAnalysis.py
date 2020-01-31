@@ -33,6 +33,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
@@ -421,6 +422,24 @@ class AGAnalysis:
             The list containing the deleted sources.
         """
         return self.sourcesLibrary.deleteSources(selection)
+
+    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, save_image=False, outDir="./", format="png", title=None):
+        """It shows fits skymap passed as first argument.
+
+        Args:
+            fitsimage (str): the relative or absolute path to the input fits file.
+            smooth (bool): if set to true, gaussian smoothing will be computed
+            sigma (float): value requested for computing gaussian smoothing
+            save_image (bool): if set to true, saves the image into outdir directory
+            outdir (string): output directory
+            format (string): the format of the image
+            title: the title of the image
+
+
+        Returns:
+            Path to the file
+        """
+        return AstroUtils.display(fitsFilepath, smooth, sigma, save_image, outDir, format, title)
 
 
 
