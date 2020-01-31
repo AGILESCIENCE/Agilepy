@@ -438,7 +438,7 @@ class AGAnalysis:
         Returns:
             Path to the file
         """
-        return AstroUtils.displaySkyMAp(fitsFilepath, smooth, sigma, save_image, self.outdir, format, title)
+        return AstroUtils.displaySkyMap(fitsFilepath, smooth, sigma, save_image, self.outdir, format, title)
 
 
 
