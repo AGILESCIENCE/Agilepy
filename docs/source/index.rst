@@ -5,7 +5,7 @@ It will be available soon!
 
 .. toctree::
   :maxdepth: 2
-  :caption: Quick start
+  :caption: Quickstart
 
   quickstart/installation
   quickstart/quick_start

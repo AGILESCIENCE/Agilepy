@@ -1,10 +1,15 @@
-Quick start guide
-=================
+Quickstart guide
+================
 
-When creating an AGAnalysis instance, the configuration is initialized by passing a YAML configuration file path and a XML file describing the sources to the class constructor:
+To import the library:
+
 ::
 
     from agilepy.api import AGAnalysis
+
+
+When creating an AGAnalysis instance, the configuration is initialized by passing a YAML configuration file path and a XML file describing the sources to the class constructor:
+::
 
     aga = AGAnalysis('agconfig.yaml', 'sources.xml')
 
@@ -21,4 +26,11 @@ To generate maps:
 To perform an maximum likelyhood estimation analysis:
 ::
 
-  aga.mle(maplistfile)
+    sourcefiles = aga.mle(maplistfile)
+
+
+.. hint:: Try out the tutorial on the **quickstart notebook**:
+
+   ::
+
+      start_tutorial_notebook.sh

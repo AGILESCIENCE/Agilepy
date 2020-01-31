@@ -1,3 +1,5 @@
+.. _configuration-file:
+
 ******************
 Configuration file
 ******************
@@ -24,7 +26,6 @@ The minimal configuration a user is required to write, it is composed by the fol
     logfilenameprefix: testcase
     verboselvl: 2
 
-
   selection:
     tmin: 456361778
     tmax: 456537945
@@ -36,8 +37,8 @@ The minimal configuration a user is required to write, it is composed by the fol
 The next paragraphs of this document will describe each configuration option.
 
 
-input
-======================
+Section: *'input'*
+==================
 This section defines the input data files.
 The input data files are indexes: each row of the file holds the position of an
 actual event data/log file together with the time interval it refers to.
@@ -50,8 +51,8 @@ actual event data/log file together with the time interval it refers to.
    logfile, "Path to index log file name", str, Yes, null
 
 
-output
-=============
+Section: *'output'*
+===================
 The output section collects options related to the output files generation.
 
 The *'outdir'* option sets the root directory of the analysis results where all output files are written.
@@ -77,8 +78,9 @@ There are 4 kind of messages based on their importance factor:
    | 2 ⇒ *CRITICAL*, *WARNING*, *INFO* and *DEBUG* messages are logged on the console",  "int", "no", 1
 
 
-Selection
-=========
+Section: *'selection'*
+======================
+
 The temporal, spatial and spectral binning of the data can be customized using the configuration option of this section.
 
 The *ROI* (region of interest) center is defined by giving explicit Galactic sky coordinates (glon and glat).
@@ -125,7 +127,7 @@ The *ROI* (region of interest) center is defined by giving explicit Galactic sky
    | the *'phasecode'* rule", "int", "null", "no"
 
 Phasecode rule
--------------------------
+--------------
 
   - phasecode = 2 -> spinning mode, SAA excluded with AC counts method.
   - phasecode = 6 -> spinning mode, SAA excluded according to the magnetic field intensity (old definition of SAA, defined by TPZ)
@@ -147,14 +149,38 @@ It is suggested to use phasecode = 2 for data taken in spinning mode.
 
 
 
-Maps
-====
+Section: *'maps'*
+=================
 
-These options specify the parameters of the sky maps generation.
+These options control the behaviour of the sky maps generation tools.
+The *'energybin'* and *'fovbinnumber'* modify the number of maps that are generated.
+
+The *'energybin'* option is a list of strings with the following format:
+
+.. code-block:: yaml
+
+    energybins:
+      - 100, 1000
+      - 1000, 3000
+
+The *'fovbinnumber'* set the number of bins between *'fovradmin'* and *'fovradmax'* as:
+
+.. math::
+
+    number\_of\_bins = (fovradmax-fovradmin)/fovbinnumber
+
+.. note:: One map is generated for each possible combination between the *'energybin'* (emin, emax) and the *'fovbinnumber'* (fovmin, fovmax).
+   The order of map generation is described by the following pseudocode:
+
+   | For each fovmin..fovmax:
+   |    For each emin..emax:
+   |        generateMap(fovmin, fovmax, emin, emax)
+
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
+   :width: 100
 
    "mapsize", "Width of the ROI in degrees","float", 40, "no"
    "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map. Possible values = [*yes*, *no*]", "boolean", "yes", "no"
@@ -169,14 +195,49 @@ These options specify the parameters of the sky maps generation.
    | 3) SKY001 (old galcenter, binsize 0.1, full sky),
    | 4) SKY002 (new galcenter, binsize 0.1, full sky) ", "int", "4", "no"
    "binsize", "Spatial bin size in degrees", "float", 0.1, "no"
-   "energybin", "------- completare -----------", "List<List<int>>", "[100, 10000]", "no"
+   "energybin", "------- completare -----------", "List<String>", "[100, 10000]", "no"
    "fovbinnumber", "| Number of bins between fovradmin and fovradmax.
    | Dim = (fovradmax-fovradmin)/fovbinnumber", "int", 1, "no"
 
 
 
-Model
-=====
+Section: *'model'*
+==================
+
+The '*galcoeff*' and '*isocoeff*' options values can take the default value of -1 or they can be a string with a specific format,
+for example:
+
+.. code-block:: yaml
+
+    model:
+      galcoeff: 10, 15
+      isocoeff: 0.6, 0.8
+
+In this case, you should pay attention on how the sky maps are generated: the
+following example show which iso/gal coefficients are assigned to which map.
+
+.. code-block:: yaml
+
+    selection:
+      fovradmin: 0
+      fovradmax: 60
+
+    maps:
+      energybins:
+        - 100, 300
+        - 300, 1000
+      fovbinnumber: 2
+
+    model:
+      galcoeff: 10, 15
+      isocoeff: 0.6, 0.8
+
+Map (1) has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:10.0 isocoeff:0.6
+Map (2) has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:15.0 isocoeff:0.8
+Map (3) has: fovmax:30 fovmax:60 emin:100 emax:300   galcoeff:10.0 isocoeff:0.6
+Map (4) has: fovmax:30 fovmax:60 emin:300 emax:1000  galcoeff:15.0 isocoeff:0.8
+
+
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
@@ -186,8 +247,8 @@ Model
    | sources, diffuse and isotropic components", "string", "null", "yes"
    "galmode",  "int", 1, "no",
    "isomode", "int", 1, "no",
-   "galcoeff", "set into .maplist if >= 0", "float", -1, "no"
-   "isocoeff", "set into .maplist if >= 0", "float", -1, "no"
+   "galcoeff", "set into .maplist if >= 0", "float or str", -1, "no"
+   "isocoeff", "set into .maplist if >= 0", "float or str", -1, "no"
    "emin_sources", "energy min of the modelfile", "int", 100, "no"
    "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
@@ -203,8 +264,8 @@ coefficients *'galcoeff'* or *'isocoeff'* found in all the lines of the maplist 
 | 3: all the coefficients are proportionally variable, that is the relative weight of their absolute value is kept.
 
 
-mle
-===
+Section: *'mle'*
+================
 
 The maximum likelihood estimation analysis is configured by the following options:
 
@@ -217,7 +278,7 @@ The maximum likelihood estimation analysis is configured by the following option
    "loccl", "Source location contour confidence level (default 95 (%)confidence level) Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
 
 Exp-ratio evaluation options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"

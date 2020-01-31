@@ -7,6 +7,7 @@ build/
 out/
 docs/build/
 .idea
+.ipynb_checkpoints
 
 load_env.sh
 /tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out

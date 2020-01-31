@@ -9,13 +9,17 @@ need to decide the name of the virtual environment that will be created by anaco
 ::
 
     conda config --add channels conda-forge
-    conda create -n <virtualenv_name> -c addis.inaf agilepy
+    conda create -n <virtualenv_name> -c agilescience agilepy
 
 Supported platforms:
 
   - linux-64
   - osx-64
 
+Tested on:
+
+  - CentOs 7.6
+  - macOs 10.14
 
 In order to use the software you need to activate the virtual environment first:
 ::
@@ -26,10 +30,6 @@ When you activate the environment the following environment variables will be se
 ::
 
     AGILE=$CONDA_PREFIX/agiletools
-    PFILES=$PFILES:$AGILE/share
-    ROOTSYS=$CONDA_PREFIX
-    CFITSIO=$CONDA_PREFIX
-    GSL=$CONDA_PREFIX
     PATH=$AGILE/bin:$AGILE/scripts:$AGILE/scripts/extendesources:$PATH
     LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$CONDA_PREFIX/lib64:$AGILE/lib:$LD_LIBRARY_PATH
 
@@ -37,6 +37,11 @@ Running tests:
 ::
 
     start_agilepy_tests.sh
+
+Running tutorial:
+::
+
+    start_tutorial_notebook.sh
 
 Uninstalling
 ^^^^^^^^^^^^
