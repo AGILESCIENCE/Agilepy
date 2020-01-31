@@ -5,6 +5,7 @@ recursive-include * *.yaml
 recursive-include * *.xml
 recursive-include * *.source
 recursive-include * *.sh
+recursive-include * *.txt
 recursive-include * *.ipynb
 
 recursive-exclude * __pycache__
