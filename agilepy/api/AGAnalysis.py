@@ -314,16 +314,37 @@ class AGAnalysis:
 
             multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
 
-            mapCenterL = float(self.config.getOptionValue("glon"))
-            mapCenterB = float(self.config.getOptionValue("glat"))
-            self.sourcesLibrary.updateMulti(multiOutputData, mapCenterL, mapCenterB)
+            self.sourcesLibrary.updateMulti(multiOutputData)
 
 
         self.config.reset()
 
         return sourceFiles
 
+    def selectSources(self, selection):
+        """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
 
+        The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
+        ``boolean expression strings``.
+
+        The selection criteria can be expressed using the following ``Source`` class's parameters:
+
+        - Name: the unique code identifying the source.
+        - Dist: the distance of the source from the center of the maps (generated with ``generateMaps()``)
+        - Flux: the flux value.
+        - SqrtTS: the radix square of the ts.
+
+        Warning:
+
+            The SqrtTS parameter is available only after the maximum likelihood estimation analysis.
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+
+        Returns:
+            List of sources.
+        """
+        return self.sourcesLibrary.selectSources(selection)
 
     def freeSources(self, selection, parameterName, free):
         """It can set to True or False a parameter's ``free`` attribute of one or more source.
@@ -342,20 +363,6 @@ class AGAnalysis:
                   <parameter name="GLAT" value="2.12298" />
                 </spatialModel>
             </source>
-
-        The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
-        ``boolean expression strings``.
-
-        The selection criteria can be expressed using the following ``Source`` class's parameters:
-
-        - Name: the unique code identifying the source.
-        - Dist: the distance of the source from the center of the maps (generated with ``generateMaps()``)
-        - Flux: the flux value.
-        - SqrtTS: the radix square of the ts.
-
-        Warning:
-
-            The Dist, Flux and SqrtTS parameters are available only after the maximum likelihood estimation analysis.
 
 
         The supported ``parameterName`` are:
@@ -401,16 +408,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.freeSources(selection, parameterName, free)
 
-    def selectSources(self, selection):
-        """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
 
-        Args:
-            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
-
-        Returns:
-            List of sources.
-        """
-        return self.sourcesLibrary.selectSources(selection)
 
     def deleteSources(self, selection):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.

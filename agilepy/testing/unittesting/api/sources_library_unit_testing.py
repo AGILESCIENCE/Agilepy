@@ -44,6 +44,8 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
         self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
+        self.config = AgilepyConfig()
+        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
 
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
@@ -65,7 +67,6 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_load_xml(self):
         self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML"))
-        self.assertEqual(2, len(self.sl.sources))
 
         self.assertEqual(2, len(self.sl.sources))
 
@@ -75,6 +76,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(119.3e-08, source.getParamValue("Flux"))
         self.assertEqual(1.75, source.getParamValue("Index"))
         self.assertEqual(78.2375, source.getParamValue("GLON"))
+        self.assertEqual(True, source.spatialModel.dist > 0)
 
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
@@ -83,6 +85,8 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(70.89e-08, source.getParamValue("Flux"))
         self.assertEqual(1.38, source.getParamValue("Index"))
         self.assertEqual(75.2562, source.getParamValue("GLON"))
+        self.assertEqual(True, source.spatialModel.dist > 0)
+
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
@@ -156,15 +160,18 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
         self.assertEqual(2, len(self.sl.sources))
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
+        sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
         self.assertEqual(1, len(sources))
 
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
 
         source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source, 80, 0)
+        self.sl.updateMulti(source)
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
+        self.assertEqual(1, len(sources))
+
+        sources = self.sl.selectSources('SqrtTS == 10')
         self.assertEqual(1, len(sources))
 
     def test_select_sources_with_selection_lambda(self):
@@ -178,7 +185,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
 
         source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source, 80, 0)
+        self.sl.updateMulti(source)
 
         sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0)
         self.assertEqual(1, len(sources))
@@ -188,7 +195,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source, 80, 0)
+        self.sl.updateMulti(source)
 
 
         sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", False)
@@ -210,7 +217,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source, 80, 0)
+        self.sl.updateMulti(source)
 
         sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", False)
         self.assertEqual(1, len(sources))

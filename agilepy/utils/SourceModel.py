@@ -114,6 +114,7 @@ class SpatialModel(ValueParamFinder):
     type: str
     location_limit: int
     free: int
+    dist: float
     parameters: List[Parameter]
 
     def __init__(self, type, location_limit, free):
@@ -121,10 +122,11 @@ class SpatialModel(ValueParamFinder):
         self.type = type
         self.location_limit = float(location_limit)
         self.free = int(free)
+        self.dist = None
 
 
     def __str__(self):
-        return f'\n - SpatialModel type: {self.type} free: {self.free}\n\tglon: {self.parameters[0].value}\n\tglat: {self.parameters[1].value}'
+        return f'\n - SpatialModel type: {self.type} free: {self.free}\n\tglon: {self.parameters[0].value}\n\tglat: {self.parameters[1].value}\n\tdist: {self.dist}'
 
 @dataclass
 class Spectrum(ValueParamFinder):
@@ -351,6 +353,32 @@ class Source:
             strRepr += f'{self.multi}'
         strRepr += '\n----------------------------------------------------------------'
         return strRepr
+
+    def getSelectionValue(self, paramName):
+
+        if paramName == "Name" or paramName == "name":
+            return self.name
+
+        elif paramName == "Flux" or paramName == "flux":
+            if self.multi:
+                return self.multi.Flux
+            else:
+                return self.spectrum.getParamValue("Flux")
+
+        elif paramName == "Dist" or paramName == "dist":
+            if self.multi:
+                return self.multi.Dist
+            else:
+                return self.spatialModel.dist
+
+        elif paramName == "SqrtTS" or paramName == "sqrtTS":
+
+            return self.multi.SqrtTS
+
+        else:
+
+            return None
+
 
     def setParamValue(self, key, val):
 

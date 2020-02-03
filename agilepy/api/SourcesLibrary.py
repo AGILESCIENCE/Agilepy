@@ -36,6 +36,7 @@ from xml.dom import minidom
 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.AgilepyLogger import agilepyLogger
+from agilepy.config.AgilepyConfig import AgilepyConfig
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
@@ -60,6 +61,7 @@ class SourcesLibrary:
 
         self.sources = None
 
+        self.config = AgilepyConfig()
 
     def loadSources(self, filePath, fileformat="XML"):
         """
@@ -79,13 +81,14 @@ class SourcesLibrary:
             self.sources = self._loadFromSourcesTxt(self.sourcesFilePath)
 
         if not self.sources:
-
             self.logger.critical(self, "Errors during %s parsing (format %s)", self.sourcesFilePath, self.sourcesFilePathFormat)
             raise SourcesFileLoadingError("Errors during {} parsing (format {})".format(self.sourcesFilePath, self.sourcesFilePathFormat))
 
-        else:
-            return True
+        for source in self.sources:
 
+            self.updateSourceDistance(source)
+
+        return True
 
 
 
@@ -261,45 +264,63 @@ class SourcesLibrary:
 
         return multiOutput
 
-    def updateMulti(self, data, mapCenterL, mapCenterB):
 
-        sourcesFound = self.selectSources(lambda Name : Name == data.label)
+    def updateMulti(self, dataFromAGMulti):
+
+        sourcesFound = self.selectSources(lambda Name : Name == dataFromAGMulti.label)
 
         if len(sourcesFound) == 0:
-            raise SourceNotFound("Source '%s' has not been found in the sources library"%(data.label))
+            raise SourceNotFound("Source '%s' has not been found in the sources library"%(dataFromAGMulti.label))
 
         for sourceFound in sourcesFound:
 
-            sourceFound.multi = data
+            sourceFound.multi = dataFromAGMulti
+
+            self.updateSourceDistance(sourceFound)
+
+            self.updateSourceFlux(sourceFound)
 
 
-            # Computing the distances from maps centers
-            # Longitude
-            sourceL = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLON"))
-            # Latitude
-            sourceB = float(sourceFound.spatialModel.getParamAttributeWhere("value", "name", "GLAT"))
+    def updateSourceDistance(self, source):
 
-            sourceL = float(data.L)
-            sourceB = float(data.B)
+        mapCenterL = float(self.config.getOptionValue("glon"))
+        mapCenterB = float(self.config.getOptionValue("glat"))
+
+        if source.multi:
+            sourceL = float(source.multi.L)
+            sourceB = float(source.multi.B)
 
             if sourceL == -1:
-                sourceL = float(data.start_l)
+                sourceL = float(source.multi.start_l)
+
             if sourceB == -1:
-                sourceB = float(data.start_b)
+                sourceB = float(source.multi.start_b)
+
+        else:
+            sourceL = float(source.spatialModel.getParamAttributeWhere("value", "name", "GLON"))
+            sourceB = float(source.spatialModel.getParamAttributeWhere("value", "name", "GLAT"))
 
 
-            sourceFound.multi.Dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
+        dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
 
-            self.logger.debug(self, "'Dist' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Dist))
 
-            if sourceFound.setParamValue("Flux", sourceFound.multi.Flux):
 
-                self.logger.debug(self, "'Flux' parameter of '%s' has been updated: %f", data.label, float(sourceFound.multi.Flux))
+        if source.multi:
+            source.multi.Dist = dist
+            self.logger.debug(self, "'Dist' parameter of '%s' has been updated from multi: %f", source.multi.label, float(source.multi.Dist))
+        else:
+            source.spatialModel.dist = dist
+            self.logger.debug(self, "'Dist' parameter of '%s' has been updated from xml: %f", source.name, float(source.spatialModel.dist))
 
-            else:
+    def updateSourceFlux(self, source):
 
-                self.warning.warning(self, "'Flux' parameter of '%s' has NOT been updated.", [data.label])
+        if source.setParamValue("Flux", source.multi.Flux):
 
+            self.logger.debug(self, "'Flux' parameter of '%s' has been updated: %f", source.multi.label, float(source.multi.Flux))
+
+        else:
+
+            self.warning.warning(self, "'Flux' parameter of '%s' has NOT been updated.", [source.multi.label])
 
     @singledispatch
     def _extractSelectionParams(selection):
@@ -344,16 +365,7 @@ class SourcesLibrary:
     @staticmethod
     def _selectSource(selection, source, selectionParamsNames):
 
-        selectionParamsValues = []
-
-        for paramName in selectionParamsNames:
-
-            if paramName == "Name":
-                paramValue = getattr(source, "name")
-            else:
-                paramValue = float(getattr(source.multi, paramName))
-
-            selectionParamsValues.append(paramValue)
+        selectionParamsValues = [source.getSelectionValue(paramName) for paramName in selectionParamsNames]
 
         return SourcesLibrary.__selectSource(selection, source, selectionParamsNames, selectionParamsValues)
 
@@ -434,7 +446,6 @@ class SourcesLibrary:
                     sourceDescrDC = SpatialModel(sourceDescription.attrib["type"], sourceDescription.attrib["location_limit"], sourceDescription.attrib["free"])
                     sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
                     sourceDC.spatialModel = sourceDescrDC
-
 
             sources.append(sourceDC)
 
@@ -726,7 +737,7 @@ class SourcesLibrary:
     def _getSelectionParams(tostr = False, onlyMultiParams = False):
         sp = ["Name","Dist", "Flux", "SqrtTS"]
         if onlyMultiParams:
-            sp = ["Dist", "Flux", "SqrtTS"]
+            sp = ["SqrtTS"]
         if not tostr:
             return sp
         else:
