@@ -51,7 +51,7 @@ class AgilepyConfig(metaclass=Singleton):
     def __init__(self):
 
         self.pp = pprint.PrettyPrinter(indent=2)
-
+        self.initialized = False
 
     def loadConfigurations(self, configurationFilePath, validate = True):
 
@@ -73,6 +73,8 @@ class AgilepyConfig(metaclass=Singleton):
         if validate:
 
             self.validateConfiguration()
+
+        self.initialized = True
 
     def validateConfiguration(self):
 

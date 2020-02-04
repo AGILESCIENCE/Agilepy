@@ -330,7 +330,7 @@ class AGAnalysis:
         The selection criteria can be expressed using the following ``Source`` class's parameters:
 
         - Name: the unique code identifying the source.
-        - Dist: the distance of the source from the center of the maps (generated with ``generateMaps()``)
+        - Dist: the distance of the source from the center of the maps.
         - Flux: the flux value.
         - SqrtTS: the radix square of the ts.
 
