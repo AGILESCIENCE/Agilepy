@@ -421,22 +421,24 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.deleteSources(selection)
 
-    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, save_image=False, format="png", title=None):
+    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
         """It shows fits skymap passed as first argument.
 
         Args:
             fitsimage (str): the relative or absolute path to the input fits file.
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
-            save_image (bool): if set to true, saves the image into outdir directory
-            format (string): the format of the image
-            title: the title of the image
+            saveImage (bool): if set to true, saves the image into outdir directory
+            format (str): the format of the image
+            title (str): the title of the image
+            cmap (str): Matplotlib colormap
+            regFilePath (str): the relative or absolute path to the input reg file
 
 
         Returns:
             Path to the file
         """
-        return AstroUtils.displaySkyMap(fitsFilepath, smooth, sigma, save_image, self.outdir, format, title)
+        return AstroUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.outdir, format, title, cmap, regFilePath)
 
 
 

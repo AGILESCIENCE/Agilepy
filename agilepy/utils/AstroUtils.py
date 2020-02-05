@@ -26,18 +26,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-import matplotlib as mpl
 
 #mpl.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
 from astropy.wcs import WCS
 from astropy.io import fits
-from astropy.utils.data import get_pkg_data_filename
-import os
+from regions import read_ds9
 import scipy.ndimage as ndimage
 import ntpath
 from os.path import join
+
 
 
 class AstroUtils:
@@ -80,7 +78,7 @@ class AstroUtils:
         return (timett / 86400.0) + 53005.0
 
 
-    def displaySkyMap(fitsFilepath,  smooth=False, sigma=4, save_image=False, outDir="./", format="png", title=None):
+    def displaySkyMap(fitsFilepath,  smooth, sigma, saveImage, outDir, format, title, cmap, regFilePath):
         hdu = fits.open(fitsFilepath)[0]
 
         wcs = WCS(hdu.header)
@@ -93,11 +91,17 @@ class AstroUtils:
         else:
             data = hdu.data
 
-        cmap = plt.cm.CMRmap
-        cmap.set_bad(color='black')
+        #cmap = plt.cm.CMRmap
+        #cmap.set_bad(color='black')
 
         plt.imshow(data, origin='lower', norm=None, cmap=cmap)
         # interpolation = "gaussian",
+        if regFilePath is not None:
+            regions = read_ds9(regFilePath)
+            for region in regions:
+                pixelRegion = region.to_pixel(wcs=wcs)
+                pixelRegion.plot(ax=ax, color="green")
+
         plt.grid(color='white', ls='solid')
         plt.colorbar()
         if wcs.wcs.ctype[0].find('LAT') == 0:
@@ -107,10 +111,13 @@ class AstroUtils:
             plt.xlabel('Right ascension')
             plt.ylabel('Declination')
 
-        if save_image:
+        if saveImage:
             _, filename = ntpath.split(fitsFilepath)
             filename = join(outDir, filename+"."+format)
             plt.savefig(filename)
             return filename
         else:
             plt.show()
+
+#if __name__ == "__main__":
+#    path = AstroUtils.displaySkyMap("examples/testcase_EMIN00100_EMAX00300_01.cts.gz", outDir="./", smooth=True, sigma=4, saveImage=False, title="ciao", format=None, cmap="Greys", regFilePath="examples/2AGL_2.reg")
