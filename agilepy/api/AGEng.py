@@ -25,7 +25,6 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
-from time import time
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.io import fits
@@ -39,13 +38,15 @@ class AGEng:
     @staticmethod
     def computeAGILEAngularDistanceFromSource(logfilesIndex, tmin, tmax, l=None, b=None, ra=None, dec=None, zmax=60, step=1):
 
-        start_t = time()
+
 
         if l is not None and b is not None:
-            skyCords = SkyCoord(l=l*u.degree, b=b*u.degree, frame='galactic')
-            skyCordsFK5 = skyCords.transform_to('icrs')
+            skyCordsGAL = SkyCoord(l=l*u.degree, b=b*u.degree, frame='galactic')
+            skyCordsFK5 = skyCordsGAL.transform_to('icrs')
         else:
             skyCordsFK5 = SkyCoord(ra=ra*u.degree, dec=dec*u.degree, frame='icrs')
+
+        print("Coord transformation: l:%f b:%f  => ra:%f dec:%f"%(skyCordsGAL.l.deg,skyCordsGAL.b.deg,skyCordsFK5.ra.deg,skyCordsFK5.dec.deg))
 
         logFiles = AGEng._getLogsFileInInterval(logfilesIndex, tmin, tmax)
 
@@ -57,9 +58,6 @@ class AGEng:
 
         sep, time_s, time_e = AGEng._calcSeparation(logFiles, tmin, tmax, skyCordsFK5, zmax, step)
 
-        end_t = time() - start_t
-
-        print("Took %f seconds"%(end_t))
 
         return sep, time_s, time_e, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
 
@@ -105,7 +103,7 @@ class AGEng:
             else:
                 doTimeMask = False
 
-            print("%d/%d %s"%(idx,total,logFile))
+            print("\n%d/%d %s"%(idx,total,logFile))
 
             sep, time_i, time_f = AGEng.computeSeparationPerFile(doTimeMask, logFile, tmin_start, tmax_start, skyCordsFK5, zmax, step)
 
@@ -119,13 +117,40 @@ class AGEng:
                 time_i_tot = np.concatenate((time_i_tot, time_i), axis=0)
                 time_f_tot = np.concatenate((time_f_tot, time_f), axis=0)
 
-            #print("sep: ", sep, len(sep), type(sep), sep.dtype)
+            print("total computed separations: ", len(sep_tot))
             #print("time_i: ", time_i, len(time_i), type(time_i), time_i.dtype)
 
             #print("sep_tot: ", sep_tot, len(sep_tot), type(sep_tot), sep_tot.dtype)
             #print("time_i_tot: ", time_i_tot, len(time_i_tot), type(time_i_tot), time_i_tot.dtype)
 
             #input("..")
+
+
+        """
+        WRITE DATA ON FILES
+        zmax = zmax*u.deg
+        ttotal_under_zmax = np.sum(tTTf[separation<zmax]-tTTi[separation<zmax])
+        ttotal_above_zmax = np.sum(tTTf[separation>zmax]-tTTi[separation>zmax])
+        print("Total integration time=", ttotal_obs*step, " s")
+        print("Total time spent at separation < ", zmax, " deg:", ttotal_under_zmax*step, "s")
+        print("Relative time spent at separation <", zmax, " deg:", ttotal_under_zmax*100./ttotal_obs, "%")
+        print("Relative time spent at separation >", zmax, " deg:", ttotal_above_zmax*100./ttotal_obs, "%")
+        with open("test.txt", "a") as f:
+            f.write("AGILE\n")
+            f.write("Total integration time={}s\n".format(ttotal_obs*step))
+            f.write("Total time spent at separation < {} deg: {} s\n".format(zmax,ttotal_under_zmax*step))
+            f.write("Relative time spent at separation < {} deg: {} %\n".format(zmax,ttotal_under_zmax*100./ttotal_obs))
+            f.write("Relative time spent at separation > {} deg: {} %\n".format(zmax, ttotal_above_zmax*100./ttotal_obs))
+        f.close()
+        kk = open("times_bins_vs_separation.txt", "w")
+        filesep = open('time_vs_separation_agile.txt', 'w')
+        for i in np.arange(len(separation)):
+            filesep.write("{} {}\n".format(meantimes[i], separation[i]))
+            kk.write("{} {} {}\n".format(tTTi[i], tTTf[i], separation[i]))
+        filesep.close()
+        kk.close()
+        """
+
 
         return sep, time_i, time_f
 
@@ -134,13 +159,26 @@ class AGEng:
 
         hdulist = fits.open(logFile)
         SC = hdulist[1].data
+        print("Total events: ", len(SC["TIME"]))
+        print("tmin: ",tmin_start)
+        print("tmin log file:",SC["TIME"][0])
+        print("tmax: ",tmax_start)
+        print("tmax log file:",SC["TIME"][-1])
+
+        print("Do time mask? ",doTimeMask)
 
         if doTimeMask:
+
+            print("How many times are >= tmin_start? ",np.sum(SC['TIME'] >= tmin_start))
+            print("How many times are <= tmax_start? ",np.sum(SC['TIME'] <= tmax_start))
+
             # Filtering out
             booleanMask = np.logical_and(SC['TIME'] >= tmin_start, SC['TIME'] <= tmax_start)
             TIME = SC['TIME'][booleanMask]
             ATTITUDE_RA_Y= SC['ATTITUDE_RA_Y'][booleanMask]
             ATTITUDE_DEC_Y= SC['ATTITUDE_DEC_Y'][booleanMask]
+            print("Time mask: %d values skipped"%(np.sum(np.logical_not(booleanMask))))
+
 
         else:
             TIME = SC['TIME']
@@ -157,6 +195,8 @@ class AGEng:
         ATTITUDE_RA_Y= ATTITUDE_RA_Y[booleanMaskRA]
         ATTITUDE_DEC_Y= ATTITUDE_DEC_Y[booleanMaskDEC]
 
+        print("Not-null mask (RA): %d values skipped"%(np.sum(np.logical_not(booleanMaskRA))))
+        print("Not-null mask (DEC): %d values skipped"%(np.sum(np.logical_not(booleanMaskDEC))))
 
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
 
@@ -166,9 +206,13 @@ class AGEng:
         index_ti = 0
         index_tf = len(TIME)-1
 
+        print("Step is:",step)
+
         # creating arrays filled with zeros
         src_raz  = np.zeros(len(TIME[index_ti:index_tf:int(step)]))
         src_decz  = np.zeros(len(TIME[index_ti:index_tf:int(step)]))
+
+        print("Number of separations to be computed: ", index_tf/int(step))
 
         # filling the just created arrays with our coordinates of interest
         src_ra   = src_raz + skyCordsFK5.ra
@@ -178,6 +222,8 @@ class AGEng:
         c2  = SkyCoord(ATTITUDE_RA_Y[index_ti:index_tf:int(step)], ATTITUDE_DEC_Y[index_ti:index_tf:int(step)], unit='deg', frame='icrs')
 #        print 'c1=', len(c1), 'c2=', len(c2) # to ensure c1 and c2 have the same length
         sep = c2.separation(c1)
+
+        print("Number of computed separation: %f"%(len(sep)))
 
         return np.asfarray(sep), TIME[index_ti:index_tf:int(step)], TIME[index_ti:index_tf:int(step)]+deltatime
 
@@ -203,20 +249,16 @@ class AGEng:
         return logsFiles
 
     @staticmethod
-    def calc_mjd_simple(t_in):
-        """ Returns the variable t_in, expressed AGILE MET seconds, converted to MJD
-            Input: t_in, AGILE MET in seconds
-            Output: t_mjd, AGILE MJD time
-        """
-        tref   = datetime.datetime(2004,1,1,0,0,0)
-        t_temp = tref + datetime.timedelta(seconds=t_in)
-        time2  = Time(t_temp, format='datetime')
-        t_mjd  = time2.mjd
-        return t_mjd
+    def convert_tt_to_mjd(time_tt):
+        return (float(time_tt) / 86400.0) + 53005.0
 
     @staticmethod
-    def PlotVisibility(src_ra, src_dec, separation, tTTi, tTTf, zmax, step, twocolumn=False, show=False, histogram=False, im_fmt='png', plot=True):
-        """PlotVisibility makes a plot of the zenith distance of a given source
+    def convert_mjd_to_tt(time_mjd):
+        return (float(time_mjd) - 53005.0) *  86400.0;
+
+    @staticmethod
+    def visibilityPlot(separation, tTTi, tTTf, src_ra, src_dec, zmax, step, twocolumn=False, show=False, histogram=False, im_fmt='png', plot=True, outDir="./images"):
+        """visibilityPlot makes a plot of the zenith distance of a given source
            (src_ra and src_dec selected in the agilecheck parameters).
 
            Input (optional) parameters:
@@ -230,7 +272,7 @@ class AGEng:
              the percentage of time spent at diferent zenith distance bins (10 degrees bins)
              is saved.
         """
-        start_t = time()
+
 #=================================================================
 #====================== plotting settings ========================
 #=================================================================
@@ -260,67 +302,27 @@ class AGEng:
             #'text.usetex': True,
             'ps.usedistiller': False,
             'figure.figsize': fig_size,
-            'font.family': 'Times New Roman',
+            'font.family': 'DejaVu Sans',
             'font.serif': ['Bitstream Vera Serif']}
         plt.rcParams.update(params)
 #================== end of plotting settings =====================
 
-        print("src_ra: ",src_ra)
-        print("src_dec: ",src_dec)
+
+
         print("separation: ",separation, len(separation))
-        print("tTTi: ",tTTi, len(tTTi))
-        print("tTTf: ",tTTf, len(tTTf))
-        print("zmax: ",zmax)
-        print("step: ",step)
 
 
-        ti_mjd = []
-        tf_mjd = []
-
-        time_conv_start_t = time()
-
-        for i in np.arange(len(tTTi)):
-            timjd = AGEng.calc_mjd_simple(tTTi[i])
-            tfmjd = AGEng.calc_mjd_simple(tTTf[i])
-            ti_mjd.append(timjd)
-            tf_mjd.append(tfmjd)
-        time_conv_end_t = time() - time_conv_start_t
-        print("Time conversion took: ", time_conv_end_t)
-
-        ti_mjd = np.array(ti_mjd)
-        tf_mjd = np.array(tf_mjd)
-
-        print("tf_mjd: ", tf_mjd, len(tf_mjd))
-        print("ti_mjd: ", ti_mjd, len(ti_mjd))
-
+        # Conversion TT => MJD
+        ti_mjd = np.array([AGEng.convert_tt_to_mjd(tiTT) for tiTT in tTTi])
+        tf_mjd = np.array([AGEng.convert_tt_to_mjd(tfTT) for tfTT in tTTf])
         total_obs = (np.max(tf_mjd)-np.min(ti_mjd))//1 # in days
-        meantime = (ti_mjd+tf_mjd)/2.
 
         deltat = tTTf - tTTi
-        deltat1 = deltat[1]
-
         ttotal_obs = np.sum(deltat)
-        ttotal_under_zmax = np.sum(tTTf[separation<zmax]-tTTi[separation<zmax])
-        ttotal_above_zmax = np.sum(tTTf[separation>zmax]-tTTi[separation>zmax])
-        print("Total integration time=", ttotal_obs*step, " s")
-        print("Total time spent at separation < ", zmax, " deg:", ttotal_under_zmax*step, "s")
-        print("Relative time spent at separation <", zmax, " deg:", ttotal_under_zmax*100./ttotal_obs, "%")
-        print("Relative time spent at separation >", zmax, " deg:", ttotal_above_zmax*100./ttotal_obs, "%")
-        with open("test.txt", "a") as f:
-            f.write("AGILE\n")
-            f.write("Total integration time={}s\n".format(ttotal_obs*step))
-            f.write("Total time spent at separation < {} deg: {} s\n".format(zmax,ttotal_under_zmax*step))
-            f.write("Relative time spent at separation < {} deg: {} %\n".format(zmax,ttotal_under_zmax*100./ttotal_obs))
-            f.write("Relative time spent at separation > {} deg: {} %\n".format(zmax, ttotal_above_zmax*100./ttotal_obs))
-        f.close()
 
-        kk = open("times_bins_vs_separation.txt", "w")
-        filesep = open('time_vs_separation_agile.txt', 'w')
-        for i in np.arange(len(separation)):
-            filesep.write("{} {}\n".format(meantime[i], separation[i]))
-            kk.write("{} {} {}\n".format(tTTi[i], tTTf[i], separation[i]))
-        filesep.close()
-        kk.close()
+        meantimes = (ti_mjd+tf_mjd)/2. # for plot
+
+        deltat1 = deltat[1] # for histogram
 
 
 
@@ -349,82 +351,78 @@ class AGEng:
 #        for i in np.arange(len(t_agilei_mjd)):
 #            ax.fill_between([t_agilei_mjd[i], t_agilef_mjd[i]], 0, 200, color='grey', alpha=0.5)
 
-        if plot == True:
-            print('Plotting figure...')
-            f  = plt.figure()
-            ax = f.add_subplot(111)
-            ax.plot(meantime, separation, '-b')
-#            ax.plot(meantime[separation < zmax], separation[separation < zmax], '-r')
 
-            ax.set_ylim(0., zmax+5.0)
-            ax.set_xlabel('MJD')
-            ax.set_ylabel('off-axis angle [$^{\\circ}$]')
+        f  = plt.figure()
+        ax = f.add_subplot(111)
+        ax.plot(meantimes, separation, '-b')
+#            ax.plot(meantimes[separation < zmax], separation[separation < zmax], '-r')
 
-            print( 'Saving figure...')
-            ax.set_xlim(np.min(meantime), np.max(meantime))
-            if show==True:
-                f.show()
-            else:
-                filename = 'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
-                f.savefig(filename)
-                print("Produce: ", filename)
+        ax.set_ylim(0., zmax.value+5.0)
+        ax.set_xlabel('MJD')
+        ax.set_ylabel('off-axis angle [$^{\\circ}$]')
+        ax.set_xlim(np.min(meantimes), np.max(meantimes))
 
-        if histogram == True:
-            print( "Plotting histogram...")
-            bins  = [0, 10, 20, 30, 40, 50, 60]
-            bins2 = [60, 180]
-            hist, bins = np.histogram(separation, bins=bins, density=False)
-            hist2, bins2 = np.histogram(separation, bins=bins2, density=False)
-            width = 1. * (bins[1] - bins[0])
-            center = (bins[:-1] + bins[1:]) / 2
-            width2 = 1. * (bins2[1] - bins2[0])
-            center2 = (bins2[:-1] + bins2[1:]) / 2
-#            print hist, bins, center, width
-#            print hist2, bins2, center2, width2
-#            print len(separation)
+        print( 'Saving figure...')
+        if saveImage:
+            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt))
+            f.savefig(filePath)
+            print("Produce: ", filePath)
 
-            f2  = plt.figure()
-            ax2 = f2.add_subplot(111)
-            ax2.bar(center, hist*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width)
-            ax2.bar(center2, hist2*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width2)
+        f.show()
 
-            ax2.set_xlim(0., 100.)
-            ax2.set_ylim(0., 100.)
-            ax2.set_ylabel('\\% of time spent')
-            ax2.set_xlabel('off-axis angle $[^\\circ]$')
-            labels  = [0, 10, 20, 30, 40, 50, 180]
-            xlabels = [0, 10, 20, 30, 40, 50, 100]
-            plt.xticks(xlabels, labels)
 
-            fil = open('agile_histogram_visibility'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.txt', 'w')
-            for i in np.arange(len(center)):
-                fil.write("{} {} \n".format(center[i], hist[i]))
-            for i in np.arange(len(center2)):
-                fil.write("{} {} \n".format(center2[i], hist2[i]))
-            fil.close()
+    @staticmethod
+    def visibilityHistogram(separation):
+        print( "Plotting histogram...")
+        bins  = [0, 10, 20, 30, 40, 50, 60]
+        bins2 = [60, 180]
+        separation = [s.value for s in separation]
+        hist, bins = np.histogram(separation, bins=bins, density=False)
+        hist2, bins2 = np.histogram(separation, bins=bins2, density=False)
+        width = 1. * (bins[1] - bins[0])
+        center = (bins[:-1] + bins[1:]) / 2
+        width2 = 1. * (bins2[1] - bins2[0])
+        center2 = (bins2[:-1] + bins2[1:]) / 2
 
-            print( 'Saving figure...')
-            if show==True:
-                f2.show()
-            else:
-                filename = 'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
-                f2.savefig(filename)
-                print("Produced: ",filename)
+        f2  = plt.figure()
+        ax2 = f2.add_subplot(111)
+        ax2.bar(center, hist*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width)
+        ax2.bar(center2, hist2*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width2)
 
-            end_t = time() - start_t
+        ax2.set_xlim(0., 100.)
+        ax2.set_ylim(0., 100.)
+        ax2.set_ylabel('\\% of time spent')
+        ax2.set_xlabel('off-axis angle $[^\\circ]$')
+        labels  = [0, 10, 20, 30, 40, 50, 180]
+        xlabels = [0, 10, 20, 30, 40, 50, 100]
+        plt.xticks(xlabels, labels)
 
-            print("Took %f seconds"%(end_t))
+        """
+        fil = open('agile_histogram_visibility'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.txt', 'w')
+        for i in np.arange(len(center)):
+            fil.write("{} {} \n".format(center[i], hist[i]))
+        for i in np.arange(len(center2)):
+            fil.write("{} {} \n".format(center2[i], hist2[i]))
+        fil.close()
+        """
+        if saveImage:
+            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt))
+            f2.savefig(filePath)
+            print("Produced: ",filePath)
 
-            return ttotal_obs, np.concatenate((hist,hist2))
+        f2.show()
+
+        return ttotal_obs, np.concatenate((hist,hist2))
 
 
 if __name__ == "__main__":
 
-    file = "/AGILE_PROC3/DATA_ASDCSTDk/INDEX/LOG.log.index"
+    file = "/data/AGILE/LOG_INDEX/LOG.log.index"
+
     zmax = 60
-    step = 5
-
+    step = 10
     # sep, time_s, time_f, ra ,dec = AGEng.computeAGILEAngularDistanceFromSource(file, 221572734, 228830334, l=129.7, b=3.7, zmax=zmax, step=step)
-    sep, time_s, time_f, ra ,dec = AGEng.computeAGILEAngularDistanceFromSource(file, 221572734, 221830334, l=129.7, b=3.7, zmax=zmax, step=step)
+    sep, time_s, time_f, ra ,dec = AGEng.computeAGILEAngularDistanceFromSource(file, 184161534, 184247933, l=129.7, b=3.7, zmax=zmax, step=step)
 
-    AGEng.PlotVisibility(ra ,dec, sep, time_s, time_f, zmax, step, twocolumn=True, show=False, histogram=True, im_fmt='png', plot=True)
+    AGEng.visibilityPlot(sep, time_s, time_f, ra, dec, zmax, step, twocolumn=False, histogram=True, im_fmt='png', plot=True, outDir="./images")
+    AGEng.visibilityHistogram(sep, )
