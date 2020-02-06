@@ -23,6 +23,6 @@ else
 
   echo "agilepy_path: $agilepy_path/notebooks"
 
-  jupyter notebook --notebook-dir="$agilepy_path/notebooks" "$agilepy_path/notebooks/agilepy-quickstart.ipynb"
+  jupyter notebook --notebook-dir="$agilepy_path/notebooks"
 
 fi
