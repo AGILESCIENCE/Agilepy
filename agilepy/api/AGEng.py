@@ -184,9 +184,9 @@ class AGEng:
 
         for idx, logFile in enumerate(logFiles):
 
-            self.logger.debug(self, "%d/%d", idx, total)
-
             idx = idx + 1
+
+            self.logger.info(self, "%d/%d", idx, total)
 
             if idx == 1 or idx == total:
                 doTimeMask = True
@@ -231,6 +231,8 @@ class AGEng:
         self.logger.debug(self, "separation_tot len: %d", len(separation_tot))
         self.logger.debug(self, "ti_tt_tot len: %d", len(ti_tt_tot))
         self.logger.debug(self, "tf_tt_tot len: %d", len(tf_tt_tot))
+
+
 
         return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
 
