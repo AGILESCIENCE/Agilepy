@@ -287,3 +287,15 @@ Exp-ratio evaluation options
    expratio_minthr, float, 0, none, ""
    expratio_maxthr, float, 15, none, ""
    expratio_size, float, 10, none, ""
+
+
+Section: *'plot'*
+=================
+
+This section defines the plotting configuration.
+
+.. csv-table::
+    :header: "Option", "Description", "Type", "Required", "Default"
+    :widths: 20, 20, 20, 20, 100
+
+    twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, no, False

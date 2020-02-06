@@ -191,7 +191,7 @@ class AgilepyConfig(metaclass=Singleton):
                             "timetype", "timelist", "projtype", "proj", "modelfile"]:
             return str
 
-        elif optionName in ["useEDPmatrixforEXP", "expratioevaluation"]:
+        elif optionName in ["useEDPmatrixforEXP", "expratioevaluation", "twocolumns"]:
             return bool
 
         elif optionName in ["energybins", "galcoeff", "isocoeff"]:

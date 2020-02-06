@@ -27,21 +27,7 @@
 
 import math
 
-#mpl.use("Agg")
-import matplotlib.pyplot as plt
-from astropy.wcs import WCS
-from astropy.io import fits
-from regions import read_ds9
-import scipy.ndimage as ndimage
-import ntpath
-from os.path import join
-
-
-
 class AstroUtils:
-
-    def __init__(self):
-        pass
 
     @staticmethod
     def distance(ll, bl, lf, bf):
@@ -76,48 +62,3 @@ class AstroUtils:
     @staticmethod
     def time_tt_to_mjd(timett):
         return (timett / 86400.0) + 53005.0
-
-
-    def displaySkyMap(fitsFilepath,  smooth, sigma, saveImage, outDir, format, title, cmap, regFilePath):
-        hdu = fits.open(fitsFilepath)[0]
-
-        wcs = WCS(hdu.header)
-        plt.figure(figsize=(10, 10))
-        ax = plt.subplot(projection=wcs)
-        if title:
-            ax.set_title(title, fontsize='large')
-        if smooth:
-            data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
-        else:
-            data = hdu.data
-
-        #cmap = plt.cm.CMRmap
-        #cmap.set_bad(color='black')
-
-        plt.imshow(data, origin='lower', norm=None, cmap=cmap)
-        # interpolation = "gaussian",
-        if regFilePath is not None:
-            regions = read_ds9(regFilePath)
-            for region in regions:
-                pixelRegion = region.to_pixel(wcs=wcs)
-                pixelRegion.plot(ax=ax, color="green")
-
-        plt.grid(color='white', ls='solid')
-        plt.colorbar()
-        if wcs.wcs.ctype[0].find('LAT') == 0:
-            plt.xlabel('Galactic Longitude')
-            plt.ylabel('Galactic Latitude')
-        if wcs.wcs.ctype[0].find('RA') == 0:
-            plt.xlabel('Right ascension')
-            plt.ylabel('Declination')
-
-        if saveImage:
-            _, filename = ntpath.split(fitsFilepath)
-            filename = join(outDir, filename+"."+format)
-            plt.savefig(filename)
-            return filename
-        else:
-            plt.show()
-
-#if __name__ == "__main__":
-#    path = AstroUtils.displaySkyMap("examples/testcase_EMIN00100_EMAX00300_01.cts.gz", outDir="./", smooth=True, sigma=4, saveImage=False, title="ciao", format=None, cmap="Greys", regFilePath="examples/2AGL_2.reg")

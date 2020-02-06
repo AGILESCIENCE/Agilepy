@@ -78,3 +78,6 @@ mle:
   # Hidden for internal corrections
   edpcorrection: 0.75
   fluxcorrection: 1
+
+plot:
+  twocolumns: False

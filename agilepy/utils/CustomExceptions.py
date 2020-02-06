@@ -73,3 +73,7 @@ class CannotSetHiddenOptionError(Exception):
 class LoggerTypeNotFound(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class WrongCoordinateSystemError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

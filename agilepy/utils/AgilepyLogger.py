@@ -43,6 +43,10 @@ class AgilepyLogger(metaclass=Singleton):
 
     def initialize(self, outputDirectory, logFilenamePrefix, debug_lvl = 2):
 
+        if self.initialized:
+
+            return Path(self.logfilePath)
+
         self.debug_lvl = debug_lvl
 
         # CRITICAL: always present in the log.

@@ -33,7 +33,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
 
-from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
@@ -93,6 +93,8 @@ class AGAnalysis:
         self.sourcesLibrary = SourcesLibrary()
 
         self.sourcesLibrary.loadSources(sourcesFilePath)
+
+        self.plottingUtils = PlottingUtils(self.config.getConf("plotting","twocolumns"))
 
         if "AGILE" not in os.environ:
             raise AGILENotFoundError("$AGILE is not set.")
@@ -438,7 +440,7 @@ class AGAnalysis:
         Returns:
             Path to the file
         """
-        return AstroUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.outdir, format, title, cmap, regFilePath)
+        return self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.outdir, format, title, cmap, regFilePath)
 
 
 

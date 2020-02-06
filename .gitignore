@@ -12,3 +12,4 @@ docs/build/
 load_env.sh
 /tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out
 tag.sh
+*.png

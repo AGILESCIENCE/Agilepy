@@ -26,7 +26,7 @@ Agilepy's documentation
   :caption: API
 
   api/analysis_api
-
+  api/engineering_api
 
 .. toctree::
   :caption: Help
