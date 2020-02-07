@@ -92,7 +92,16 @@ class AGAnalysis:
 
         self.sourcesLibrary = SourcesLibrary()
 
-        self.sourcesLibrary.loadSources(sourcesFilePath)
+        if ".txt" in sourcesFilePath:
+            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
+
+        elif ".xml" in sourceFilePath:
+            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
+
+        else:
+            self.logger.warning("Sources file don't have neither '.txt' or '.xml' extension")
+            self.sourcesLibrary.loadSources(sourcesFilePath)
+
 
         self.plottingUtils = PlottingUtils(self.config.getConf("plotting","twocolumns"))
 
