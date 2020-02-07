@@ -4,3 +4,4 @@ pyyaml
 matplotlib
 astropy
 scipy
+regions==0.4
