@@ -13,9 +13,9 @@ txt format
 
 Each source is described by a line containing space separated values, in the following order:
 
-.. code-block::
+::
 
-   <flux> <l> <b> <spectral index> <fixflag> <minSqrt(TS)> <name> <locationlimit> <funtype> <par2> <par3> <index limit min> <index limit max> <par2 limit min> <par2 limit max> <par3 limit min> <par3 limit max>
+   'flux' 'l' 'b' 'spectral index' 'fixflag' 'minSqrt(TS)' 'name' 'locationlimit' 'funtype' 'par2' 'par3' 'index limit min' 'index limit max' 'par2 limit min' 'par2 limit max' 'par3 limit min' 'par3 limit max'
 
 The '*flux*' parameter is expressed in cm^-2 s^-1, galactic longitude '*l* 'and latitude '*b*' are expressed in degrees.
 
