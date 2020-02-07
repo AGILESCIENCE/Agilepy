@@ -38,10 +38,7 @@ Running tests:
 
     start_agilepy_tests.sh
 
-Running tutorial:
-::
 
-    start_tutorial_notebook.sh
 
 Uninstalling
 ^^^^^^^^^^^^

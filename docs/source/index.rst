@@ -29,6 +29,11 @@ Agilepy's documentation
   api/engineering_api
 
 .. toctree::
+  :caption: How to
+
+  how_to/mle
+  
+.. toctree::
   :caption: Help
 
   help/help

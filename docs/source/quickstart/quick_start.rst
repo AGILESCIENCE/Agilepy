@@ -33,4 +33,4 @@ To perform an maximum likelyhood estimation analysis:
 
    ::
 
-      start_tutorial_notebook.sh
+      start_agilepy_notebooks.sh
