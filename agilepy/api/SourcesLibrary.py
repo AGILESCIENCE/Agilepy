@@ -460,11 +460,15 @@ class SourcesLibrary:
 
              for line in txtFile:
 
+                 if line == "\n":
+                     continue
+
                  elements = [elem.strip() for elem in line.split(" ") if elem] # each line is a source
 
                  if len(elements) != 17:
-                     self.logger.critical(self, "The number of elements on the line %s is not 17", line)
-                     raise SourcesAgileFormatParsingError("The number of elements on the line {} is not 17".format(line))
+                     print(elements)
+                     self.logger.critical(self, "The number of elements on the line %s is not 17 but %d", line, len(elements))
+                     raise SourcesAgileFormatParsingError("The number of elements on the line {} is not 17, but {}".format(line, len(elements)))
 
                  flux = float(elements[0])
                  glon = float(elements[1])

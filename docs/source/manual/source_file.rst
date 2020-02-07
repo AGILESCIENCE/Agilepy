@@ -28,12 +28,12 @@ According to the '*fixflag*' some or all of those values will be optimized by be
 The fixflag is a bit mask, each bit indicating whether the corresponding value is to be allowed to vary:
 
 | fixflag = 0 everything is fixed (free=”0”)
-| fixflag = 1 indicates the flux (free=”1” in <parameter name="Flux">)
-| fixflag = 2 the position is free (free=”1” in <spatialModel type="PointSource">)
-| fixflag = 4 the Index or Index1 is free (free=”1” in <parameter name="Index"> or <parameter name="Index1"> )
-| fixflag = 8 the par2 is free (free=”1” in <parameter name="CutoffEnergy"> or <parameter name="PivotEnergy">)
-| fixflag = 16 the par3 is free (free=”1” in <parameter name="Index2"> or <parameter name="Curvature">)
-| fixflag = 32 force position to be variable only in Loop2 (free=”2” in <spatialModel type="PointSource">)
+| fixflag = 1 indicates the flux (free=”1” in 'parameter name="Flux">)
+| fixflag = 2 the position is free (free=”1” in 'spatialModel type="PointSource">)
+| fixflag = 4 the Index or Index1 is free (free=”1” in 'parameter name="Index"> or 'parameter name="Index1"> )
+| fixflag = 8 the par2 is free (free=”1” in 'parameter name="CutoffEnergy"> or 'parameter name="PivotEnergy">)
+| fixflag = 16 the par3 is free (free=”1” in 'parameter name="Index2"> or 'parameter name="Curvature">)
+| fixflag = 32 force position to be variable only in Loop2 (free=”2” in 'spatialModel type="PointSource">)
 
 The user may combine these values, but the flux will always be allowed to vary if at least one of the other values are.
 
@@ -71,57 +71,57 @@ xml format
 
 .. code-block:: xml
 
-  <?xml version="1.0" ?>
-  <source_library title="source library">
+  '?xml version="1.0" ?>
+  'source_library title="source library">
 
-    <!-- Point Sources -->
-    <source name="2AGLJ2202+4214" type="PointSource">
-      <spectrum type="PowerLaw">
-        <parameter name="Flux" free="1"  value="7.45398e-08"/>
-        <parameter name="Index" free="1" scale="-1.0" value="1.96903" min="0.5" max="5"/>
-      </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-        <parameter name="GLON" value="92.4102" />
-        <parameter name="GLAT" value="-10.3946" />
-      </spatialModel>
-    </source>
+    '!-- Point Sources -->
+    'source name="2AGLJ2202+4214" type="PointSource">
+      'spectrum type="PowerLaw">
+        'parameter name="Flux" free="1"  value="7.45398e-08"/>
+        'parameter name="Index" free="1" scale="-1.0" value="1.96903" min="0.5" max="5"/>
+      '/spectrum>
+      'spatialModel type="PointSource" location_limit="0" free="0">
+        'parameter name="GLON" value="92.4102" />
+        'parameter name="GLAT" value="-10.3946" />
+      '/spatialModel>
+    '/source>
 
-    <source name="2AGLJ0007+7308" type="PointSource">
-      <spectrum type="PLExpCutoff">
-         <parameter name="Flux" free="1"  value="41.6072e-08"/>
-         <parameter name="Index" free="1" scale="-1.0" value="1.29082" min="0.5" max="5"/>
-         <parameter name="CutoffEnergy" free="1" scale="-1.0" value="2003.9" min="20" max="10000"/>
-      </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-         <parameter name="GLON" value="119.677" />
-         <parameter name="GLAT" value="10.544" />
-      </spatialModel>
-    </source>
+    'source name="2AGLJ0007+7308" type="PointSource">
+      'spectrum type="PLExpCutoff">
+         'parameter name="Flux" free="1"  value="41.6072e-08"/>
+         'parameter name="Index" free="1" scale="-1.0" value="1.29082" min="0.5" max="5"/>
+         'parameter name="CutoffEnergy" free="1" scale="-1.0" value="2003.9" min="20" max="10000"/>
+      '/spectrum>
+      'spatialModel type="PointSource" location_limit="0" free="0">
+         'parameter name="GLON" value="119.677" />
+         'parameter name="GLAT" value="10.544" />
+      '/spatialModel>
+    '/source>
 
-    <source name="2AGLJ0835-4514" type="PointSource">
-      <spectrum type="PLSuperExpCutoff">
-        <parameter name="Flux" free="1"  value="969.539e-08"/>
-        <parameter name="Index1" free="1" scale="-1.0" value="1.71345" min="0.5" min="5"/>
-        <parameter name="CutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
-        <parameter name="Index2" free="1" value="1.3477" min="0"  max="100"/>
-      </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-        <parameter name="GLON" value="263.585" />
-        <parameter name="GLAT" value="-2.84083" />
-      </spatialModel>
-    </source>
+    'source name="2AGLJ0835-4514" type="PointSource">
+      'spectrum type="PLSuperExpCutoff">
+        'parameter name="Flux" free="1"  value="969.539e-08"/>
+        'parameter name="Index1" free="1" scale="-1.0" value="1.71345" min="0.5" min="5"/>
+        'parameter name="CutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
+        'parameter name="Index2" free="1" value="1.3477" min="0"  max="100"/>
+      '/spectrum>
+      'spatialModel type="PointSource" location_limit="0" free="0">
+        'parameter name="GLON" value="263.585" />
+        'parameter name="GLAT" value="-2.84083" />
+      '/spatialModel>
+    '/source>
 
-    <source name="2AGLJ1801-2334" type="PointSource">
-      <spectrum type="LogParabola">
-        <parameter name="Flux" free="1"  value="35.79e-08"/>
-        <parameter name="Index" free="1" scale="-1.0" value="3.37991" min="1" min="4"/>
-        <parameter name="PivotEnergy" free="1" scale="-1.0" value="2935.07" min="500" max="3000"/>
-        <parameter name="Curvature" free="1" scale="-1.0" value="0.682363" min="0.1" max="3"/>
-      </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="1">
-        <parameter name="GLON" value="6.16978" />
-        <parameter name="GLAT" value="-0.0676943" />
-      </spatialModel>
-    </source>
+    'source name="2AGLJ1801-2334" type="PointSource">
+      'spectrum type="LogParabola">
+        'parameter name="Flux" free="1"  value="35.79e-08"/>
+        'parameter name="Index" free="1" scale="-1.0" value="3.37991" min="1" min="4"/>
+        'parameter name="PivotEnergy" free="1" scale="-1.0" value="2935.07" min="500" max="3000"/>
+        'parameter name="Curvature" free="1" scale="-1.0" value="0.682363" min="0.1" max="3"/>
+      '/spectrum>
+      'spatialModel type="PointSource" location_limit="0" free="1">
+        'parameter name="GLON" value="6.16978" />
+        'parameter name="GLAT" value="-0.0676943" />
+      '/spatialModel>
+    '/source>
 
-  </source_library>
+  '/source_library>
