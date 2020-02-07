@@ -128,7 +128,7 @@ class PlottingUtils(metaclass=Singleton):
         """
 
         if len(separations) == 0:
-            self.warning.info(self, "No data to plot")
+            self.logger.warning(self, "No data to plot")
             return None
 
         self.logger.info(self, "Loading visibility plot...")
@@ -167,13 +167,14 @@ class PlottingUtils(metaclass=Singleton):
         ax.plot(meantimes, separations, '-b')
 #            ax.plot(meantimes[separations < zmax], separations[separations < zmax], '-r')
 
+        ax.set_title(title, fontsize='large')
         ax.set_ylim(0., zmax+5.0)
         ax.set_xlabel('MJD')
         ax.set_ylabel('off-axis angle [$^{\\circ}$]')
         ax.set_xlim(np.min(meantimes), np.max(meantimes))
 
         if saveImage:
-            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'.'+str(format))
+            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
             self.logger.info(self, "Visibility plot at: %s", filePath)
             f.savefig(filePath)
 
@@ -182,10 +183,10 @@ class PlottingUtils(metaclass=Singleton):
         return filePath
 
 
-    def visibilityHistogram(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd):
+    def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, format, title):
 
         if len(separations) == 0:
-            self.warning.info(self, "No data to plot")
+            self.logger.warning(self, "No data to plot")
             return None
 
         deltat = tf_tt - ti_tt
@@ -203,6 +204,8 @@ class PlottingUtils(metaclass=Singleton):
         center2 = (bins2[:-1] + bins2[1:]) / 2
 
         f2  = plt.figure()
+        ax2 = f2.add_subplot(111)
+        ax2.set_title(title, fontsize='large')
         ax2 = f2.add_subplot(111)
         ax2.bar(center, hist*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width)
         ax2.bar(center2, hist2*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width2)
@@ -224,9 +227,9 @@ class PlottingUtils(metaclass=Singleton):
         fil.close()
         """
         if saveImage:
-            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'.'+str(format))
+            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
             f2.savefig(filePath)
-            self.logger.info(self, "Visibility plot at: %s", filePath)
+            self.logger.info(self, "Visibility histogram at: %s", filePath)
 
         f2.show()
 

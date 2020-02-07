@@ -80,7 +80,7 @@ class AGEng:
         self.plottingUtils = PlottingUtils(self.config.getConf("plotting","twocolumns"))
 
 
-    def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, logfilesIndex=None, saveImage=True, format="png", title="Visibility Plot"):
+    def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, format="png", title="Visibility Plot"):
         """ It computes the angular separations between the center of the
         AGILE GRID field of view and the coordinates for a given position in the sky,
         given by src_ra and src_dec.
@@ -109,8 +109,13 @@ class AGEng:
         """
         separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec = self._computePointingDistancesFromSource(tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex)
 
-        return self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, format, title)
+        vis_plot = self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, format, title)
+        hist_plot = None
 
+        if computeHistogram:
+            hist_plot = self.plottingUtils.visibilityHisto(separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, self.outdir, format, title)
+
+        return vis_plot, hist_plot
 
     def _computePointingDistancesFromSource(self, tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex):
         """ It computes the angular separations between the center of the
@@ -168,7 +173,7 @@ class AGEng:
 
         if not logFiles:
             self.logger.warning(self, "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
-            return [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
+            return [], [], [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
 
 
         total = len(logFiles)
@@ -186,14 +191,13 @@ class AGEng:
 
             idx = idx + 1
 
-            self.logger.info(self, "%d/%d", idx, total)
+            self.logger.info(self, "%d/%d %s", idx, total, logFile)
 
             if idx == 1 or idx == total:
                 doTimeMask = True
             else:
                 doTimeMask = False
 
-            self.logger.debug(self, "############# %d/%d %s", idx,total,logFile)
 
             separation, ti_tt, tf_tt = self._computeSeparationPerFile(doTimeMask, logFile, tmin_start, tmax_start, skyCordsFK5, zmax, step)
 
@@ -210,6 +214,7 @@ class AGEng:
             self.logger.debug(self, "Total computed separations: %d", len(separation_tot))
 
 
+        self.logger.info(self, "Converting times from TT to MJD..")
 
         # Conversion TT => MJD
         ti_mjd = np.array([AstroUtils.time_tt_to_mjd(tiTT) for tiTT in ti_tt_tot])
@@ -275,12 +280,13 @@ class AGEng:
         booleanMaskRA = np.logical_not(np.isnan(ATTITUDE_RA_Y))
         booleanMaskDEC = np.logical_not(np.isnan(ATTITUDE_DEC_Y))
 
-        TIME = TIME[booleanMaskRA]
-        ATTITUDE_RA_Y= ATTITUDE_RA_Y[booleanMaskRA]
-        ATTITUDE_DEC_Y= ATTITUDE_DEC_Y[booleanMaskDEC]
+        booleanMaskRADEC = np.logical_or(booleanMaskRA, booleanMaskDEC)
 
-        self.logger.debug(self, "Not-null mask (RA): %d values skipped"%(np.sum(np.logical_not(booleanMaskRA))))
-        self.logger.debug(self, "Not-null mask (DEC): %d values skipped"%(np.sum(np.logical_not(booleanMaskDEC))))
+        TIME = TIME[booleanMaskRA]
+        ATTITUDE_RA_Y= ATTITUDE_RA_Y[booleanMaskRADEC]
+        ATTITUDE_DEC_Y= ATTITUDE_DEC_Y[booleanMaskRADEC]
+
+        self.logger.debug(self, "Not-null mask RA/DEC (at least one NULL): %d values skipped"%(np.sum(np.logical_not(booleanMaskRADEC))))
 
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
 
