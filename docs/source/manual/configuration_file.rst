@@ -163,7 +163,7 @@ The *'energybin'* option is a list of strings with the following format:
       - 100, 1000
       - 1000, 3000
 
-The *'fovbinnumber'* set the number of bins between *'fovradmin'* and *'fovradmax'* as:
+The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'fovradmax'* as:
 
 .. math::
 
