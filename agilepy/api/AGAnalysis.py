@@ -103,7 +103,7 @@ class AGAnalysis:
             self.sourcesLibrary.loadSources(sourcesFilePath)
 
 
-        self.plottingUtils = PlottingUtils(self.config.getConf("plotting","twocolumns"))
+        self.plottingUtils = PlottingUtils()
 
         if "AGILE" not in os.environ:
             raise AGILENotFoundError("$AGILE is not set.")

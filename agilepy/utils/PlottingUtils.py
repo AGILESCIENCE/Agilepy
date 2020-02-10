@@ -35,25 +35,34 @@ import scipy.ndimage as ndimage
 import ntpath
 from os.path import join
 import numpy as np
+from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.Utils import Singleton
 
+
 class PlottingUtils(metaclass=Singleton):
 
-    def __init__(self, twocolumns):
+    def __init__(self):
 
         self.logger = agilepyLogger
+        self.config = AgilepyConfig()
+        self.updateRC()
+
+    def updateRC(self):
+        twocolumns = self.config.getConf("plotting","twocolumns")
 
         """
         twocolumn: boolean, True or False (default). If two column=True, the
         plot is adjusted to the size of a two column journal publication.
         """
-        if twocolumns == True:
+        if twocolumns:
             fig_width_pt = 255.76535
             fontsize     = 12
+            self.logger.info(self, "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
         else:
             fig_width_pt = 426.79134
             fontsize     = 10
+            self.logger.info(self, "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
 
         inches_per_pt = 1.0/72.27               # Convert pt to inch
         golden_mean = (np.sqrt(5)+1.0)/2.0      # Aesthetic ratio
@@ -62,23 +71,25 @@ class PlottingUtils(metaclass=Singleton):
 
         fig_size =  [fig_width,fig_height]
 
-        params = {'backend': 'pdf',
-            'axes.labelsize': fontsize,
-            'font.size': fontsize,
-            'legend.fontsize': fontsize,
-            'xtick.labelsize': fontsize,
-            'ytick.labelsize': fontsize,
-            'axes.linewidth': 0.5,
-            'lines.linewidth': 0.5,
-            #'text.usetex': True,
-            'ps.usedistiller': False,
-            'figure.figsize': fig_size,
-            'font.family': 'DejaVu Sans',
-            'font.serif': ['Bitstream Vera Serif']}
+        params = {  'backend': 'pdf',
+                    'axes.labelsize': fontsize,
+                    'font.size': fontsize,
+                    'legend.fontsize': fontsize,
+                    'xtick.labelsize': fontsize,
+                    'ytick.labelsize': fontsize,
+                    'axes.linewidth': 0.5,
+                    'lines.linewidth': 0.5,
+                    #'text.usetex': True,
+                    'ps.usedistiller': False,
+                    'figure.figsize': fig_size,
+                    'font.family': 'DejaVu Sans',
+                    'font.serif': ['Bitstream Vera Serif']}
 
         plt.rcParams.update(params)
 
+
     def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, outDir, format, title, cmap, regFilePath):
+        self.updateRC()
 
         hdu = fits.open(fitsFilepath)[0]
 
@@ -123,6 +134,8 @@ class PlottingUtils(metaclass=Singleton):
 
 
     def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, format, title):
+        self.updateRC()
+
         """visibilityPlot makes a plot of the zenith distance of a given source
            (src_ra and src_dec selected in the agilecheck parameters).
         """
@@ -184,6 +197,7 @@ class PlottingUtils(metaclass=Singleton):
 
 
     def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, format, title):
+        self.updateRC()
 
         if len(separations) == 0:
             self.logger.warning(self, "No data to plot")
