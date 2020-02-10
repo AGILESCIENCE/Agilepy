@@ -63,18 +63,22 @@ class SourcesLibrary:
 
         self.config = AgilepyConfig()
 
-    def loadSources(self, filePath, fileformat="XML"):
+        self.outdirPath = Path(self.config.getConf("output","outdir")).joinpath("sources_library")
+
+        self.outdirPath.mkdir(parents=True, exist_ok=True)
+
+    def loadSources(self, filePath, fileformat="xml"):
         """
         This method ... blabla ...
         """
-        if fileformat not in ["AG", "XML"]:
-            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
+        if fileformat not in ["txt", "xml"]:
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
 
         self.sourcesFilePathFormat = format
         self.sourcesFilePath = filePath
         self.sourcesFilePathPrefix,_ = split(self.sourcesFilePath)
 
-        if fileformat == "XML":
+        if fileformat == "xml":
             self.sources = self._loadFromSourcesXml(self.sourcesFilePath)
 
         else:
@@ -92,29 +96,30 @@ class SourcesLibrary:
 
 
 
-    def writeToFile(self, outfileNamePrefix, fileformat="AG"):
+    def writeToFile(self, outfileNamePrefix, fileformat="txt"):
         """
         This method ... blabla ...
         """
-        if fileformat not in ["AG", "XML"]:
-            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: AG, XML".format(format))
+        if fileformat not in ["txt", "xml"]:
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
 
-        outfilepath = join(self.sourcesFilePathPrefix, outfileNamePrefix)
+        outputFilePath = self.outdirPath.joinpath(outfileNamePrefix)
 
-        if fileformat == "AG":
+        if fileformat == "txt":
             sourceLibraryToWrite = SourcesLibrary._convertToAgileFormat(self.sources)
-            outfilepath += ".txt"
+            outputFilePath = outputFilePath.with_suffix('.txt')
 
         else:
             sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat(self.sources)
-            outfilepath += ".xml"
+            outputFilePath = outputFilePath.with_suffix('.xml')
 
-        with open(outfilepath, "w") as sourceLibraryFile:
+        with open(outputFilePath, "w") as sourceLibraryFile:
 
             sourceLibraryFile.write(sourceLibraryToWrite)
 
+        self.logger.info(self,"File %s has been produced", outputFilePath)
 
-        return outfilepath
+        return str(outputFilePath)
 
 
     def getSources(self):

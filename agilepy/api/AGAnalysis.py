@@ -93,10 +93,10 @@ class AGAnalysis:
         self.sourcesLibrary = SourcesLibrary()
 
         if ".txt" in sourcesFilePath:
-            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
+            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="txt")
 
         elif ".xml" in sourcesFilePath:
-            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="XML")
+            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="xml")
 
         else:
             self.logger.warning("Sources file don't have neither '.txt' or '.xml' extension")
@@ -304,7 +304,7 @@ class AGAnalysis:
                                  file as argument (perhaps you want to call generateMaps() first). ")
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="AG")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="txt")
 
         self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
@@ -451,8 +451,18 @@ class AGAnalysis:
         """
         return self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.outdir, format, title, cmap, regFilePath)
 
+    def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
+        """It writes on file the list of sources loaded into the *SourceLibrary*.
+        The supported formats ('txt' and 'xml') are described here: :ref:`sources-file`.
 
+        Args:
+            outfileNamePrefix (str): the relative or absolute path to the input fits file.
+            fileFormat (str): Possible values: ['txt', 'xml'].
 
+        Returns:
+            Path to the file
+        """
+        self.sourcesLibrary.writeToFile(outfileNamePrefix, fileFormat)
 
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):

@@ -1,3 +1,5 @@
+.. _sources-file:
+
 ************
 Sources file
 ************
@@ -8,8 +10,8 @@ The flux parameter estimates are relevant in the fitting process, as the sources
 are considered one by one starting with the one with the brightest initial flux
 value, regardless of the order they are given in the source file.
 
-XML document format
-===================
+Source library format (xml document)
+====================================
 
 .. code-block:: xml
 
@@ -70,8 +72,8 @@ XML document format
 
 
 
-Text file format (AGILE format)
-===============================
+AGILE format (text file)
+========================
 
 Each source is described by a line containing space separated values, in the following order:
 

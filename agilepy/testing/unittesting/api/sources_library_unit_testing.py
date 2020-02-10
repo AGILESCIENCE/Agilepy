@@ -66,7 +66,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
                }
 
     def test_load_xml(self):
-        self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML"))
+        self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml"))
 
         self.assertEqual(2, len(self.sl.sources))
 
@@ -90,7 +90,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
-        self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, fileformat="AG"))
+        self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, fileformat="txt"))
         self.assertEqual(10, len(self.sl.sources))
 
         sources = self.sl.selectSources('Name == "2AGLJ1801-2334"')
@@ -157,7 +157,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_string(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
@@ -176,7 +176,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
 
 
         sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+3654" )
@@ -192,7 +192,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_string(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -214,7 +214,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_lambda(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -238,13 +238,11 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.config.loadConfigurations(self.agilepyconfPath, validate=True)
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="XML")
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
 
-        outDir = Path(self.config.getConf("output","outdir"))
+        outfileName = "write_to_file_testcase"
 
-        outDir.mkdir(parents=True, exist_ok=True)
-
-        outputFile = Path(self.sl.writeToFile(outDir.joinpath("write_to_file_testcase"), fileformat="XML"))
+        outputFile = Path(self.sl.writeToFile(outfileName, fileformat="xml"))
 
         self.assertEqual(True, outputFile.exists())
 
