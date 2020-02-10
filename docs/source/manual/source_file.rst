@@ -2,29 +2,29 @@
 Sources file
 ************
 
-The sources must be defined using two differents formats: xml and txt.
+The sources can be defined using one of two different formats: xml document and text file.
 
 The flux parameter estimates are relevant in the fitting process, as the sources
 are considered one by one starting with the one with the brightest initial flux
 value, regardless of the order they are given in the source file.
 
-txt format
-==========
+Text file format (AGILE format)
+===============================
 
 Each source is described by a line containing space separated values, in the following order:
 
 ::
 
-   <flux< <l< <b< <spectral index< <fixflag< <minSqrt(TS)< <name< <locationlimit< <funtype< <par2< <par3< <index limit min< <index limit max< <par2 limit min< <par2 limit max< <par3 limit min< <par3 limit max<
+   'flux' 'l' 'b' 'spectral index' 'fixflag' 'minSqrt(TS)' 'name' 'locationlimit' 'funtype' 'par2' 'par3' 'index limit min' 'index limit max' 'par2 limit min' 'par2 limit max' 'par3 limit min' 'par3 limit max'
 
-The <*flux*< parameter is expressed in cm^-2 s^-1, galactic longitude <*l* <and latitude <*b*< are expressed in degrees.
+The '*flux*' parameter is expressed in cm^-2 s^-1, galactic longitude '*l* 'and latitude '*b*' are expressed in degrees.
 
 The spectral index of each source represents the initial estimates of the values for that source (a positive number).
 
 The fixflag parameter
 ---------------------
 
-According to the <*fixflag*< some or all of those values will be optimized by being allowed to vary.
+According to the '*fixflag*' some or all of those values will be optimized by being allowed to vary.
 The fixflag is a bit mask, each bit indicating whether the corresponding value is to be allowed to vary:
 
 | fixflag = 0 everything is fixed (free=”0”)
