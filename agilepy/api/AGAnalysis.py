@@ -95,7 +95,7 @@ class AGAnalysis:
         if ".txt" in sourcesFilePath:
             self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
 
-        elif ".xml" in sourceFilePath:
+        elif ".xml" in sourcesFilePath:
             self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
 
         else:
