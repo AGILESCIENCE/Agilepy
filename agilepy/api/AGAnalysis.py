@@ -111,6 +111,7 @@ class AGAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
+        self.currentMaplistFile = None
 
     def setOptions(self, **kwargs):
         """It updates configuration options specifying one or more key=value pairs at once.
@@ -160,6 +161,32 @@ class AGAnalysis:
         """
         return self.config.printOptions(section)
 
+    def getSkyMaps(self, maplistFilePath=None):
+
+        if not maplistFilePath and not self.currentMaplistFile:
+
+            raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
+                                 file as argument or call generateMaps(). ")
+
+        if not maplistFilePath:
+
+            maplistFilePath = self.currentMaplistFile
+
+        with open(maplistFilePath, "r") as mlf:
+
+            mlf_content = mlf.readlines()
+
+        maps = []
+
+        for line in mlf_content:
+            elements = line.split(" ")
+            cts_map = elements[0]
+            exp_map = elements[1]
+            gas_map = elements[2]
+
+            maps.append( [cts_map, exp_map, gas_map] )
+
+        return maps
 
     def generateMaps(self):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
@@ -266,13 +293,15 @@ class AGAnalysis:
 
         self.logger.info(self, "Maplist file created in %s", maplistFilePath)
 
+        self.currentMaplistFile = maplistFilePath
+
         self.config.reset()
 
 
         return maplistFilePath
 
 
-    def mle(self, maplistFilePath):
+    def mle(self, maplistFilePath = None):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -299,9 +328,14 @@ class AGAnalysis:
             [/home/rt/agilepy/output/testcase0001_2AGLJ2021+4029.source /home/rt/agilepy/output/testcase0001_2AGLJ2021+3654.source]
 
         """
+        if not maplistFilePath and not self.currentMaplistFile:
+
+            raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
+                                 file as argument or call generateMaps(). ")
+
         if not maplistFilePath:
-            raise MaplistIsNone("The 'maplistFilePath' input argument is None. Please, pass a valid path to a maplist \
-                                 file as argument (perhaps you want to call generateMaps() first). ")
+
+            maplistFilePath = self.currentMaplistFile
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
         sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="txt")

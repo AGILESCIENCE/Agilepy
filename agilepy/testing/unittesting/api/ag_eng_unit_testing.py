@@ -60,12 +60,13 @@ class AGEngUnittesting(unittest.TestCase):
         zmax=60
         step=10
         logfilesIndex=None
+        histogram=True
         writeFiles=True
         saveImage=True
         format="png"
         title="Visibility plot 184075134 - 184275134"
 
-        plotfilepath = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex, saveImage, format, title)
+        plotfilepath = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, format, title)
 
 
 

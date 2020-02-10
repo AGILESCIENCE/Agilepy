@@ -190,8 +190,8 @@ class PlottingUtils(metaclass=Singleton):
             filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
             self.logger.info(self, "Visibility plot at: %s", filePath)
             f.savefig(filePath)
-
-        plt.show()
+        else:
+            plt.show()
 
         return filePath
 
@@ -244,8 +244,8 @@ class PlottingUtils(metaclass=Singleton):
             filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
             f2.savefig(filePath)
             self.logger.info(self, "Visibility histogram at: %s", filePath)
-
-        f2.show()
+        else:
+            f2.show()
 
         return filePath
 

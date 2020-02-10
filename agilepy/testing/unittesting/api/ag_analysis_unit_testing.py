@@ -87,6 +87,23 @@ class AGAnalysisUnittesting(unittest.TestCase):
 
         self.assertNotEqual(flux_1, flux_2)
 
+    def test_parse_maplistfile(self):
+        self.aga.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
+        maplistFilePath = self.aga.generateMaps()
+
+        maps_1 = self.aga.getSkyMaps()
+        maps_2 = self.aga.getSkyMaps(maplistFilePath)
+
+        self.assertEqual(4, len(maps_1))
+        self.assertEqual(4, len(maps_2))
+
+        for i in range(4):
+            for j in range(3):
+                self.assertEqual(maps_1[i][j], maps_2[i][j])
+
+        for i in range(4):
+            for j in range(3):
+                self.assertEqual(True, os.path.isfile(maps_1[i][j]))
 
 if __name__ == '__main__':
     unittest.main()
