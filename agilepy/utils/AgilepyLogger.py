@@ -49,6 +49,13 @@ class AgilepyLogger(metaclass=Singleton):
 
         self.debug_lvl = debug_lvl
 
+        self.outputDirectory = Path(outputDirectory).joinpath('logs')
+
+        self.outputDirectory.mkdir(parents=True, exist_ok=True)
+
+        self.logfilePath = self.outputDirectory.joinpath("%s_%s.log" % (logFilenamePrefix, strftime("%Y%m%d-%H%M%S")) )
+
+
         # CRITICAL: always present in the log.
 
         # WARNING: An indication that something unexpected happened, or indicative
@@ -62,20 +69,14 @@ class AgilepyLogger(metaclass=Singleton):
         # DEBUG: Detailed information, typically of interest only when diagnosing problems.
         if self.debug_lvl == 2: debug_lvl_enum = logging.DEBUG
 
-        Path(join(outputDirectory,"logs")).mkdir(parents=True, exist_ok=True)
-
-        logFilenamePrefix = logFilenamePrefix+"_"+strftime("%Y%m%d-%H%M%S")
-
-        self.logfilePath = join(outputDirectory, logFilenamePrefix+".log")
 
 
         # formatter
         logFormatter = logging.Formatter("%(asctime)s [%(levelname)-8.8s] %(message)s")
 
-
         self.consoleLogger = self.setup_logger("Console logger", "console", logFormatter, debug_lvl_enum)
 
-        self.fileLogger = self.setup_logger("File logger", "file", logFormatter, logging.DEBUG, "{0}/{1}.log".format(outputDirectory, logFilenamePrefix))
+        self.fileLogger = self.setup_logger("File logger", "file", logFormatter, logging.DEBUG, self.logfilePath)
 
         self.fileLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
         self.consoleLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
