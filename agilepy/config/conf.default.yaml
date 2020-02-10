@@ -79,5 +79,5 @@ mle:
   edpcorrection: 0.75
   fluxcorrection: 1
 
-plot:
+plotting:
   twocolumns: False

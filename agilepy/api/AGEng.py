@@ -77,7 +77,7 @@ class AGEng:
 
         self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
-        self.plottingUtils = PlottingUtils(self.config.getConf("plotting","twocolumns"))
+        self.plottingUtils = PlottingUtils()
 
 
     def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, format="png", title="Visibility Plot"):
