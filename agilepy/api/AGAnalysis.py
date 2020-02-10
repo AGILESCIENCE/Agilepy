@@ -96,7 +96,7 @@ class AGAnalysis:
             self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
 
         elif ".xml" in sourcesFilePath:
-            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="AG")
+            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="XML")
 
         else:
             self.logger.warning("Sources file don't have neither '.txt' or '.xml' extension")
