@@ -205,13 +205,16 @@ class PlottingUtils(metaclass=Singleton):
 
         deltat = tf_tt - ti_tt
         ttotal_obs = np.sum(deltat)
-        deltat1 = deltat[1] # for histogram
+        deltat1 = deltat[0] # for histogram always 0.1!!!
 
-        bins  = [0, 10, 20, 30, 40, 50, 60]
-        bins2 = [60, 180]
+        bins  = [0, 10, 20, 30, 40, 50, 60, 70, 80]
+        bins2 = [80, 180]
         separations = [s.value for s in separations]
         hist, bins = np.histogram(separations, bins=bins, density=False)
         hist2, bins2 = np.histogram(separations, bins=bins2, density=False)
+
+        print(hist)
+
         width = 1. * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
         width2 = 1. * (bins2[1] - bins2[0])
@@ -228,8 +231,8 @@ class PlottingUtils(metaclass=Singleton):
         ax2.set_ylim(0., 100.)
         ax2.set_ylabel('\\% of time spent')
         ax2.set_xlabel('off-axis angle $[^\\circ]$')
-        labels  = [0, 10, 20, 30, 40, 50, 180]
-        xlabels = [0, 10, 20, 30, 40, 50, 100]
+        labels  = [0, 10, 20, 30, 40, 50, 60, 70, 80, 180]
+        xlabels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 180]
         plt.xticks(xlabels, labels)
 
         """

@@ -58,11 +58,11 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def get_free_params(source):
 
         return {
-                 "curvature": source.spectrum.getFreeAttributeValueOf("name", "Curvature"),
-                 "pivot_energy": source.spectrum.getFreeAttributeValueOf("name", "PivotEnergy"),
-                 "index": source.spectrum.getFreeAttributeValueOf("name", "Index"),
-                 "pos": source.spatialModel.free,
-                 "flux": source.spectrum.getFreeAttributeValueOf("name", "Flux")
+                 "curvature": source.spectrum.curvature.free,
+                 "pivot_energy": source.spectrum.pivotEnergy.free,
+                 "index": source.spectrum.index.free,
+                 "pos": source.spatialModel.pos.free,
+                 "flux": source.spectrum.flux.free
                }
 
     def test_load_xml(self):
@@ -70,35 +70,35 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.assertEqual(2, len(self.sl.sources))
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+4029"')
+        sources = self.sl.selectSources('name == "2AGLJ2021+4029"')
         self.assertEqual(1, len(sources))
         source = sources.pop()
-        self.assertEqual(119.3e-08, source.getParamValue("Flux"))
-        self.assertEqual(1.75, source.getParamValue("Index"))
-        self.assertEqual(78.2375, source.getParamValue("GLON"))
-        self.assertEqual(True, source.spatialModel.dist > 0)
+        self.assertEqual(119.3e-08, source.spectrum.get("flux"))
+        self.assertEqual(1.75, source.spectrum.get("index"))
+        self.assertEqual(78.2375, source.spatialModel.get("pos")[0])
+        self.assertEqual(True, source.spatialModel.get("dist") > 0)
 
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+3654"')
+        sources = self.sl.selectSources('name == "2AGLJ2021+3654"')
         self.assertEqual(1, len(sources))
         source = sources.pop()
-        self.assertEqual(70.89e-08, source.getParamValue("Flux"))
-        self.assertEqual(1.38, source.getParamValue("Index"))
-        self.assertEqual(75.2562, source.getParamValue("GLON"))
-        self.assertEqual(True, source.spatialModel.dist > 0)
-
+        self.assertEqual(70.89e-08, source.spectrum.get("flux"))
+        self.assertEqual(1.38, source.spectrum.get("index"))
+        self.assertEqual(75.2562, source.spatialModel.get("pos")[0])
+        self.assertEqual(True, source.spatialModel.get("dist") > 0)
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
         self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, fileformat="txt"))
         self.assertEqual(10, len(self.sl.sources))
 
-        sources = self.sl.selectSources('Name == "2AGLJ1801-2334"')
+        sources = self.sl.selectSources('name == "2AGLJ1801-2334"')
         self.assertEqual(10, len(sources))
         source = sources.pop()
-        self.assertEqual(3.579e-07, source.getParamValue("Flux"))
-        self.assertEqual(3.37991, source.getParamValue("Index"))
-        self.assertEqual(6.16978, source.getParamValue("GLON"))
+
+        self.assertEqual(3.579e-07, source.spectrum.get("flux"))
+        self.assertEqual(3.37991, source.spectrum.get("index"))
+        self.assertEqual(6.16978, source.spatialModel.get("pos")[0])
 
 
 
@@ -132,46 +132,44 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+4029.source")
 
         res = self.sl.parseSourceFile(sourceFile)
+
         self.assertEqual(True, bool(res))
-        self.assertEqual(True, isinstance(res.Flux, float))
-        self.assertEqual(0, res.Flux)
-        self.assertEqual(True, isinstance(res.SkytypeHFilterIrf, str))
-        self.assertEqual('SKY002.SFMG_H0025', res.SkytypeHFilterIrf)
-        self.assertEqual(True, isinstance(res.GalCoeff, List))
-        self.assertEqual(4, len(res.GalCoeff))
-        self.assertEqual(True, isinstance(res.GalCoeff[0], float))
-        self.assertEqual(None, res.Dist)
+
+        self.assertEqual(True, isinstance(res.multiFlux.value, float))
+        self.assertEqual(0, res.multiFlux.value)
+        self.assertEqual(True, isinstance(res.multiSqrtTS.value, float))
+        self.assertEqual(0, res.multiSqrtTS.value)
+        self.assertEqual(None, res.multiDist.value)
 
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
 
         res = self.sl.parseSourceFile(sourceFile)
         self.assertEqual(True, bool(res))
-        self.assertEqual(True, isinstance(res.Flux, float))
-        self.assertEqual(6.69108e-15, res.Flux)
-        self.assertEqual(True, isinstance(res.SkytypeHFilterIrf, str))
-        self.assertEqual('SKY002.SFMG_H0025', res.SkytypeHFilterIrf)
-        self.assertEqual(True, isinstance(res.GalCoeff, List))
-        self.assertEqual(4, len(res.GalCoeff))
-        self.assertEqual(True, isinstance(res.GalCoeff[0], float))
-        self.assertEqual(None, res.Dist)
+        self.assertEqual(True, isinstance(res.multiFlux.value, float))
+        self.assertEqual(6.69108e-15, res.multiFlux.value)
+        self.assertEqual(None, res.multiDist.value)
 
     def test_select_sources_with_selection_string(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
         self.assertEqual(2, len(self.sl.sources))
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
+        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0')
         self.assertEqual(1, len(sources))
 
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
 
         source = self.sl.parseSourceFile(sourceFile)
+
         self.sl.updateMulti(source)
 
-        sources = self.sl.selectSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0')
+        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0')
         self.assertEqual(1, len(sources))
 
-        sources = self.sl.selectSources('SqrtTS == 10')
+        """
+        MAP sqrtTS con multiSqrtTS
+        """
+        sources = self.sl.selectSources('sqrtTS == 10')
         self.assertEqual(1, len(sources))
 
     def test_select_sources_with_selection_lambda(self):
@@ -179,7 +177,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
 
 
-        sources = self.sl.selectSources( lambda Name : Name == "2AGLJ2021+3654" )
+        sources = self.sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
         self.assertEqual(1, len(sources))
 
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
@@ -187,7 +185,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
 
-        sources = self.sl.selectSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0)
+        sources = self.sl.selectSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0)
         self.assertEqual(1, len(sources))
 
     def test_free_sources_with_selection_string(self):
@@ -197,20 +195,27 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
 
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "flux", False)
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", False)
         self.assertEqual(1, len(sources))
-        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(0, sources[0].spectrum.getFree("flux"))
+        self.assertEqual("0", sources[0].spectrum.getFree("flux", strRepr=True))
 
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Flux", True)
-        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "flux", True)
+        self.assertEqual(1, sources[0].spectrum.getFree("flux"))
+        self.assertEqual("1", sources[0].spectrum.getFree("flux", strRepr=True))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", True)
-        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
 
-        sources = self.sl.freeSources('Name == "2AGLJ2021+3654" AND Dist > 0 AND Flux > 0', "Index", False)
-        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "index", True)
+        self.assertEqual(1, sources[0].spectrum.getFree("index"))
+        self.assertEqual("1", sources[0].spectrum.getFree("index", strRepr=True))
+
+
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "index", False)
+        self.assertEqual(0, sources[0].spectrum.getFree("index"))
+        self.assertEqual("0", sources[0].spectrum.getFree("index", strRepr=True))
+
 
     def test_free_sources_with_selection_lambda(self):
 
@@ -219,18 +224,18 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", False)
+        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "flux", False)
         self.assertEqual(1, len(sources))
-        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        self.assertEqual(0, sources[0].spectrum.getFree("flux"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Flux", True)
-        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Flux"))
+        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "flux", True)
+        self.assertEqual(1, sources[0].spectrum.getFree("flux"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", True)
-        self.assertEqual(1, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "index", True)
+        self.assertEqual(1, sources[0].spectrum.getFree("index"))
 
-        sources = self.sl.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+3654" and Dist > 0 and Flux > 0, "Index", False)
-        self.assertEqual(0, sources[0].spectrum.getFreeAttributeValueOf("name", "Index"))
+        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "index", False)
+        self.assertEqual(0, sources[0].spectrum.getFree("index"))
 
     def test_write_to_file_xml(self):
 

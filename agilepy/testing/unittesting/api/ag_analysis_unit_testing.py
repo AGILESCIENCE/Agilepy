@@ -63,14 +63,14 @@ class AGAnalysisUnittesting(unittest.TestCase):
         maplistFilePath = self.aga.generateMaps()
 
         self.aga.mle(maplistFilePath)
-        source_1 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+4029').pop()
-        dist_1 = source_1.multi.Dist
+        source_1 = self.aga.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        dist_1 = source_1.multi.get("multiDist")
 
         self.aga.setOptions(glon=81, glat=1)
 
         self.aga.mle(maplistFilePath)
-        source_2 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+4029').pop()
-        dist_2 = source_2.multi.Dist
+        source_2 = self.aga.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        dist_2 = source_2.multi.get("multiDist")
 
         self.assertNotEqual(dist_1, dist_2)
 
@@ -78,12 +78,12 @@ class AGAnalysisUnittesting(unittest.TestCase):
 
         maplistFilePath = self.aga.generateMaps()
 
-        source_1 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+3654').pop()
-        flux_1 = source_1.getParamValue("Flux")
+        source_1 = self.aga.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+        flux_1 = source_1.spectrum.get("flux")
 
         self.aga.mle(maplistFilePath)
-        source_2 = self.aga.selectSources(lambda Name: Name == '2AGLJ2021+3654').pop()
-        flux_2 = source_2.getParamValue("Flux")
+        source_2 = self.aga.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+        flux_2 = source_2.multi.get("multiFlux")
 
         self.assertNotEqual(flux_1, flux_2)
 

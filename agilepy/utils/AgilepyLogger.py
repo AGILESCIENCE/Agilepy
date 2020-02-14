@@ -130,12 +130,15 @@ class AgilepyLogger(metaclass=Singleton):
 
             self.fileLogger.info("[%s] Removing logger...", type(self).__name__)
             for handler in self.fileLogger.handlers[:]:
+                handler.close()
                 self.fileLogger.removeHandler(handler)
 
             self.consoleLogger.info("[%s] Removing logger...", type(self).__name__)
             for handler in self.consoleLogger.handlers[:]:
+                handler.close()
                 self.consoleLogger.removeHandler(handler)
 
+        self.initialized = False
 
-
+        
 agilepyLogger = AgilepyLogger()

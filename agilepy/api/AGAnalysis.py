@@ -44,11 +44,8 @@ from agilepy.utils.CustomExceptions import AGILENotFoundError, \
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
 
-    This class is a wrapper around the ``SourcesLibrary``, ``ScienceTools`` and ``AgilepyConfig`` classes and implements
-    high level functionality.
-
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour
-    and a ``xml descriptor file`` that contains a list of all the sources you want to consider.
+    and a ``xml descriptor file`` containing the list of the sources you want to take in account in your analysis.
 
     Class attributes:
 
@@ -162,7 +159,18 @@ class AGAnalysis:
         return self.config.printOptions(section)
 
     def getSkyMaps(self, maplistFilePath=None):
+        """It parses the maplistfile in order to return sky map files paths.
 
+        Args:
+            maplistFilePath (str): if you don't specify the maplistfile path, the
+            last generated one (if it exists) will be used.
+
+        Returns:
+            A matrix where each row contains a cts, ext and gas map.
+
+        Raises:
+            MaplistIsNone: if no maplist file is passed and no maplist file have been generated yet.
+        """
         if not maplistFilePath and not self.currentMaplistFile:
 
             raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
@@ -374,14 +382,14 @@ class AGAnalysis:
 
         The selection criteria can be expressed using the following ``Source`` class's parameters:
 
-        - Name: the unique code identifying the source.
-        - Dist: the distance of the source from the center of the maps.
-        - Flux: the flux value.
-        - SqrtTS: the radix square of the ts.
+        - name: the unique code identifying the source.
+        - dist: the distance of the source from the center of the maps.
+        - flux: the flux value.
+        - sqrtTS: the radix square of the ts.
 
         Warning:
 
-            The SqrtTS parameter is available only after the maximum likelihood estimation analysis.
+            The sqrtTS parameter is available only after the maximum likelihood estimation analysis is performed.
 
         Args:
             selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
@@ -399,28 +407,26 @@ class AGAnalysis:
 
             <source name="2AGLJ2021+4029" type="PointSource">
                 <spectrum type="PLExpCutoff">
-                  <parameter name="Flux" free="1"  value="119.3e-08"/>
-                  <parameter name="Index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
-                  <parameter name="CutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
+                  <parameter name="flux" free="1"  value="119.3e-08"/>
+                  <parameter name="index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
+                  <parameter name="cutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
                 </spectrum>
-                <spatialModel type="PointSource" location_limit="0" free="0">
-                  <parameter name="GLON" value="78.2375" />
-                  <parameter name="GLAT" value="2.12298" />
+                <spatialModel type="PointSource" location_limit="0">
+                  <parameter name="pos" value="(78.2375, 2.12298)" free="0" />
                 </spatialModel>
             </source>
 
 
         The supported ``parameterName`` are:
 
-        - Flux
-        - Index
-        - Index1
-        - Index2
-        - CutoffEnergy
-        - PivotEnergy
-        - Curvature
-        - Index2
-        - Loc
+        - flux
+        - index
+        - index1
+        - index2
+        - cutoffEnergy
+        - pivotEnergy
+        - curvature
+        - index2
 
 
         Args:
@@ -442,10 +448,10 @@ class AGAnalysis:
             named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
             is greater than zero.
 
-            >>> aganalysis.freeSources(lambda Name, Dist, Flux : Name == "2AGLJ2021+4029" and Dist > 0 and Flux > 0, "Flux", True)
+            >>> aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
             [..]
 
-            >>> aganalysis.freeSources('Name == "2AGLJ2021+4029" AND Dist > 0 AND Flux > 0', "Flux", True)
+            >>> aganalysis.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
             [..]
 
 
@@ -487,7 +493,7 @@ class AGAnalysis:
 
     def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
         """It writes on file the list of sources loaded into the *SourceLibrary*.
-        The supported formats ('txt' and 'xml') are described here: :ref:`sources-file`.
+        The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.
 
         Args:
             outfileNamePrefix (str): the relative or absolute path to the input fits file.

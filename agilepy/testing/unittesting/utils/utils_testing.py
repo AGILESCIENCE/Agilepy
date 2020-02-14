@@ -80,7 +80,7 @@ class UtilsUnittesting(unittest.TestCase):
         self.config.setOptions(verboselvl=1)
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
-
+        
         self.assertEqual(True, logfilePath.is_file())
 
         with open(logfilePath, "r") as f:

@@ -21,50 +21,46 @@ Source library format (xml document)
     <!-- Point Sources -->
     <source name="2AGLJ2202+4214" type="PointSource">
       <spectrum type="PowerLaw">
-        <parameter name="Flux" free="1"  value="7.45398e-08"/>
-        <parameter name="Index" free="1" scale="-1.0" value="1.96903" min="0.5" max="5"/>
+        <parameter name="flux" free="1"  value="7.45398e-08"/>
+        <parameter name="index" free="1" scale="-1.0" value="1.96903" min="0.5" max="5"/>
       </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-        <parameter name="GLON" value="92.4102" />
-        <parameter name="GLAT" value="-10.3946" />
+      <spatialModel type="PointSource" location_limit="0">
+        <parameter name="pos" value="(92.4102, -10.3946)" free="0" />
       </spatialModel>
     </source>
 
     <source name="2AGLJ0007+7308" type="PointSource">
       <spectrum type="PLExpCutoff">
-         <parameter name="Flux" free="1"  value="41.6072e-08"/>
-         <parameter name="Index" free="1" scale="-1.0" value="1.29082" min="0.5" max="5"/>
-         <parameter name="CutoffEnergy" free="1" scale="-1.0" value="2003.9" min="20" max="10000"/>
+         <parameter name="flux" free="1"  value="41.6072e-08"/>
+         <parameter name="index" free="1" scale="-1.0" value="1.29082" min="0.5" max="5"/>
+         <parameter name="cutoffEnergy" free="1" scale="-1.0" value="2003.9" min="20" max="10000"/>
       </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-         <parameter name="GLON" value="119.677" />
-         <parameter name="GLAT" value="10.544" />
+      <spatialModel type="PointSource" location_limit="0">
+         <parameter name="pos" value="(119.677, 10.544)" free="0" />
       </spatialModel>
     </source>
 
     <source name="2AGLJ0835-4514" type="PointSource">
       <spectrum type="PLSuperExpCutoff">
-        <parameter name="Flux" free="1"  value="969.539e-08"/>
-        <parameter name="Index1" free="1" scale="-1.0" value="1.71345" min="0.5" min="5"/>
-        <parameter name="CutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
-        <parameter name="Index2" free="1" value="1.3477" min="0"  max="100"/>
+        <parameter name="flux" free="1"  value="969.539e-08"/>
+        <parameter name="index1" free="1" scale="-1.0" value="1.71345" min="0.5" min="5"/>
+        <parameter name="cutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
+        <parameter name="index2" free="1" value="1.3477" min="0"  max="100"/>
       </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="0">
-        <parameter name="GLON" value="263.585" />
-        <parameter name="GLAT" value="-2.84083" />
+      <spatialModel type="PointSource" location_limit="0">
+        <parameter name="pos" value="(263.585, -2.84083)" free="0" />
       </spatialModel>
     </source>
 
     <source name="2AGLJ1801-2334" type="PointSource">
       <spectrum type="LogParabola">
-        <parameter name="Flux" free="1"  value="35.79e-08"/>
-        <parameter name="Index" free="1" scale="-1.0" value="3.37991" min="1" min="4"/>
-        <parameter name="PivotEnergy" free="1" scale="-1.0" value="2935.07" min="500" max="3000"/>
-        <parameter name="Curvature" free="1" scale="-1.0" value="0.682363" min="0.1" max="3"/>
+        <parameter name="flux" free="1"  value="35.79e-08"/>
+        <parameter name="index" free="1" scale="-1.0" value="3.37991" min="1" min="4"/>
+        <parameter name="pivotEnergy" free="1" scale="-1.0" value="2935.07" min="500" max="3000"/>
+        <parameter name="curvature" free="1" scale="-1.0" value="0.682363" min="0.1" max="3"/>
       </spectrum>
-      <spatialModel type="PointSource" location_limit="0" free="1">
-        <parameter name="GLON" value="6.16978" />
-        <parameter name="GLAT" value="-0.0676943" />
+      <spatialModel type="PointSource" location_limit="0">
+        <parameter name="pos" value="(6.16978, -0.0676943)" free="1" />
       </spatialModel>
     </source>
 
