@@ -238,6 +238,12 @@ class AGEng:
         self.logger.debug(self, "tf_tt_tot len: %d", len(tf_tt_tot))
 
 
+        if writeFiles:
+
+            filename = "offaxis_distances"
+            Path(self.outdir).joinpath(filename)
+            separation_tot_ = [s.value for s in separation_tot]
+            np.save(filename, separation_tot_, allow_pickle=True)
 
         return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
 
