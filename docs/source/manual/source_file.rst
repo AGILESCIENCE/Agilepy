@@ -55,7 +55,7 @@ Source library format (xml document)
     <source name="2AGLJ1801-2334" type="PointSource">
       <spectrum type="LogParabola">
         <parameter name="flux" free="1"  value="35.79e-08"/>
-        <parameter name="index" free="1" scale="-1.0" value="3.37991" min="1" min="4"/>
+        <parameter name="index" free="1" scale="-1.0" value="3.37991" min="1" max="4"/>
         <parameter name="pivotEnergy" free="1" scale="-1.0" value="2935.07" min="500" max="3000"/>
         <parameter name="curvature" free="1" scale="-1.0" value="0.682363" min="0.1" max="3"/>
       </spectrum>

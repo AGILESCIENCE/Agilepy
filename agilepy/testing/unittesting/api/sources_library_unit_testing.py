@@ -285,13 +285,33 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "", newSourceDict)
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, None, newSourceDict)
 
-        newSource = self.sl.addSource("newsource", newSourceDict)
+
+        self.assertEqual(True, self.sl.addSource("newsource", newSourceDict))
+
+        newSource = self.sl.selectSources('name == "newsource"').pop()
 
         self.assertEqual(0, newSource.spectrum.get("flux"))
         self.assertEqual(0, newSource.spectrum.get("curvature"))
         self.assertEqual("newsource", newSource.name)
 
-        print(newSource)
+        newSourceDict = {
+            "glon" : 250,
+            "glat": 30,
+            "spectrumType" : "LogParabola",
+            "flux": 1,
+            "curvature":2
+        }
+        self.assertEqual(True, self.sl.addSource("newsource2", newSourceDict))
+
+        newSource = self.sl.selectSources('name == "newsource2"').pop()
+        self.assertEqual(1, newSource.spectrum.get("flux"))
+        self.assertEqual(2, newSource.spectrum.get("curvature"))
+        self.assertEqual(250, newSource.spatialModel.get("pos")[0])
+        self.assertEqual(30, newSource.spatialModel.get("pos")[1])
+        self.assertEqual("newsource2", newSource.name)
+
+
+        self.assertEqual(False, self.sl.addSource("newsource2", newSourceDict))
 
 if __name__ == '__main__':
     unittest.main()

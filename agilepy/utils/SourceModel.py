@@ -86,13 +86,13 @@ class OutputVal(Value):
             self.value = self.castTo(value)
 
 class Parameter(Value):
-    def __init__(self, name, datatype=None):
+    def __init__(self, name, datatype=None, free=0, scale=None, min=None, max=None, locationLimit=None):
         super().__init__(name, datatype)
-        self.free = 0
-        self.scale = None
-        self.min = None
-        self.max = None
-        self.location_limit = None
+        self.free = free
+        self.scale = scale
+        self.min = min
+        self.max = max
+        self.locationLimit = locationLimit
 
     def __str__(self):
         return f'\t- {self.name}: {self.value} free: {self.free}'
@@ -104,7 +104,7 @@ class Parameter(Value):
             self.free = freeVal
             return True
 
-    def setAttributes(self, name=None, value=None, free=None, scale=None, min=None, max=None, location_limit=None):
+    def setAttributes(self, name=None, value=None, free=None, scale=None, min=None, max=None, locationLimit=None):
         if value is not None:
             self.value = self.castTo(value)
         if free is not None:
@@ -115,8 +115,8 @@ class Parameter(Value):
             self.min = float(min)
         if max is not None:
             self.max = float(max)
-        if location_limit is not None:
-            self.location_limit = int(location_limit)
+        if locationLimit is not None:
+            self.locationLimit = int(locationLimit)
 
     def toDict(self):
         d = vars(self)
@@ -172,12 +172,12 @@ class Spectrum(SourceDescription):
 
     def __init__(self, stype):
         self.stype = stype
-        self.flux = Parameter("flux", "float")
+        self.flux = Parameter("flux", "float", free = 0)
 
 class PowerLawSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
-        self.index = Parameter("index", "float")
+        self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}'
@@ -188,9 +188,8 @@ class PowerLawSpectrum(Spectrum):
 class PLExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
-        self.flux = Parameter("flux", "float")
-        self.index = Parameter("index", "float")
-        self.cutoffEnergy = Parameter("cutoffEnergy", "float")
+        self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
+        self.cutoffEnergy = Parameter("cutoffEnergy", "float", free=0, scale=-1.0, min=20, max=10000)
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}\n{self.cutoffEnergy}'
@@ -201,10 +200,9 @@ class PLExpCutoffSpectrum(Spectrum):
 class PLSuperExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
-        self.flux = Parameter("flux", "float")
-        self.index1 = Parameter("index1", "float")
-        self.cutoffEnergy = Parameter("cutoffEnergy", "float")
-        self.index2 = Parameter("index2", "float")
+        self.index1 = Parameter("index1", "float", free=0, scale=-1.0, min=0.5, max=5)
+        self.cutoffEnergy = Parameter("cutoffEnergy", "float", free=0, scale=-1.0, min=20, max=10000)
+        self.index2 = Parameter("index2", "float", free=0, scale=-1.0, min=0, max=100)
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index1}\n{self.cutoffEnergy}\n{self.index2}'
@@ -216,9 +214,9 @@ class LogParabolaSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.flux = Parameter("flux", "float")
-        self.index = Parameter("index", "float")
-        self.pivotEnergy = Parameter("pivotEnergy", "float")
-        self.curvature = Parameter("curvature", "float")
+        self.index = Parameter("index", "float", free=0, scale=-1.0, min=1, max=4)
+        self.pivotEnergy = Parameter("pivotEnergy", "float", free=0, scale=-1.0, min=500, max=3000)
+        self.curvature = Parameter("curvature", "float", free=0, scale=-1.0, min=0.1, max=3)
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}\n{self.pivotEnergy}\n{self.curvature}'

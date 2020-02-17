@@ -352,6 +352,11 @@ class SourcesLibrary:
             self.logger.critical(self, "sourceName cannot be None or empty.")
             raise SourceParamNotFoundError("sourceName is a required param.")
 
+        for source in self.sources:
+            if sourceName == source.name:
+                self.logger.warning(self,"The source %s already exists. Input source will not be added.", sourceName)
+                return False
+
         requiredKeys = ["glon", "glat", "spectrumType"]
 
         for rK in requiredKeys:
@@ -360,7 +365,10 @@ class SourcesLibrary:
                 raise SourceParamNotFoundError("'{}' is a required param. Please add it to the 'sourceDict' input dictionary".format(rK))
 
         newSource = Source(sourceName, "PointSource")
+
         newSource.spatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
+        newSource.spatialModel.set("pos", f'({sourceDict["glon"]}, {sourceDict["glat"]})')
+
         newSource.spectrum = Spectrum.getSpectrumObject(sourceDict["spectrumType"])
 
         spectrumKeys = ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature"]
@@ -368,9 +376,13 @@ class SourcesLibrary:
         for sK in spectrumKeys:
             if sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(0)
-            if sK in sourceDict and sK in newSource.spectrum:
+            if sK in sourceDict and sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(sourceDict[sK])
-        return newSource
+
+        self.sources.append(newSource)
+
+        return True
+
 
     @singledispatch
     def _extractSelectionParams(selection):

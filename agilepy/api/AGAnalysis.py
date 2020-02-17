@@ -137,7 +137,6 @@ class AGAnalysis:
         """
         return self.config.setOptions(**kwargs)
 
-
     def resetOptions(self):
         """It resets the configuration options to their original values.
 
@@ -145,7 +144,6 @@ class AGAnalysis:
             None, newline=True.
         """
         return self.config.reset()
-
 
     def printOptions(self, section=None):
         """It prints the configuration options in the console.
@@ -308,7 +306,6 @@ class AGAnalysis:
 
         return maplistFilePath
 
-
     def mle(self, maplistFilePath = None):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
@@ -399,6 +396,14 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.selectSources(selection)
 
+    def getSources(self):
+        """It returns all the sources.
+
+            Returns:
+                List of sources.
+        """
+        return self.sourcesLibrary.sources
+
     def freeSources(self, selection, parameterName, free):
         """It can set to True or False a parameter's ``free`` attribute of one or more source.
 
@@ -459,7 +464,34 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.freeSources(selection, parameterName, free)
 
+    def addSource(self, sourceName, sourceDict):
+        """It adds a new source in the ``Sources Library``. You can add a source, passing \
+        a dictionary containing the source's data. Some keys are required, other are optional.
+        Here's an example:
 
+        ::
+
+            newSourceDict = {
+                "glon" : 6.16978,
+                "glat": -0.0676943,
+                "spectrumType" : "LogParabola",
+                "flux": 35.79e-08,
+                "curvature": 0.682363
+            }
+            newSource = aganalysis.addSource("2AGLJ1801-2334", newSourceDict)
+
+        Args:
+            sourceName (str): the name of the source
+            sourceDict (dict): a dictionary containing the source's data.
+
+        Raises:
+            SourceParamNotFoundError: if ``sourceName`` is None or empty, OR the \
+            ``sourceDict`` input dictionary does not contain at least one of the \
+            following keys: ["glon", "glat","spectrumType"].
+
+        Returns:
+            True if the source is loaded. False if the source is already present in the Source Library.
+        """
 
     def deleteSources(self, selection):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
