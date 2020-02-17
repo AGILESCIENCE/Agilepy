@@ -62,3 +62,15 @@ class AstroUtils:
     @staticmethod
     def time_tt_to_mjd(timett):
         return (timett / 86400.0) + 53005.0
+
+    @staticmethod
+    def time_nparray_mjd_to_tt(timemjd_nparray):
+        if not isinstance(timemjd_nparray, np.ndarray):
+            timemjd_nparray = np.array(timemjd_nparray)
+        return (timemjd_array - 53005.0) * 86400.0
+
+    @staticmethod
+    def time_nparray_tt_to_mjd(timett_nparray):
+        if not isinstance(timett_nparray, np.ndarray):
+            timett_nparray = np.array(timett_nparray)
+        return (timett_nparray / 86400.0) + 53005.0

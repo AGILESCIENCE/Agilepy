@@ -91,7 +91,7 @@ class AGEng:
             src_x (float): source position x (unit: degrees)
             src_y (float): source position y (unit: degrees)
             zmax (float): maximum zenith distance of the source to the center of the detector (unit: degrees)
-            step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 1 s.
+            step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 0.1 s.
             writeFiles (bool): if True, two text files with the separions data will be written on file.
             logfilesIndex (str) (optional): the index file for the logs files. If specified it will ovverride the one in the configuration file.
             saveImage (bool): If True, the image will be saved on disk
@@ -159,9 +159,9 @@ class AGEng:
             self.logger.critical(self, "Reference system '%s' is not supported", ref)
             raise WrongCoordinateSystemError("Reference system '%s' is not supported" %(ref))
 
-        if step < 1:
-            self.logger.critical(self, "step %f cannot be < 1", step)
-            raise ValueError("'step' %f cannot be < 1"%(step))
+        if step < 0.1:
+            self.logger.critical(self, "step %f cannot be < 0.1", step)
+            raise ValueError("'step' %f cannot be < 0.1"%(step))
 
         self.logger.debug(self, "Galactict coords: l:%f b:%f", skyCordsGAL.l.deg,skyCordsGAL.b.deg)
 
@@ -213,12 +213,13 @@ class AGEng:
 
             self.logger.debug(self, "Total computed separations: %d", len(separation_tot))
 
-
-        self.logger.info(self, "Converting times from TT to MJD..")
-
         # Conversion TT => MJD
-        ti_mjd = np.array([AstroUtils.time_tt_to_mjd(tiTT) for tiTT in ti_tt_tot])
-        tf_mjd = np.array([AstroUtils.time_tt_to_mjd(tfTT) for tfTT in tf_tt_tot])
+        self.logger.info(self, "Converting ti_tt_tot from TT to MJD..Number of elements=%d", len(ti_tt_tot))
+        ti_mjd = AstroUtils.time_nparray_mjd_to_tt(ti_tt_tot)
+
+        self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
+        tf_mjd = AstroUtils.time_nparray_mjd_to_tt(tf_tt_tot)
+        
         meantimes = (ti_mjd+tf_mjd)/2.
 
         if writeFiles:
@@ -304,24 +305,29 @@ class AGEng:
 
         self.logger.debug(self, "Step is: %f",step)
 
-        # creating arrays filled with zeros
-        src_raz  = np.zeros(len(TIME[index_ti:index_tf:int(step)]))
-        src_decz  = np.zeros(len(TIME[index_ti:index_tf:int(step)]))
+        indexstep = int(step*10) # if step 0.1 , indexstep=1 => all values
+                            # if step 1 , indexstep=10 => one value on 10 values
 
-        self.logger.debug(self, "Number of separations to be computed: %f", index_tf/int(step))
+        self.logger.debug(self, "indexstep is: %f",indexstep)
+
+        # creating arrays filled with zeros
+        src_raz  = np.zeros(len(TIME[index_ti:index_tf:indexstep]))
+        src_decz  = np.zeros(len(TIME[index_ti:index_tf:indexstep]))
+
+        self.logger.debug(self, "Number of separations to be computed: %f", index_tf/indexstep)
 
         # filling the just created arrays with our coordinates of interest
         src_ra   = src_raz + skyCordsFK5.ra
         src_dec   = src_decz + skyCordsFK5.dec
 
         c1  = SkyCoord(src_ra, src_dec, unit='deg', frame='icrs')
-        c2  = SkyCoord(ATTITUDE_RA_Y[index_ti:index_tf:int(step)], ATTITUDE_DEC_Y[index_ti:index_tf:int(step)], unit='deg', frame='icrs')
+        c2  = SkyCoord(ATTITUDE_RA_Y[index_ti:index_tf:indexstep], ATTITUDE_DEC_Y[index_ti:index_tf:indexstep], unit='deg', frame='icrs')
 #        print 'c1=', len(c1), 'c2=', len(c2) # to ensure c1 and c2 have the same length
         sep = c2.separation(c1)
 
         self.logger.debug(self, "Number of computed separation: %f"%(len(sep)))
 
-        return np.asfarray(sep), TIME[index_ti:index_tf:int(step)], TIME[index_ti:index_tf:int(step)]+deltatime
+        return np.asfarray(sep), TIME[index_ti:index_tf:indexstep], TIME[index_ti:index_tf:indexstep]+deltatime
 
     def _getLogsFileInInterval(self, logfilesIndex, tmin, tmax):
 

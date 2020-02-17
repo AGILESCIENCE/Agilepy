@@ -105,5 +105,21 @@ class AGAnalysisUnittesting(unittest.TestCase):
             for j in range(3):
                 self.assertEqual(True, os.path.isfile(maps_1[i][j]))
 
+    def test_print_source(self):
+
+        for s in self.aga.sourcesLibrary.sources:
+            print(s)
+
+        maplistFilePath = self.aga.generateMaps()
+
+        self.aga.freeSources('name == "2AGLJ2021+3654"', "pos", True)
+
+        self.aga.mle(maplistFilePath)
+
+        for s in self.aga.sourcesLibrary.sources:
+            print(s)
+
+        self.assertEqual(True, True)
+
 if __name__ == '__main__':
     unittest.main()

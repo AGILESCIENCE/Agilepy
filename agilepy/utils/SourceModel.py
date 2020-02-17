@@ -266,16 +266,32 @@ class MultiOutput(SourceDescription):
         self.multiFluxPosErr = OutputVal("multiFluxPosErr", "float")
         self.multiFluxNegErr = OutputVal("multiFluxNegErr", "float")
 
-        self.multiErg = OutputVal("multiErg", "float")
-        self.multiErgErr = OutputVal("multiErgErr", "float")
-        self.multiErgUL = OutputVal("multiErgUL", "float")
+        self.multiUL = OutputVal("multiUL", "float")
 
-        self.multiL = OutputVal("multiL", "float")
-        self.multiB = OutputVal("multiB", "float")
+        self.multiErgLog = OutputVal("multiErgLog", "float")
+        self.multiErgLogErr = OutputVal("multiErgLogErr", "float")
+
+
         self.multiStartL = OutputVal("multiStartL", "float")
         self.multiStartB = OutputVal("multiStartB", "float")
 
         self.multiDist = OutputVal("multiDist", "float")
+
+        self.multiL = OutputVal("multiL", "float")
+        self.multiB = OutputVal("multiB", "float")
+        self.multiDistFromStartPosition = OutputVal("multiDistFromStartPosition", "float")
+        self.multir = OutputVal("multir", "float")
+        self.multia = OutputVal("multia", "float")
+        self.multib = OutputVal("multib", "float")
+        self.multiphi = OutputVal("multiphi", "float")
+
+        self.multiGalCoeff = OutputVal("multiGalCoeff", "List<float>")
+        self.multiGalErr = OutputVal("multiGalErr", "List<float>")
+
+        self.multiIsoCoeff = OutputVal("multiIsoCoeff", "List<float>")
+        self.multiIsoErr = OutputVal("multiIsoErr", "List<float>")
+
+
 
     def __str__(self):
         return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiDist} \
@@ -312,15 +328,56 @@ class Source:
 
 
     def __str__(self):
-        strRepr = '\n----------------------------------------------------------------'
-        strRepr += f'\nSource name: {self.name}\nSource type: {self.type}'
+
+
+        freeParams = [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
+                        [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
+
+        spectrumParams = [k+": "+v.get(strRepr=True) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter)]
+
+        strRepr = '\n-----------------------------------------------------------'
+        strRepr += f'\nSource name: {self.name} ({self.type})'
+
+        if self.multi:
+            strRepr += " => sqrt(ts): "+str(self.multi.get("multiSqrtTS"))
+
+        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}'
+
+        strRepr += f'\n  * Spectrum: ({self.spectrum.stype})'
+        for sp in spectrumParams:
+            strRepr += f'\n\t- {sp}'
+
+
+        strRepr += f'\n  * Free params: '+' '.join(freeParams)
+
+        if self.multi:
+            strRepr += f'\n  * Multi analysis:'
+            strRepr += f'\n\t- flux: {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
+            strRepr += f'\n\t- upper limit: {self.multi.get("multiUL")}'
+            strRepr += f'\n\t- ergLog: {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
+            strRepr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
+            strRepr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
+
+            if "pos" in freeParams:
+                strRepr += f'\n\t- L: {self.multi.get("multiL")}'
+                strRepr += f'\n\t- B: {self.multi.get("multiB")}'
+                strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPosition")}'
+                strRepr += f'\n\t- r: {self.multi.get("multir")}'
+                strRepr += f'\n\t- a: {self.multi.get("multia")}'
+                strRepr += f'\n\t- b: {self.multi.get("multib")}'
+                strRepr += f'\n\t- phi: {self.multi.get("multiphi")}'
+
+
+        """
         if self.spectrum:
             strRepr += f'{self.spectrum}'
         if self.spatialModel:
             strRepr += f'{self.spatialModel}'
         if self.multi:
             strRepr += f'{self.multi}'
-        strRepr += '\n----------------------------------------------------------------'
+        """
+
+        strRepr += '\n-----------------------------------------------------------'
         return strRepr
 
 
@@ -572,491 +629,3 @@ class Source:
 
     self.Dist: float = None
     """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-class ValueParamFinder:
-
-    def getParamAttributeWhere(self, attributeName, key, value, strRepr = False):
-        val = [getattr(param, attributeName) for param in self.parameters if getattr(param, key) == value].pop()
-        if strRepr:
-            return str(val)
-        else:
-            return val
-
-    def setParamValue(self, paramName, paramValue):
-        for param in self.parameters:
-            if getattr(param, "name") == paramName:
-                setattr(param, "value", paramValue)
-                return True
-        return False
-
-    def getParamValue(self, paramName):
-        for param in self.parameters:
-            if getattr(param, "name") == paramName:
-                return getattr(param, "value")
-        return None
-
-    def getParam(self, paramName):
-        for param in self.parameters:
-            if getattr(param, "name") == paramName:
-                return param
-        return None
-
-
-
-    def getFreeAttributeValueOf(self, key, value, strRepr = False):
-        try:
-            val = [getattr(param, "free") for param in self.parameters if getattr(param, key) == value].pop()
-            if strRepr:
-                return str(val)
-            else:
-                return val
-
-        except Exception:
-            return ""
-"""
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-@dataclass
-class SpatialModel:
-
-    type: str
-    location_limit: int
-    free: int
-    dist: float
-    parameters: List[Parameter]
-
-    def __init__(self, type, location_limit, free):
-        self.parameters = []
-        self.type = type
-        self.location_limit = float(location_limit)
-        self.free = int(free)
-        self.dist = None
-
-
-    def __str__(self):
-        return f'\n - SpatialModel type: {self.type} free: {self.free}\n\tglon: {self.parameters[0].value}\n\tglat: {self.parameters[1].value}\n\tdist: {self.dist}'
-
-"""
-
-
-"""
-@dataclass
-class Parameter:
-
-    name: str
-    value: float
-    free: bool = None
-    scale: float = None
-    min: float = None
-    max: float = None
-
-    def __init__(self, name, value, free=None, scale=None, min=None, max=None):
-
-        self.name = name
-        self.value = float(value)
-        if free is not None:
-            self.free = int(free)
-        if scale is not None:
-            self.scale = float(scale)
-        if min is not None:
-            self.min = float(min)
-        if max is not None:
-            self.max = float(max)
-
-    def toDict(self):
-        d = vars(self)
-        for k,v in d.items():
-            d[k] = str(v)
-        return d
-"""
-"""
-
-@dataclass
-class SpatialModel(ValueParamFinder):
-    type: str
-    location_limit: int
-    free: int
-    dist: float
-    parameters: List[Parameter]
-
-    def __init__(self, type, location_limit, free):
-        self.parameters = []
-        self.type = type
-        self.location_limit = float(location_limit)
-        self.free = int(free)
-        self.dist = None
-
-
-    def __str__(self):
-        return f'\n - SpatialModel type: {self.type} free: {self.free}\n\tglon: {self.parameters[0].value}\n\tglat: {self.parameters[1].value}\n\tdist: {self.dist}'
-@dataclass
-class Spectrum(ValueParamFinder):
-    type: str
-    parameters: List[Parameter]
-    def __init__(self, type):
-        self.type = type
-        self.parameters = []
-
-    def __str__(self):
-        paramsStr = ""
-        for p in self.parameters:
-            paramsStr += f'\n\t{p.name}={p.value} free={p.free}'
-        return f'\n - Spectrum type: {self.type} {paramsStr}'
-"""
-"""
-@dataclass
-class MultiOutput:
-
-
-    label: str  = None #  == Source.name ?
-    Fix: int  = None
-    index: float = None
-    ULConfidenceLevel: float = None
-    SrcLocConfLevel: float = None
-    start_l: float = None
-    start_b: float = None
-    start_flux: float = None
-    lmin: float = None
-    lmax: float = None
-    bmin: float = None
-    bmax: float = None
-    typefun: float = None
-    par2: float = None
-    par3: float = None
-    galmode2: float = None
-    galmode2fit: float = None
-    isomode2: float = None
-    isomode2fit: float = None
-    edpcor: float = None
-    fluxcor: float = None
-    integratortype: float = None
-    expratioEval: float = None
-    expratio_minthr: float = None
-    expratio_maxthr: float = None
-    expratio_size: float = None
-    index_min: float = None
-    index_max: float = None
-    par2_min: float = None
-    par2_max: float = None
-    par3_min: float = None
-    par3_max: float = None
-    contourpoints: float = None
-    minimizertype: str = None
-    minimizeralg: str = None
-    minimizerdefstrategy: float = None
-    minimizerdeftol: float = None
-
-    SqrtTS: float = None
-
-    L_peak: float = None
-    B_peak: float = None
-    Dist_from_start_position_peak: float = None
-
-    L: float = None
-    B: float = None
-    Dist_from_start_position: float = None
-    r: float = None
-    a: float = None
-    b: float = None
-    phi: float = None
-
-    Counts: float = None
-    CountsErr: float = None
-    CountsPosErr: float = None
-    CountsNegErr: float = None
-    CountsUL: float = None
-
-    Flux: float = None
-    FluxErr: float = None
-    FluxPosErr: float = None
-    FluxNegErr: float = None
-    FluxUL: float = None
-    FluxULbayes: float = None
-
-    Exp: float = None
-    ExpSpectraCorFactor: float = None
-
-    Erg: float = None
-    Erg_Err: float = None
-    Erg_UL: float = None
-    Erglog: float = None
-    Erglog_Err: float = None
-    Erglog_UL: float = None
-
-    Sensitivity: float = None
-
-    FluxPerChannel: List[float] = None
-
-    Index: float = None
-    Index_Err: float = None
-    Par2: float = None
-    Par2_Err: float = None
-    Par3: float = None
-    Par3_Err: float = None
-
-    cts: float = None
-    fitstatus0: float = None
-    fcn0: float = None
-    edm0: float = None
-    nvpar0: float = None
-    nparx0: float = None
-    iter0: float = None
-    fitstatus1: float = None
-    fcn1: float = None
-    edm1: float = None
-    nvpar1: float = None
-    nparx1: float = None
-    iter1: float = None
-    Likelihood1: float = None
-
-    GalCoeff: List[float] = None
-    GalErrs: List[float] = None
-
-    GalZeroCoeff: List[float] = None
-    GalZeroErrs: List[float] = None
-
-    IsoCoeffs: List[float] = None
-    IsoErrs: List[float] = None
-
-    IsoZeroCoeffs: List[float] = None
-    IsoZeroErrs: List[float] = None
-
-    Start_date_UTC: datetime.datetime = None # 2018-06-03T12:01:07
-    End_date_UTC: datetime.datetime = None   # 2018-06-04T00:01:07
-    Start_data_TT: float = None
-    End_data_TT: float = None
-    Start_date_MJD: float = None
-    End_date_MJD: float = None
-
-    emin: float = List[float]
-    emax: float = List[float]
-    fovmin: float = List[float]
-    fovmax: float = List[float]
-    albedo: float = None
-    binsize: float = None
-    expstep: float = None
-    phasecode: float = None
-    ExpRatio: float = None
-
-    ext1FitStatus: float = None
-    step1FitStatus: float = None
-    ext2FitStatus: float = None
-    step2FitStatus: float = None
-    contourFitStatus: float = None
-    indexFitStatus: float = None
-    ulFitStatus: float = None
-
-    ext1Counts: float = None
-    step1Counts: float = None
-    ext2Counts: float = None
-    step2Counts: float = None
-    contourCounts: float = None
-    indexCounts: float = None
-    ulCounts: float = None
-
-    SkytypeLFilterIrf: str = None
-    SkytypeHFilterIrf: str = None
-
-    Dist: float = None
-
-    def convertToFloat(self):
-
-        # filtering out methods
-        attributes = inspect.getmembers(self, lambda a:not(inspect.isroutine(a)))
-
-        # filtering out special names
-        attributes = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
-
-        for a in attributes:
-
-            attrName = a[0]
-            attrVal = a[1]
-
-            if attrName in ["FluxPerChannel", "GalCoeff", "GalErrs", "GalZeroCoeff", "GalZeroErrs", "IsoCoeffs", "IsoErrs", "IsoZeroCoeffs", "IsoZeroErrs", "emin", "emax", "fovmin", "fovmax"]:
-                listelem = getattr(self, attrName)
-                newl = [float(elem) for elem in listelem]
-                setattr(self, attrName, newl)
-
-            elif attrName in ["label", "minimizeralg", "minimizertype", "Start_date_UTC", "End_date_UTC", "SkytypeLFilterIrf", "SkytypeHFilterIrf"]:
-                pass
-
-            else:
-                attrVal = getattr(self, attrName)
-
-                if attrVal:
-                    setattr(self, attrName, float(attrVal))
-
-    def __str__(self):
-
-        return f'\n - MultiOutput\n\tstart_flux: {self.start_flux}\n\tFlux: {self.Flux}\n\tDist: {self.Dist}\n\tsqrt(TS): {self.SqrtTS}'
-
-
-"""
-"""
-@dataclass(order=True)
-class Source:
-    name: str
-    type: str
-    multi: MultiOutput = None
-    spatialModel: SpatialModel = None
-    spectrum: Spectrum = None
-
-    def __str__(self):
-        strRepr = '----------------------------------------------------------------'
-        strRepr += f'\nSource name: {self.name}\nSource type: {self.type}'
-        if self.spectrum:
-            strRepr += f'{self.spectrum}'
-        if self.spatialModel:
-            strRepr += f'{self.spatialModel}'
-        if self.multi:
-            strRepr += f'{self.multi}'
-        strRepr += '\n----------------------------------------------------------------'
-        return strRepr
-
-    def from_dict(self, name, source_dict):
-
-        errors = []
-        fail = False
-
-        if "name" not in source_dict:
-            errors.append("The input dictinary does not contain the requried 'name' key")
-            fail = True
-        else:
-            sourceDC = Source(source_dict["name"], "PointSource")
-
-        if "spectrum" not in source_dict:
-            errors.append("The input dictinary does not contain the requried 'spectrum' key")
-            fail = True
-        else:
-            spectrum = Spectrum(source_dict["spectrum"]["type"])
-            # sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
-            sourceDC.spectrum = spectrum
-
-        if "spatialModel" not in source_dict:
-            errors.append("The input dictinary does not contain the requried 'spatialModel' key")
-            fail = True
-        else:
-            spatialModel = SpatialModel(source_dict["spatialModel"]["type"], source_dict["spatialModel"]["location_limit"], source_dict["spatialModel"]["free"])
-            # sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
-            sourceDC.spatialModel = spatialModel
-
-
-        return sourceDC
-
-    def getSelectionValue(self, paramName):
-
-        if paramName == "Name" or paramName == "name":
-            return self.name
-
-        elif paramName == "Flux" or paramName == "flux":
-            if self.multi:
-                return self.multi.Flux
-            else:
-                return self.spectrum.getParamValue("Flux")
-
-        elif paramName == "Dist" or paramName == "dist":
-            if self.multi:
-                return self.multi.Dist
-            else:
-                return self.spatialModel.dist
-
-        elif paramName == "SqrtTS" or paramName == "sqrtTS":
-
-            return self.multi.SqrtTS
-
-        else:
-
-            return None
-
-
-    def setParamValue(self, key, val):
-
-        if key in ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature"] :
-            return self.spectrum.setParamValue(key, val)
-
-        elif key in ["GLON", "GLAT"]:
-            return self.spatialModel.setParamValue(key, val)
-
-        else:
-            return False
-
-
-    def getParamValue(self, key):
-
-        if key in ["Flux", "Index", "Index1", "Index2", "CutoffEnergy", "PivotEnergy", "Curvature"] :
-            return self.spectrum.getParamValue(key)
-
-        elif key in ["GLON", "GLAT"]:
-            return self.spatialModel.getParamValue(key)
-
-        else:
-            return False
-
-
-    def setFreeAttributeValueOf(self, parameterName, free):
-
-        if self.spatialModel.getParam(parameterName):
-            self.spatialModel.setFreeAttributeValueOf(parameterName, free)
-            return True
-
-        elif self.spectrum.getParam(parameterName):
-            self.spectrum.setFreeAttributeValueOf(parameterName, free)
-            return True
-
-        else:
-            return False
-
-    def __eq__(self, other):
-        return self.name == other.name
-"""

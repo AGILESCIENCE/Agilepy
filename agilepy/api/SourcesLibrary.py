@@ -259,8 +259,8 @@ class SourcesLibrary:
         if len(allValues) != 128:
             self.logger.critical(self, "The values extracted from %s file are lesser then 128", sourceFilePath)
             raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
-        #print("allValues: ", allValues)
-        #print("allValues sum: ", len(allValues))
+
+        # print("values from .source: ", allValues)
 
         multiOutput = MultiOutput()
 
@@ -273,15 +273,28 @@ class SourcesLibrary:
         multiOutput.multiFluxPosErr.setAttributes(value = allValues[55])
         multiOutput.multiFluxNegErr.setAttributes(value = allValues[56])
 
-        multiOutput.multiErg.setAttributes(value = allValues[61])
-        multiOutput.multiErgErr.setAttributes(value = allValues[62])
-        multiOutput.multiErgUL.setAttributes(value = allValues[63])
+        multiOutput.multiUL.setAttributes(value = allValues[57])
+
+        multiOutput.multiErgLog.setAttributes(value = allValues[64])
+        multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
+
 
         multiOutput.multiL.setAttributes(value = allValues[41])
         multiOutput.multiB.setAttributes(value = allValues[42])
+        multiOutput.multiDistFromStartPosition.setAttributes(value = allValues[43])
+        multiOutput.multir.setAttributes(value = allValues[44])
+        multiOutput.multia.setAttributes(value = allValues[45])
+        multiOutput.multib.setAttributes(value = allValues[46])
+        multiOutput.multiphi.setAttributes(value = allValues[47])
+
+
         multiOutput.multiStartL.setAttributes(value = allValues[5])
         multiOutput.multiStartB.setAttributes(value = allValues[6])
 
+        multiOutput.multiGalCoeff.setAttributes(value = allValues[89])
+        multiOutput.multiGalErr.setAttributes(value = allValues[90])
+        multiOutput.multiIsoCoeff.setAttributes(value = allValues[93])
+        multiOutput.multiIsoErr.setAttributes(value = allValues[94])
 
 
         return multiOutput
