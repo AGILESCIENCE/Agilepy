@@ -44,7 +44,8 @@ from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
                                            FileSourceParsingError, \
                                            SourceNotFound, \
                                            SourcesFileLoadingError, \
-                                           SourcesAgileFormatParsingError
+                                           SourcesAgileFormatParsingError, \
+                                           SourceParamNotFoundError
 
 class SourcesLibrary:
 
@@ -174,8 +175,6 @@ class SourcesLibrary:
                 affected.append(s)
 
         return affected
-
-
 
     def deleteSources(self, selection):
         """
@@ -313,8 +312,6 @@ class SourcesLibrary:
 
             self.updateSourceDistance(sourceFound)
 
-
-
     def updateSourceDistance(self, source):
 
         mapCenterL = float(self.config.getOptionValue("glon"))
@@ -349,11 +346,31 @@ class SourcesLibrary:
             source.spatialModel.set("dist", dist)
             self.logger.debug(self, "'dist' parameter of '%s' has been updated from xml: %f", source.name, source.spatialModel.get("dist"))
 
+    def addSource(self, sourceName, sourceDict):
 
+        if not sourceName:
+            self.logger.critical(self, "sourceName cannot be None or empty.")
+            raise SourceParamNotFoundError("sourceName is a required param.")
 
+        requiredKeys = ["glon", "glat", "spectrumType"]
 
+        for rK in requiredKeys:
+            if rK not in sourceDict:
+                self.logger.critical(self, "'%s' is a required param. Please add it to the 'sourceDict' input dictionary", rK)
+                raise SourceParamNotFoundError("'{}' is a required param. Please add it to the 'sourceDict' input dictionary".format(rK))
 
+        newSource = Source(sourceName, "PointSource")
+        newSource.spatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
+        newSource.spectrum = Spectrum.getSpectrumObject(sourceDict["spectrumType"])
 
+        spectrumKeys = ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature"]
+
+        for sK in spectrumKeys:
+            if sK in vars(newSource.spectrum):
+                getattr(newSource.spectrum, sK).set(0)
+            if sK in sourceDict and sK in newSource.spectrum:
+                getattr(newSource.spectrum, sK).set(sourceDict[sK])
+        return newSource
 
     @singledispatch
     def _extractSelectionParams(selection):

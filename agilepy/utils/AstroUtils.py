@@ -26,6 +26,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
+import numpy as np
 
 class AstroUtils:
 
@@ -67,7 +68,7 @@ class AstroUtils:
     def time_nparray_mjd_to_tt(timemjd_nparray):
         if not isinstance(timemjd_nparray, np.ndarray):
             timemjd_nparray = np.array(timemjd_nparray)
-        return (timemjd_array - 53005.0) * 86400.0
+        return (timemjd_nparray - 53005.0) * 86400.0
 
     @staticmethod
     def time_nparray_tt_to_mjd(timett_nparray):

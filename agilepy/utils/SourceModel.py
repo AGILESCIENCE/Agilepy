@@ -30,7 +30,7 @@ from dataclasses import dataclass
 from typing import List
 import datetime
 import inspect
-from agilepy.utils.CustomExceptions import WrongSpectrumTypeError, \
+from agilepy.utils.CustomExceptions import SpectrumTypeNotFoundError, \
                                            AttributeValueDatatypeNotSupportedError, \
                                            SelectionParamNotSupported, \
                                            NotFreeableParamsError
@@ -88,7 +88,7 @@ class OutputVal(Value):
 class Parameter(Value):
     def __init__(self, name, datatype=None):
         super().__init__(name, datatype)
-        self.free = None
+        self.free = 0
         self.scale = None
         self.min = None
         self.max = None
@@ -127,8 +127,6 @@ class Parameter(Value):
 
         return outDict
 
-
-
 class SourceDescription:
 
     def set(self, attributeName, attributeVal):
@@ -142,19 +140,19 @@ class SourceDescription:
 
     def getFree(self, attributeName, strRepr=False):
         freeval = getattr(self, attributeName).free
-        if strRepr:
-            freeval = str(freeval)
-        return freeval
-
+        if freeval is None and strRepr:
+            return "None"
+        elif freeval is None and not strRepr:
+            return 0
+        elif strRepr and freeval is not None:
+            return str(freeval)
+        else:
+            return freeval
 
 class Spectrum(SourceDescription):
 
     @staticmethod
     def getSpectrumObject(stype):
-
-        if stype not in ["PowerLaw", "PLExpCutoff", "PLSuperExpCutoff", "LogParabola"]:
-
-            raise WrongSpectrumTypeError("Spectrum type '%s' is not supported. Supported spectrum types: ['PowerLaw', 'PLExpCutoff', 'PLSuperExpCutoff', 'LogParabola']".format(stype))
 
         if stype == "PowerLaw":
             return PowerLawSpectrum(stype)
@@ -165,8 +163,12 @@ class Spectrum(SourceDescription):
         elif stype == "PLSuperExpCutoff":
             return PLSuperExpCutoffSpectrum(stype)
 
-        else:
+        elif stype == "LogParabola":
             return LogParabolaSpectrum(stype)
+
+        else:
+            raise SpectrumTypeNotFoundError("Spectrum type '{}' is not supported. Supported spectrum types: ['PowerLaw', 'PLExpCutoff', 'PLSuperExpCutoff', 'LogParabola']".format(stype))
+
 
     def __init__(self, stype):
         self.stype = stype
@@ -224,7 +226,6 @@ class LogParabolaSpectrum(Spectrum):
     def getParameterDict(self):
         return [self.flux.toDict(), self.index.toDict(), self.pivotEnergy.toDict(), self.curvature.toDict()]
 
-
 class SpatialModel(SourceDescription):
 
     @staticmethod
@@ -252,7 +253,6 @@ class PointSourceSpatialModel(SpatialModel):
 
     def getParameterDict(self):
         return [self.pos.toDict()]
-
 
 class MultiOutput(SourceDescription):
     def __init__(self):
@@ -296,8 +296,6 @@ class MultiOutput(SourceDescription):
     def __str__(self):
         return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiDist} \
                  \n{self.multiStartL}\n{self.multiStartB}\n{self.multiL}\n{self.multiB}\n{self.multiDist}'
-
-
 
 class Source:
 

@@ -78,10 +78,6 @@ class WrongCoordinateSystemError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-class WrongSpectrumTypeError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-
 class WrongSpatialModelTypeError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -91,5 +87,13 @@ class AttributeValueDatatypeNotSupportedError(Exception):
         super().__init__(message)
 
 class NotFreeableParamsError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class SourceParamNotFoundError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class SpectrumTypeNotFoundError(Exception):
     def __init__(self, message):
         super().__init__(message)

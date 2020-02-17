@@ -35,6 +35,7 @@ from xml.etree.ElementTree import parse
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError
 
 class SourcesLibraryUnittesting(unittest.TestCase):
 
@@ -255,7 +256,42 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.assertEqual(2, len(sourcesxml))
 
+    def test_add_source(self):
 
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+
+        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+
+        newSourceDict = {
+            "a" : 10
+        }
+        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "newsource", newSourceDict)
+
+
+        newSourceDict = {
+            "glon" : 250,
+            "glat": 30,
+            "spectrumType" : "LogPaperone"
+        }
+        self.assertRaises(SpectrumTypeNotFoundError, self.sl.addSource, "newsource", newSourceDict)
+
+        newSourceDict = {
+            "glon" : 250,
+            "glat": 30,
+            "spectrumType" : "LogParabola"
+        }
+        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "", newSourceDict)
+        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, None, newSourceDict)
+
+        newSource = self.sl.addSource("newsource", newSourceDict)
+
+        self.assertEqual(0, newSource.spectrum.get("flux"))
+        self.assertEqual(0, newSource.spectrum.get("curvature"))
+        self.assertEqual("newsource", newSource.name)
+
+        print(newSource)
 
 if __name__ == '__main__':
     unittest.main()
