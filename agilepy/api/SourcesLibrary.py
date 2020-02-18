@@ -111,20 +111,22 @@ class SourcesLibrary:
 
         return addedSources
 
-    def writeToFile(self, outfileNamePrefix, fileformat="txt"):
-
+    def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=[]):
 
         if fileformat not in ["txt", "xml"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
 
         outputFilePath = self.outdirPath.joinpath(outfileNamePrefix)
 
+        if len(sources) == 0:
+            sources = self.sources
+
         if fileformat == "txt":
-            sourceLibraryToWrite = SourcesLibrary._convertToAgileFormat(self.sources)
+            sourceLibraryToWrite = SourcesLibrary._convertToAgileFormat(sources)
             outputFilePath = outputFilePath.with_suffix('.txt')
 
         else:
-            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat(self.sources)
+            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat(sources)
             outputFilePath = outputFilePath.with_suffix('.xml')
 
         with open(outputFilePath, "w") as sourceLibraryFile:
