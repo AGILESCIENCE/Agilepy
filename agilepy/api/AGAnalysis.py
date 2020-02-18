@@ -116,7 +116,7 @@ class AGAnalysis:
             sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
             rangeDist (tuple): a interval (min, max) of distances (degree)
         Raises:
-            SourceModelFormatNotSupported: if the sources file format is not supported.
+            SourceModelFormatNotSupported: if the input file format is not supported.
             SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
 
         Returns:
@@ -557,6 +557,25 @@ class AGAnalysis:
             Path to the file
         """
         self.sourcesLibrary.writeToFile(outfileNamePrefix, fileFormat)
+
+    def convertCatalogToXml(self, catalogFilepath):
+        """It takes a catalog file in AGILE (.txt) format as input and converts
+        it in the xml format.
+
+        Args:
+            catalogFilepath (str): a relative or absolute path to the catalog file in AGILE (.txt) format.
+
+        Raises:
+            SourceModelFormatNotSupported: if the input file format is not supported.
+
+        Returns:
+            A string rapresenting the path to the output file.
+
+        """
+        return self.sourcesLibrary.convertCatalogToXml(catalogFilepath)
+
+
+
 
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):

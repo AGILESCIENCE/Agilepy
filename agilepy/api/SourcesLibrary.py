@@ -64,13 +64,11 @@ class SourcesLibrary:
 
         self.outdirPath.mkdir(parents=True, exist_ok=True)
 
-
     def getSupportedCatalogs(self):
 
         catalogsPath = self.config._expandEnvVar("$AGILE/catalogs")
 
-        return [f for f in listdir(catalogsPath) if ".multi" in f]
-
+        return [str(Path(catalogsPath).joinpath(f)) for f in listdir(catalogsPath) if ".multi" in f]
 
     def loadSources(self, filePath, rangeDist = (0, float("inf")) ):
 
@@ -110,6 +108,19 @@ class SourcesLibrary:
                     addedSources.append(source)
 
         return addedSources
+
+    def convertCatalogToXml(self, catalogFilepath):
+
+        catalogFilepath = self.config._expandEnvVar(catalogFilepath)
+
+        filename, fileExtension = splitext(catalogFilepath)
+
+        if fileExtension not in [".multi", ".txt"]:
+            raise SourceModelFormatNotSupported("Format of {} not supported. Supported formats: {}".format(filePath, ' '.join(supportFormats)))
+
+        newSources = self._loadFromSourcesTxt(catalogFilepath)
+
+        return self.writeToFile(filename, fileformat="xml", sources=newSources)
 
     def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=[]):
 
@@ -538,8 +549,8 @@ class SourcesLibrary:
                  index = float(elements[3])
                  fixflag = int(elements[4])
                  name = elements[6]
-                 location_limit = int(elements[7])
-                 spectrum_type = int(elements[8])
+                 locationLimit = int(elements[7])
+                 spectrumType = int(elements[8])
 
 
                  if fixflag == 0:
@@ -558,34 +569,34 @@ class SourcesLibrary:
 
                  sourceDC = Source(name=name, type="PointSource")
 
-                 if spectrum_type == 0:
+                 if spectrumType == 0:
                      sourceDC.spectrum = Spectrum.getSpectrumObject("PowerLaw")
-                 elif spectrum_type == 1:
+                 elif spectrumType == 1:
                      sourceDC.spectrum = Spectrum.getSpectrumObject("PLExpCutoff")
-                 elif spectrum_type == 2:
+                 elif spectrumType == 2:
                      sourceDC.spectrum = Spectrum.getSpectrumObject("PLSuperExpCutoff")
-                 elif spectrum_type == 3:
+                 elif spectrumType == 3:
                      sourceDC.spectrum = Spectrum.getSpectrumObject("LogParabola")
                  else:
-                     self.logger.critical(self,"spectrum_type=%d not supported. Supported: [0,1,2,3]", spectrum_type)
-                     raise SourcesAgileFormatParsingError("spectrum_type={} not supported. Supported: [0,1,2,3]".format(spectrum_type))
+                     self.logger.critical(self,"spectrumType=%d not supported. Supported: [0,1,2,3]", spectrumType)
+                     raise SourcesAgileFormatParsingError("spectrumType={} not supported. Supported: [0,1,2,3]".format(spectrumType))
 
 
                  getattr(sourceDC.spectrum, "flux").setAttributes(name="flux", free=free_bits[0], value=flux)
 
-                 if spectrum_type == 0:
+                 if spectrumType == 0:
                      getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
                                                                         value=index, min=float(elements[11]), max=float(elements[12]))
 
 
-                 elif spectrum_type == 1:
+                 elif spectrumType == 1:
                      getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
                                                                         value=index, min=float(elements[11]), max=float(elements[12]))
 
                      getattr(sourceDC.spectrum, "cutoffEnergy").setAttributes(name="cutoffEnergy", free=free_bits[3], scale=-1.0, \
                                                                         value=float(elements[9]), min=float(elements[13]), max=float(elements[14]))
 
-                 elif spectrum_type == 2:
+                 elif spectrumType == 2:
                      getattr(sourceDC.spectrum, "index1").setAttributes(name="index1", free=free_bits[2], scale=-1.0, \
                                                                         value=index, min=float(elements[11]), max=float(elements[12]))
 
@@ -595,7 +606,7 @@ class SourcesLibrary:
                      getattr(sourceDC.spectrum, "index2").setAttributes(name="index2", free=free_bits[4], value=float(elements[10]), \
                                                                         min=float(elements[15]), max=float(elements[16]))
 
-                 elif spectrum_type == 3:
+                 elif spectrumType == 3:
                      getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
                                                                         value=index, min=float(elements[11]), max=float(elements[12]))
 
@@ -606,7 +617,7 @@ class SourcesLibrary:
                                                                         min=float(elements[15]), max=float(elements[16]))
 
 
-                 sourceDC.spatialModel = SpatialModel.getSpatialModelObject("PointSource", location_limit)
+                 sourceDC.spatialModel = SpatialModel.getSpatialModelObject("PointSource", locationLimit)
 
                  getattr(sourceDC.spatialModel, "pos").setAttributes(name="pos", value="(%s,%s)"%(glon, glat), free=free_bits_position)
 
@@ -752,7 +763,7 @@ class SourcesLibrary:
 
 
             spatial_model_tag = Element("spatialModel", { "type": source.spatialModel.sptype, \
-                                                          "location_limit": str(source.spatialModel.locationLimit) })
+                                                          "locationLimit": str(source.spatialModel.locationLimit) })
 
             for parameterDict in source.spatialModel.getParameterDict():
 

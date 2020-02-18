@@ -73,8 +73,11 @@ class SourcesLibraryUnittesting(unittest.TestCase):
     def test_get_supported_catalogs(self):
         files = self.sl.getSupportedCatalogs()
         self.assertEqual(1, len(files))
-        self.assertEqual("2AGL.multi", files.pop())
-
+        catalog = files.pop()
+        self.assertEqual("2AGL.multi", catalog)
+        added = self.sl.loadSources(catalog)
+        self.assertEqual(175, len(added))
+        self.assertEqual(175, len(self.sl.sources))
 
     def test_load_file_with_wrong_extension(self):
 
@@ -361,6 +364,23 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
 
         self.assertEqual(False, self.sl.addSource("newsource2", newSourceDict))
+
+
+    def test_convert_catalog_to_xml(self):
+
+        catalogFile = "$AGILE/catalogs/2AGL.multi"
+
+        outfile = self.sl.convertCatalogToXml(catalogFile)
+
+        sourcesxml = parse(outfile).getroot()
+
+        self.assertEqual(175, len(sourcesxml))
+
+        added = self.sl.loadSources(outfile)
+
+        self.assertEqual(175, len(added))
+
+        self.assertEqual(175, len(self.sl.sources))
 
 if __name__ == '__main__':
     unittest.main()
