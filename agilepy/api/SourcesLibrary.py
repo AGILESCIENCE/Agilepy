@@ -112,9 +112,8 @@ class SourcesLibrary:
         return addedSources
 
     def writeToFile(self, outfileNamePrefix, fileformat="txt"):
-        """
-        This method ... blabla ...
-        """
+
+
         if fileformat not in ["txt", "xml"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
 
