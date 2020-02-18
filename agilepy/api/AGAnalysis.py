@@ -56,12 +56,13 @@ class AGAnalysis:
 
     """
 
-    def __init__(self, configurationFilePath, sourcesFilePath):
+    def __init__(self, configurationFilePath, sourcesFilePath = None):
         """AGAnalysis constructor.
 
         Args:
-            configurationFilePath (str): the relative or absolute path to the yaml configuration file.
-            sourcesFilePath (str): the relative or absolute path to the xml sources descriptor file.
+            configurationFilePath (str): a relative or absolute path to the yaml configuration file.
+            sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
+            Three different types of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
 
         Raises:
             FileExistsError: if the output directory already exists.
@@ -89,16 +90,9 @@ class AGAnalysis:
 
         self.sourcesLibrary = SourcesLibrary()
 
-        if ".txt" in sourcesFilePath:
-            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="txt")
+        if sourcesFilePath:
 
-        elif ".xml" in sourcesFilePath:
-            self.sourcesLibrary.loadSources(sourcesFilePath, fileformat="xml")
-
-        else:
-            self.logger.warning("Sources file don't have neither '.txt' or '.xml' extension")
             self.sourcesLibrary.loadSources(sourcesFilePath)
-
 
         self.plottingUtils = PlottingUtils()
 
@@ -109,6 +103,34 @@ class AGAnalysis:
             raise PFILESNotFoundError("$PFILES is not set.")
 
         self.currentMaplistFile = None
+
+
+
+    def loadSources(self, sourcesFilepath, rangeDist = (0, float("inf"))):
+        """It loads the sources, reading them from a file. Three different types \
+        of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
+
+        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
+
+        Args:
+            sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
+            rangeDist (tuple): a interval (min, max) of distances (degree)
+        Raises:
+            SourceModelFormatNotSupported: if the sources file format is not supported.
+            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
+
+        Returns:
+            The List of sources that have been succesfully loaded into the SourcesLibrary.
+        """
+        return self.sourcesLibrary.loadSources(sourcesFilepath)
+
+    def getSupportedCatalogs(self):
+        """It returns a list of filepaths corresponding to the supported catalogs you can load.
+
+        Returns:
+            A List of filepaths.
+        """
+        return self.sourcesLibrary.getSupportedCatalogs()
 
     def setOptions(self, **kwargs):
         """It updates configuration options specifying one or more key=value pairs at once.

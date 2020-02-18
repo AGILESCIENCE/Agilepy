@@ -27,7 +27,8 @@
 
 from pathlib import Path
 from inspect import signature
-from os.path import split, join
+from os.path import split, join, splitext
+from os import listdir
 
 from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
@@ -55,46 +56,60 @@ class SourcesLibrary:
         """
         self.logger = agilepyLogger
 
-        self.sourcesFilePath = None
-        self.sourcesFilePathPrefix = None
-        self.sourcesFilePathFormat = None
-
-        self.sources = None
-
         self.config = AgilepyConfig()
+
+        self.sources = []
 
         self.outdirPath = Path(self.config.getConf("output","outdir")).joinpath("sources_library")
 
         self.outdirPath.mkdir(parents=True, exist_ok=True)
 
-    def loadSources(self, filePath, fileformat="xml"):
-        """
-        This method ... blabla ...
-        """
-        if fileformat not in ["txt", "xml"]:
 
-            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
+    def getSupportedCatalogs(self):
 
-        self.sourcesFilePathFormat = format
-        self.sourcesFilePath = filePath
-        self.sourcesFilePathPrefix,_ = split(self.sourcesFilePath)
+        catalogsPath = self.config._expandEnvVar("$AGILE/catalogs")
 
-        if fileformat == "xml":
-            self.sources = self._loadFromSourcesXml(self.sourcesFilePath)
-
-        else:
-            self.sources = self._loadFromSourcesTxt(self.sourcesFilePath)
-
-        if not self.sources:
-            self.logger.critical(self, "Errors during %s parsing (format %s)", self.sourcesFilePath, self.sourcesFilePathFormat)
-            raise SourcesFileLoadingError("Errors during {} parsing (format {})".format(self.sourcesFilePath, self.sourcesFilePathFormat))
-
-        for source in self.sources:
-
-            self.updateSourceDistance(source)
+        return [f for f in listdir(catalogsPath) if ".multi" in f]
 
 
-        return True
+    def loadSources(self, filePath, rangeDist = (0, float("inf")) ):
+
+        filePath = self.config._expandEnvVar(filePath)
+
+        filename, fileExtension = splitext(filePath)
+
+        supportFormats = [".txt", ".xml", ".multi"]
+
+        if fileExtension not in supportFormats:
+
+            raise SourceModelFormatNotSupported("Format of {} not supported. Supported formats: {}".format(filePath, ' '.join(supportFormats)))
+
+
+        if fileExtension == ".xml":
+            newSources = self._loadFromSourcesXml(filePath)
+
+        elif fileExtension == ".txt" or fileExtension == ".multi":
+            newSources = self._loadFromSourcesTxt(filePath)
+
+
+        if newSources is None:
+            self.logger.critical(self, "Errors during %s parsing (%s)", filePath, fileExtension)
+            raise SourcesFileLoadingError("Errors during {} parsing ({})".format(filePath, fileExtension))
+
+        addedSources = []
+
+        for source in newSources:
+
+            distance = self.updateSourceDistance(source)
+
+            if distance >= rangeDist[0] and distance <= rangeDist[1]:
+
+                added = self.addSource(source.name, source)
+
+                if added:
+                    addedSources.append(source)
+
+        return addedSources
 
     def writeToFile(self, outfileNamePrefix, fileformat="txt"):
         """
@@ -337,8 +352,6 @@ class SourcesLibrary:
 
         dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
 
-
-
         if source.multi:
             source.multi.set("multiDist", dist)
             self.logger.debug(self, "'multiDist' parameter of '%s' has been updated from multi: %f", source.multi.get("name"), source.multi.get("multiDist"))
@@ -346,42 +359,68 @@ class SourcesLibrary:
             source.spatialModel.set("dist", dist)
             self.logger.debug(self, "'dist' parameter of '%s' has been updated from xml: %f", source.name, source.spatialModel.get("dist"))
 
-    def addSource(self, sourceName, sourceDict):
+        return dist
+
+    def addSource(self, sourceName, sourceObject):
 
         if not sourceName:
-            self.logger.critical(self, "sourceName cannot be None or empty.")
-            raise SourceParamNotFoundError("sourceName is a required param.")
+            self.logger.critical(self, "'sourceName' cannot be None or empty.")
+            raise SourceParamNotFoundError("'sourceName' cannot be None or empty.")
 
         for source in self.sources:
             if sourceName == source.name:
-                self.logger.warning(self,"The source %s already exists. Input source will not be added.", sourceName)
+                self.logger.warning(self,"The source %s already exists. The 'sourceObject' will not be added to the SourcesLibrary.", sourceName)
                 return False
+
+        return SourcesLibrary._addSource(sourceObject, sourceName, self)
+
+    @singledispatch
+    def _addSource(sourceObject, sourceName, self):
+        raise NotImplementedError('Unsupported type: {}'.format(type(selection)))
+
+    @_addSource.register(Source)
+    def _(sourceObject, sourceName, self):
+
+        self.logger.debug(self, "Loading source from a Source object..")
+
+        self.sources.append(sourceObject)
+
+        return True
+
+    @_addSource.register(dict)
+    def _(sourceObject, sourceName, self):
+
+        self.logger.debug(self, "Loading source from a dictionary..")
 
         requiredKeys = ["glon", "glat", "spectrumType"]
 
         for rK in requiredKeys:
-            if rK not in sourceDict:
-                self.logger.critical(self, "'%s' is a required param. Please add it to the 'sourceDict' input dictionary", rK)
-                raise SourceParamNotFoundError("'{}' is a required param. Please add it to the 'sourceDict' input dictionary".format(rK))
+            if rK not in sourceObject:
+                self.logger.critical(self, "'%s' is a required param. Please add it to the 'sourceObject' input dictionary", rK)
+                raise SourceParamNotFoundError("'{}' is a required param. Please add it to the 'sourceObject' input dictionary".format(rK))
 
         newSource = Source(sourceName, "PointSource")
 
         newSource.spatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
-        newSource.spatialModel.set("pos", f'({sourceDict["glon"]}, {sourceDict["glat"]})')
+        newSource.spatialModel.set("pos", f'({sourceObject["glon"]}, {sourceObject["glat"]})')
 
-        newSource.spectrum = Spectrum.getSpectrumObject(sourceDict["spectrumType"])
+        newSource.spectrum = Spectrum.getSpectrumObject(sourceObject["spectrumType"])
 
         spectrumKeys = ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature"]
 
         for sK in spectrumKeys:
             if sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(0)
-            if sK in sourceDict and sK in vars(newSource.spectrum):
-                getattr(newSource.spectrum, sK).set(sourceDict[sK])
+            if sK in sourceObject and sK in vars(newSource.spectrum):
+                getattr(newSource.spectrum, sK).set(sourceObject[sK])
 
         self.sources.append(newSource)
 
         return True
+
+
+
+
 
 
     @singledispatch
@@ -396,8 +435,6 @@ class SourcesLibrary:
     @_extractSelectionParams.register(object)
     def _(selectionLambda):
         return list(signature(selectionLambda).parameters)
-
-
 
     def _getCompatibleSources(self, validatedUserSelectionParams):
 
@@ -422,7 +459,6 @@ class SourcesLibrary:
                 sources.append(source)
 
         return sources
-
 
     @staticmethod
     def _selectSource(selection, source, userSelectionParamsMapping):
@@ -477,7 +513,6 @@ class SourcesLibrary:
             sources.append(sourceDC)
 
         return sources
-
 
     def _loadFromSourcesTxt(self, txtFilePath):
 
@@ -592,12 +627,10 @@ class SourcesLibrary:
 
         return sourceDescrDC
 
-
     def _getConf(self, key=None):
         if not key:
             return self.sources
         else: return self.sources[key]
-
 
     @staticmethod
     def _fail(msg):
@@ -733,8 +766,6 @@ class SourcesLibrary:
         reparsed = minidom.parseString(rough_string)
 
         return reparsed.toprettyxml(indent="  ")
-
-
 
     @staticmethod
     def _computeFixFlag(source, spectrumType):

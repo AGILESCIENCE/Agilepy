@@ -35,7 +35,8 @@ from xml.etree.ElementTree import parse
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError
+from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError,  \
+                                           SourceModelFormatNotSupported
 
 class SourcesLibraryUnittesting(unittest.TestCase):
 
@@ -66,9 +67,54 @@ class SourcesLibraryUnittesting(unittest.TestCase):
                  "flux": source.spectrum.flux.free
                }
 
-    def test_load_xml(self):
-        self.assertEqual(True, self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml"))
 
+
+
+    def test_get_supported_catalogs(self):
+        files = self.sl.getSupportedAGILECatalogs()
+        self.assertEqual(1, len(files))
+        self.assertEqual("2AGL.multi", files.pop())
+
+
+    def test_load_file_with_wrong_extension(self):
+
+        xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.wrongext")
+
+        self.assertRaises(SourceModelFormatNotSupported, self.sl.loadSources, xmlsourcesconfPath)
+
+
+    def test_load_wrong_file(self):
+
+        xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/idontexitst.txt")
+
+        self.assertRaises(FileNotFoundError, self.sl.loadSources, xmlsourcesconfPath)
+
+
+    def test_load_catalog(self):
+
+        catalogFile = "$AGILE/catalogs/2AGL.multi"
+
+        added = self.sl.loadSources(catalogFile)
+
+        self.assertEqual(175, len(added))
+        self.assertEqual(175, len(self.sl.sources))
+
+
+    def test_load_catalog_filtering_on_distances(self):
+
+        catalogFile = "$AGILE/catalogs/2AGL.multi"
+
+        added = self.sl.loadSources(catalogFile, rangeDist=(70, 80))
+
+        self.assertEqual(15, len(added))
+        self.assertEqual(15, len(self.sl.sources))
+
+
+    def test_load_xml(self):
+
+        added = self.sl.loadSources(self.xmlsourcesconfPath)
+
+        self.assertEqual(2, len(added))
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('name == "2AGLJ2021+4029"')
@@ -90,11 +136,14 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_load_txt(self):
         agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
-        self.assertEqual(True, self.sl.loadSources(agsourcesconfPath, fileformat="txt"))
+
+        added = self.sl.loadSources(agsourcesconfPath)
+
+        self.assertEqual(10, len(added))
         self.assertEqual(10, len(self.sl.sources))
 
         sources = self.sl.selectSources('name == "2AGLJ1801-2334"')
-        self.assertEqual(10, len(sources))
+        self.assertEqual(1, len(sources))
         source = sources.pop()
 
         self.assertEqual(3.579e-07, source.spectrum.get("flux"))
@@ -152,7 +201,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_string(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0')
@@ -175,7 +224,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
 
 
         sources = self.sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
@@ -191,7 +240,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_string(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -220,7 +269,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
     def test_free_sources_with_selection_lambda(self):
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -244,7 +293,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.config.loadConfigurations(self.agilepyconfPath, validate=True)
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
 
         outfileName = "write_to_file_testcase"
 
@@ -262,7 +311,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.config.loadConfigurations(self.agilepyconfPath, validate=True)
 
-        self.sl.loadSources(self.xmlsourcesconfPath, fileformat="xml")
+        self.sl.loadSources(self.xmlsourcesconfPath)
 
         newSourceDict = {
             "a" : 10
