@@ -71,7 +71,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
 
     def test_get_supported_catalogs(self):
-        files = self.sl.getSupportedAGILECatalogs()
+        files = self.sl.getSupportedCatalogs()
         self.assertEqual(1, len(files))
         self.assertEqual("2AGL.multi", files.pop())
 
