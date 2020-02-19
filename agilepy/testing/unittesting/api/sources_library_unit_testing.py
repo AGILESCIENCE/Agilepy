@@ -74,7 +74,7 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         files = self.sl.getSupportedCatalogs()
         self.assertEqual(1, len(files))
         catalog = files.pop()
-        self.assertEqual("2AGL.multi", catalog)
+        self.assertEqual(True, "2AGL.multi" in catalog)
         added = self.sl.loadSources(catalog)
         self.assertEqual(175, len(added))
         self.assertEqual(175, len(self.sl.sources))
