@@ -32,8 +32,8 @@ from agilepy.utils.ProcessWrapper import ProcessWrapper
 
 class CtsMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
         return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
@@ -73,8 +73,8 @@ class CtsMapGenerator(ProcessWrapper):
 
 class ExpMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
 
     def getRequiredOptions(self):
@@ -126,13 +126,13 @@ class ExpMapGenerator(ProcessWrapper):
 
 class GasMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap"]
 
-    def configure(self, confDict):
+    def configure(self, confDict, extraParams=[]):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".gas.gz"
@@ -141,7 +141,7 @@ class GasMapGenerator(ProcessWrapper):
 
         self.products = [self.outfilePath]
 
-        self.args = [ expMapGenerator.outfilePath, \
+        self.args = [ extraParams["expMapGeneratorOutfilePath"], \
                       self.outfilePath,  \
                       confDict.getOptionValue("skymapL"), \
                       confDict.getOptionValue("skymapH"), \
@@ -152,13 +152,13 @@ class GasMapGenerator(ProcessWrapper):
 
 class IntMapGenerator(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap", "ctsmap"]
 
-    def configure(self, confDict):
+    def configure(self, confDict, extraParams=None):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".int.gz"
@@ -166,9 +166,9 @@ class IntMapGenerator(ProcessWrapper):
 
         self.products = [self.outfilePath]
 
-        self.args = [ expMapGenerator.outfilePath, \
+        self.args = [ extraParams["expMapGeneratorOutfilePath"], \
                       self.outfilePath,  \
-                      ctsMapGenerator.outfilePath, \
+                      extraParams["ctsMapGeneratorOutfilePath"], \
                     ]
 
 
@@ -178,8 +178,8 @@ class IntMapGenerator(ProcessWrapper):
 
 class Multi(ProcessWrapper):
 
-    def __init__(self, exeName):
-        super().__init__(exeName)
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix"]
@@ -198,6 +198,7 @@ class Multi(ProcessWrapper):
         expratioevaluation = 0
         if confDict.getOptionValue("expratioevaluation"):
             expratioevaluation = 1
+
 
         self.args = [
             confDict.getOptionValue("maplist"), \
@@ -226,14 +227,3 @@ class Multi(ProcessWrapper):
             confDict.getOptionValue("expratio_size"), \
             confDict.getOptionValue("contourpoints"),
         ]
-
-
-
-
-
-
-ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen")
-expMapGenerator = ExpMapGenerator("AG_expmapgen")
-gasMapGenerator = GasMapGenerator("AG_gasmapgen")
-intMapGenerator = IntMapGenerator("AG_intmapgen")
-multi = Multi("AG_multi")

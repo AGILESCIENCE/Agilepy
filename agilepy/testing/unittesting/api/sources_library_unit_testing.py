@@ -35,6 +35,8 @@ from xml.etree.ElementTree import parse
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.utils.AgilepyLogger import AgilepyLogger
+
 from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError,  \
                                            SourceModelFormatNotSupported
 
@@ -49,12 +51,15 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.config = AgilepyConfig()
         self.config.loadConfigurations(self.agilepyconfPath, validate=True)
 
+        self.logger = AgilepyLogger()
+        self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
+
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.sl = SourcesLibrary()
+        self.sl = SourcesLibrary(self.config, self.logger)
 
     @staticmethod
     def get_free_params(source):

@@ -34,7 +34,7 @@ from time import strftime
 from agilepy.utils.CustomExceptions import LoggerTypeNotFound
 from agilepy.utils.Utils import Singleton
 
-class AgilepyLogger(metaclass=Singleton):
+class AgilepyLogger():
 
     def __init__(self):
         self.debug_lvl = None
@@ -139,6 +139,3 @@ class AgilepyLogger(metaclass=Singleton):
                 self.consoleLogger.removeHandler(handler)
 
         self.initialized = False
-
-        
-agilepyLogger = AgilepyLogger()

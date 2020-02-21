@@ -37,7 +37,7 @@ from pathlib import Path
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.utils.AgilepyLogger import agilepyLogger
+from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import WrongCoordinateSystemError
 
@@ -73,11 +73,11 @@ class AGEng:
 
         Path(self.outdir).mkdir(parents=True, exist_ok=True)
 
-        self.logger = agilepyLogger
+        self.logger = AgilepyLogger()
 
         self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
-        self.plottingUtils = PlottingUtils()
+        self.plottingUtils = PlottingUtils(self.config, self.logger)
 
 
     def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, format="png", title="Visibility Plot"):
@@ -219,7 +219,7 @@ class AGEng:
 
         self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
         tf_mjd = AstroUtils.time_nparray_mjd_to_tt(tf_tt_tot)
-        
+
         meantimes = (ti_mjd+tf_mjd)/2.
 
         if writeFiles:

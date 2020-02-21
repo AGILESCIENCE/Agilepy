@@ -32,7 +32,7 @@ from pathlib import Path
 from time import sleep
 
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.AgilepyLogger import agilepyLogger
+from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class UtilsUnittesting(unittest.TestCase):
@@ -44,12 +44,15 @@ class UtilsUnittesting(unittest.TestCase):
         self.config = AgilepyConfig()
         self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
+        self.agilepyLogger = AgilepyLogger()
+
         outDir = Path(self.config.getOptionValue("outdir"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.agilepyLogger = agilepyLogger
+    def tearDown(self):
+        self.agilepyLogger.reset()
 
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)
@@ -80,7 +83,7 @@ class UtilsUnittesting(unittest.TestCase):
         self.config.setOptions(verboselvl=1)
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
-        
+
         self.assertEqual(True, logfilePath.is_file())
 
         with open(logfilePath, "r") as f:

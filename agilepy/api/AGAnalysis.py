@@ -26,16 +26,21 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from os.path import join, exists
+from os.path import join, exists, isdir, splitext
+from pathlib import Path
+from time import time
+from copy import deepcopy
+import subprocess
+from multiprocessing import Process
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import ctsMapGenerator, expMapGenerator, gasMapGenerator, intMapGenerator, multi
+from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi
 
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
-from agilepy.utils.AgilepyLogger import agilepyLogger
+from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \
                                            ScienceToolInputArgMissing, \
@@ -84,17 +89,17 @@ class AGAnalysis:
         if exists(self.outdir):
             raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(self.outdir))
 
-        self.logger = agilepyLogger
+        self.logger = AgilepyLogger()
 
         self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
-        self.sourcesLibrary = SourcesLibrary()
+        self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
         if sourcesFilePath:
 
             self.sourcesLibrary.loadSources(sourcesFilePath)
 
-        self.plottingUtils = PlottingUtils()
+        self.plottingUtils = PlottingUtils(self.config, self.logger)
 
         if "AGILE" not in os.environ:
             raise AGILENotFoundError("$AGILE is not set.")
@@ -103,6 +108,9 @@ class AGAnalysis:
             raise PFILESNotFoundError("$PFILES is not set.")
 
         self.currentMaplistFile = None
+
+    def __del__(self):
+        self.logger.reset()
 
 
     ############################################################################
@@ -216,7 +224,7 @@ class AGAnalysis:
     # analysis                                                                 #
     ############################################################################
 
-    def generateMaps(self):
+    def generateMaps(self, config = None):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -235,14 +243,23 @@ class AGAnalysis:
             /home/rt/agilepy/output/testcase.maplist4
 
         """
-        fovbinnumber = self.config.getOptionValue("fovbinnumber")
-        energybins = self.config.getOptionValue("energybins")
+        timeStart = time()
 
-        initialFovmin = self.config.getOptionValue("fovradmin")
-        initialFovmax = self.config.getOptionValue("fovradmax")
+        if config:
+            configBKP = config
+        else:
+            configBKP = AgilepyConfig.getCopy(self.config)
 
-        initialFileNamePrefix = self.config.getOptionValue("filenameprefix")
-        outdir = self.config.getOptionValue("outdir")
+
+        fovbinnumber = configBKP.getOptionValue("fovbinnumber")
+        energybins = configBKP.getOptionValue("energybins")
+
+        initialFovmin = configBKP.getOptionValue("fovradmin")
+        initialFovmax = configBKP.getOptionValue("fovradmax")
+
+        initialFileNamePrefix = configBKP.getOptionValue("filenameprefix")
+
+        outdir = configBKP.getOptionValue("outdir")
 
         mapListFileContent = []
         maplistFilePath = join(outdir, initialFileNamePrefix+".maplist4")
@@ -271,22 +288,28 @@ class AGAnalysis:
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
-                    self.config.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
-                    self.config.setOptions(fovradmin=fovmin, fovradmax=fovmax)
-                    self.config.addOptions("selection", emin=emin, emax=emax)
-                    self.config.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
+                    configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
+                    configBKP.setOptions(fovradmin=fovmin, fovradmax=fovmax)
+                    configBKP.addOptions("selection", emin=emin, emax=emax)
+                    configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
-                    ctsMapGenerator.configure(self.config)
-                    expMapGenerator.configure(self.config)
-                    gasMapGenerator.configure(self.config)
-                    intMapGenerator.configure(self.config)
 
-                    self.config.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+                    ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen", self.logger)
+                    expMapGenerator = ExpMapGenerator("AG_expmapgen", self.logger)
+                    gasMapGenerator = GasMapGenerator("AG_gasmapgen", self.logger)
+                    intMapGenerator = IntMapGenerator("AG_intmapgen", self.logger)
 
-                    if not ctsMapGenerator.allRequiredOptionsSet(self.config) or \
-                       not expMapGenerator.allRequiredOptionsSet(self.config) or \
-                       not gasMapGenerator.allRequiredOptionsSet(self.config) or \
-                       not intMapGenerator.allRequiredOptionsSet(self.config):
+                    ctsMapGenerator.configure(configBKP)
+                    expMapGenerator.configure(configBKP)
+                    gasMapGenerator.configure(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath})
+                    intMapGenerator.configure(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath, "ctsMapGeneratorOutfilePath" : ctsMapGenerator.outfilePath})
+
+                    configBKP.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+
+                    if not ctsMapGenerator.allRequiredOptionsSet(configBKP) or \
+                       not expMapGenerator.allRequiredOptionsSet(configBKP) or \
+                       not gasMapGenerator.allRequiredOptionsSet(configBKP) or \
+                       not intMapGenerator.allRequiredOptionsSet(configBKP):
 
                         raise ScienceToolInputArgMissing("Some options have not been set.")
 
@@ -307,8 +330,8 @@ class AGAnalysis:
                                                expMapGenerator.outfilePath + " " + \
                                                gasMapGenerator.outfilePath + " " + \
                                                str(bincenter) + " " + \
-                                               str(self.config.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + \
-                                               str(self.config.getOptionValue("isocoeff")[bgCoeffIdx]) )
+                                               str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + \
+                                               str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx]) )
 
                 else:
 
@@ -323,12 +346,11 @@ class AGAnalysis:
 
         self.currentMaplistFile = maplistFilePath
 
-        self.config.reset()
-
+        self.logger.info(self, "Took %f seconds.", time() - timeStart)
 
         return maplistFilePath
 
-    def mle(self, maplistFilePath = None):
+    def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -355,6 +377,13 @@ class AGAnalysis:
             [/home/rt/agilepy/output/testcase0001_2AGLJ2021+4029.source /home/rt/agilepy/output/testcase0001_2AGLJ2021+3654.source]
 
         """
+        timeStart = time()
+
+        if config:
+            configBKP = config
+        else:
+            configBKP = AgilepyConfig.getCopy(self.config)
+
         if not maplistFilePath and not self.currentMaplistFile:
 
             raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
@@ -364,16 +393,18 @@ class AGAnalysis:
 
             maplistFilePath = self.currentMaplistFile
 
+        multi = Multi("AG_multi", self.logger)
+
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
         sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="txt")
 
-        self.config.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
+        configBKP.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 
         multisources = self.sourcesLibrary.getSourcesNames()
-        self.config.addOptions("selection", multisources=multisources)
+        configBKP.addOptions("selection", multisources=multisources)
 
 
-        multi.configure(self.config)
+        multi.configure(configBKP)
 
         sourceFiles = multi.call()
 
@@ -382,36 +413,160 @@ class AGAnalysis:
 
         self.logger.info(self,"AG_multi produced: %s", sourceFiles)
 
-        for sourceFile in sourceFiles:
+        if updateSourceLibrary:
 
-            multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
+            for sourceFile in sourceFiles:
 
-            self.sourcesLibrary.updateMulti(multiOutputData)
+                multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
+
+                self.sourcesLibrary.updateMulti(multiOutputData)
 
 
-        self.config.reset()
+        self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
         return sourceFiles
 
-    def lightCurve(self, binsize = 86400):
+    def lightCurve(self, sourceName, binsize = 86400, processes=1):
+        timeStart = time()
 
         tmin = self.config.getOptionValue("tmin")
         tmax = self.config.getOptionValue("tmax")
 
         bins = [ (t1, t1+binsize) for t1 in range(tmin, tmax, binsize) ]
+        tstart = bins[0][0]
+        tstop = bins[-1][1]
 
-        print(f"tmin {tmin} tmax {tmax}")
-        print("Number of bins:",len(bins))
-        print(bins)
+        lcAnalysisDataDir = self.config.getOptionValue("outdir") + "/lc"
+
+        binsForProcesses = self._chunkList(bins, processes)
+
+        configBKP = AgilepyConfig.getCopy(self.config)
+
+        logsOutDir = configBKP.getConf("output","outdir")
+        logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
+        verboseLvl = configBKP.getConf("output","verboselvl")
+
+        self.logger.info(self, "Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
 
         for t1,t2 in bins:
 
-            self.config.setOptions(tmin=t1, tmax=t2)
-            self.generateMaps()
-            self.mle()
-            # generate maps
-            # mle
+            binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
 
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2)
+
+            maplistFilePath = self.generateMaps(config = configBKP)
+
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2)
+            sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+
+        """
+        processes = []
+        for pID, pInputs in enumerate(binsForProcesses):
+            logFilenamePrefix += f"_thread_{pID}"
+            print("generating process...(%d). Chunk size for process: %d"%(pID, len(pInputs)))
+            p = Process(target=self._computeLcBin, args=(pID, pInputs, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl))
+            processes.append((pID,p,len(pInputs)))
+
+        for pID, p, binsNumber in processes:
+            self.logger.info(self, "Starting process %d for %d bins", pID, binsNumber)
+            p.start()
+
+        for pID, p, binsNumber in processes:
+            p.join()
+        """
+
+
+        lcData = self.getLightCurveData(sourceName, lcAnalysisDataDir)
+
+        lcOutputFilePath = Path(lcAnalysisDataDir).joinpath(f"light_curve_{tstart}_{tstop}.txt")
+
+        with open(lcOutputFilePath, "w") as lco:
+            lco.write(lcData)
+
+        self.logger.info(self, "Light curve created in %s", lcOutputFilePath)
+
+        self.logger.info(self, "Took %f seconds.", time()-timeStart)
+
+        return str(lcOutputFilePath)
+
+    def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
+
+        logger = AgilepyLogger()
+
+        logger.initialize(logsOutDir, logFilenamePrefix, verboseLvl)
+
+        # outputs = []
+
+        for t1,t2 in bins:
+
+            binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
+
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2)
+
+            maplistFilePath = self.generateMaps(configBKP)
+
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2)
+            sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+
+            # outputs.append((t1,t2), maplistFilePath, sourceFiles)
+
+        # return outputs
+
+    def _chunkList(self, lst, num):
+        avg = len(lst) / float(num)
+        out = []
+        last = 0.0
+
+        while last < len(lst):
+            out.append(lst[int(last):int(last + avg)])
+            last += avg
+
+        return out
+
+    def getLightCurveData(self, sourceName, lcAnalysisDataDir):
+
+
+        binDirectories = os.listdir(lcAnalysisDataDir)
+
+        lcData = "t_start t_end sqrt_ts flux flux_err flux_ul\n"
+
+        for bd in binDirectories:
+
+            mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd).joinpath("mle")
+
+            mleOutputFiles = os.listdir(mleOutputDirectories)
+
+            for mleOutputFile in mleOutputFiles:
+
+                mleOutputFilename, mleOutputFileExtension = splitext(mleOutputFile)
+
+                if mleOutputFileExtension == ".source" and sourceName in mleOutputFilename:
+
+                    mleOutputFilepath = mleOutputDirectories.joinpath(mleOutputFile)
+
+                    lcRow = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
+
+                    lcData += lcRow+"\n"
+
+        print(lcData)
+        return lcData
+
+    def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
+
+        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
+
+        tstart = multiOutput.get("startDataTT", strRepr=True)
+        tstop = multiOutput.get("endDataTT", strRepr=True)
+        sqrtTS = multiOutput.get("multiSqrtTS", strRepr=True)
+        flux = multiOutput.get("multiSqrtTS", strRepr=True)
+        fluxErr = multiOutput.get("multiFluxErr", strRepr=True)
+        fluxUL = multiOutput.get("multiUL", strRepr=True)
+
+        return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
 
     ############################################################################
     # sources management                                                       #

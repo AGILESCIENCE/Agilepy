@@ -289,10 +289,12 @@ class MultiOutput(SourceDescription):
         self.multiIsoCoeff = OutputVal("multiIsoCoeff", "List<float>")
         self.multiIsoErr = OutputVal("multiIsoErr", "List<float>")
 
+        self.startDataTT = OutputVal("startDataTT", "float")
+        self.endDataTT = OutputVal("endDataTT", "float")
 
 
     def __str__(self):
-        return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiDist} \
+        return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiUL}\n{self.multiDist} \
                  \n{self.multiStartL}\n{self.multiStartB}\n{self.multiL}\n{self.multiB}\n{self.multiDist}'
 
 class Source:

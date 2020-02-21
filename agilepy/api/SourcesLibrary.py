@@ -33,11 +33,8 @@ from os import listdir
 from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
-
-
+ 
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.AgilepyLogger import agilepyLogger
-from agilepy.config.AgilepyConfig import AgilepyConfig
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
@@ -50,13 +47,13 @@ from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
 
 class SourcesLibrary:
 
-    def __init__(self):
+    def __init__(self, agilepyConfig, agilepyLogger):
         """
         This method ... blabla ...
         """
         self.logger = agilepyLogger
 
-        self.config = AgilepyConfig()
+        self.config = agilepyConfig
 
         self.sources = []
 
@@ -322,6 +319,8 @@ class SourcesLibrary:
         multiOutput.multiIsoCoeff.setAttributes(value = allValues[93])
         multiOutput.multiIsoErr.setAttributes(value = allValues[94])
 
+        multiOutput.startDataTT.setAttributes(value = allValues[99])
+        multiOutput.endDataTT.setAttributes(value = allValues[100])
 
         return multiOutput
 

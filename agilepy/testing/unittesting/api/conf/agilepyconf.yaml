@@ -6,7 +6,7 @@ input:
 output:
   outdir: "$AGILE/agilepy-test-data/unittesting-output/api"
   filenameprefix: "testcase"
-  logfilenameprefix: "testcase"
+  logfilenameprefix: "logtestcase"
   verboselvl: 1
 
 selection:

@@ -30,12 +30,11 @@ import subprocess
 from pathlib import Path
 from abc import ABC, abstractmethod
 
-from agilepy.utils.AgilepyLogger import agilepyLogger
 from agilepy.utils.CustomExceptions import ScienceToolProductNotFound, ScienceToolErrorCodeReturned
 
 class ProcessWrapper(ABC):
 
-    def __init__(self, exeName):
+    def __init__(self, exeName, agilepyLogger):
 
         self.logger = agilepyLogger
         self.exeName = exeName

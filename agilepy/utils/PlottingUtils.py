@@ -35,17 +35,16 @@ import scipy.ndimage as ndimage
 import ntpath
 from os.path import join
 import numpy as np
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.AgilepyLogger import agilepyLogger
+
 from agilepy.utils.Utils import Singleton
 
 
 class PlottingUtils(metaclass=Singleton):
 
-    def __init__(self):
+    def __init__(self, agilepyConfig, agilepyLogger):
 
+        self.config = agilepyConfig
         self.logger = agilepyLogger
-        self.config = AgilepyConfig()
         self.updateRC()
 
     def updateRC(self):

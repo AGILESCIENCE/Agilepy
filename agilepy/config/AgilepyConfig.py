@@ -44,7 +44,7 @@ from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
 
 
 
-class AgilepyConfig(metaclass=Singleton):
+class AgilepyConfig():
     """
 
     """
@@ -52,6 +52,14 @@ class AgilepyConfig(metaclass=Singleton):
 
         self.pp = pprint.PrettyPrinter(indent=2)
         self.initialized = False
+        self.conf = None
+
+    @staticmethod
+    def getCopy(copyFrom):
+        ac = AgilepyConfig()
+        ac.conf = deepcopy(copyFrom.conf)
+        ac.initialized = True
+        return ac
 
     def loadConfigurations(self, configurationFilePath, validate = True):
 
@@ -68,7 +76,7 @@ class AgilepyConfig(metaclass=Singleton):
         conf = AgilepyConfig._completeConfiguration(mergedConf)
 
         self.conf = conf
-        self.conf_bkp = deepcopy(self.conf)
+        # self.conf_bkp = deepcopy(self.conf)
 
         if validate:
 
@@ -83,10 +91,13 @@ class AgilepyConfig(metaclass=Singleton):
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
 
+    # def getCopy(self):
 
 
-    def reset(self):
-        self.conf = deepcopy(self.conf_bkp)
+
+    #@ deprecated
+    # def reset(self):
+    #    self.conf = deepcopy(self.conf_bkp)
 
 
     def getSectionOfOption(self, optionName):
