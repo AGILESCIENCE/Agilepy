@@ -20,11 +20,18 @@ Tested on:
 
   - CentOs 7.6
   - macOs 10.14
+  - macOs 10.15
 
 In order to use the software you need to activate the virtual environment first:
 ::
 
     conda activate <virtualenv_name>
+    
+or
+
+::
+
+    source activate <virtualenv_name>
 
 When you activate the environment the following environment variables will be set:
 ::
