@@ -126,11 +126,9 @@ class AGAnalysisUnittesting(unittest.TestCase):
         self.aga.setOptions(glon=78.2375, glat=2.12298)
         self.aga.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        for s in self.aga.getSources():
-            print(s)
+        lightCurveData = self.aga.lightCurve("2AGLJ2021+4029", processes=1)
 
-        self.aga.lightCurve("2AGLJ2021+4029", processes=3)
-        self.assertEqual(True, True)
+        self.assertEqual(True, os.path.isfile(lightCurveData))
 
 if __name__ == '__main__':
     unittest.main()

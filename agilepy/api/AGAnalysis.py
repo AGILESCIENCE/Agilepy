@@ -427,6 +427,15 @@ class AGAnalysis:
         return sourceFiles
 
     def lightCurve(self, sourceName, binsize = 86400, processes=1):
+        """It generates a cvs file containing the data for a light curve plot.
+
+        Args:
+            sourceName (str): the name of the source under analysis.
+            binsize (int): temporal bin size.
+
+        Returns:
+            The absolute path to the light curve data output file.
+        """
         timeStart = time()
 
         tmin = self.config.getOptionValue("tmin")
