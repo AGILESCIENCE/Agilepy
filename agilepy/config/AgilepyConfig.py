@@ -40,7 +40,8 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
                                            ConfigFileOptionTypeError, \
-                                           CannotSetHiddenOptionError
+                                           CannotSetHiddenOptionError, \
+                                           CannotSetNotUpdatableOptionError
 
 
 
@@ -139,7 +140,7 @@ class AgilepyConfig():
             self.conf[section][optionName] = optionValue
 
 
-    def setOptions(self, **kwargs):
+    def setOptions(self, force=False, **kwargs):
         """
 
         """
@@ -149,6 +150,10 @@ class AgilepyConfig():
             optionSection = self.getSectionOfOption(optionName)
 
             if optionSection:
+
+                if AgilepyConfig._notUpdatable(optionName):
+                    if not force:
+                        raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
 
                 if not AgilepyConfig._isHidden(optionName):
 
@@ -210,6 +215,12 @@ class AgilepyConfig():
 
         else:
             return None
+
+    @staticmethod
+    def _notUpdatable(optionName):
+        if optionName in ["logfilenameprefix", "verboselvl"]:
+            return True
+        return False
 
     @staticmethod
     def _isHidden(optionName):

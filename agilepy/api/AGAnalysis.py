@@ -84,14 +84,14 @@ class AGAnalysis:
 
         self.config.loadConfigurations(configurationFilePath, validate=True)
 
-        self.outdir = self.config.getConf("output","outdir")
+        outdir = self.config.getConf("output","outdir")
 
-        if exists(self.outdir):
-            raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(self.outdir))
+        if exists(outdir):
+            raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(outdir))
 
         self.logger = AgilepyLogger()
 
-        self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
+        self.logger.initialize(outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
@@ -218,7 +218,7 @@ class AGAnalysis:
         Returns:
             Path to the file
         """
-        return self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.outdir, format, title, cmap, regFilePath)
+        return self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.config.getConf("output","outdir"), format, title, cmap, regFilePath)
 
     ############################################################################
     # analysis                                                                 #
@@ -396,7 +396,7 @@ class AGAnalysis:
         multi = Multi("AG_multi", self.logger)
 
         sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.outdir, sourceListFilename), fileformat="txt")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.config.getConf("output","outdir"), sourceListFilename), fileformat="txt")
 
         configBKP.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
 

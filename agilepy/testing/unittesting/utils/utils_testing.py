@@ -57,7 +57,7 @@ class UtilsUnittesting(unittest.TestCase):
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)
         self.agilepyLogger.reset()
-        self.config.setOptions(verboselvl=2)
+        self.config.setOptions(force=True, verboselvl=2)
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
@@ -80,7 +80,7 @@ class UtilsUnittesting(unittest.TestCase):
     def test_initialize_logger_verboselvl_1(self):
         sleep(1.0)
         self.agilepyLogger.reset()
-        self.config.setOptions(verboselvl=1)
+        self.config.setOptions(force=True, verboselvl=1)
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
@@ -103,7 +103,7 @@ class UtilsUnittesting(unittest.TestCase):
     def test_initialize_logger_verboselvl_0(self):
         sleep(1.0)
         self.agilepyLogger.reset()
-        self.config.setOptions(verboselvl=0)
+        self.config.setOptions(force=True, verboselvl=0)
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
