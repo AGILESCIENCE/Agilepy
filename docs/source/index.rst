@@ -21,6 +21,7 @@ Agilepy's documentation
   manual/source_file
   manual/products
   manual/advanced_configuration
+  manual/agile_data
 
 .. toctree::
   :caption: API
@@ -32,7 +33,7 @@ Agilepy's documentation
   :caption: How to
 
   how_to/mle
-  
+
 .. toctree::
   :caption: Help
 
