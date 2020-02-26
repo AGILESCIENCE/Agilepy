@@ -607,7 +607,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.loadSources(sourcesFilepath)
 
-    def selectSources(self, selection):
+    def selectSources(self, selection, quiet=False):
         """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
 
         The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
@@ -626,6 +626,7 @@ class AGAnalysis:
 
         Args:
             selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+            quiet (boolean) (optional default=False): if quiet is True, the method will not console log the selected sources.
 
         Returns:
             List of sources.

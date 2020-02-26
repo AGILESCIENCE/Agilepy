@@ -33,7 +33,7 @@ from os import listdir
 from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
- 
+
 from agilepy.utils.AstroUtils import AstroUtils
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
@@ -157,7 +157,7 @@ class SourcesLibrary:
         """
         return [s.name for s in self.sources]
 
-    def selectSources(self, selection):
+    def selectSources(self, selection, quiet=False):
         """
         This method ... blablabla..
         """
@@ -175,6 +175,10 @@ class SourcesLibrary:
             if SourcesLibrary._selectSource(selection, source, userSelectionParamsMapping):
 
                 selected.append(source)
+
+        if not quiet:
+            for s in selected:
+                print(s)
 
         return selected
 
@@ -301,6 +305,9 @@ class SourcesLibrary:
         multiOutput.multiErgLog.setAttributes(value = allValues[64])
         multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
 
+        multiOutput.multiLPeak.setAttributes(value = allValues[38])
+        multiOutput.multiBPeak.setAttributes(value = allValues[39])
+        multiOutput.multiDistFromStartPositionPeak.setAttributes(value = allValues[40])
 
         multiOutput.multiL.setAttributes(value = allValues[41])
         multiOutput.multiB.setAttributes(value = allValues[42])
@@ -326,7 +333,7 @@ class SourcesLibrary:
 
     def updateMulti(self, multiOutputData):
 
-        sourcesFound = self.selectSources(lambda name : name == multiOutputData.get("name"))
+        sourcesFound = self.selectSources(lambda name : name == multiOutputData.get("name"), quiet=True)
 
         if len(sourcesFound) == 0:
             raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))

@@ -275,6 +275,10 @@ class MultiOutput(SourceDescription):
 
         self.multiDist = OutputVal("multiDist", "float")
 
+        self.multiLPeak = OutputVal("multiLPeak", "float")
+        self.multiBPeak = OutputVal("multiBPeak", "float")
+        self.multiDistFromStartPositionPeak = OutputVal("multiDistFromStartPositionPeak", "float")
+
         self.multiL = OutputVal("multiL", "float")
         self.multiB = OutputVal("multiB", "float")
         self.multiDistFromStartPosition = OutputVal("multiDistFromStartPosition", "float")
@@ -357,6 +361,9 @@ class Source:
             strRepr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
 
             if "pos" in freeParams:
+                strRepr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
+                strRepr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
+                strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
                 strRepr += f'\n\t- L: {self.multi.get("multiL")}'
                 strRepr += f'\n\t- B: {self.multi.get("multiB")}'
                 strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPosition")}'
