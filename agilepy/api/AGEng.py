@@ -128,7 +128,7 @@ class AGEng:
             src_x (float): source position x (unit: degrees)
             src_y (float): source position y (unit: degrees)
             zmax (float): maximum zenith distance of the source to the center of the detector (unit: degrees)
-            step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 1 s.
+            step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 0.1 s.
             writeFiles (bool): if True, two text files with the separions data will be written on file.
             logfilesIndex (str) (optional): the index file for the logs files. If specified it will ovverride the one in the configuration file.
 
@@ -220,8 +220,10 @@ class AGEng:
         self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
         tf_mjd = AstroUtils.time_nparray_mjd_to_tt(tf_tt_tot)
 
+        self.logger.info(self, "Computig meantimes..Number of elements=%d", len(ti_mjd))
         meantimes = (ti_mjd+tf_mjd)/2.
 
+        """
         if writeFiles:
             zmax = zmax*u.deg
             ttotal_under_zmax = np.sum(tf_tt_tot[separation_tot<zmax]-ti_tt_tot[separation_tot<zmax])
@@ -233,6 +235,8 @@ class AGEng:
                 kk.write("{} {} {}\n".format(ti_tt_tot[i], tf_tt_tot[i], separation_tot[i]))
             filesep.close()
             kk.close()
+        """
+
 
         self.logger.debug(self, "separation_tot len: %d", len(separation_tot))
         self.logger.debug(self, "ti_tt_tot len: %d", len(ti_tt_tot))
@@ -241,10 +245,13 @@ class AGEng:
 
         if writeFiles:
 
-            filename = "offaxis_distances"
-            Path(self.outdir).joinpath(filename)
-            separation_tot_ = [s.value for s in separation_tot]
-            np.save(filename, separation_tot_, allow_pickle=True)
+            filename = "offaxis_distances_{}_{}".format(tmin, tmax)
+            outdirPath = Path(self.outdir).joinpath("offaxis_data")
+            outdirPath.mkdir(parents=True, exist_ok=True)
+            filenamePath = outdirPath.joinpath(filename)
+            np.save(filenamePath, separation_tot.value, allow_pickle=True)
+            self.logger.info(self, "Produced: %s", filenamePath)
+
 
         return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
 
@@ -294,6 +301,7 @@ class AGEng:
         ATTITUDE_DEC_Y= ATTITUDE_DEC_Y[booleanMaskRADEC]
 
         self.logger.debug(self, "Not-null mask RA/DEC (at least one NULL): %d values skipped"%(np.sum(np.logical_not(booleanMaskRADEC))))
+
 
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
 

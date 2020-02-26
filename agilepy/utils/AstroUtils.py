@@ -26,7 +26,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
+from datetime import datetime
 import numpy as np
+import julian
 
 class AstroUtils:
 
@@ -56,6 +58,8 @@ class AstroUtils:
 
                 return math.sqrt(d1 * d1 + d2 * d2);
 
+
+    # BASIC CONVERSIONS
     @staticmethod
     def time_mjd_to_tt(timemjd):
         return (timemjd - 53005.0) * 86400.0
@@ -75,3 +79,125 @@ class AstroUtils:
         if not isinstance(timett_nparray, np.ndarray):
             timett_nparray = np.array(timett_nparray)
         return (timett_nparray / 86400.0) + 53005.0
+
+
+
+
+
+    @staticmethod
+    def time_tt_to_utc(time):
+
+        utc_offset = 2400000.5
+        mjdref = 53005.0
+        sod = 86400.0
+        sec_offset = 43200.0
+
+        a = AstroUtils.jd_to_civil(utc_offset + mjdref + ( (time + sec_offset)/86400.0 ))
+        print("jd_to_civil:",a)
+        b = AstroUtils.day_fraction_to_time(a[2] % 1)
+        print("day_fraction_to_time:",b)
+        utc = [a[0] , a[1] , float(int(a[2])), b[0] , b[1] , b[2] , b[3]]
+        utc_s = "%s-%02d-%02dT%02d:%02d:%02d"%(str(a[0]), int(a[1]), int(a[2]), b[0], b[1], b[2])
+        return utc_s
+
+    @staticmethod
+    def time_utc_to_tt(utc):
+
+        ls1 = utc.split("T")[0];
+        ls2 = utc.split("T")[1];
+        year=ls1.split("-")[0];
+        month=ls1.split("-")[1];
+        day=ls1.split("-")[2];
+        hour=ls2.split(":")[0];
+        min=ls2.split(":")[1];
+        sec=ls2.split(":")[2];
+
+        utc_offset = 2400000.5
+        mjdref = 53005.0
+        sod = 86400.0
+        sec_offset = 43200.0
+        fod = AstroUtils.time_to_day_fraction( int(hour) , int(min) , int(sec) )
+
+        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
+
+        jd = julian.to_jd(dt, fmt='jd')
+        #print("jd:\n",jd)
+
+        jd = jd + fod
+        #print("jd:\n",jd)
+
+        tt = (jd - utc_offset - mjdref) * sod
+        #print("tt:\n",tt)
+
+        tt -= sec_offset
+
+        return tt
+
+
+    # Convert a fractional day +fr+ to [hours, minutes, seconds,
+    # fraction_of_a_second]
+    @staticmethod
+    def day_fraction_to_time(fr):
+        ss,  fr = divmod(fr, 1/86400)
+        h,   ss = divmod(ss, 3600)
+        min, s  = divmod(ss, 60)
+        return h, min, s, fr
+
+    @staticmethod
+    def time_to_day_fraction(h, min, s):
+        return (h * 3600 + min * 60 + s)/86400
+
+
+    @staticmethod
+    def jd_to_civil(jd): #. sg=Date::GREGORIAN):
+        """
+        Convert a Julian Day Number to a Civil Date.  +jd+ is
+        the Julian Day Number. +sg+ specifies the Day of
+        Calendar Reform.
+        Returns the corresponding [year, month, day_of_month]
+        as a three-element array.
+        if isJulian(jd, sg):
+        a = jd
+        else:
+        x = math.floor((jd - 1867216.25) / 36524.25)
+        a = jd + 1 + x - math.floor(x / 4.0)
+        """
+        x = math.floor((jd - 1867216.25) / 36524.25)
+        a = jd + 1 + x - math.floor(x / 4.0)
+
+        b = a + 1524
+        c = math.floor((b - 122.1) / 365.25)
+        d = math.floor(365.25 * c)
+        e = math.floor((b - d) / 30.6001)
+        dom = b - d - math.floor(30.6001 * e)
+        if e <= 13:
+            m = e - 1
+            y = c - 4716
+        else:
+            m = e - 13
+            y = c - 4715
+
+        return y, m, dom
+
+
+    """
+    @staticmethod
+	def julian? (jd, sg)
+		case sg
+		when Numeric
+			jd < sg
+		else
+			not sg
+		end
+	end
+	"""
+
+    # THEY DEPENDES TO THE PREVIOUS METHODS
+
+    @staticmethod
+    def time_mjd_to_utc(mjd):
+        return AstroUtils.time_tt_to_utc(AstroUtils.time_mjd_to_tt(mjd))
+
+    @staticmethod
+    def time_utc_to_mjd(utc):
+        return AstroUtils.time_tt_to_mjd(AstroUtils.time_utc_to_tt(utc))
