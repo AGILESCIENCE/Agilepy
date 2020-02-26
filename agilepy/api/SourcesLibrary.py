@@ -182,6 +182,22 @@ class SourcesLibrary:
 
         return selected
 
+
+    def fixSource(self, source):
+        """
+        Set to False all freeable params of a source
+        """
+        affected = False
+        
+        freeableParams = Source.freeParams["spectrum"] + Source.freeParams["spatialModel"]
+
+        for paramName in freeableParams:
+
+            if source.setFreeAttributeValueOf(paramName, False):
+                affected = True
+
+        return affected
+
     def freeSources(self, selection, parameterName, free):
         """
         Returns the list of sources affected by the update.

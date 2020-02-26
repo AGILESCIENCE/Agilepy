@@ -44,7 +44,8 @@ from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \
                                            ScienceToolInputArgMissing, \
-                                           MaplistIsNone
+                                           MaplistIsNone, \
+                                           SourceNotFound
 
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
@@ -350,6 +351,51 @@ class AGAnalysis:
 
         return maplistFilePath
 
+    def calcBkg(self, sourceName):
+        timeStart = time()
+
+        inputSource = self.selectSources(f'name == "{sourceName}"')
+
+        if not inputSource:
+            self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
+            raise SourceNotFound(f"The source {sourceName} has not been loaded yet")
+
+        analysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("calcBkg")
+        configBKP = AgilepyConfig.getCopy(self.config)
+        tmin = self.config.getOptionValue("tmin")
+        tmax = self.config.getOptionValue("tmax")
+        timetype = self.config.getOptionValue("timetype")
+        configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
+
+        # find new tmin tmax -= 14 days
+        tmax = tmin
+        if timetype == "TT":
+            tmin = tmin - 1209600
+        else:
+            tmin = tmin - 14
+
+
+        configBKP.setOptions(tmin = tmin, tmax = tmax)
+
+        # generate maps
+        maplistFilePath = self.generateMaps(config = configBKP)
+
+        # fixflag = 0 for each source different from "sourceName"
+        for s in self.getSources():
+            self.fixSource(s)
+
+        # "sourceName" must have flux = 1
+        self.freeSources(f'name == "{sourceName}"', "flux", True)
+
+        # mle
+        configBKP.setOptions(filenameprefix="calcBkg", outdir = analysisDataDir)
+        configBKP.setOptions(tmin = tmin, tmax = tmax)
+        sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+
+        # extract iso e gal coeff of "sourceName"
+        return self._extractBkgCoeff(sourceName)
+
+
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
@@ -577,6 +623,14 @@ class AGAnalysis:
 
         return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
 
+    def _extractBkgCoeff(self, sourceFilePath):
+
+        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
+
+        isoCoeff = multiOutput.get("multiIsoCoeff")
+        galCoeff = multiOutput.get("multiIsoErr")
+
+        return isoCoeff, galCoeff
     ############################################################################
     # sources management                                                       #
     ############################################################################
@@ -700,6 +754,18 @@ class AGAnalysis:
 
         """
         return self.sourcesLibrary.freeSources(selection, parameterName, free)
+
+    def fixSource(self, source):
+        """Set to False all freeable params of a source.
+
+        Args:
+            sourceName (Source): the source object.
+
+        Returns:
+            True if at least one parameter of the source changes, False otherwise.
+
+        """
+        return self.sourcesLibrary.fixSource(sourceName)
 
     def addSource(self, sourceName, sourceDict):
         """It adds a new source in the ``Sources Library``. You can add a source, passing \

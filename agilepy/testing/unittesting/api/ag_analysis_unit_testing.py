@@ -59,6 +59,12 @@ class AGAnalysisUnittesting(unittest.TestCase):
         for p in products_2:
             self.assertEqual(True, os.path.isfile(p))
 
+    def test_calc_bkg(self):
+        isoBkg, galBkg = self.aga.calcBkg('2AGLJ2021+4029')
+        print("isoBkg:",isoBkg)
+        print("galBkg:",galBkg)
+
+
     def test_source_dist_updated_after_mle(self):
         maplistFilePath = self.aga.generateMaps()
 
