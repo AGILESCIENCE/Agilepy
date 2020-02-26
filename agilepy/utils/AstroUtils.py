@@ -28,7 +28,7 @@
 import math
 from datetime import datetime
 import numpy as np
-import julian
+# import julian
 
 class AstroUtils:
 
@@ -100,6 +100,7 @@ class AstroUtils:
         utc_s = "%s-%02d-%02dT%02d:%02d:%02d"%(str(a[0]), int(a[1]), int(a[2]), b[0], b[1], b[2])
         return utc_s
 
+    """
     @staticmethod
     def time_utc_to_tt(utc):
 
@@ -132,7 +133,7 @@ class AstroUtils:
         tt -= sec_offset
 
         return tt
-
+    """
 
     # Convert a fractional day +fr+ to [hours, minutes, seconds,
     # fraction_of_a_second]
@@ -198,6 +199,8 @@ class AstroUtils:
     def time_mjd_to_utc(mjd):
         return AstroUtils.time_tt_to_utc(AstroUtils.time_mjd_to_tt(mjd))
 
+    """
     @staticmethod
     def time_utc_to_mjd(utc):
         return AstroUtils.time_tt_to_mjd(AstroUtils.time_utc_to_tt(utc))
+    """
