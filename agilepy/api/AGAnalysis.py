@@ -403,7 +403,7 @@ class AGAnalysis:
 
         self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
 
-        configBKP.setOptions(tmin = tmin, tmax = tmax)
+        configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
         # generate maps
         maplistFilePath = self.generateMaps(config = configBKP)

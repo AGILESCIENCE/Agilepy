@@ -113,6 +113,8 @@ class SourcesLibrary:
                 if added:
                     addedSources.append(source)
 
+        self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
+
         return addedSources
 
     def convertCatalogToXml(self, catalogFilepath):

@@ -3,7 +3,7 @@ input:
   logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
 
 output:
-  outdir: /home/rt/agilepy-handson-output
+  outdir: $HOME/agilepy_science_api_tutorial_output
   filenameprefix: science_api_tutorial
   logfilenameprefix: science_api_tutorial_log
   verboselvl: 1
