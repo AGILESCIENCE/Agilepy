@@ -49,8 +49,8 @@ model:
   modelfile: null
   galmode: 1
   isomode: 1
-  galcoeff: -1
-  isocoeff: -1
+  galcoeff: null
+  isocoeff: null
   emin_sources: 100
   emax_sources: 10000
   # Advanced parameters

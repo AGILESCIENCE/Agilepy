@@ -35,7 +35,8 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
                                            ConfigFileOptionTypeError, \
                                            CannotSetHiddenOptionError, \
-                                           CannotSetNotUpdatableOptionError
+                                           CannotSetNotUpdatableOptionError, \
+                                           ConfigurationsNotValidError
 
 
 class AgilepyConfigUT(unittest.TestCase):
@@ -43,7 +44,6 @@ class AgilepyConfigUT(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-        self.agilepyconfPathTestCompleteConf = os.path.join(self.currentDirPath,"conf/agilepyconf_test_complete_conf.yaml")
 
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/config"))
 
@@ -56,38 +56,27 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config = AgilepyConfig()
         self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
-        self.config.setOptions(tmin=456361777)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=456361777, timetype="TT")
 
-        error_dict = self.config._validateConfiguration(self.config.conf)
 
-        self.assertEqual(True, "input/tmin" in error_dict)
-        self.assertEqual(1, len(error_dict))
 
     def test_validation_tmax_not_in_index(self):
 
         self.config = AgilepyConfig()
         self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
-        self.config.setOptions(tmax=456537946)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmax=456537946, timetype="TT")
 
-        error_dict = self.config._validateConfiguration(self.config.conf)
-
-        self.assertEqual(True, "input/tmax" in error_dict)
-        self.assertEqual(1, len(error_dict))
 
     def test_validation_min_max(self):
 
         self.config = AgilepyConfig()
         self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
-        self.config.setOptions(fovradmin=10, fovradmax=0, emin=10, emax=0)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, fovradmin=10, fovradmax=0)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, emin=10, emax=0)
 
-        error_dict = self.config._validateConfiguration(self.config.conf)
 
-        self.assertEqual(True, "selection/fovradmin" in error_dict)
-        self.assertEqual(True, "selection/emin" in error_dict)
-
-        self.assertEqual(2, len(error_dict))
 
     def test_set_options(self):
 
@@ -95,7 +84,8 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
         # float instead of int is ok.
-        self.assertEqual(None, self.config.setOptions(tmin=456361777))
+        self.assertEqual(None, self.config.setOptions(tmin=456361779, timetype="TT"))
+
 
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")
@@ -109,20 +99,104 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions(), lonpole=100)
 
-        self.assertEqual(None, self.config.setOptions(galcoeff=[0.617196]))
-        self.assertEqual(None, self.config.setOptions(galcoeff=0.617196))
-        self.assertEqual(None, self.config.setOptions(isocoeff=[0.617196]))
-        self.assertEqual(None, self.config.setOptions(isocoeff=0.617196))
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, galcoeff=0.617196)
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=0.617196)
 
-        """
-        self.assertEqual(None, self.config.setOptions(evtfile="/data/input.evt"))
-        self.assertEqual(None, self.config.setOptions(energybins=[[100, 300], [300, 1000]]))
-        """
+        # len(energybins) = 2
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.617196])
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[0.617196])
+
+
+    def test_energybins(self):
+
+        self.config = AgilepyConfig()
+
+        # galcoeff and isocoeff are None
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+
+        self.config.loadConfigurations(conf1Path)
+
+        self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
+        self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
+        self.assertEqual(300, self.config.getOptionValue("energybins")[1][0])
+        self.assertEqual(1000, self.config.getOptionValue("energybins")[1][1])
+
+        self.config.setOptions(energybins=[[200, 400], [400, 1000]])
+
+        self.assertEqual(200, self.config.getOptionValue("energybins")[0][0])
+        self.assertEqual(400, self.config.getOptionValue("energybins")[0][1])
+        self.assertEqual(400, self.config.getOptionValue("energybins")[1][0])
+        self.assertEqual(1000, self.config.getOptionValue("energybins")[1][1])
+
+        # wrong type
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=["[200, 400]", "[400, 1000]"])
+
+        # wrong length
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, energybins=[[200, 400]])
+
+
+    def test_bkg_coeff(self):
+
+        self.config = AgilepyConfig()
+
+        # galcoeff and isocoeff are None
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+
+        self.config.loadConfigurations(conf1Path, validate=False)
+
+        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+
+        for i in range(2):
+            self.assertEqual(-1, self.config.getOptionValue("isocoeff")[i])
+            self.assertEqual(-1, self.config.getOptionValue("galcoeff")[i])
+
+
+
+
+        # galcoeff isocoeff are lists
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
+
+        self.config.loadConfigurations(conf1Path, validate=False)
+
+        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+
+        self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
+        self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
+        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[0])
+        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[1])
+
+
+        # galcoeff and isocoeff are changed at runtime
+
+        self.config.setOptions(isocoeff=[10, 15], galcoeff=[0.6, 0.8])
+        self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
+        self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
+        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[0])
+        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[1])
+
+        # this should cause an error because len(energybins) == 2
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[10])
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.6])
+
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=None, galcoeff=None)
+
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff="Pluto", galcoeff="Pippo")
+
+        # this should create an error!!
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=["Pluto"], galcoeff=["Pippo"])
+
+
+
+
     def test_complete_configuration(self):
 
         self.config = AgilepyConfig()
 
-        self.config.loadConfigurations(self.agilepyconfPathTestCompleteConf, validate=False)
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+
+        self.config.loadConfigurations(conf1Path, validate=False)
 
         self.assertEqual(5.99147, self.config.getOptionValue("loccl"))
 
@@ -133,6 +207,13 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
         self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
 
+
+
+        conf2Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
+
+        self.config.loadConfigurations(conf2Path, validate=False)
+
+        self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
 
 
 if __name__ == '__main__':

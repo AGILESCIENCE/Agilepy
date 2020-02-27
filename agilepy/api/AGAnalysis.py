@@ -130,6 +130,7 @@ class AGAnalysis:
 
         Raises:
             ConfigFileOptionTypeError: if the type of the option value is not wrong.
+            ConfigurationsNotValidError: if the values are not coherent with the configuration.
             CannotSetHiddenOptionError: if the option is hidden.
             OptionNotFoundInConfigFileError: if the option is not found.
 

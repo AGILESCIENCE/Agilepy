@@ -144,53 +144,55 @@ class AgilepyConfig():
         """
 
         """
+        if "tmin" in kwargs and "timetype" not in kwargs:
+            raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+        if "tmax" in kwargs and "timetype" not in kwargs:
+            raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+
 
         for optionName, optionValue in kwargs.items():
 
             optionSection = self.getSectionOfOption(optionName)
 
-            if optionSection:
+            if optionSection is None:
+                raise OptionNotFoundInConfigFileError("Section '{}' not found in configuration file.".format(optionSection))
 
-                if AgilepyConfig._notUpdatable(optionName):
-                    if not force:
-                        raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
+            if AgilepyConfig._notUpdatable(optionName):
+                if not force:
+                    raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
 
-                if not AgilepyConfig._isHidden(optionName):
-
-                    isOk, errorMsg = AgilepyConfig._validateOptioNameAndValue(optionName, optionValue)
-
-                    if isOk:
-
-                        self.conf[optionSection][optionName] = optionValue
-
-                        if optionName == "loccl":
-
-                            AgilepyConfig._transformLoccl(self.conf)
-
-                        elif optionName == "energybins":
-
-                            AgilepyConfig._convertBackgroundCoeff(self.conf)
-
-                        else:
-
-                            pass
+            if AgilepyConfig._isHidden(optionName):
+                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionSection))
 
 
-                        """
-                        TODO tmin, tmax, ...
-                             energybins
-                        """
-                         # self.validateConfiguration()
+            isOk, errorMsg = AgilepyConfig._validateOptioNameAndValue(optionName, optionValue)
 
+            if not isOk:
+                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: {}".format(optionName, errorMsg))
 
-                    else:
-                        raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: {}".format(optionName, errorMsg))
+            self.conf[optionSection][optionName] = optionValue
 
-                else:
-                    raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionSection))
+            if optionName == "loccl":
+
+                AgilepyConfig._transformLoccl(self.conf)
+
+            elif optionName == "isocoeff" or optionName == "galcoeff":
+
+                AgilepyConfig._convertBackgroundCoeff(self.conf, optionName)
 
             else:
-                raise OptionNotFoundInConfigFileError("Section '{}' not found in configuration file.".format(optionSection))
+                """
+                TODO tmin, tmax, ...
+                     energybins
+                """
+                pass
+
+
+        self.validateConfiguration()
+
+
+
+
 
 
 
@@ -215,29 +217,32 @@ class AgilepyConfig():
                           "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                           "fovbinnumber", "galmode", "isomode", "emin_sources", \
                           "emax_sources", "loccl"]:
-            return [Number]
+            return (None, Number)
 
-        # float
+        # Number
         if optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
                           "timestep", "binsize", "ranal", "ulcl", \
                           "expratio_minthr", "expratio_maxthr", "expratio_size"]:
-            return [Number]
+            return (None, Number)
 
+        # String
         elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
                             "timetype", "timelist", "projtype", "proj", "modelfile"]:
-            return [str]
+            return (None, str)
 
         elif optionName in ["useEDPmatrixforEXP", "expratioevaluation", "twocolumns"]:
-            return [bool]
+            return (None, bool)
 
+        # List of Numbers
         elif optionName in ["energybins"]:
-            return [List]
+            return (List, List)
 
+        # List of Numbers
         elif optionName in ["galcoeff", "isocoeff"]:
-            return [float, List]
+            return (List, Number)
 
         else:
-            return []
+            return (None, None)
 
     @staticmethod
     def _notUpdatable(optionName):
@@ -260,23 +265,21 @@ class AgilepyConfig():
     @staticmethod
     def _validateOptioNameAndValue(optionName, optionValue):
 
-        expectedTypes = AgilepyConfig._getOptionExpectedTypes(optionName)
+        complexType, basicType = AgilepyConfig._getOptionExpectedTypes(optionName)
 
-        if not expectedTypes:
-            return (False, f"Something is wrong with expectedType: {expectedTypes} of {optionName}")
+        if complexType is None and basicType is None:
+            return (False, f"Something is wrong with complexType: {complexType} and basicType {basicType} of optionName: {optionName}")
 
-        expectedTypeFound = False
-        for expectedType in expectedTypes:
-            if isinstance(optionValue, expectedType):
-                expectedTypeFound = True
+        if complexType == List and not isinstance(optionValue, complexType):
+            return (False, f"The option value {optionName} has not the expected data type {complexType} of {basicType}, but: {type(optionValue)}")
 
-        if not expectedTypeFound:
-            return (False, f"The option value {optionName} has not the expected data type {expectedTypes}, but: {type(optionValue)}")
-
-        if optionName == "energybins":
+        if complexType == List:
             for idx, elem in enumerate(optionValue):
-                if not isinstance(elem, List):
-                    return (False, "The %dth element of 'energybins' option value is not a List."%(idx))
+                if not isinstance(elem, basicType):
+                    return (False, f"The {idx}th elem of {optionName} has not the expected data type {basicType}, but: {type(elem)}")
+        elif complexType is None:
+            if not isinstance(optionValue, basicType):
+                return (False, f"The {optionName} has not the expected data type {basicType}, but: {type(optionValue)}")
 
         return (True, "")
 
@@ -304,7 +307,8 @@ class AgilepyConfig():
     @staticmethod
     def _completeConfiguration(confDict):
         AgilepyConfig._convertEnergyBinsStrings(confDict)
-        AgilepyConfig._convertBackgroundCoeff(confDict)
+        AgilepyConfig._convertBackgroundCoeff(confDict, "isocoeff")
+        AgilepyConfig._convertBackgroundCoeff(confDict, "galcoeff")
         AgilepyConfig._setTime(confDict)
         AgilepyConfig._setPhaseCode(confDict)
         AgilepyConfig._setExpStep(confDict)
@@ -355,8 +359,6 @@ class AgilepyConfig():
 
     @staticmethod
     def _parseListNotation(strList):
-        print("strList: ", strList)
-        input("..")
         # check regular expression??
         return [float(elem.strip()) for elem in strList.split(',')]
 
@@ -369,38 +371,30 @@ class AgilepyConfig():
         confDict["maps"]["energybins"] = l
 
     @staticmethod
-    def _convertBackgroundCoeff(confDict):
+    def _convertBackgroundCoeff(confDict, bkgCoeffName):
 
-        isocoeffVal = confDict["model"]["isocoeff"]
+        bkgCoeffVal = confDict["model"][bkgCoeffName]
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
 
+        # if None
+        if bkgCoeffVal is None:
+            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfEnergyBins)]
 
-        if isocoeffVal == -1:
+        # if only one value
+        elif isinstance(bkgCoeffVal, numbers.Number):
+            confDict["model"][bkgCoeffName] = [bkgCoeffVal]
 
-            confDict["model"]["isocoeff"] = [-1 for i in range(numberOfEnergyBins)]
+        # if comma separated values
+        elif isinstance(bkgCoeffVal, str):
+            confDict["model"][bkgCoeffName] = AgilepyConfig._parseListNotation(bkgCoeffVal)
 
-        else:
-
-            if isinstance(isocoeffVal, numbers.Number):
-                confDict["model"]["isocoeff"] = [isocoeffVal]
-            else:
-                confDict["model"]["isocoeff"] = AgilepyConfig._parseListNotation(isocoeffVal)
-
-
-
-
-        galcoeffVal = confDict["model"]["galcoeff"]
-
-        if galcoeffVal != [-1]:
-
-            confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
+        # if List
+        elif isinstance(bkgCoeffVal, List):
+            confDict["model"][bkgCoeffName] = bkgCoeffVal
 
         else:
-
-            if isinstance(galcoeffVal, numbers.Number):
-                confDict["model"]["galcoeff"] = [galcoeffVal]
-            else:
-                confDict["model"]["galcoeff"] = AgilepyConfig._parseListNotation(galcoeffVal)
+            print(f"Something's wrong..bkgCoeffName: {bkgCoeffName}, bkgCoeffVal: {bkgCoeffVal}")
+            confDict["model"][bkgCoeffName] = None
 
 
 
@@ -519,9 +513,9 @@ class AgilepyConfig():
         if numberOfIsoCoeff != numberOfEnergyBins:
 
             error_str = "The number of energy bins {} is not equal to the number \
-                         of bg isotropic coefficients {}.".format(confDict["maps"]["energybins"], confDict["maps"]["isocoeff"])
+                         of bg isotropic coefficients {}.".format(confDict["maps"]["energybins"], confDict["model"]["isocoeff"])
 
-            errors["model/isocoeff"]=error_str
+            errors["model/isocoeff"] = error_str
 
         numberOfGalCoeff = len(confDict["model"]["galcoeff"])
 
@@ -529,9 +523,9 @@ class AgilepyConfig():
 
 
             error_str = "The number of energy bins {} is not equal to the number \
-                         of bg galactic coefficients {}.".format(confDict["maps"]["energybins"], confDict["maps"]["galcoeff"])
+                         of bg galactic coefficients {}.".format(confDict["maps"]["energybins"], confDict["model"]["galcoeff"])
 
-            errors["model/galcoeff"]=error_str
+            errors["model/galcoeff"] = error_str
 
         return errors
 

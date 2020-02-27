@@ -183,7 +183,7 @@ class SourcesLibraryUT(unittest.TestCase):
             elif ff == 8: ff = 30
             elif ff == 9: ff = 32
 
-            self.assertDictEqual(fs[i], SourcesLibraryUnittesting.get_free_params(self.sl.sources[i]))
+            self.assertDictEqual(fs[i], SourcesLibraryUT.get_free_params(self.sl.sources[i]))
 
     def test_source_file_parsing(self):
 
