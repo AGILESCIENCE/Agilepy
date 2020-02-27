@@ -235,7 +235,7 @@ class SourcesLibrary:
 
         returns: the list of the deleted sources
         """
-        deletedSources = self.selectSources(selection)
+        deletedSources = self.selectSources(selection, quiet=True)
 
         self.sources = [s for s in self.getSources() if s not in deletedSources]
 
@@ -863,8 +863,6 @@ class SourcesLibrary:
                       posFree + \
                       fluxFree
 
-
-        print("bitmask: ",bitmask)
         #print("bitmask:\n",bitmask)
         # '{0:08b}'.format(6)
         fixflag = int(bitmask, 2)

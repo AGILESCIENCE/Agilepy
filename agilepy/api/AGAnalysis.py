@@ -146,13 +146,23 @@ class AGAnalysis:
         """
         return self.config.setOptions(**kwargs)
 
-    def resetOptions(self):
-        """It resets the configuration options to their original values.
+    def getOption(self, optionName):
+        """It reads an option value from the configuration.
+
+        Args:
+            optionName (str): the name of the option.
 
         Returns:
-            None, newline=True.
+            The option value
+
+        Raises:
+            OptionNotFoundInConfigFileError: if the optionName is not found in the configuration.
         """
-        return self.config.reset()
+
+
+
+        return self.config.getOptionValue(optionName)
+
 
     def printOptions(self, section=None):
         """It prints the configuration options in the console.
@@ -353,11 +363,22 @@ class AGAnalysis:
         return maplistFilePath
 
     def calcBkg(self, sourceName):
+        """It estimates the isotropic and galactic background coefficients using the data of 14 days before the tmin provided by the user.
+           It automatically updates the configuration.
+
+        Args:
+            sourceName (str): the name of the source under analysis.
+
+        Returns:
+            isoCoeff, galCoeff (List, List): the estimates of the background coefficients.
+
+
+        """
         timeStart = time()
 
         self.sourcesLibrary.backupSL()
 
-        inputSource = self.selectSources(f'name == "{sourceName}"')
+        inputSource = self.selectSources(f'name == "{sourceName}"', quiet=True)
 
         if not inputSource:
             self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
@@ -373,9 +394,9 @@ class AGAnalysis:
         # find new tmin tmax -= 14 days
         tmax = tmin
         if timetype == "TT":
-            tmin = tmin - 86400 #1209600
+            tmin = tmin - 1209600
         else:
-            tmin = tmin - 1 #14
+            tmin = tmin - 14
             tmin = AstroUtils.time_mjd_to_tt(tmin)
             tmax = AstroUtils.time_mjd_to_tt(tmax)
 
