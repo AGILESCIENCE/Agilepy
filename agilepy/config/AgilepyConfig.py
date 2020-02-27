@@ -161,14 +161,24 @@ class AgilepyConfig():
 
                     if isOk:
 
+                        self.conf[optionSection][optionName] = optionValue
+
                         if optionName == "loccl":
-                            self.conf[optionSection][optionName] = optionValue
+
                             AgilepyConfig._transformLoccl(self.conf)
 
+                        elif optionName == "energybins":
+
+                            AgilepyConfig._convertBackgroundCoeff(self.conf)
+
                         else:
-                            self.conf[optionSection][optionName] = optionValue
+
+                            pass
+
+
                         """
                         TODO tmin, tmax, ...
+                             energybins
                         """
                          # self.validateConfiguration()
 
@@ -345,6 +355,8 @@ class AgilepyConfig():
 
     @staticmethod
     def _parseListNotation(strList):
+        print("strList: ", strList)
+        input("..")
         # check regular expression??
         return [float(elem.strip()) for elem in strList.split(',')]
 
@@ -362,30 +374,35 @@ class AgilepyConfig():
         isocoeffVal = confDict["model"]["isocoeff"]
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
 
-        if isocoeffVal != -1:
+
+        if isocoeffVal == -1:
+
+            confDict["model"]["isocoeff"] = [-1 for i in range(numberOfEnergyBins)]
+
+        else:
 
             if isinstance(isocoeffVal, numbers.Number):
                 confDict["model"]["isocoeff"] = [isocoeffVal]
             else:
                 confDict["model"]["isocoeff"] = AgilepyConfig._parseListNotation(isocoeffVal)
 
-        else:
 
-            confDict["model"]["isocoeff"] = [-1 for i in range(numberOfEnergyBins)]
 
 
         galcoeffVal = confDict["model"]["galcoeff"]
 
-        if galcoeffVal != -1:
+        if galcoeffVal != [-1]:
+
+            confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
+
+        else:
 
             if isinstance(galcoeffVal, numbers.Number):
                 confDict["model"]["galcoeff"] = [galcoeffVal]
             else:
                 confDict["model"]["galcoeff"] = AgilepyConfig._parseListNotation(galcoeffVal)
 
-        else:
 
-            confDict["model"]["galcoeff"] = [-1 for i in range(numberOfEnergyBins)]
 
     @staticmethod
     def _setPhaseCode(confDict):

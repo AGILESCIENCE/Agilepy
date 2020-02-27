@@ -43,16 +43,18 @@ class AgilepyConfigUT(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+        self.agilepyconfPathTestCompleteConf = os.path.join(self.currentDirPath,"conf/agilepyconf_test_complete_conf.yaml")
 
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/config"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.config = AgilepyConfig()
-        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
     def test_validation_tmin_not_in_index(self):
+
+        self.config = AgilepyConfig()
+        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
         self.config.setOptions(tmin=456361777)
 
@@ -63,6 +65,9 @@ class AgilepyConfigUT(unittest.TestCase):
 
     def test_validation_tmax_not_in_index(self):
 
+        self.config = AgilepyConfig()
+        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
+
         self.config.setOptions(tmax=456537946)
 
         error_dict = self.config._validateConfiguration(self.config.conf)
@@ -71,6 +76,9 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(1, len(error_dict))
 
     def test_validation_min_max(self):
+
+        self.config = AgilepyConfig()
+        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
         self.config.setOptions(fovradmin=10, fovradmax=0, emin=10, emax=0)
 
@@ -82,6 +90,9 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(2, len(error_dict))
 
     def test_set_options(self):
+
+        self.config = AgilepyConfig()
+        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
 
         # float instead of int is ok.
         self.assertEqual(None, self.config.setOptions(tmin=456361777))
@@ -109,11 +120,19 @@ class AgilepyConfigUT(unittest.TestCase):
         """
     def test_complete_configuration(self):
 
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(self.agilepyconfPathTestCompleteConf, validate=False)
+
         self.assertEqual(5.99147, self.config.getOptionValue("loccl"))
 
         self.config.setOptions(loccl=99)
 
         self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
+
+        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+
 
 
 if __name__ == '__main__':

@@ -414,9 +414,6 @@ class AGAnalysis:
         # "sourceName" must have flux = 1
         self.freeSources(f'name == "{sourceName}"', "flux", True)
 
-        for s in self.getSources():
-            print(s)
-
         # mle
         configBKP.setOptions(filenameprefix = "calcBkg", outdir = analysisDataDir)
         configBKP.setOptions(tmin = tmin, tmax = tmax)
@@ -523,6 +520,14 @@ class AGAnalysis:
 
         tmin = self.config.getOptionValue("tmin")
         tmax = self.config.getOptionValue("tmax")
+        timetype = self.config.getOptionValue("timetype")
+
+        if timetype == "MJD":
+            tmin = AstroUtils.time_mjd_to_tt(tmin)
+            tmax = AstroUtils.time_mjd_to_tt(tmax)
+
+        tmin = int(tmin)
+        tmax = int(tmax)
 
         bins = [ (t1, t1+binsize) for t1 in range(tmin, tmax, binsize) ]
         tstart = bins[0][0]
@@ -724,7 +729,7 @@ class AGAnalysis:
         Returns:
             List of sources.
         """
-        return self.sourcesLibrary.selectSources(selection)
+        return self.sourcesLibrary.selectSources(selection, quiet=quiet)
 
     def getSources(self):
         """It returns all the sources.

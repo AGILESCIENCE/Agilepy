@@ -171,7 +171,7 @@ class AGAnalysisUT(unittest.TestCase):
         self.aga.setOptions(glon=78.2375, glat=2.12298)
         self.aga.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = self.aga.lightCurve("2AGLJ2021+4029", processes=1)
+        lightCurveData = self.aga.lightCurve("2AGLJ2021+4029")
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 

@@ -1,0 +1,26 @@
+input:
+  evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
+  logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
+
+output:
+  outdir: $HOME/agilepy_analysis/cygnus/output
+  filenameprefix: cygnus_atel_analysis
+  logfilenameprefix: cygnus_atel_analysis_log
+  verboselvl: 1
+
+model:
+  galcoeff: -1
+  isocoeff: -1
+
+maps:
+  binsize: 0.25
+
+selection:
+  tmin: 58884.0
+  tmax: 58886.0
+  timetype: MJD
+  glon: 79.8
+  glat: 0.7
+
+mle:
+  loccl: 95
