@@ -43,6 +43,7 @@ class Value:
 
     def set(self, val):
         self.value = self.castTo(val)
+        return True
 
     def get(self, strRepr=True):
         if strRepr:
@@ -130,24 +131,48 @@ class Parameter(Value):
 class SourceDescription:
 
     def set(self, attributeName, attributeVal):
-        getattr(self, attributeName).set(attributeVal)
+        try:
+            parameter = getattr(self, attributeName)
+        except AttributeError:
+            return False
+        parameter.set(attributeVal)
 
     def get(self, attributeName, strRepr = False):
-        return getattr(self, attributeName).get(strRepr) # calling Value's get()
+        try:
+            parameter = getattr(self, attributeName)
+        except AttributeError:
+            return False
+        return parameter.get(strRepr) # calling Value's get()
 
     def setFree(self, attributeName, freeVal):
-        return getattr(self, attributeName).setFree(freeVal)
+        try:
+            parameter = getattr(self, attributeName)
+        except AttributeError:
+            return False
+        return parameter.setFree(freeVal)
 
     def getFree(self, attributeName, strRepr=False):
         freeval = getattr(self, attributeName).free
-        if freeval is None and strRepr:
+        #print("freeval: ",freeval)
+        #print("attributeName: ",attributeName)
+        #print("self",self)
+        #input(".")
+        if strRepr and freeval is None:
             return "None"
-        elif freeval is None and not strRepr:
+        elif not strRepr and freeval is None:
+            return None
+        elif strRepr and freeval:
+            return "1"
+        elif strRepr and not freeval:
+            return "0"
+        elif not strRepr and freeval:
+            return 1
+        elif not strRepr and not freeval:
             return 0
-        elif strRepr and freeval is not None:
-            return str(freeval)
         else:
-            return freeval
+            print("Something wrong in getFree()")
+            exit(1)
+
 
 class Spectrum(SourceDescription):
 

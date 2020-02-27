@@ -32,22 +32,23 @@ from pathlib import Path
 
 from agilepy.api.AGAnalysis import AGAnalysis
 
-class AGAnalysisUnittesting(unittest.TestCase):
+class AGAnalysisUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
         self.sourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
-
+        self.sourcesconfPathcalcBkg = os.path.join(self.currentDirPath,"conf/sourceconf_for_calcBkg.txt")
         outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
 
     def test_analysis_pipeline(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
         maplistFilePath = self.aga.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
 
@@ -60,12 +61,44 @@ class AGAnalysisUnittesting(unittest.TestCase):
             self.assertEqual(True, os.path.isfile(p))
 
     def test_calc_bkg(self):
-        isoBkg, galBkg = self.aga.calcBkg('2AGLJ2021+4029')
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+
+
+        self.aga.setOptions( tmin=58884.0, \
+                             tmax=58886.0, \
+                             timetype="MJD", \
+                             glon=79.8, \
+                             glat=0.7,
+                             evtfile = "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
+                             logfile = "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index",
+                             galcoeff = [-1, -1],
+                             isocoeff = [-1, -1]
+                            )
+
+        affected = self.aga.freeSources('name=="CYGX3"', "index", True)
+
+        isoBkg, galBkg = self.aga.calcBkg('CYGX3')
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
 
+        cygnus = self.aga.selectSources('name=="CYGX3"', quiet=True).pop()
+        self.assertEqual(True, cygnus.spectrum.index.free)
+
+        configIso = self.aga.config.getOptionValue("isocoeff")
+        configGal = self.aga.config.getOptionValue("galcoeff")
+        print("configIso: ",configIso)
+        print("configGal: ",configGal)
+
+        for idx in range(len(configIso)):
+            self.assertEqual(isoBkg[idx], configIso[idx])
+            self.assertEqual(galBkg[idx], configGal[idx])
+
+
+
 
     def test_source_dist_updated_after_mle(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
         maplistFilePath = self.aga.generateMaps()
 
         self.aga.mle(maplistFilePath)
@@ -81,6 +114,7 @@ class AGAnalysisUnittesting(unittest.TestCase):
         self.assertNotEqual(dist_1, dist_2)
 
     def test_source_Flux_updated_after_mle(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         maplistFilePath = self.aga.generateMaps()
 
@@ -94,6 +128,8 @@ class AGAnalysisUnittesting(unittest.TestCase):
         self.assertNotEqual(flux_1, flux_2)
 
     def test_parse_maplistfile(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
         self.aga.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
         maplistFilePath = self.aga.generateMaps()
 
@@ -112,6 +148,7 @@ class AGAnalysisUnittesting(unittest.TestCase):
                 self.assertEqual(True, os.path.isfile(maps_1[i][j]))
 
     def test_print_source(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         for s in self.aga.sourcesLibrary.sources:
             print(s)
@@ -129,6 +166,8 @@ class AGAnalysisUnittesting(unittest.TestCase):
 
 
     def test_lc(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
         self.aga.setOptions(glon=78.2375, glat=2.12298)
         self.aga.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 

@@ -40,7 +40,7 @@ from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError,  \
                                            SourceModelFormatNotSupported
 
-class SourcesLibraryUnittesting(unittest.TestCase):
+class SourcesLibraryUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
@@ -313,6 +313,35 @@ class SourcesLibraryUnittesting(unittest.TestCase):
 
         self.assertEqual(2, len(sourcesxml))
 
+
+    def test_write_to_file_txt(self):
+
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+
+        sourcesFile = os.path.join(self.currentDirPath,"conf/sourcesconf_for_write_to_file_txt.txt")
+
+        self.sl.loadSources(sourcesFile)
+
+        outfileName = "write_to_file_testcase"
+
+        outputFile = Path(self.sl.writeToFile(outfileName, fileformat="txt"))
+
+        self.assertEqual(True, outputFile.exists())
+
+        with open(outputFile) as of:
+            lines = of.readlines()
+
+        self.assertEqual("1.57017e-07 80.3286 1.12047 2.16619 0 2 _2AGLJ2032+4135 0 0 0 0 0.5 5.0 20 10000 0 100", lines[0].strip())
+        self.assertEqual("1.69737e-07 79.9247 0.661449 1.99734 0 2 CYGX3 0 0 0 0 0.5 5.0 20 10000 0 100", lines[1].strip())
+        self.assertEqual("1.19303e-06 78.2375 2.12298 1.75823 3 2 _2AGLJ2021+4029 0 1 3307.63 0 0.5 5.0 20.0 10000.0  0 100", lines[2].strip())
+
+
+
+
+
+
     def test_add_source(self):
 
         self.config = AgilepyConfig()
@@ -386,6 +415,33 @@ class SourcesLibraryUnittesting(unittest.TestCase):
         self.assertEqual(175, len(added))
 
         self.assertEqual(175, len(self.sl.sources))
+
+
+    def test_backup_restore(self):
+        self.config = AgilepyConfig()
+
+        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+
+        self.sl.loadSources(self.xmlsourcesconfPath)
+
+        for s in self.sl.getSources():
+            print(s)
+
+        self.assertEqual(2, len(self.sl.sources))
+
+        self.sl.backupSL()
+
+        self.sl.deleteSources('name=="2AGLJ2021+4029"')
+
+        self.assertEqual(1, len(self.sl.sources))
+
+        self.sl.deleteSources('name=="2AGLJ2021+3654"')
+
+        self.assertEqual(0, len(self.sl.sources))
+
+        self.sl.restoreSL()
+
+        self.assertEqual(2, len(self.sl.sources))
 
 if __name__ == '__main__':
     unittest.main()

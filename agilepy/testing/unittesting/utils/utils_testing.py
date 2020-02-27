@@ -35,7 +35,7 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
-class UtilsUnittesting(unittest.TestCase):
+class AgilepyUtilsUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()

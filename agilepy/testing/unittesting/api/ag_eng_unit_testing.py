@@ -32,7 +32,7 @@ from pathlib import Path
 
 from agilepy.api.AGEng import AGEng
 
-class AGEngUnittesting(unittest.TestCase):
+class AGEngUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()

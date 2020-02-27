@@ -161,7 +161,17 @@ class AgilepyConfig():
 
                     if isOk:
 
-                        self.conf[optionSection][optionName] = optionValue
+                        if optionName == "loccl":
+                            self.conf[optionSection][optionName] = optionValue
+                            AgilepyConfig._transformLoccl(self.conf)
+
+                        else:
+                            self.conf[optionSection][optionName] = optionValue
+                        """
+                        TODO tmin, tmax, ...
+                        """
+                         # self.validateConfiguration()
+
 
                     else:
                         raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: {}".format(optionName, errorMsg))
@@ -185,7 +195,7 @@ class AgilepyConfig():
 
 
     @staticmethod
-    def _getOptionExpectedType(optionName):
+    def _getOptionExpectedTypes(optionName):
         """
         None if it does not exixst
         """
@@ -194,27 +204,30 @@ class AgilepyConfig():
         if optionName in ["verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                           "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                           "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                          "emax_sources", "loccl", "galcoeff", "isocoeff"]:
-            return Number
+                          "emax_sources", "loccl"]:
+            return [Number]
 
         # float
         if optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
                           "timestep", "binsize", "ranal", "ulcl", \
                           "expratio_minthr", "expratio_maxthr", "expratio_size"]:
-            return Number
+            return [Number]
 
         elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
                             "timetype", "timelist", "projtype", "proj", "modelfile"]:
-            return str
+            return [str]
 
         elif optionName in ["useEDPmatrixforEXP", "expratioevaluation", "twocolumns"]:
-            return bool
+            return [bool]
 
-        elif optionName in ["energybins", "galcoeff", "isocoeff"]:
-            return List
+        elif optionName in ["energybins"]:
+            return [List]
+
+        elif optionName in ["galcoeff", "isocoeff"]:
+            return [float, List]
 
         else:
-            return None
+            return []
 
     @staticmethod
     def _notUpdatable(optionName):
@@ -237,17 +250,18 @@ class AgilepyConfig():
     @staticmethod
     def _validateOptioNameAndValue(optionName, optionValue):
 
-        if optionName == "galcoeff" or optionName == "isocoeff":
-            if isinstance(optionValue, str) or isinstance(optionValue, float):
-                return (False, "The 'galcoeff' or 'isocoeff' option value is not an int or List but %s"%(type(optionValue)))
+        expectedTypes = AgilepyConfig._getOptionExpectedTypes(optionName)
 
-        expectedType = AgilepyConfig._getOptionExpectedType(optionName)
+        if not expectedTypes:
+            return (False, f"Something is wrong with expectedType: {expectedTypes} of {optionName}")
 
-        if not expectedType:
-            return (False, "Something is wrong with expectedType: %s of %s"%(expectedType, optionName))
+        expectedTypeFound = False
+        for expectedType in expectedTypes:
+            if isinstance(optionValue, expectedType):
+                expectedTypeFound = True
 
-        if not isinstance(optionValue, expectedType):
-            return (False, "The option value %s has not the expected data type %s, but: %s"%(optionName, expectedType, type(optionValue)))
+        if not expectedTypeFound:
+            return (False, f"The option value {optionName} has not the expected data type {expectedTypes}, but: {type(optionValue)}")
 
         if optionName == "energybins":
             for idx, elem in enumerate(optionValue):
@@ -285,6 +299,7 @@ class AgilepyConfig():
         AgilepyConfig._setPhaseCode(confDict)
         AgilepyConfig._setExpStep(confDict)
         AgilepyConfig._expandEnvVars(confDict)
+        AgilepyConfig._transformLoccl(confDict)
         return confDict
 
     @staticmethod
@@ -411,6 +426,21 @@ class AgilepyConfig():
             return path
 
     @staticmethod
+    def _transformLoccl(confDict):
+
+        userLoccl = confDict["mle"]["loccl"]
+
+        if userLoccl == 99:
+            confDict["mle"]["loccl"] = 9.21034
+        elif userLoccl == 95:
+            confDict["mle"]["loccl"] = 5.99147
+        elif userLoccl == 68:
+            confDict["mle"]["loccl"] = 2.29575
+        else:
+            confDict["mle"]["loccl"] = 1.38629
+
+
+    @staticmethod
     def _loadFromYaml(file):
 
         with open(file, 'r') as yamlfile:
@@ -454,9 +484,9 @@ class AgilepyConfig():
 
         loccl = confDict["mle"]["loccl"]
 
-        if loccl not in [99, 95, 68, 50]:
+        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629]:
 
-            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [50, 68, 95, 99]".format(loccl)
+            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
 
         return errors
 

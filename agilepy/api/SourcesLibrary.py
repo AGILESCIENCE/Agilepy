@@ -29,6 +29,7 @@ from pathlib import Path
 from inspect import signature
 from os.path import split, join, splitext
 from os import listdir
+from copy import deepcopy
 
 from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
@@ -57,9 +58,17 @@ class SourcesLibrary:
 
         self.sources = []
 
+        self.sourcesBKP = None
+
         self.outdirPath = Path(self.config.getConf("output","outdir")).joinpath("sources_library")
 
         self.outdirPath.mkdir(parents=True, exist_ok=True)
+
+    def backupSL(self):
+        self.sourcesBKP = deepcopy(self.sources)
+
+    def restoreSL(self):
+        self.sources = self.sourcesBKP
 
     def getSupportedCatalogs(self):
 
@@ -188,7 +197,7 @@ class SourcesLibrary:
         Set to False all freeable params of a source
         """
         affected = False
-        
+
         freeableParams = Source.freeParams["spectrum"] + Source.freeParams["spatialModel"]
 
         for paramName in freeableParams:
@@ -202,7 +211,7 @@ class SourcesLibrary:
         """
         Returns the list of sources affected by the update.
         """
-        sources = self.selectSources(selection)
+        sources = self.selectSources(selection, quiet=True)
 
         if len(sources) == 0:
             self.logger.warning(self, "No sources have been selected.")
@@ -737,12 +746,12 @@ class SourcesLibrary:
 
 
             if source.spectrum.stype == "PowerLaw":
-                sourceStr += "-1 -1 -1 -1"
+                sourceStr += "20 10000 0 100"
 
             elif source.spectrum.stype == "PLExpCutoff":
                 sourceStr += str(source.spectrum.cutoffEnergy.min) +" " \
                            + str(source.spectrum.cutoffEnergy.max) +" "\
-                           + " -1 -1"
+                           + " 0 100"
 
             elif source.spectrum.stype == "PLSuperExpCutoff":
                 sourceStr += str(source.spectrum.cutoffEnergy.min) +" "\
@@ -854,6 +863,8 @@ class SourcesLibrary:
                       posFree + \
                       fluxFree
 
+
+        print("bitmask: ",bitmask)
         #print("bitmask:\n",bitmask)
         # '{0:08b}'.format(6)
         fixflag = int(bitmask, 2)

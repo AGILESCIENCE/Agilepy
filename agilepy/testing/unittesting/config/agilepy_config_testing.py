@@ -38,7 +38,7 @@ from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
                                            CannotSetNotUpdatableOptionError
 
 
-class AgilepyConfigUnittesting(unittest.TestCase):
+class AgilepyConfigUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
@@ -98,10 +98,22 @@ class AgilepyConfigUnittesting(unittest.TestCase):
 
         self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions(), lonpole=100)
 
+        self.assertEqual(None, self.config.setOptions(galcoeff=[0.617196]))
+        self.assertEqual(None, self.config.setOptions(galcoeff=0.617196))
+        self.assertEqual(None, self.config.setOptions(isocoeff=[0.617196]))
+        self.assertEqual(None, self.config.setOptions(isocoeff=0.617196))
+
         """
         self.assertEqual(None, self.config.setOptions(evtfile="/data/input.evt"))
         self.assertEqual(None, self.config.setOptions(energybins=[[100, 300], [300, 1000]]))
         """
+    def test_complete_configuration(self):
+
+        self.assertEqual(5.99147, self.config.getOptionValue("loccl"))
+
+        self.config.setOptions(loccl=99)
+
+        self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
 
 
 if __name__ == '__main__':

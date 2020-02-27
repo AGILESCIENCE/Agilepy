@@ -41,6 +41,7 @@ from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGen
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.AgilepyLogger import AgilepyLogger
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \
                                            ScienceToolInputArgMissing, \
@@ -354,26 +355,31 @@ class AGAnalysis:
     def calcBkg(self, sourceName):
         timeStart = time()
 
+        self.sourcesLibrary.backupSL()
+
         inputSource = self.selectSources(f'name == "{sourceName}"')
 
         if not inputSource:
             self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
             raise SourceNotFound(f"The source {sourceName} has not been loaded yet")
 
-        analysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("calcBkg")
+        analysisDataDir = str(Path(self.config.getOptionValue("outdir")).joinpath("calcBkg"))
         configBKP = AgilepyConfig.getCopy(self.config)
         tmin = self.config.getOptionValue("tmin")
         tmax = self.config.getOptionValue("tmax")
         timetype = self.config.getOptionValue("timetype")
-        configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
+        configBKP.setOptions(filenameprefix="calcBkg", outdir=analysisDataDir)
 
         # find new tmin tmax -= 14 days
         tmax = tmin
         if timetype == "TT":
-            tmin = tmin - 1209600
+            tmin = tmin - 86400 #1209600
         else:
-            tmin = tmin - 14
+            tmin = tmin - 1 #14
+            tmin = AstroUtils.time_mjd_to_tt(tmin)
+            tmax = AstroUtils.time_mjd_to_tt(tmax)
 
+        self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
 
         configBKP.setOptions(tmin = tmin, tmax = tmax)
 
@@ -387,13 +393,23 @@ class AGAnalysis:
         # "sourceName" must have flux = 1
         self.freeSources(f'name == "{sourceName}"', "flux", True)
 
+        for s in self.getSources():
+            print(s)
+
         # mle
-        configBKP.setOptions(filenameprefix="calcBkg", outdir = analysisDataDir)
+        configBKP.setOptions(filenameprefix = "calcBkg", outdir = analysisDataDir)
         configBKP.setOptions(tmin = tmin, tmax = tmax)
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
         # extract iso e gal coeff of "sourceName"
-        return self._extractBkgCoeff(sourceName)
+        isoCoeff, galCoeff = self._extractBkgCoeff(sourceFiles, sourceName)
+
+        self.sourcesLibrary.restoreSL()
+
+        self.config.setOptions(galcoeff=galCoeff, isocoeff=isoCoeff)
+
+        return isoCoeff, galCoeff
+
 
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
@@ -623,12 +639,14 @@ class AGAnalysis:
 
         return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
 
-    def _extractBkgCoeff(self, sourceFilePath):
+    def _extractBkgCoeff(self, sourceFiles, sourceName):
+
+        sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in sourceFilePath].pop()
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
         isoCoeff = multiOutput.get("multiIsoCoeff")
-        galCoeff = multiOutput.get("multiIsoErr")
+        galCoeff = multiOutput.get("multiGalCoeff")
 
         return isoCoeff, galCoeff
     ############################################################################
@@ -765,7 +783,7 @@ class AGAnalysis:
             True if at least one parameter of the source changes, False otherwise.
 
         """
-        return self.sourcesLibrary.fixSource(sourceName)
+        return self.sourcesLibrary.fixSource(source)
 
     def addSource(self, sourceName, sourceDict):
         """It adds a new source in the ``Sources Library``. You can add a source, passing \
