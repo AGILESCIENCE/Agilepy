@@ -209,8 +209,8 @@ for example:
 .. code-block:: yaml
 
     model:
-      galcoeff: 10, 15
-      isocoeff: 0.6, 0.8
+      galcoeff: 0.6, 0.8
+      isocoeff: 10, 15
 
 In this case, you should pay attention on how the sky maps are generated: the
 following example show which iso/gal coefficients are assigned to which map.
@@ -228,13 +228,13 @@ following example show which iso/gal coefficients are assigned to which map.
       fovbinnumber: 2
 
     model:
-      galcoeff: 10, 15
-      isocoeff: 0.6, 0.8
+      galcoeff: 0.6, 0.8
+      isocoeff: 10, 15
 
-| **Map #1** has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:10.0 isocoeff:0.6
-| **Map #2** has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:15.0 isocoeff:0.8
-| **Map #3** has: fovmax:30 fovmax:60 emin:100 emax:300   galcoeff:10.0 isocoeff:0.6
-| **Map #4** has: fovmax:30 fovmax:60 emin:300 emax:1000  galcoeff:15.0 isocoeff:0.8
+| **Map #1** has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:0.6 isocoeff:10
+| **Map #2** has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:0.8 isocoeff:15
+| **Map #3** has: fovmax:30 fovmax:60 emin:100 emax:300   galcoeff:0.6 isocoeff:10
+| **Map #4** has: fovmax:30 fovmax:60 emin:300 emax:1000  galcoeff:0.8 isocoeff:15
 
 
 
