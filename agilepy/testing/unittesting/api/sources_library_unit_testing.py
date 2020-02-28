@@ -36,6 +36,7 @@ from xml.etree.ElementTree import parse
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AgilepyLogger import AgilepyLogger
+from agilepy.utils.SourceModel import Source
 
 from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError,  \
                                            SourceModelFormatNotSupported
@@ -380,14 +381,15 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "", newSourceDict)
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, None, newSourceDict)
 
-
-        self.assertEqual(True, self.sl.addSource("newsource", newSourceDict))
+        newSourceObj = self.sl.addSource("newsource", newSourceDict)
+        self.assertEqual(True, isinstance(newSourceObj, Source))
 
         newSource = self.sl.selectSources('name == "newsource"').pop()
 
         self.assertEqual(0, newSource.spectrum.get("flux"))
         self.assertEqual(0, newSource.spectrum.get("curvature"))
         self.assertEqual("newsource", newSource.name)
+        self.assertEqual(148.52505082279242, newSource.spatialModel.get("dist"))
 
         newSourceDict = {
             "glon" : 250,
@@ -396,7 +398,10 @@ class SourcesLibraryUT(unittest.TestCase):
             "flux": 1,
             "curvature":2
         }
-        self.assertEqual(True, self.sl.addSource("newsource2", newSourceDict))
+
+        newSourceObj = self.sl.addSource("newsource2", newSourceDict)
+        self.assertEqual(True, isinstance(newSourceObj, Source))
+
 
         newSource = self.sl.selectSources('name == "newsource2"').pop()
         self.assertEqual(1, newSource.spectrum.get("flux"))
@@ -406,7 +411,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual("newsource2", newSource.name)
 
 
-        self.assertEqual(False, self.sl.addSource("newsource2", newSourceDict))
+        self.assertEqual(None, self.sl.addSource("newsource2", newSourceDict))
 
 
     def test_convert_catalog_to_xml(self):

@@ -838,8 +838,9 @@ class AGAnalysis:
             following keys: ["glon", "glat","spectrumType"].
 
         Returns:
-            True if the source is loaded. False if the source is already present in the Source Library.
+            The source object if it is been loaded. None, otherwise.
         """
+        return self.sourcesLibrary.addSource(sourceName, sourceDict)
 
     def deleteSources(self, selection):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.

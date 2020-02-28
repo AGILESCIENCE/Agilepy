@@ -104,9 +104,11 @@ class SourcesLibrary:
 
         for source in newSources:
 
-            distance = self.updateSourceDistance(source)
+            distance = self.getSourceDistance(source)
 
             if distance >= rangeDist[0] and distance <= rangeDist[1]:
+
+                source.spatialModel.set("dist", distance)
 
                 added = self.addSource(source.name, source)
 
@@ -178,7 +180,6 @@ class SourcesLibrary:
 
         userSelectionParamsMapping = Source._mapSelectionParams(userSelectionParamsNames)
 
-
         selected = []
 
         for source in sources:
@@ -241,6 +242,7 @@ class SourcesLibrary:
 
         self.sources = [s for s in self.getSources() if s not in deletedSources]
 
+        self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
     def parseSourceFile(self, sourceFilePath):
@@ -367,12 +369,15 @@ class SourcesLibrary:
 
         for sourceFound in sourcesFound:
 
-
             sourceFound.multi = multiOutputData
 
-            self.updateSourceDistance(sourceFound)
+            distance = self.getSourceDistance(sourceFound)
 
-    def updateSourceDistance(self, source):
+            sourceFound.multi.set("multiDist", distance)
+
+            self.logger.debug(self, "'multiDist' parameter of '%s' has been updated: %f", sourceFound.multi.get("name"), sourceFound.multi.get("multiDist"))
+
+    def getSourceDistance(self, source):
 
         mapCenterL = float(self.config.getOptionValue("glon"))
         mapCenterB = float(self.config.getOptionValue("glat"))
@@ -395,16 +400,7 @@ class SourcesLibrary:
 
         self.logger.debug(self, "sourceL %f, sourceB %f, mapCenterL %f, mapCenterB %f", sourceL, sourceB, mapCenterL, mapCenterB)
 
-        dist = AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
-
-        if source.multi:
-            source.multi.set("multiDist", dist)
-            self.logger.debug(self, "'multiDist' parameter of '%s' has been updated from multi: %f", source.multi.get("name"), source.multi.get("multiDist"))
-        else:
-            source.spatialModel.set("dist", dist)
-            self.logger.debug(self, "'dist' parameter of '%s' has been updated from xml: %f", source.name, source.spatialModel.get("dist"))
-
-        return dist
+        return AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
 
     def addSource(self, sourceName, sourceObject):
 
@@ -415,7 +411,7 @@ class SourcesLibrary:
         for source in self.sources:
             if sourceName == source.name:
                 self.logger.warning(self,"The source %s already exists. The 'sourceObject' will not be added to the SourcesLibrary.", sourceName)
-                return False
+                return None
 
         return SourcesLibrary._addSource(sourceObject, sourceName, self)
 
@@ -430,7 +426,7 @@ class SourcesLibrary:
 
         self.sources.append(sourceObject)
 
-        return True
+        return sourceObject
 
     @_addSource.register(dict)
     def _(sourceObject, sourceName, self):
@@ -459,9 +455,13 @@ class SourcesLibrary:
             if sK in sourceObject and sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(sourceObject[sK])
 
+        distance = self.getSourceDistance(newSource)
+
+        newSource.spatialModel.set("dist", distance)
+
         self.sources.append(newSource)
 
-        return True
+        return newSource
 
 
 

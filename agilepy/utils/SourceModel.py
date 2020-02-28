@@ -368,7 +368,7 @@ class Source:
         if self.multi:
             strRepr += " => sqrt(ts): "+str(self.multi.get("multiSqrtTS"))
 
-        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}'
+        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {self.spatialModel.get("dist")}'
 
         strRepr += f'\n  * Spectrum: ({self.spectrum.stype})'
         for sp in spectrumParams:

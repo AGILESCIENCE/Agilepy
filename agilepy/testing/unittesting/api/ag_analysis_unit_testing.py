@@ -60,39 +60,6 @@ class AGAnalysisUT(unittest.TestCase):
         for p in products_2:
             self.assertEqual(True, os.path.isfile(p))
 
-    def test_calc_bkg(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
-
-
-        self.aga.setOptions( tmin=58884.0, \
-                             tmax=58886.0, \
-                             timetype="MJD", \
-                             glon=79.8, \
-                             glat=0.7,
-                             evtfile = "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
-                             logfile = "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index",
-                             galcoeff = [-1, -1],
-                             isocoeff = [-1, -1]
-                            )
-
-        affected = self.aga.freeSources('name=="CYGX3"', "index", True)
-
-        isoBkg, galBkg = self.aga.calcBkg('CYGX3')
-        print("isoBkg:",isoBkg)
-        print("galBkg:",galBkg)
-
-        cygnus = self.aga.selectSources('name=="CYGX3"', quiet=True).pop()
-        self.assertEqual(True, cygnus.spectrum.index.free)
-
-        configIso = self.aga.config.getOptionValue("isocoeff")
-        configGal = self.aga.config.getOptionValue("galcoeff")
-        print("configIso: ",configIso)
-        print("configGal: ",configGal)
-
-        for idx in range(len(configIso)):
-            self.assertEqual(isoBkg[idx], configIso[idx])
-            self.assertEqual(galBkg[idx], configGal[idx])
-
 
 
 
@@ -164,7 +131,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(True, True)
 
-
+    """
     def test_lc(self):
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
@@ -175,5 +142,41 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
+
+    def test_calc_bkg(self):
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+
+
+        self.aga.setOptions( tmin=58884.0, \
+                             tmax=58886.0, \
+                             timetype="MJD", \
+                             glon=79.8, \
+                             glat=0.7,
+                             evtfile = "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
+                             logfile = "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index",
+                             galcoeff = [-1, -1],
+                             isocoeff = [-1, -1]
+                            )
+
+        affected = self.aga.freeSources('name=="CYGX3"', "index", True)
+
+        isoBkg, galBkg = self.aga.calcBkg('CYGX3')
+        print("isoBkg:",isoBkg)
+        print("galBkg:",galBkg)
+
+        cygnus = self.aga.selectSources('name=="CYGX3"', quiet=True).pop()
+        self.assertEqual(True, cygnus.spectrum.index.free)
+
+        configIso = self.aga.config.getOptionValue("isocoeff")
+        configGal = self.aga.config.getOptionValue("galcoeff")
+        print("configIso: ",configIso)
+        print("configGal: ",configGal)
+
+        for idx in range(len(configIso)):
+            self.assertEqual(isoBkg[idx], configIso[idx])
+            self.assertEqual(galBkg[idx], configGal[idx])
+
+
+    """
 if __name__ == '__main__':
     unittest.main()
