@@ -1,3 +1,4 @@
+
 input:
   evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
   logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
@@ -16,8 +17,8 @@ maps:
   binsize: 0.25
 
 selection:
-  tmin: 58884.0
-  tmax: 58886.0
+  tmin: 58884.0 # 2020-02-05 00:00:00.000
+  tmax: 58886.0 # 2020-02-07 00:00:00.000
   timetype: MJD
   glon: 79.8
   glat: 0.7
