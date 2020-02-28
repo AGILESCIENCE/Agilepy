@@ -44,7 +44,8 @@ from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
                                            SourceNotFound, \
                                            SourcesFileLoadingError, \
                                            SourcesAgileFormatParsingError, \
-                                           SourceParamNotFoundError
+                                           SourceParamNotFoundError, \
+                                           MultiOutputNotFoundError
 
 class SourcesLibrary:
 
@@ -244,6 +245,55 @@ class SourcesLibrary:
 
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
+
+    def updateSourcePosition(self, sourceName, useMulti, glon, glat):
+
+        sources = self.selectSources(lambda name : name == sourceName, quiet=True)
+
+        if len(sources) == 0:
+            raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))
+
+        source = sources.pop()
+
+        if useMulti and source.multi is None:
+            self.logger.critical(self, "You cannot use multi output because mle() it has not been called yet.")
+            raise MultiOutputNotFoundError("You cannot use multi output because mle() it has not been called yet.")
+
+        currentPos = source.spatialModel.pos.value
+
+        if useMulti:
+
+            if source.multi.multiL.value == -1:
+                self.logger.warning(self, "(multiL,multiB)=(-1,-1)")
+                return False
+            else:
+                newPos = (source.multi.multiL.value, source.multi.multiB.value)
+
+        else:
+
+            if glon is None or glat is None:
+
+                self.logger.critical(self, f"useMulti is False, but glon or glat is None. glon: {glon} glat: {glat}")
+                raise ValueError(f"useMulti is False, but glon or glat is None. glon: {glon} glat: {glat}")
+
+            else:
+
+                newPos = (glon, glat)
+
+
+        source.spatialModel.pos.value = newPos
+
+        if currentPos != newPos:
+            self.logger.info(self, f"Old position is {currentPos}, new position is {newPos}")
+            return True
+        else:
+            self.logger.info(self, f"Position is not changed: {newPos}")
+            return False
+
+
+
+
+
 
     def parseSourceFile(self, sourceFilePath):
         """

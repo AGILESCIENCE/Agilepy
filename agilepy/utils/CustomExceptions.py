@@ -101,3 +101,7 @@ class SourceParamNotFoundError(Exception):
 class SpectrumTypeNotFoundError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class MultiOutputNotFoundError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

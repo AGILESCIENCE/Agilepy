@@ -165,7 +165,6 @@ class AGAnalysis:
 
         return self.config.getOptionValue(optionName)
 
-
     def printOptions(self, section=None):
         """It prints the configuration options in the console.
 
@@ -267,41 +266,6 @@ class AGAnalysis:
             It returns the paths to the image files written on disk.
         """
         return self._displaySkyMaps("GAS", maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
-
-    def _displaySkyMaps(self, type, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
-
-        if self.currentMaplistFile is None and maplistFile is None:
-            self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
-            return False
-
-        if self.currentMaplistFile is None:
-            maplistRows = self.parseMaplistFile(maplistFile)
-        else:
-            maplistRows = self.parseMaplistFile()
-
-        filepaths = []
-        for maplistRow in maplistRows:
-
-            skymapFilename = basename(maplistRow[0])
-            emin = skymapFilename.split("EMIN")[1].split("_")[0]
-            emax = skymapFilename.split("EMAX")[1].split("_")[0]
-
-            title = f"{type} - emin: {emin} emax: {emax} bincenter: {maplistRow[3]} galcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
-
-            if type == "CTS":
-                mapIndex = 0
-
-            elif type == "EXP":
-                mapIndex = 1
-
-            else:
-                mapIndex = 2
-
-            filepath = self.displaySkyMap(maplistRow[mapIndex], smooth=smooth, sigma=sigma, saveImage=saveImage, format=format, title=title, cmap=cmap, regFilePath=regFilePath)
-
-            filepaths.append(filepath)
-
-        return filepaths
 
     def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays a fits skymap passed as first argument.
@@ -523,8 +487,6 @@ class AGAnalysis:
 
         return isoCoeff, galCoeff
 
-
-
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
@@ -683,42 +645,6 @@ class AGAnalysis:
 
         return str(lcOutputFilePath)
 
-    def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
-
-        logger = AgilepyLogger()
-
-        logger.initialize(logsOutDir, logFilenamePrefix, verboseLvl)
-
-        # outputs = []
-
-        for t1,t2 in bins:
-
-            binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
-
-            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
-
-            maplistFilePath = self.generateMaps(configBKP)
-
-            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
-            sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
-
-            # outputs.append((t1,t2), maplistFilePath, sourceFiles)
-
-        # return outputs
-
-    def _chunkList(self, lst, num):
-        avg = len(lst) / float(num)
-        out = []
-        last = 0.0
-
-        while last < len(lst):
-            out.append(lst[int(last):int(last + avg)])
-            last += avg
-
-        return out
-
     def getLightCurveData(self, sourceName, lcAnalysisDataDir):
 
 
@@ -747,29 +673,6 @@ class AGAnalysis:
         print(lcData)
         return lcData
 
-    def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
-
-        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
-
-        tstart = multiOutput.get("startDataTT", strRepr=True)
-        tstop = multiOutput.get("endDataTT", strRepr=True)
-        sqrtTS = multiOutput.get("multiSqrtTS", strRepr=True)
-        flux = multiOutput.get("multiSqrtTS", strRepr=True)
-        fluxErr = multiOutput.get("multiFluxErr", strRepr=True)
-        fluxUL = multiOutput.get("multiUL", strRepr=True)
-
-        return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
-
-    def _extractBkgCoeff(self, sourceFiles, sourceName):
-
-        sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in sourceFilePath].pop()
-
-        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
-
-        isoCoeff = multiOutput.get("multiIsoCoeff")
-        galCoeff = multiOutput.get("multiGalCoeff")
-
-        return isoCoeff, galCoeff
     ############################################################################
     # sources management                                                       #
     ############################################################################
@@ -947,6 +850,26 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.deleteSources(selection)
 
+    def updateSourcePosition(self, sourceName, useMulti=True, glon=None, glat=None):
+        """It updates a source (l,b) position parameters. You can explicity pass new values
+        or your can use the output of the last mle() analysis.
+
+        Args:
+            sourceName (str): the name of the source
+            useMulti (bool): set it to True if you want to use the last mle analysis output
+            glon (float): if useMulti is False this value is goint to be use.
+            glat (float): if useMulti is False this value is goint to be use.
+
+        Raises:
+            SourceNotFound: if the source has not been loaded into the SourcesLibrary.
+            MultiOutputNotFoundError: if useMulti is True but mle() has not been executed yet.
+            ValueError: if useMulti is False but one of glon or glat in None.
+
+        Returns:
+            True if the position changes, False when the position don't change or the position is (-1, -1).
+        """
+        return self.sourcesLibrary.updateSourcePosition(sourceName, useMulti, glon, glat)
+
     def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
         """It writes on file the list of sources loaded into the *SourceLibrary*.
         The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.
@@ -978,6 +901,10 @@ class AGAnalysis:
 
 
 
+    ############################################################################
+    # private methods                                                          #
+    ############################################################################
+
 
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):
@@ -995,3 +922,94 @@ class AGAnalysis:
         # print("bincenter {}, fovmin {}, fovmax {}".format(bincenter, fovmin, fovmax))
 
         return bincenter, fovmin, fovmax
+
+    def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
+
+        logger = AgilepyLogger()
+
+        logger.initialize(logsOutDir, logFilenamePrefix, verboseLvl)
+
+        # outputs = []
+
+        for t1,t2 in bins:
+
+            binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
+
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
+
+            maplistFilePath = self.generateMaps(configBKP)
+
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
+            sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+
+    def _chunkList(self, lst, num):
+        avg = len(lst) / float(num)
+        out = []
+        last = 0.0
+
+        while last < len(lst):
+            out.append(lst[int(last):int(last + avg)])
+            last += avg
+
+        return out
+
+    def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
+
+        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
+
+        tstart = multiOutput.get("startDataTT", strRepr=True)
+        tstop = multiOutput.get("endDataTT", strRepr=True)
+        sqrtTS = multiOutput.get("multiSqrtTS", strRepr=True)
+        flux = multiOutput.get("multiSqrtTS", strRepr=True)
+        fluxErr = multiOutput.get("multiFluxErr", strRepr=True)
+        fluxUL = multiOutput.get("multiUL", strRepr=True)
+
+        return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
+
+    def _extractBkgCoeff(self, sourceFiles, sourceName):
+
+        sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in sourceFilePath].pop()
+
+        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
+
+        isoCoeff = multiOutput.get("multiIsoCoeff")
+        galCoeff = multiOutput.get("multiGalCoeff")
+
+        return isoCoeff, galCoeff
+
+    def _displaySkyMaps(self, type, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+
+        if self.currentMaplistFile is None and maplistFile is None:
+            self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
+            return False
+
+        if self.currentMaplistFile is None:
+            maplistRows = self.parseMaplistFile(maplistFile)
+        else:
+            maplistRows = self.parseMaplistFile()
+
+        filepaths = []
+        for maplistRow in maplistRows:
+
+            skymapFilename = basename(maplistRow[0])
+            emin = skymapFilename.split("EMIN")[1].split("_")[0]
+            emax = skymapFilename.split("EMAX")[1].split("_")[0]
+
+            title = f"{type} - emin: {emin} emax: {emax} bincenter: {maplistRow[3]} galcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
+
+            if type == "CTS":
+                mapIndex = 0
+
+            elif type == "EXP":
+                mapIndex = 1
+
+            else:
+                mapIndex = 2
+
+            filepath = self.displaySkyMap(maplistRow[mapIndex], smooth=smooth, sigma=sigma, saveImage=saveImage, format=format, title=title, cmap=cmap, regFilePath=regFilePath)
+
+            filepaths.append(filepath)
+
+        return filepaths

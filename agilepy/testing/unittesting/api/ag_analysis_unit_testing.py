@@ -149,7 +149,30 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(True, os.path.isfile(map))
 
 
+    def test_update_source_position(self):
 
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        self.aga.generateMaps()
+
+
+        self.aga.freeSources('name == "2AGLJ2021+4029"', "pos", False)
+
+        self.aga.mle()
+
+
+        self.assertRaises(ValueError, self.aga.updateSourcePosition, "2AGLJ2021+4029", useMulti=False)
+
+        changed = self.aga.updateSourcePosition("2AGLJ2021+4029", useMulti=False, glon=78.2375, glat=2.12298)
+        self.assertEqual(False, changed)
+
+
+        self.aga.freeSources('name == "2AGLJ2021+4029"', "pos", True)
+
+        self.aga.mle()
+        
+        changed = self.aga.updateSourcePosition("2AGLJ2021+4029", useMulti=True)
+        self.assertEqual(False, changed)
 
 
     """
