@@ -259,7 +259,7 @@ class SourcesLibrary:
             self.logger.critical(self, "You cannot use multi output because mle() it has not been called yet.")
             raise MultiOutputNotFoundError("You cannot use multi output because mle() it has not been called yet.")
 
-        currentPos = source.spatialModel.pos.value
+        currentPosParameter = source.spatialModel.pos
 
         if useMulti:
 
@@ -267,7 +267,8 @@ class SourcesLibrary:
                 self.logger.warning(self, "(multiL,multiB)=(-1,-1)")
                 return False
             else:
-                newPos = (source.multi.multiL.value, source.multi.multiB.value)
+                newPos = Parameter("pos", "tuple<float,float>")
+                newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
 
         else:
 
@@ -277,17 +278,19 @@ class SourcesLibrary:
                 raise ValueError(f"useMulti is False, but glon or glat is None. glon: {glon} glat: {glat}")
 
             else:
+                newPos = Parameter("pos", "tuple<float,float>")
+                newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
 
-                newPos = (glon, glat)
 
+        source.spatialModel.pos = newPos
 
-        source.spatialModel.pos.value = newPos
-
-        if currentPos != newPos:
-            self.logger.info(self, f"Old position is {currentPos}, new position is {newPos}")
+        if currentPosParameter.value != newPos.value:
+            newDistance = self.getSourceDistance(source)
+            source.spatialModel.dist.setAttributes(value = newDistance)
+            self.logger.info(self, f"Old position is {currentPosParameter.value}, new position is {source.spatialModel.pos.value}, new distance is {source.spatialModel.dist}")
             return True
         else:
-            self.logger.info(self, f"Position is not changed: {newPos}")
+            self.logger.info(self, f"Position is not changed: {source.spatialModel.pos.value}")
             return False
 
 
