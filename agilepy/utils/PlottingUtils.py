@@ -56,11 +56,11 @@ class PlottingUtils(metaclass=Singleton):
         """
         if twocolumns:
             fig_width_pt = 255.76535
-            fontsize     = 8
+            fontsize     = 10
             self.logger.info(self, "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
         else:
             fig_width_pt = 426.79134
-            fontsize     = 9
+            fontsize     = 11
             self.logger.info(self, "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
 
         inches_per_pt = 1.0/72.27               # Convert pt to inch

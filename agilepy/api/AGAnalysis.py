@@ -28,6 +28,7 @@
 import os
 from os.path import join, exists, isdir, splitext
 from pathlib import Path
+from ntpath import basename
 from time import time
 from copy import deepcopy
 import subprocess
@@ -176,7 +177,7 @@ class AGAnalysis:
         """
         return self.config.printOptions(section)
 
-    def getSkyMaps(self, maplistFilePath=None):
+    def parseMaplistFile(self, maplistFilePath=None):
         """It parses the maplistfile in order to return sky map files paths.
 
         Args:
@@ -209,13 +210,101 @@ class AGAnalysis:
             cts_map = elements[0]
             exp_map = elements[1]
             gas_map = elements[2]
-
-            maps.append( [cts_map, exp_map, gas_map] )
+            bin_center = elements[3]
+            gas_coeff = elements[4]
+            iso_coeff = elements[5]
+            maps.append( [cts_map, exp_map, gas_map, bin_center, gas_coeff, iso_coeff] )
 
         return maps
 
+    def displayCtsSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+        """It displays the last generated cts skymaps.
+
+        Args:
+            smooth (bool): if set to true, gaussian smoothing will be computed
+            sigma (float): value requested for computing gaussian smoothing
+            saveImage (bool): if set to true, saves the image into outdir directory
+            format (str): the format of the image
+            title (str): the title of the image
+            cmap (str): Matplotlib colormap
+            regFilePath (str): the relative or absolute path to the input reg file
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("CTS",  maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+
+    def displayExpSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+        """It displays the last generated exp skymaps.
+
+        Args:
+            smooth (bool): if set to true, gaussian smoothing will be computed
+            sigma (float): value requested for computing gaussian smoothing
+            saveImage (bool): if set to true, saves the image into outdir directory
+            format (str): the format of the image
+            title (str): the title of the image
+            cmap (str): Matplotlib colormap
+            regFilePath (str): the relative or absolute path to the input reg file
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("EXP", maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+
+    def displayGasSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+        """It displays the last generated gas skymaps.
+
+        Args:
+            smooth (bool): if set to true, gaussian smoothing will be computed
+            sigma (float): value requested for computing gaussian smoothing
+            saveImage (bool): if set to true, saves the image into outdir directory
+            format (str): the format of the image
+            title (str): the title of the image
+            cmap (str): Matplotlib colormap
+            regFilePath (str): the relative or absolute path to the input reg file
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("GAS", maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+
+    def _displaySkyMaps(self, type, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+
+        if self.currentMaplistFile is None and maplistFile is None:
+            self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
+            return False
+
+        if self.currentMaplistFile is None:
+            maplistRows = self.parseMaplistFile(maplistFile)
+        else:
+            maplistRows = self.parseMaplistFile()
+
+        filepaths = []
+        for maplistRow in maplistRows:
+
+            skymapFilename = basename(maplistRow[0])
+            emin = skymapFilename.split("EMIN")[1].split("_")[0]
+            emax = skymapFilename.split("EMAX")[1].split("_")[0]
+
+            title = f"{type} - emin: {emin} emax: {emax} bincenter: {maplistRow[3]} galcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
+
+            if type == "CTS":
+                mapIndex = 0
+
+            elif type == "EXP":
+                mapIndex = 1
+
+            else:
+                mapIndex = 2
+
+            filepath = self.displaySkyMap(maplistRow[mapIndex], smooth=smooth, sigma=sigma, saveImage=saveImage, format=format, title=title, cmap=cmap, regFilePath=regFilePath)
+
+            filepaths.append(filepath)
+
+        return filepaths
+
     def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
-        """It shows fits skymap passed as first argument.
+        """It displays a fits skymap passed as first argument.
 
         Args:
             fitsimage (str): the relative or absolute path to the input fits file.
@@ -229,9 +318,14 @@ class AGAnalysis:
 
 
         Returns:
-            Path to the file
+            If saveImage is True, it returns the path to the file
         """
-        return self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.config.getConf("output","outdir"), format, title, cmap, regFilePath)
+        outputfile = self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.config.getConf("output","outdir"), format, title, cmap, regFilePath)
+
+        if outputfile:
+            self.logger.info(self, "Produced: %s", outputfile)
+
+        return outputfile
 
     ############################################################################
     # analysis                                                                 #
@@ -327,16 +421,16 @@ class AGAnalysis:
                         raise ScienceToolInputArgMissing("Some options have not been set.")
 
                     f1 = ctsMapGenerator.call()
-                    self.logger.info(self, "Science tool ctsMapGenerator produced %s", f1)
+                    self.logger.info(self, "Science tool ctsMapGenerator produced:\n %s", f1)
 
                     f2 = expMapGenerator.call()
-                    self.logger.info(self, "Science tool expMapGenerator produced %s", f2)
+                    self.logger.info(self, "Science tool expMapGenerator produced:\n %s", f2)
 
                     f3 = gasMapGenerator.call()
-                    self.logger.info(self, "Science tool gasMapGenerator produced %s", f3)
+                    self.logger.info(self, "Science tool gasMapGenerator produced:\n %s", f3)
 
                     f4 = intMapGenerator.call()
-                    self.logger.info(self, "Science tool intMapGenerator produced %s", f4)
+                    self.logger.info(self, "Science tool intMapGenerator produced:\n %s", f4)
 
 
                     mapListFileContent.append( ctsMapGenerator.outfilePath + " " + \

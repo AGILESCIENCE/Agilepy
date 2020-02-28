@@ -100,19 +100,19 @@ class AGAnalysisUT(unittest.TestCase):
         self.aga.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
         maplistFilePath = self.aga.generateMaps()
 
-        maps_1 = self.aga.getSkyMaps()
-        maps_2 = self.aga.getSkyMaps(maplistFilePath)
+        maplistRows1 = self.aga.parseMaplistFile()
+        maplistRows2 = self.aga.parseMaplistFile(maplistFilePath)
 
-        self.assertEqual(4, len(maps_1))
-        self.assertEqual(4, len(maps_2))
-
-        for i in range(4):
-            for j in range(3):
-                self.assertEqual(maps_1[i][j], maps_2[i][j])
+        self.assertEqual(4, len(maplistRows1))
+        self.assertEqual(4, len(maplistRows2))
 
         for i in range(4):
             for j in range(3):
-                self.assertEqual(True, os.path.isfile(maps_1[i][j]))
+                self.assertEqual(maplistRows1[i][j], maplistRows2[i][j])
+
+        for i in range(4):
+            for j in range(3):
+                self.assertEqual(True, os.path.isfile(maplistRows1[i][j]))
 
     def test_print_source(self):
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -130,6 +130,27 @@ class AGAnalysisUT(unittest.TestCase):
             print(s)
 
         self.assertEqual(True, True)
+
+    def test_display_sky_maps(self):
+
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        maplistFilePath = self.aga.generateMaps()
+
+        maps = self.aga.displayCtsSkyMaps(saveImage=True)
+        for map in maps:
+            self.assertEqual(True, os.path.isfile(map))
+
+        maps = self.aga.displayExpSkyMaps(saveImage=True)
+        for map in maps:
+            self.assertEqual(True, os.path.isfile(map))
+
+        maps = self.aga.displayGasSkyMaps(saveImage=True)
+        for map in maps:
+            self.assertEqual(True, os.path.isfile(map))
+
+
+
+
 
     """
     def test_lc(self):
