@@ -417,7 +417,7 @@ class AGAnalysis:
 
         # mle
         configBKP.setOptions(filenameprefix = "calcBkg", outdir = analysisDataDir)
-        configBKP.setOptions(tmin = tmin, tmax = tmax)
+        configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
         # extract iso e gal coeff of "sourceName"
@@ -551,12 +551,12 @@ class AGAnalysis:
             binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             maplistFilePath = self.generateMaps(config = configBKP)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
             sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
         """
@@ -602,12 +602,12 @@ class AGAnalysis:
             binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             maplistFilePath = self.generateMaps(configBKP)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
-            configBKP.setOptions(tmin = t1, tmax = t2)
+            configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
             sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
             # outputs.append((t1,t2), maplistFilePath, sourceFiles)
