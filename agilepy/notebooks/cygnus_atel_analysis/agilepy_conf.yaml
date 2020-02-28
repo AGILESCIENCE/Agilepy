@@ -4,7 +4,7 @@ input:
   logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
 
 output:
-  outdir: $HOME/agilepy_analysis/cygnus/output
+  outdir: /home/leofaber/agilepy_analysis/cygnus/output
   filenameprefix: cygnus_atel_analysis
   logfilenameprefix: cygnus_atel_analysis_log
   verboselvl: 1

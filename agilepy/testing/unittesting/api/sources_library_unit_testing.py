@@ -113,9 +113,18 @@ class SourcesLibraryUT(unittest.TestCase):
         catalogFile = "$AGILE/catalogs/2AGL.multi"
 
         added = self.sl.loadSources(catalogFile, rangeDist=(70, 80))
-
         self.assertEqual(15, len(added))
         self.assertEqual(15, len(self.sl.sources))
+
+        self.sl.sources = []
+        added = self.sl.loadSources(catalogFile, rangeDist=(0, 10))
+        self.assertEqual(9, len(added))
+        self.assertEqual(9, len(self.sl.sources))
+
+        self.sl.sources = []
+        added = self.sl.loadSources(catalogFile, rangeDist=(0, 20))
+        self.assertEqual(14, len(added))
+        self.assertEqual(14, len(self.sl.sources))
 
 
     def test_load_xml(self):

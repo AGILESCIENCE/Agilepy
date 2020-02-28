@@ -4,9 +4,9 @@ input:
   logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
 
 output:
-  outdir: /home/leofaber/agilepy_science_api_tutorial/output
-  filenameprefix: science_api_tutorial
-  logfilenameprefix: science_api_tutorial_log
+  outdir: /home/leofaber/agilepy_eng_api_tutorial/output
+  filenameprefix: eng_api_tutorial
+  logfilenameprefix: eng_api_tutorial_log
   verboselvl: 1
 
 selection:

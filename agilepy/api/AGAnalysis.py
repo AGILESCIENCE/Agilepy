@@ -704,7 +704,7 @@ class AGAnalysis:
         Returns:
             The List of sources that have been succesfully loaded into the SourcesLibrary.
         """
-        return self.sourcesLibrary.loadSources(sourcesFilepath)
+        return self.sourcesLibrary.loadSources(sourcesFilepath, rangeDist)
 
     def selectSources(self, selection, quiet=False):
         """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
