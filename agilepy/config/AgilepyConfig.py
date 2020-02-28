@@ -380,6 +380,10 @@ class AgilepyConfig():
         if bkgCoeffVal is None:
             confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfEnergyBins)]
 
+        # if -1
+        elif bkgCoeffVal == -1:
+            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfEnergyBins)]
+
         # if only one value
         elif isinstance(bkgCoeffVal, numbers.Number):
             confDict["model"][bkgCoeffName] = [bkgCoeffVal]
@@ -507,23 +511,23 @@ class AgilepyConfig():
         errors = {}
 
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
+        fovbinnumber = confDict["maps"]["fovbinnumber"]
+        isocoeff = confDict["model"]["isocoeff"]
+        galcoeff = confDict["model"]["galcoeff"]
 
-        numberOfIsoCoeff = len(confDict["model"]["isocoeff"])
+        numberOfIsoCoeff = len(isocoeff)
 
-        if numberOfIsoCoeff != numberOfEnergyBins:
+        if numberOfIsoCoeff < numberOfEnergyBins:
 
-            error_str = "The number of energy bins {} is not equal to the number \
-                         of bg isotropic coefficients {}.".format(confDict["maps"]["energybins"], confDict["model"]["isocoeff"])
+            error_str = f"The number of bg isotropic coefficients {numberOfIsoCoeff} is less then the number of energybins {numberOfEnergyBins}"
 
             errors["model/isocoeff"] = error_str
 
-        numberOfGalCoeff = len(confDict["model"]["galcoeff"])
+        numberOfGalCoeff = len(galcoeff)
 
-        if numberOfGalCoeff != numberOfEnergyBins:
+        if numberOfGalCoeff < numberOfEnergyBins:
 
-
-            error_str = "The number of energy bins {} is not equal to the number \
-                         of bg galactic coefficients {}.".format(confDict["maps"]["energybins"], confDict["model"]["galcoeff"])
+            error_str = f"The number of bg galactic coefficients {numberOfGalCoeff} is less then the number of energybins {numberOfEnergyBins}"
 
             errors["model/galcoeff"] = error_str
 
