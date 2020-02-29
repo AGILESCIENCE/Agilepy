@@ -23,10 +23,10 @@ else
 
   echo "agilepy_path: $agilepy_path"
 
-  python "$agilepy_path/testing/unittesting/api/ag_analysis_unit_testing.py" -v
-  python "$agilepy_path/testing/unittesting/api/sources_library_unit_testing.py" -v
-  python "$agilepy_path/testing/unittesting/config/agilepy_config_testing.py" -v
-  python "$agilepy_path/testing/unittesting/utils/utils_testing.py" -v
+  python "$agilepy_path/testing/unittesting/api/ag_analysis_unit_test.py" -v
+  python "$agilepy_path/testing/unittesting/api/sources_library_unit_test.py" -v
+  python "$agilepy_path/testing/unittesting/config/agilepy_config_test.py" -v
+  python "$agilepy_path/testing/unittesting/utils/utils_test.py" -v
 
 
 fi

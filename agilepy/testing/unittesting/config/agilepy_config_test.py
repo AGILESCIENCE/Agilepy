@@ -132,7 +132,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=["[200, 400]", "[400, 1000]"])
 
         # wrong length
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, energybins=[[200, 400]])
+        # self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, energybins=[[200, 400]])
 
 
     def test_bkg_coeff(self):

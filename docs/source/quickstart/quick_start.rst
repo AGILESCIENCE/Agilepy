@@ -12,7 +12,7 @@ When creating an AGAnalysis instance, the configuration is initialized by passin
 
 ::
 
-    aga = AGAnalysis('agconfig.yaml', 'sources.xml')
+    aga = AGAnalysis('agconfig.yaml')
 
 The you have to load the models of the sources (you can filter them by their distance (degree) from l,b provided within the configuration file):
 
