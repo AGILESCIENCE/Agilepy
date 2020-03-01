@@ -26,8 +26,8 @@ maps:
   binsize: 0.2
 
 model:
-  galcoeff: 0.6, 0.8
-  isocoeff: 10, 15
+  galcoeff: 0.6, 0.8, 0.6, 0.8
+  isocoeff: 10, 15, 10, 15
 
 mle:
   loccl: 99

@@ -144,10 +144,10 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.config.loadConfigurations(conf1Path, validate=False)
 
-        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
 
-        for i in range(2):
+        for i in range(4):
             self.assertEqual(-1, self.config.getOptionValue("isocoeff")[i])
             self.assertEqual(-1, self.config.getOptionValue("galcoeff")[i])
 
@@ -159,8 +159,8 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.config.loadConfigurations(conf1Path, validate=False)
 
-        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
 
         self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
         self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
@@ -170,11 +170,15 @@ class AgilepyConfigUT(unittest.TestCase):
 
         # galcoeff and isocoeff are changed at runtime
 
-        self.config.setOptions(isocoeff=[10, 15], galcoeff=[0.6, 0.8])
+        self.config.setOptions(isocoeff=[10, 15, 10, 15], galcoeff=[0.6, 0.8, 0.6, 0.8])
         self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
         self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
+        self.assertEqual(10, self.config.getOptionValue("isocoeff")[2])
+        self.assertEqual(15, self.config.getOptionValue("isocoeff")[3])
         self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[0])
         self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[1])
+        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[2])
+        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[3])
 
         # this should cause an error because len(energybins) == 2
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[10])
@@ -204,8 +208,8 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
 
-        self.assertEqual(2, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(2, len(self.config.getOptionValue("galcoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
+        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
 
 
 

@@ -87,7 +87,14 @@ class AgilepyConfig():
 
     def validateConfiguration(self):
 
-        errors = AgilepyConfig._validateConfiguration(self.conf)
+        errors = {}
+
+        errors.update( AgilepyConfig._validateBackgroundCoeff(self.conf) )
+        errors.update( AgilepyConfig._validateIndexFiles(self.conf) )
+        errors.update( AgilepyConfig._validateTimeInIndex(self.conf) )
+        errors.update( AgilepyConfig._validateLOCCL(self.conf) )
+        errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "fovradmin", "fovradmax") )
+        errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "emin", "emax") )
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
@@ -375,14 +382,16 @@ class AgilepyConfig():
 
         bkgCoeffVal = confDict["model"][bkgCoeffName]
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
+        fovbinnumber = confDict["maps"]["fovbinnumber"]
+        numberOfMaps = numberOfEnergyBins*fovbinnumber
 
         # if None
         if bkgCoeffVal is None:
-            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfEnergyBins)]
+            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
 
         # if -1
         elif bkgCoeffVal == -1:
-            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfEnergyBins)]
+            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
 
         # if only one value
         elif isinstance(bkgCoeffVal, numbers.Number):
@@ -462,18 +471,8 @@ class AgilepyConfig():
 
             return yaml.safe_load(yamlfile)
 
-    @staticmethod
-    def _validateConfiguration(confDict):
-        errors = {}
 
-        errors.update( AgilepyConfig._validateBackgroundCoeff(confDict) )
-        errors.update( AgilepyConfig._validateIndexFiles(confDict) )
-        errors.update( AgilepyConfig._validateTimeInIndex(confDict) )
-        errors.update( AgilepyConfig._validateLOCCL(confDict) )
-        errors.update( AgilepyConfig._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
-        errors.update( AgilepyConfig._validateMinMax(confDict, "selection", "emin", "emax") )
 
-        return errors
 
     @staticmethod
     def _validateMinMax(confDict, section, optionMin, optionMax):
@@ -512,22 +511,24 @@ class AgilepyConfig():
 
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
         fovbinnumber = confDict["maps"]["fovbinnumber"]
+        numberOfMaps = numberOfEnergyBins*fovbinnumber
+
         isocoeff = confDict["model"]["isocoeff"]
         galcoeff = confDict["model"]["galcoeff"]
 
         numberOfIsoCoeff = len(isocoeff)
 
-        if numberOfIsoCoeff < numberOfEnergyBins:
+        if numberOfIsoCoeff < numberOfMaps:
 
-            error_str = f"The number of bg isotropic coefficients {numberOfIsoCoeff} is less then the number of energybins {numberOfEnergyBins}"
+            error_str = f"The number of bg isotropic coefficients {isocoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
 
             errors["model/isocoeff"] = error_str
 
         numberOfGalCoeff = len(galcoeff)
 
-        if numberOfGalCoeff < numberOfEnergyBins:
+        if numberOfGalCoeff < numberOfMaps:
 
-            error_str = f"The number of bg galactic coefficients {numberOfGalCoeff} is less then the number of energybins {numberOfEnergyBins}"
+            error_str = f"The number of bg galactic coefficients {galcoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
 
             errors["model/galcoeff"] = error_str
 

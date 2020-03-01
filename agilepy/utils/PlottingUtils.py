@@ -90,6 +90,9 @@ class PlottingUtils(metaclass=Singleton):
     def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, outDir, format, title, cmap, regFilePath):
         self.updateRC()
 
+        if regFilePath:
+            regFilePath = self.config._expandEnvVar(regFilePath)
+
         hdu = fits.open(fitsFilepath)[0]
 
         wcs = WCS(hdu.header)

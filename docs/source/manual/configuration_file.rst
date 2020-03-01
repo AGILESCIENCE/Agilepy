@@ -142,7 +142,7 @@ It is suggested to use phasecode = 2 for data taken in spinning mode.
           if tmax.to_f >= 182692800.0
              @phasecode = 6 #SPIN
           else
-             @phasecode = 18 #POIN
+             @phasecode = 18 #POINTING
           end
        end
     end
@@ -153,7 +153,12 @@ Section: *'maps'*
 =================
 
 These options control the behaviour of the sky maps generation tools.
-The *'energybin'* and *'fovbinnumber'* modify the number of maps that are generated.
+The *'energybin'* and *'fovbinnumber'* options set the number of maps that are generated:
+
+::
+
+    number of maps = number of energy bins * fovbinnumber
+
 
 The *'energybin'* option is a list of strings with the following format:
 
@@ -165,9 +170,9 @@ The *'energybin'* option is a list of strings with the following format:
 
 The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'fovradmax'* as:
 
-.. math::
+::
 
-    number\_of\_bins = (fovradmax-fovradmin)/fovbinnumber
+    number of fov bins = (fovradmax-fovradmin)/fovbinnumber
 
 .. note:: One map is generated for each possible combination between the *'energybin'* (emin, emax) and the *'fovbinnumber'* (fovmin, fovmax).
    The order of map generation is described by the following pseudocode:
@@ -203,14 +208,14 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
 Section: *'model'*
 ==================
 
-The '*galcoeff*' and '*isocoeff*' options values can take the default value of -1 or they can be a a list of values separated by a comma,
+The '*galcoeff*' and '*isocoeff*' options values can take the default value of null or they can be a a list of values separated by a comma,
 for example:
 
 .. code-block:: yaml
 
     model:
-      galcoeff: 0.6, 0.8
-      isocoeff: 10, 15
+      galcoeff: 0.6, 0.8, 0.6, 0.8
+      isocoeff: 10, 15, 10, 15
 
 In this case, you should pay attention on how the sky maps are generated: the
 following example show which iso/gal coefficients are assigned to which map.
@@ -228,8 +233,12 @@ following example show which iso/gal coefficients are assigned to which map.
       fovbinnumber: 2
 
     model:
-      galcoeff: 0.6, 0.8
-      isocoeff: 10, 15
+      galcoeff: 0.6, 0.8, 0.6, 0.8
+      isocoeff: 10, 15, 10, 15
+
+| **FOV bins:**
+| (0, 30), (30, 60)
+
 
 | **Map #1** has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:0.6 isocoeff:10
 | **Map #2** has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:0.8 isocoeff:15
@@ -246,8 +255,8 @@ following example show which iso/gal coefficients are assigned to which map.
    | sources, diffuse and isotropic components", "string", "null", "yes"
    "galmode",  "int", 1, "no",
    "isomode", "int", 1, "no",
-   "galcoeff", "set into .maplist if >= 0", "float or str", -1, "no"
-   "isocoeff", "set into .maplist if >= 0", "float or str", -1, "no"
+   "galcoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
+   "isocoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
    "emin_sources", "energy min of the modelfile", "int", 100, "no"
    "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
