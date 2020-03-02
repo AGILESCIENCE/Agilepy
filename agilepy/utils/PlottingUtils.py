@@ -69,7 +69,7 @@ class PlottingUtils(metaclass=Singleton):
 
         hdu = fits.open(fitsFilepaths[0])[0]
         wcs = WCS(hdu.header)
-        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2),figsize=(15,15), subplot_kw={'projection': wcs})
+        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2), subplot_kw={'projection': wcs})
 
         for idx, fitsImage in enumerate(fitsFilepaths):
 
@@ -120,7 +120,7 @@ class PlottingUtils(metaclass=Singleton):
         hdu = fits.open(fitsFilepath)[0]
         wcs = WCS(hdu.header)
 
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 10), subplot_kw={'projection': wcs})
+        fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw={'projection': wcs})
 
         if smooth:
             data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)

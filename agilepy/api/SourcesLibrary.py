@@ -71,6 +71,11 @@ class SourcesLibrary:
     def restoreSL(self):
         self.sources = self.sourcesBKP
 
+    def destroy(self):
+        self.sources = []
+        self.sourcesBKP = None
+        self.outdirPath = None
+
     def getSupportedCatalogs(self):
 
         catalogsPath = self.config._expandEnvVar("$AGILE/catalogs")

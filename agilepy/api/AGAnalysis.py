@@ -30,6 +30,7 @@ from os.path import join, exists, splitext
 from pathlib import Path
 from ntpath import basename
 from time import time
+from shutil import rmtree
 # from multiprocessing import Process
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
@@ -113,7 +114,9 @@ class AGAnalysis:
     def __del__(self):
         self.logger.reset()
 
-
+    def destroy(self):
+        self.sourcesLibrary.destroy()
+        self.logger.reset()
     ############################################################################
     # utility                                                                  #
     ############################################################################
@@ -425,12 +428,17 @@ class AGAnalysis:
             self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
             raise SourceNotFound(f"The source {sourceName} has not been loaded yet")
 
-        analysisDataDir = str(Path(self.config.getOptionValue("outdir")).joinpath("calcBkg"))
+        analysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("calcBkg")
+
+        if analysisDataDir.exists():
+            rmtree(analysisDataDir)
+
+
         configBKP = AgilepyConfig.getCopy(self.config)
         tmin = self.config.getOptionValue("tmin")
         tmax = self.config.getOptionValue("tmax")
         timetype = self.config.getOptionValue("timetype")
-        configBKP.setOptions(filenameprefix="calcBkg", outdir=analysisDataDir)
+        configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
 
         # find new tmin tmax -= 14 days
         tmax = tmin
@@ -456,7 +464,7 @@ class AGAnalysis:
         self.freeSources(f'name == "{sourceName}"', "flux", True)
 
         # mle
-        configBKP.setOptions(filenameprefix = "calcBkg", outdir = analysisDataDir)
+        configBKP.setOptions(filenameprefix = "calcBkg", outdir = str(analysisDataDir))
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
@@ -545,6 +553,7 @@ class AGAnalysis:
 
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
+
 
         return sourceFiles
 
@@ -955,14 +964,23 @@ class AGAnalysis:
 
     def _extractBkgCoeff(self, sourceFiles, sourceName):
 
-        sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in sourceFilePath].pop()
+        sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in basename(sourceFilePath)]
 
-        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
+        if len(sourceFilePath) > 1:
+            self.logger.critical(self, f"Something is wrong, found two .source files {sourceFilePath} for the same source {sourceName}")
+            raise ValueError(f"Something is wrong, found two .source files {sourceFilePath} for the same source {sourceName}")
+
+        self.logger.debug(self, "Extracting isocoeff and galcoeff from %s", sourceFilePath)
+
+        multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath.pop())
 
         isoCoeff = multiOutput.get("multiIsoCoeff")
         galCoeff = multiOutput.get("multiGalCoeff")
 
+        self.logger.debug(self, f"Multioutput: {multiOutput}")
+
         return isoCoeff, galCoeff
+
 
     def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
 
@@ -1005,7 +1023,7 @@ class AGAnalysis:
             self.logger.warning(self, "singleMode has been turned off because only one map is going to be displayed.")
             singleMode = False
 
-            
+
         if singleMode:
 
             outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, sigma=sigma, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFilePath=regFilePath)
