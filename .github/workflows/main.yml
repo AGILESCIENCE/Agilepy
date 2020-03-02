@@ -36,15 +36,18 @@ jobs:
 
     - name: Anaconda info
       run: |
+        source ~/.bashrc
         which python
         conda --version
 
     - name: Download the Agilepy environment
       run: |
-        /opt/anaconda3/bin/conda config --add channels conda-forge
-        /opt/anaconda3/bin/conda create -n agilepydevops -c agilescience agilepy
+        source ~/.bashrc
+        conda config --add channels conda-forge
+        conda create -n agilepydevops -c agilescience agilepy
 
     - name: Running unit tests
       run: |
-        /opt/anaconda3/bin/conda activate agilepydevops
+        source ~/.bashrc
+        conda activate agilepydevops
         bash start_agilepy_tests.sh
