@@ -17,8 +17,6 @@ selection:
   tmax: null
   timetype: null
   timelist: None
-  projtype: WCS
-  proj: ARC
   filtercode: 5
   fovradmin: 0
   fovradmax: 60
@@ -37,6 +35,8 @@ maps:
   expstep: null
   spectralindex: 2.1
   timestep: 160
+  projtype: WCS
+  proj: ARC  
   # skytype: 4
   binsize: 0.1
   energybins:

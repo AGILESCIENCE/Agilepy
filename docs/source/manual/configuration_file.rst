@@ -101,9 +101,6 @@ The *ROI* (region of interest) center is defined by giving explicit Galactic sky
    | format to generate maps
    | integrated within a time window.
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
-   "projtype", "Projection mode. Possible values: ['*WCS*']", "str", "WCS", "no"
-   "proj", "| Spatial projection for WCS mode.
-   | Possible values: ['*ARC*', '*AIT*']", "str", "ARC", "no"
    "filtercode", "filtercode = 5 select G filtercode = 0 select G+L+S", "int", 5, "no"
    "fovradmin", "fovradmin < fovradmax", "int", 0, "no"
    "fovradmax", "fovradmax > fovradmin", "int", 60, "no"
@@ -192,6 +189,9 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
    | round(1 / binsize, 2) (e.g. 0.3->3, 0.25->4, 0.1->10)", "int", "None", "no"
    "spectralindex", "Spectral index of the exposure map", "float", 2.1, "no"
    "timestep", "LOG file step size of exposure map (LOG file are at 0.1s)", "float", 160, "no"
+   "projtype", "Projection mode. Possible values: ['*WCS*']", "str", "WCS", "no"
+   "proj", "| Spatial projection for WCS mode.
+   | Possible values: ['*ARC*', '*AIT*']", "str", "ARC", "no"
    "skytype", "| gasmap:
    | 0) SKY000-1 + SKY000-5,
    | 1) gc_allsky maps + SKY000-5,
