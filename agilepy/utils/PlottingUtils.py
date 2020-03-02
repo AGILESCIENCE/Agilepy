@@ -36,6 +36,7 @@ import ntpath
 from os.path import join
 import numpy as np
 from pathlib import Path
+from time import strftime
 
 from agilepy.utils.Utils import Singleton
 
@@ -53,7 +54,7 @@ class PlottingUtils(metaclass=Singleton):
         self._updateRC()
 
 
-    def displaySkyMapsSingleMode(self, fitsFilepaths, outfilename, smooth, sigma, saveImage, fileFormat, titles, cmap, regFilePath):
+    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, sigma, saveImage, fileFormat, titles, cmap, regFilePath):
         self._updateRC()
 
         if regFilePath:
@@ -96,9 +97,13 @@ class PlottingUtils(metaclass=Singleton):
             axs[lastR][lastC].remove()
 
         if saveImage:
-
-            filename = join(self.outdir, outfilename+"."+fileFormat)
-            plt.savefig(filename)
+            _, filename = ntpath.split(fitsFilepaths[0])
+            values = filename.split("_")
+            prefix = values[0]
+            suffix = values[-1]
+            skymaptype = suffix.split(".")[1]
+            filename = self.outdir.joinpath(prefix+"_"+skymaptype+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
+            plt.savefig(str(filename))
             self.logger.info(self, "Produced: %s", filename)
             return filename
         else:
@@ -132,7 +137,7 @@ class PlottingUtils(metaclass=Singleton):
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepath)
-            filename = self.outdir.joinpath(filename).with_suffix(fileFormat)
+            filename = self.outdir.joinpath(filename+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(filename)
             self.logger.info(self, "Produced: %s", filename)
             print("filename: ",filename)

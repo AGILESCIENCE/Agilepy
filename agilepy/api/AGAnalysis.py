@@ -214,13 +214,12 @@ class AGAnalysis:
 
         return maps
 
-    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, outFilename=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated cts skymaps.
 
         Args:
             maplistFile (str): the path to the .maplist file.
             singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            outFilename (str): It is the name of the output file when singleMode is True.
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
@@ -232,15 +231,14 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("CTS",  singleMode, outFilename, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
-    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, outFilename=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated exp skymaps.
 
         Args:
             maplistFile (str): the path to the .maplist file.
             singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            outFilename (str): It is the name of the output file when singleMode is True.
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
@@ -252,15 +250,14 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("EXP", singleMode, outFilename, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
-    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, outFilename=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated gas skymaps.
 
         Args:
             maplistFile (str): the path to the .maplist file.
             singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            outFilename (str): It is the name of the output file when singleMode is True.
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
@@ -272,7 +269,7 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("GAS", singleMode, outFilename, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
 
 
@@ -967,11 +964,7 @@ class AGAnalysis:
 
         return isoCoeff, galCoeff
 
-    def _displaySkyMaps(self, skyMapType, singleMode, outFilename=None, maplistFile=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
-
-        if singleMode and outFilename is None:
-            self.logger.warning(self, "singleMode is True and you did not provide the outFilename.")
-            raise TypeError("singleMode is True and you did not provide the outFilename.")
+    def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
 
         if self.currentMaplistFile is None and maplistFile is None:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
@@ -1008,9 +1001,14 @@ class AGAnalysis:
 
             files.append(maplistRow[mapIndex])
 
+        if len(files) == 1 and singleMode is True:
+            self.logger.warning(self, "singleMode has been turned off because only one map is going to be displayed.")
+            singleMode = False
+
+            
         if singleMode:
 
-            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, outFilename, smooth=smooth, sigma=sigma, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFilePath=regFilePath)
+            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, sigma=sigma, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFilePath=regFilePath)
 
             outputs.append(outputfile)
 

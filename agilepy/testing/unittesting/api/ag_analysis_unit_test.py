@@ -156,15 +156,15 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertRaises(TypeError, self.aga.displayCtsSkyMaps)
 
 
-        maps = self.aga.displayCtsSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        maps = self.aga.displayCtsSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayExpSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        maps = self.aga.displayExpSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayGasSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        maps = self.aga.displayGasSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 

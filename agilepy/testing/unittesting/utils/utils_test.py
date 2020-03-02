@@ -98,7 +98,6 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         file = pu.displaySkyMapsSingleMode(
                     [img, img, img], \
-                    outfilename = "pippo",
                     smooth = smooth,
                     sigma = sigma,
                     fileFormat = fileFormat,
