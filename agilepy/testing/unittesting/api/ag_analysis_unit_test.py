@@ -60,9 +60,6 @@ class AGAnalysisUT(unittest.TestCase):
         for p in products_2:
             self.assertEqual(True, os.path.isfile(p))
 
-
-
-
     def test_source_dist_updated_after_mle(self):
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
@@ -152,9 +149,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         _ = self.aga.generateMaps()
-
-        self.assertRaises(TypeError, self.aga.displayCtsSkyMaps)
-
 
         maps = self.aga.displayCtsSkyMaps(saveImage=True)
         for m in maps:

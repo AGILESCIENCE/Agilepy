@@ -51,11 +51,11 @@ class PlottingUtils(metaclass=Singleton):
         self.outdir = Path(self.config.getConf("output", "outdir")).joinpath("plots")
         self.outdir.mkdir(parents=True, exist_ok=True)
 
-        self._updateRC()
+        # self._updateRC()
 
 
     def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, sigma, saveImage, fileFormat, titles, cmap, regFilePath):
-        self._updateRC()
+        # self._updateRC()
 
         if regFilePath:
             regFilePath = self.config._expandEnvVar(regFilePath)
@@ -69,7 +69,7 @@ class PlottingUtils(metaclass=Singleton):
 
         hdu = fits.open(fitsFilepaths[0])[0]
         wcs = WCS(hdu.header)
-        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2), subplot_kw={'projection': wcs})
+        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2), subplot_kw={'projection': wcs}, figsize=(12, 12))
 
         for idx, fitsImage in enumerate(fitsFilepaths):
 
@@ -90,11 +90,13 @@ class PlottingUtils(metaclass=Singleton):
             axs[row][col] = self._configAxes(axs[row][col], titles[idx], regFilePath, wcs)
             #cmap = plt.cm.CMRmap
             #cmap.set_bad(color='black')
-
         if hideLast:
             lastR = int(numberOfSubplots/2 - 1)
             lastC = lastR
             axs[lastR][lastC].remove()
+
+        # fig.tight_layout(pad=3.0)
+        plt.subplots_adjust(bottom=-0.1)
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepaths[0])
@@ -111,7 +113,7 @@ class PlottingUtils(metaclass=Singleton):
             return None
 
     def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath):
-        self._updateRC()
+        # self._updateRC()
 
         if regFilePath:
             regFilePath = self.config._expandEnvVar(regFilePath)
@@ -120,7 +122,7 @@ class PlottingUtils(metaclass=Singleton):
         hdu = fits.open(fitsFilepath)[0]
         wcs = WCS(hdu.header)
 
-        fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw={'projection': wcs})
+        fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw={'projection': wcs}, figsize=(12, 12))
 
         if smooth:
             data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
@@ -147,7 +149,7 @@ class PlottingUtils(metaclass=Singleton):
             return None
 
     def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        self._updateRC()
+        # self._updateRC()
 
         """visibilityPlot makes a plot of the zenith distance of a given source
            (src_ra and src_dec selected in the agilecheck parameters).
@@ -209,7 +211,7 @@ class PlottingUtils(metaclass=Singleton):
         return filePath
 
     def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        self._updateRC()
+        # self._updateRC()
 
         if len(separations) == 0:
             self.logger.warning(self, "No data to plot")

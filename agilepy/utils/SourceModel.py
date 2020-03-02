@@ -366,7 +366,7 @@ class Source:
         if self.multi:
             strRepr += " => sqrt(ts): "+str(self.multi.get("multiSqrtTS"))
 
-        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {self.spatialModel.get("dist")}'
+        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {round(self.spatialModel.get("dist"), 4)}'
 
         strRepr += f'\n  * Spectrum: ({self.spectrum.stype})'
         for sp in spectrumParams:
@@ -387,13 +387,14 @@ class Source:
                 strRepr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
                 strRepr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
                 strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
-                strRepr += f'\n\t- L: {self.multi.get("multiL")}'
-                strRepr += f'\n\t- B: {self.multi.get("multiB")}'
-                strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPosition")}'
-                strRepr += f'\n\t- r: {self.multi.get("multir")}'
-                strRepr += f'\n\t- a: {self.multi.get("multia")}'
-                strRepr += f'\n\t- b: {self.multi.get("multib")}'
-                strRepr += f'\n\t- phi: {self.multi.get("multiphi")}'
+                strRepr += f'\n\t- ellipse:'
+                strRepr += f'\n\t    - L: {self.multi.get("multiL")}'
+                strRepr += f'\n\t    - B: {self.multi.get("multiB")}'
+                strRepr += f'\n\t    - distFromStartPos: {self.multi.get("multiDistFromStartPosition")}'
+                strRepr += f'\n\t    - r: {self.multi.get("multir")}'
+                strRepr += f'\n\t    - a: {self.multi.get("multia")}'
+                strRepr += f'\n\t    - b: {self.multi.get("multib")}'
+                strRepr += f'\n\t    - phi: {self.multi.get("multiphi")}'
 
 
         """
