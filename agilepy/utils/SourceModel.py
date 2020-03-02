@@ -26,10 +26,8 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from dataclasses import dataclass
 from typing import List
-import datetime
-import inspect
+
 from agilepy.utils.CustomExceptions import SpectrumTypeNotFoundError, \
                                            AttributeValueDatatypeNotSupportedError, \
                                            SelectionParamNotSupported, \
@@ -256,7 +254,7 @@ class SpatialModel(SourceDescription):
 
         if type not in ["PointSource"]:
 
-            raise WrongSpatialModelTypeError("SpatialModel type '%s' is not supported. Supported SpatialModel types: ['PointSource']".format(type))
+            raise WrongSpatialModelTypeError(f"SpatialModel '{type}' is not supported. Supported SpatialModel types: ['PointSource']")
 
         return PointSourceSpatialModel(type, ll)
 
@@ -478,10 +476,10 @@ class Source:
     def _getSelectionParams(onlyMultiParams = False):
         sparams = []
         if onlyMultiParams:
-            for k,v in Source.selectionParams["multi"].items():
+            for _,v in Source.selectionParams["multi"].items():
                 sparams += v
         else:
-            for k,v in Source.selectionParams["source"].items():
+            for _,v in Source.selectionParams["source"].items():
                 sparams += v
         return sparams
 

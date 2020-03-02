@@ -66,8 +66,10 @@ class AGEngUT(unittest.TestCase):
         format="png"
         title="Visibility plot 184075134 - 184275134"
 
-        plotfilepath = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, format, title)
+        visplot, histoplot = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, format, title)
 
+        self.assertEqual(True, os.path.isfile(visplot))
+        self.assertEqual(True, os.path.isfile(histoplot))
 
 
 if __name__ == '__main__':

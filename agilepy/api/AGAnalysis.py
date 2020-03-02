@@ -26,13 +26,11 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from os.path import join, exists, isdir, splitext
+from os.path import join, exists, splitext
 from pathlib import Path
 from ntpath import basename
 from time import time
-from copy import deepcopy
-import subprocess
-from multiprocessing import Process
+# from multiprocessing import Process
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
@@ -216,14 +214,14 @@ class AGAnalysis:
 
         return maps
 
-    def displayCtsSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayCtsSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, fileFormat="png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated cts skymaps.
 
         Args:
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
-            format (str): the format of the image
+            fileFormat (str): the format of the image
             title (str): the title of the image
             cmap (str): Matplotlib colormap
             regFilePath (str): the relative or absolute path to the input reg file
@@ -231,16 +229,16 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("CTS",  maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+        return self._displaySkyMaps("CTS",  maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
-    def displayExpSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayExpSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, fileFormat="png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated exp skymaps.
 
         Args:
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
-            format (str): the format of the image
+            fileFormat (str): the format of the image
             title (str): the title of the image
             cmap (str): Matplotlib colormap
             regFilePath (str): the relative or absolute path to the input reg file
@@ -248,16 +246,16 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("EXP", maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+        return self._displaySkyMaps("EXP", maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
-    def displayGasSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayGasSkyMaps(self, maplistFile = None, smooth=False, sigma=4, saveImage=False, fileFormat="png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays the last generated gas skymaps.
 
         Args:
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
-            format (str): the format of the image
+            fileFormat (str): the format of the image
             title (str): the title of the image
             cmap (str): Matplotlib colormap
             regFilePath (str): the relative or absolute path to the input reg file
@@ -265,9 +263,9 @@ class AGAnalysis:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("GAS", maplistFile, smooth, sigma, saveImage, format, title, cmap, regFilePath)
+        return self._displaySkyMaps("GAS", maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
 
-    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+    def displaySkyMap(self, fitsFilepath,  smooth=False, sigma=4, saveImage=False, fileFormat="png", title=None, cmap="CMRmap", regFilePath=None):
         """It displays a fits skymap passed as first argument.
 
         Args:
@@ -275,7 +273,7 @@ class AGAnalysis:
             smooth (bool): if set to true, gaussian smoothing will be computed
             sigma (float): value requested for computing gaussian smoothing
             saveImage (bool): if set to true, saves the image into outdir directory
-            format (str): the format of the image
+            fileFormat (str): the format of the image
             title (str): the title of the image
             cmap (str): Matplotlib colormap
             regFilePath (str): the relative or absolute path to the input reg file
@@ -284,7 +282,7 @@ class AGAnalysis:
         Returns:
             If saveImage is True, it returns the path to the file
         """
-        outputfile = self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.config.getConf("output","outdir"), format, title, cmap, regFilePath)
+        outputfile = self.plottingUtils.displaySkyMap(fitsFilepath, smooth, sigma, saveImage, self.config.getConf("output","outdir"), fileFormat, title, cmap, regFilePath)
 
         if outputfile:
             self.logger.info(self, "Produced: %s", outputfile)
@@ -370,10 +368,10 @@ class AGAnalysis:
                     gasMapGenerator = GasMapGenerator("AG_gasmapgen", self.logger)
                     intMapGenerator = IntMapGenerator("AG_intmapgen", self.logger)
 
-                    ctsMapGenerator.configure(configBKP)
-                    expMapGenerator.configure(configBKP)
-                    gasMapGenerator.configure(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath})
-                    intMapGenerator.configure(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath, "ctsMapGeneratorOutfilePath" : ctsMapGenerator.outfilePath})
+                    ctsMapGenerator.configureTool(configBKP)
+                    expMapGenerator.configureTool(configBKP)
+                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath})
+                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath, "ctsMapGeneratorOutfilePath" : ctsMapGenerator.outfilePath})
 
                     configBKP.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
 
@@ -485,6 +483,9 @@ class AGAnalysis:
 
         self.config.setOptions(galcoeff=galCoeff, isocoeff=isoCoeff)
 
+        self.logger.info(self, "Took %f seconds.", time()-timeStart)
+
+
         return isoCoeff, galCoeff
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
@@ -541,7 +542,7 @@ class AGAnalysis:
         configBKP.addOptions("selection", multisources=multisources)
 
 
-        multi.configure(configBKP)
+        multi.configureTool(configBKP)
 
         sourceFiles = multi.call()
 
@@ -592,13 +593,12 @@ class AGAnalysis:
 
         lcAnalysisDataDir = self.config.getOptionValue("outdir") + "/lc"
 
-        binsForProcesses = self._chunkList(bins, processes)
+        binsForProcesses = AGAnalysis._chunkList(bins, processes)
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
-        logsOutDir = configBKP.getConf("output","outdir")
-        logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
-        verboseLvl = configBKP.getConf("output","verboselvl")
+        # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
+        # verboseLvl = configBKP.getConf("output","verboselvl")
 
         self.logger.info(self, "Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
 
@@ -942,9 +942,10 @@ class AGAnalysis:
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
-            sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+            _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
-    def _chunkList(self, lst, num):
+    @staticmethod
+    def _chunkList(lst, num):
         avg = len(lst) / float(num)
         out = []
         last = 0.0
@@ -979,7 +980,7 @@ class AGAnalysis:
 
         return isoCoeff, galCoeff
 
-    def _displaySkyMaps(self, type, maplistFile = None, smooth=False, sigma=4, saveImage=False, format="png", title=None, cmap="CMRmap", regFilePath=None):
+    def _displaySkyMaps(self, type, maplistFile = None, smooth=False, sigma=4, saveImage=False, fileFormat="png", title=None, cmap="CMRmap", regFilePath=None):
 
         if self.currentMaplistFile is None and maplistFile is None:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
@@ -1008,7 +1009,7 @@ class AGAnalysis:
             else:
                 mapIndex = 2
 
-            filepath = self.displaySkyMap(maplistRow[mapIndex], smooth=smooth, sigma=sigma, saveImage=saveImage, format=format, title=title, cmap=cmap, regFilePath=regFilePath)
+            filepath = self.displaySkyMap(maplistRow[mapIndex], smooth=smooth, sigma=sigma, saveImage=saveImage, fileFormat=fileFormat, title=title, cmap=cmap, regFilePath=regFilePath)
 
             filepaths.append(filepath)
 

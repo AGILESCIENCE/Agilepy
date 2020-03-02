@@ -45,7 +45,7 @@ class ProcessWrapper(ABC):
         self.callCounter = 0
 
     @abstractmethod
-    def configure(self, confDict):
+    def configureTool(self, confDict):
         """
         This method must initialize the 'args', 'products' and 'outputDir' attributes of the object.
         """

@@ -26,7 +26,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from datetime import datetime
 import numpy as np
 # import julian
 
@@ -92,11 +91,11 @@ class AstroUtils:
         sod = 86400.0
         sec_offset = 43200.0
 
-        a = AstroUtils.jd_to_civil(utc_offset + mjdref + ( (time + sec_offset)/86400.0 ))
+        a = AstroUtils.jd_to_civil(utc_offset + mjdref + ( (time + sec_offset)/sod ))
         print("jd_to_civil:",a)
         b = AstroUtils.day_fraction_to_time(a[2] % 1)
         print("day_fraction_to_time:",b)
-        utc = [a[0] , a[1] , float(int(a[2])), b[0] , b[1] , b[2] , b[3]]
+        # utc = [a[0] , a[1] , float(int(a[2])), b[0] , b[1] , b[2] , b[3]]
         utc_s = "%s-%02d-%02dT%02d:%02d:%02d"%(str(a[0]), int(a[1]), int(a[2]), b[0], b[1], b[2])
         return utc_s
 

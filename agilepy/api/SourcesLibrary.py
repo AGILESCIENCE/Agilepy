@@ -27,7 +27,7 @@
 
 from pathlib import Path
 from inspect import signature
-from os.path import split, join, splitext
+from os.path import split, splitext
 from os import listdir
 from copy import deepcopy
 
@@ -81,7 +81,7 @@ class SourcesLibrary:
 
         filePath = self.config._expandEnvVar(filePath)
 
-        filename, fileExtension = splitext(filePath)
+        _, fileExtension = splitext(filePath)
 
         supportFormats = [".txt", ".xml", ".multi"]
 
@@ -133,14 +133,14 @@ class SourcesLibrary:
 
         return self.writeToFile(filename, fileformat="xml", sources=newSources)
 
-    def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=[]):
+    def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=None):
 
         if fileformat not in ["txt", "xml"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
 
         outputFilePath = self.outdirPath.joinpath(outfileNamePrefix)
 
-        if len(sources) == 0:
+        if sources is None:
             sources = self.sources
 
         if fileformat == "txt":
@@ -195,7 +195,7 @@ class SourcesLibrary:
 
         return selected
 
-
+    
     def fixSource(self, source):
         """
         Set to False all freeable params of a source

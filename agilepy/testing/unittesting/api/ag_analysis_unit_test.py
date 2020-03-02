@@ -134,7 +134,7 @@ class AGAnalysisUT(unittest.TestCase):
     def test_display_sky_maps(self):
 
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        maplistFilePath = self.aga.generateMaps()
+        _ = self.aga.generateMaps()
 
         maps = self.aga.displayCtsSkyMaps(saveImage=True)
         for map in maps:
@@ -170,7 +170,7 @@ class AGAnalysisUT(unittest.TestCase):
         self.aga.freeSources('name == "2AGLJ2021+4029"', "pos", True)
 
         self.aga.mle()
-        
+
         changed = self.aga.updateSourcePosition("2AGLJ2021+4029", useMulti=True)
         self.assertEqual(False, changed)
 

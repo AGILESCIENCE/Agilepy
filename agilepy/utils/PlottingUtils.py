@@ -87,7 +87,7 @@ class PlottingUtils(metaclass=Singleton):
         plt.rcParams.update(params)
 
 
-    def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, outDir, format, title, cmap, regFilePath):
+    def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, outDir, fileFormat, title, cmap, regFilePath):
         self.updateRC()
 
         if regFilePath:
@@ -127,7 +127,7 @@ class PlottingUtils(metaclass=Singleton):
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepath)
-            filename = join(outDir, filename+"."+format)
+            filename = join(outDir, filename+"."+fileFormat)
             plt.savefig(filename)
             return filename
         else:
@@ -135,7 +135,7 @@ class PlottingUtils(metaclass=Singleton):
 
 
 
-    def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, format, title):
+    def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
         self.updateRC()
 
         """visibilityPlot makes a plot of the zenith distance of a given source
@@ -163,8 +163,8 @@ class PlottingUtils(metaclass=Singleton):
         #            time_f       = agile_f[i]
         #            t_start_temp = tref + datetime.timedelta(seconds=time_i)
         #            t_stop_temp  = tref + datetime.timedelta(seconds=time_f)
-        #            tstart       = Time(t_start_temp, format='datetime')
-        #            tstop        = Time(t_stop_temp, format='datetime')
+        #            tstart       = Time(t_start_temp, fileFormat='datetime')
+        #            tstop        = Time(t_stop_temp, fileFormat='datetime')
         #            tstart_data  = tstart.mjd
         #            tstop_data   = tstop.mjd
         #            t_agilestart.append(tstart_data)
@@ -189,7 +189,7 @@ class PlottingUtils(metaclass=Singleton):
         ax.set_xlim(np.min(meantimes), np.max(meantimes))
 
         if saveImage:
-            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
+            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
             self.logger.info(self, "Visibility plot at: %s", filePath)
             f.savefig(filePath)
         else:
@@ -198,7 +198,7 @@ class PlottingUtils(metaclass=Singleton):
         return filePath
 
 
-    def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, format, title):
+    def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
         self.updateRC()
 
         if len(separations) == 0:
@@ -246,7 +246,7 @@ class PlottingUtils(metaclass=Singleton):
         fil.close()
         """
         if saveImage:
-            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(format))
+            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
             f2.savefig(filePath)
             self.logger.info(self, "Visibility histogram at: %s", filePath)
         else:
@@ -255,4 +255,4 @@ class PlottingUtils(metaclass=Singleton):
         return filePath
 
 #if __name__ == "__main__":
-#    path = AstroUtils.displaySkyMap("examples/testcase_EMIN00100_EMAX00300_01.cts.gz", outDir="./", smooth=True, sigma=4, saveImage=False, title="ciao", format=None, cmap="Greys", regFilePath="examples/2AGL_2.reg")
+#    path = AstroUtils.displaySkyMap("examples/testcase_EMIN00100_EMAX00300_01.cts.gz", outDir="./", smooth=True, sigma=4, saveImage=False, title="ciao", fileFormat=None, cmap="Greys", regFilePath="examples/2AGL_2.reg")

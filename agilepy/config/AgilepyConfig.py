@@ -183,17 +183,12 @@ class AgilepyConfig():
 
                 AgilepyConfig._transformLoccl(self.conf)
 
-            elif optionName == "isocoeff" or optionName == "galcoeff":
+            if optionName == "isocoeff" or optionName == "galcoeff":
 
                 AgilepyConfig._convertBackgroundCoeff(self.conf, optionName)
 
-            else:
-                """
-                TODO tmin, tmax, ...
-                     energybins
-                """
-                pass
 
+        
 
         self.validateConfiguration()
 

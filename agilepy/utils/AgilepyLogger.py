@@ -27,12 +27,10 @@
 
 import sys
 import logging
-from os.path import join
 from pathlib import Path
 from time import strftime
 
 from agilepy.utils.CustomExceptions import LoggerTypeNotFound
-from agilepy.utils.Utils import Singleton
 
 class AgilepyLogger():
 
@@ -43,18 +41,20 @@ class AgilepyLogger():
 
     def initialize(self, outputDirectory, logFilenamePrefix, debug_lvl = 2):
 
+
+
+        self.outputDirectory = Path(outputDirectory).joinpath('logs')
+
+        self.logfilePath = self.outputDirectory.joinpath("%s_%s.log" % (logFilenamePrefix, strftime("%Y%m%d-%H%M%S")) )
+
         if self.initialized:
 
             return Path(self.logfilePath)
 
+
         self.debug_lvl = debug_lvl
 
-        self.outputDirectory = Path(outputDirectory).joinpath('logs')
-
         self.outputDirectory.mkdir(parents=True, exist_ok=True)
-
-        self.logfilePath = self.outputDirectory.joinpath("%s_%s.log" % (logFilenamePrefix, strftime("%Y%m%d-%H%M%S")) )
-
 
         # CRITICAL: always present in the log.
 
@@ -74,9 +74,9 @@ class AgilepyLogger():
         # formatter
         logFormatter = logging.Formatter("%(asctime)s [%(levelname)-8.8s] %(message)s")
 
-        self.consoleLogger = self.setup_logger("Console logger", "console", logFormatter, debug_lvl_enum)
+        self.consoleLogger = self.setupLogger("Console logger", "console", logFormatter, debug_lvl_enum)
 
-        self.fileLogger = self.setup_logger("File logger", "file", logFormatter, logging.DEBUG, self.logfilePath)
+        self.fileLogger = self.setupLogger("File logger", "file", logFormatter, logging.DEBUG, self.logfilePath)
 
         self.fileLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
         self.consoleLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
@@ -85,17 +85,17 @@ class AgilepyLogger():
 
         return Path(self.logfilePath)
 
-    def setup_logger(self, name, type, formatter, level, log_file=None):
+    def setupLogger(self, name, loggerType, formatter, level, log_file=None):
         """To setup as many loggers as you want"""
 
-        if type == "file":
+        if loggerType == "file":
             handler = logging.FileHandler(log_file)
 
-        elif type== "console":
+        elif loggerType== "console":
             handler = logging.StreamHandler(sys.stdout)
 
         else:
-            raise LoggerTypeNotFound("Logger of type %s is not supported"%(type))
+            raise LoggerTypeNotFound("Logger of type %s is not supported"%(loggerType))
 
         handler.setFormatter(formatter)
 

@@ -29,10 +29,7 @@ import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.io import fits
-from astropy.time import Time
-import matplotlib.pyplot as plt
 from os.path import join
-import datetime
 from pathlib import Path
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
@@ -220,10 +217,10 @@ class AGEng:
         self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
         tf_mjd = AstroUtils.time_nparray_mjd_to_tt(tf_tt_tot)
 
+        """
         self.logger.info(self, "Computig meantimes..Number of elements=%d", len(ti_mjd))
         meantimes = (ti_mjd+tf_mjd)/2.
 
-        """
         if writeFiles:
             zmax = zmax*u.deg
             ttotal_under_zmax = np.sum(tf_tt_tot[separation_tot<zmax]-ti_tt_tot[separation_tot<zmax])
@@ -305,7 +302,7 @@ class AGEng:
 
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
 
-        tmin = np.min(TIME)
+        # tmin = np.min(TIME)
         tmax = np.max(TIME)
 
         index_ti = 0
