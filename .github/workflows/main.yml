@@ -40,8 +40,8 @@ jobs:
 
     - name: Download the Agilepy environment
       run: |
-        conda config --add channels conda-forge
-        conda create -n agilepydevops -c agilescience agilepy
+        /opt/anaconda3/bin/conda config --add channels conda-forge
+        /opt/anaconda3/bin/conda create -n agilepydevops -c agilescience agilepy
 
     - name: Running unit tests
       run: |
