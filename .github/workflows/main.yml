@@ -53,21 +53,3 @@ jobs:
         conda activate agilepydevops
         bash start_agilepy_tests.sh
 
-    - name: Running code coverage
-      run: |
-        source ~/.bashrc
-        conda activate agilepydevops
-        bash start_coverage.sh        
-
-    - name: Uploading coverage report to Codacy
-      env: |
-        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-        CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
-        CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
-
-      run: |
-        LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"
-        curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"
-        chmod +x codacy-coverage-reporter
-        ./codacy-coverage-reporter report -l Python -r ./agilepy/testing/unittesting/coverage/cov_xml_report.xml
