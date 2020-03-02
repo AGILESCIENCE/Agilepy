@@ -3,10 +3,10 @@ input:
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils/logs"
-  filenameprefix: "testcase"
-  logfilenameprefix: "testcase"
-  verboselvl: 2
+  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
+  filenameprefix: "utils-testcase"
+  logfilenameprefix: "utils-testcase"
+  verboselvl: 1
 
 
 selection:

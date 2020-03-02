@@ -1,0 +1,30 @@
+
+input:
+  evtfile: $AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index
+  logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
+  # evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
+  # logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
+
+output:
+  outdir: /home/leofaber/agilepy_science_api_tutorial/output
+  filenameprefix: science_api_tutorial
+  logfilenameprefix: science_api_tutorial_log
+  verboselvl: 1
+
+selection:
+  tmin: 456361778
+  tmax: 456537945
+  timetype: TT
+  glon: 80.0 
+  glat: 1.0
+ 
+maps:
+  energybins:
+    - 100, 300
+    - 300, 1000
+  fovbinnumber: 2
+
+model:
+  galcoeff: null
+  isocoeff: null
+  

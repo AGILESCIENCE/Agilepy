@@ -33,6 +33,7 @@ from time import sleep
 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
+from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class AgilepyUtilsUT(unittest.TestCase):
@@ -46,14 +47,67 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         self.agilepyLogger = AgilepyLogger()
 
+        self.agilepyLogger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
-        outDir = Path(self.config.getOptionValue("outdir"))
+        self.datadir = os.path.join(self.currentDirPath,"data")
 
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
+        self.outDir = Path(self.config.getOptionValue("outdir"))
+
+        if self.outDir.exists() and self.outDir.is_dir():
+            shutil.rmtree(self.outDir)
 
     def tearDown(self):
         self.agilepyLogger.reset()
+
+    def test_display_sky_map(self):
+
+        pu = PlottingUtils(self.config, self.agilepyLogger)
+
+        smooth = True
+        sigma = 4
+        fileFormat = ".png"
+        title = "testcase"
+        cmap = "CMRmap"
+        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+
+
+        file = pu.displaySkyMap(
+                    self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz", \
+                    smooth = smooth,
+                    sigma = sigma,
+                    fileFormat = fileFormat,
+                    title = title,
+                    cmap = cmap,
+                    regFilePath = regFilePath,
+                    saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(file))
+
+
+    def test_display_sky_map_single_mode(self):
+
+        pu = PlottingUtils(self.config, self.agilepyLogger)
+
+        smooth = True
+        sigma = 4
+        fileFormat = ".png"
+        title = "testcase"
+        cmap = "CMRmap"
+        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
+
+        file = pu.displaySkyMapsSingleMode(
+                    [img, img, img], \
+                    outfilename = "pippo",
+                    smooth = smooth,
+                    sigma = sigma,
+                    fileFormat = fileFormat,
+                    titles = [title+"_1", title+"_2", title+"_3"],
+                    cmap = cmap,
+                    regFilePath = regFilePath,
+                    saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(file))
 
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)

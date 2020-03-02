@@ -35,6 +35,7 @@ import scipy.ndimage as ndimage
 import ntpath
 from os.path import join
 import numpy as np
+from pathlib import Path
 
 from agilepy.utils.Utils import Singleton
 
@@ -45,98 +46,103 @@ class PlottingUtils(metaclass=Singleton):
 
         self.config = agilepyConfig
         self.logger = agilepyLogger
-        self.updateRC()
 
-    def updateRC(self):
-        twocolumns = self.config.getConf("plotting","twocolumns")
+        self.outdir = Path(self.config.getConf("output", "outdir")).joinpath("plots")
+        self.outdir.mkdir(parents=True, exist_ok=True)
 
-        """
-        twocolumn: boolean, True or False (default). If two column=True, the
-        plot is adjusted to the size of a two column journal publication.
-        """
-        if twocolumns:
-            fig_width_pt = 255.76535
-            fontsize     = 10
-            self.logger.info(self, "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
-        else:
-            fig_width_pt = 426.79134
-            fontsize     = 11
-            self.logger.info(self, "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
-
-        inches_per_pt = 1.0/72.27               # Convert pt to inch
-        golden_mean = (np.sqrt(5)+1.0)/2.0      # Aesthetic ratio
-        fig_width = fig_width_pt*inches_per_pt  # width in inches
-        fig_height = fig_width/golden_mean      # height in inches
-
-        fig_size =  [fig_width,fig_height]
-
-        params = {  'backend': 'pdf',
-                    'axes.labelsize': fontsize,
-                    'font.size': fontsize,
-                    'legend.fontsize': fontsize,
-                    'xtick.labelsize': fontsize,
-                    'ytick.labelsize': fontsize,
-                    'axes.linewidth': 0.5,
-                    'lines.linewidth': 0.5,
-                    #'text.usetex': True,
-                    'ps.usedistiller': False,
-                    'figure.figsize': fig_size,
-                    'font.family': 'DejaVu Sans',
-                    'font.serif': ['Bitstream Vera Serif']}
-
-        plt.rcParams.update(params)
+        self._updateRC()
 
 
-    def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, outDir, fileFormat, title, cmap, regFilePath):
-        self.updateRC()
+    def displaySkyMapsSingleMode(self, fitsFilepaths, outfilename, smooth, sigma, saveImage, fileFormat, titles, cmap, regFilePath):
+        self._updateRC()
 
         if regFilePath:
             regFilePath = self.config._expandEnvVar(regFilePath)
 
-        hdu = fits.open(fitsFilepath)[0]
+        numberOfSubplots = len(fitsFilepaths)
 
+        hideLast = False
+        if numberOfSubplots % 2 != 0:
+            numberOfSubplots += 1
+            hideLast = True
+
+        hdu = fits.open(fitsFilepaths[0])[0]
         wcs = WCS(hdu.header)
-        plt.figure(figsize=(10, 10))
-        ax = plt.subplot(projection=wcs)
-        if title:
-            ax.set_title(title, fontsize='large')
+        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2),figsize=(15,15), subplot_kw={'projection': wcs})
+
+        for idx, fitsImage in enumerate(fitsFilepaths):
+
+            row,col = self._getCell(idx, int(numberOfSubplots/2))
+
+            hdu = fits.open(fitsFilepaths[idx])[0]
+            wcs = WCS(hdu.header)
+
+            if smooth:
+                data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
+            else:
+                data = hdu.data
+
+            im = axs[row][col].imshow(data, origin='lower', norm=None, cmap=cmap)
+
+            fig.colorbar(im, ax=axs[row][col])
+
+            axs[row][col] = self._configAxes(axs[row][col], titles[idx], regFilePath, wcs)
+            #cmap = plt.cm.CMRmap
+            #cmap.set_bad(color='black')
+
+        if hideLast:
+            lastR = int(numberOfSubplots/2 - 1)
+            lastC = lastR
+            axs[lastR][lastC].remove()
+
+        if saveImage:
+
+            filename = join(self.outdir, outfilename+"."+fileFormat)
+            plt.savefig(filename)
+            self.logger.info(self, "Produced: %s", filename)
+            return filename
+        else:
+            plt.show()
+            return None
+
+    def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath):
+        self._updateRC()
+
+        if regFilePath:
+            regFilePath = self.config._expandEnvVar(regFilePath)
+
+
+        hdu = fits.open(fitsFilepath)[0]
+        wcs = WCS(hdu.header)
+
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 10), subplot_kw={'projection': wcs})
+
         if smooth:
             data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
         else:
             data = hdu.data
 
+        plt.imshow(data, origin='lower', norm=None, cmap=cmap)
+
+        ax = self._configAxes(ax, title, regFilePath, wcs)
+
         #cmap = plt.cm.CMRmap
         #cmap.set_bad(color='black')
-
-        plt.imshow(data, origin='lower', norm=None, cmap=cmap)
-        # interpolation = "gaussian",
-        if regFilePath is not None:
-            regions = read_ds9(regFilePath)
-            for region in regions:
-                pixelRegion = region.to_pixel(wcs=wcs)
-                pixelRegion.plot(ax=ax, color="green")
-
-        plt.grid(color='white', ls='solid')
         plt.colorbar()
-        if wcs.wcs.ctype[0].find('LAT') == 0:
-            plt.xlabel('Galactic Longitude')
-            plt.ylabel('Galactic Latitude')
-        if wcs.wcs.ctype[0].find('RA') == 0:
-            plt.xlabel('Right ascension')
-            plt.ylabel('Declination')
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepath)
-            filename = join(outDir, filename+"."+fileFormat)
+            filename = self.outdir.joinpath(filename).with_suffix(fileFormat)
             plt.savefig(filename)
+            self.logger.info(self, "Produced: %s", filename)
+            print("filename: ",filename)
             return filename
         else:
             plt.show()
-
-
+            return None
 
     def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        self.updateRC()
+        self._updateRC()
 
         """visibilityPlot makes a plot of the zenith distance of a given source
            (src_ra and src_dec selected in the agilecheck parameters).
@@ -197,9 +203,8 @@ class PlottingUtils(metaclass=Singleton):
 
         return filePath
 
-
     def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        self.updateRC()
+        self._updateRC()
 
         if len(separations) == 0:
             self.logger.warning(self, "No data to plot")
@@ -254,5 +259,78 @@ class PlottingUtils(metaclass=Singleton):
 
         return filePath
 
-#if __name__ == "__main__":
-#    path = AstroUtils.displaySkyMap("examples/testcase_EMIN00100_EMAX00300_01.cts.gz", outDir="./", smooth=True, sigma=4, saveImage=False, title="ciao", fileFormat=None, cmap="Greys", regFilePath="examples/2AGL_2.reg")
+
+
+    def _updateRC(self):
+        twocolumns = self.config.getConf("plotting","twocolumns")
+
+        """
+        twocolumn: boolean, True or False (default). If two column=True, the
+        plot is adjusted to the size of a two column journal publication.
+        """
+        if twocolumns:
+            fig_width_pt = 255.76535
+            fontsize     = 10
+            self.logger.info(self, "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
+        else:
+            fig_width_pt = 426.79134
+            fontsize     = 11
+            self.logger.info(self, "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
+
+        inches_per_pt = 1.0/72.27               # Convert pt to inch
+        golden_mean = (np.sqrt(5)+1.0)/2.0      # Aesthetic ratio
+        fig_width = fig_width_pt*inches_per_pt  # width in inches
+        fig_height = fig_width/golden_mean      # height in inches
+
+        fig_size =  [fig_width,fig_height]
+
+        params = {  'backend': 'pdf',
+                    'axes.labelsize': fontsize,
+                    'font.size': fontsize,
+                    'legend.fontsize': fontsize,
+                    'xtick.labelsize': fontsize,
+                    'ytick.labelsize': fontsize,
+                    'axes.linewidth': 0.5,
+                    'lines.linewidth': 0.5,
+                    #'text.usetex': True,
+                    'ps.usedistiller': False,
+                    'figure.figsize': fig_size,
+                    'font.family': 'DejaVu Sans',
+                    'font.serif': ['Bitstream Vera Serif']}
+
+        plt.rcParams.update(params)
+
+    def _configAxes(self, ax, title, regionFile, wcs):
+
+        if title:
+            ax.set_title(title, fontsize='large')
+
+
+        # interpolation = "gaussian",
+        if regionFile is not None:
+            regions = read_ds9(regionFile)
+            for region in regions:
+                pixelRegion = region.to_pixel(wcs=wcs)
+                pixelRegion.plot(ax=ax, color="green")
+
+        if "GLON" in wcs.wcs.ctype[0]:
+            ax.set_xlabel('Galactic Longitude')
+            ax.set_ylabel('Galactic Latitude')
+
+        elif "RA" in wcs.wcs.ctype[0]:
+            ax.set_xlabel('Right ascension')
+            ax.set_ylabel('Declination')
+
+        else:
+            self.logger.warning(self, f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
+
+        ax.grid(b=True, color='white', ls='solid')
+
+        return ax
+
+    def _getCell(self, idx, numberOfSubplots):
+        # print(f"{idx} / {numberOfSubplots}")
+        q, r = divmod(idx, numberOfSubplots)
+        row = q
+        col = r
+        return row, col

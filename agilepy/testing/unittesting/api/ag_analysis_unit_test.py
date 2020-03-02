@@ -136,18 +136,37 @@ class AGAnalysisUT(unittest.TestCase):
         self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         _ = self.aga.generateMaps()
 
-        maps = self.aga.displayCtsSkyMaps(saveImage=True)
+        maps = self.aga.displayCtsSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayExpSkyMaps(saveImage=True)
+        maps = self.aga.displayExpSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayGasSkyMaps(saveImage=True)
+        maps = self.aga.displayGasSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
+    def test_display_sky_maps_singlemode(self):
+
+        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        _ = self.aga.generateMaps()
+
+        self.assertRaises(TypeError, self.aga.displayCtsSkyMaps)
+
+
+        maps = self.aga.displayCtsSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
+
+        maps = self.aga.displayExpSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
+
+        maps = self.aga.displayGasSkyMaps(saveImage=True, outFilename="testcase-singlemode")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
 
     def test_update_source_position(self):
 
