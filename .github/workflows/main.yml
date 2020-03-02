@@ -45,5 +45,5 @@ jobs:
 
     - name: Running unit tests
       run: |
-        source activate agilepydevops
+        /opt/anaconda3/bin/conda activate agilepydevops
         bash start_agilepy_tests.sh
