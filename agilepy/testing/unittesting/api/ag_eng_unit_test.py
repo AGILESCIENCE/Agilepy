@@ -50,7 +50,10 @@ class AGEngUT(unittest.TestCase):
         # file = "/data/AGILE/LOG_INDEX/LOG.log.index"
         zmax = 60
         step = 10
-        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec = self.ageng._computePointingDistancesFromSource(456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, logfilesIndex=None, writeFiles=True)
+        _, _, _, _, _, _, _, separationFile = self.ageng._computePointingDistancesFromSource(456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, logfilesIndex=None, writeFiles=True)
+
+        # self.assertEqual(True, os.path.isfile(separationFile))
+
 
     def test_visibility_plot(self):
 
@@ -63,10 +66,10 @@ class AGEngUT(unittest.TestCase):
         histogram=True
         writeFiles=True
         saveImage=True
-        format="png"
+        fileFormat="png"
         title="Visibility plot 184075134 - 184275134"
 
-        visplot, histoplot = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, format, title)
+        visplot, histoplot = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, fileFormat, title)
 
         self.assertEqual(True, os.path.isfile(visplot))
         self.assertEqual(True, os.path.isfile(histoplot))

@@ -35,7 +35,6 @@ from numbers import Number
 from os.path import dirname, realpath, join, expandvars
 from pathlib import Path
 
-from agilepy.utils.Utils import Singleton
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
@@ -188,7 +187,7 @@ class AgilepyConfig():
                 AgilepyConfig._convertBackgroundCoeff(self.conf, optionName)
 
 
-        
+
 
         self.validateConfiguration()
 

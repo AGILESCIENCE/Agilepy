@@ -74,9 +74,9 @@ class AgilepyLogger():
         # formatter
         logFormatter = logging.Formatter("%(asctime)s [%(levelname)-8.8s] %(message)s")
 
-        self.consoleLogger = self.setupLogger("Console logger", "console", logFormatter, debug_lvl_enum)
+        self.consoleLogger = AgilepyLogger.setupLogger("Console logger", "console", logFormatter, debug_lvl_enum)
 
-        self.fileLogger = self.setupLogger("File logger", "file", logFormatter, logging.DEBUG, self.logfilePath)
+        self.fileLogger = AgilepyLogger.setupLogger("File logger", "file", logFormatter, logging.DEBUG, self.logfilePath)
 
         self.fileLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
         self.consoleLogger.info("[%s] File and Console loggers are active. Log file: %s", type(self).__name__, self.logfilePath)
@@ -85,7 +85,8 @@ class AgilepyLogger():
 
         return Path(self.logfilePath)
 
-    def setupLogger(self, name, loggerType, formatter, level, log_file=None):
+    @staticmethod
+    def setupLogger(name, loggerType, formatter, level, log_file=None):
         """To setup as many loggers as you want"""
 
         if loggerType == "file":

@@ -38,7 +38,7 @@ class CtsMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
 
-    def configureTool(self, confDict):
+    def configureTool(self, confDict, extraParams=None):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".cts.gz"
@@ -80,7 +80,7 @@ class ExpMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
-    def configureTool(self, confDict):
+    def configureTool(self, confDict, extraParams=None):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".exp.gz"
@@ -132,7 +132,7 @@ class GasMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap"]
 
-    def configureTool(self, confDict, extraParams):
+    def configureTool(self, confDict, extraParams=None):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
         outputName = confDict.getOptionValue("filenameprefix")+".gas.gz"
@@ -184,7 +184,7 @@ class Multi(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix"]
 
-    def configureTool(self, confDict):
+    def configureTool(self, confDict, extraParams=None):
 
         self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "mle")
         outputName = confDict.getOptionValue("filenameprefix")+(str(self.callCounter).zfill(4))

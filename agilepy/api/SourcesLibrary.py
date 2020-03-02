@@ -27,7 +27,7 @@
 
 from pathlib import Path
 from inspect import signature
-from os.path import split, splitext
+from os.path import splitext
 from os import listdir
 from copy import deepcopy
 
@@ -195,7 +195,6 @@ class SourcesLibrary:
 
         return selected
 
-    
     def fixSource(self, source):
         """
         Set to False all freeable params of a source
@@ -292,11 +291,6 @@ class SourcesLibrary:
         else:
             self.logger.info(self, f"Position is not changed: {source.spatialModel.pos.value}")
             return False
-
-
-
-
-
 
     def parseSourceFile(self, sourceFilePath):
         """

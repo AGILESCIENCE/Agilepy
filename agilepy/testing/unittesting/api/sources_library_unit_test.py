@@ -29,7 +29,6 @@
 import os
 import shutil
 import unittest
-from typing import List
 from pathlib import Path
 from xml.etree.ElementTree import parse
 

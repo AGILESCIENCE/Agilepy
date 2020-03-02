@@ -77,7 +77,7 @@ class AGEng:
         self.plottingUtils = PlottingUtils(self.config, self.logger)
 
 
-    def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, format="png", title="Visibility Plot"):
+    def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, fileFormat="png", title="Visibility Plot"):
         """ It computes the angular separations between the center of the
         AGILE GRID field of view and the coordinates for a given position in the sky,
         given by src_ra and src_dec.
@@ -92,7 +92,7 @@ class AGEng:
             writeFiles (bool): if True, two text files with the separions data will be written on file.
             logfilesIndex (str) (optional): the index file for the logs files. If specified it will ovverride the one in the configuration file.
             saveImage (bool): If True, the image will be saved on disk
-            format (str): The output format of the image
+            fileFormat (str): The output format of the image
             title (str): The plot title
 
         Returns:
@@ -104,13 +104,13 @@ class AGEng:
             skyCordsFK5.ra.deg
             skyCordsFK5.dec.deg
         """
-        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec = self._computePointingDistancesFromSource(tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex)
+        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, sepFile = self._computePointingDistancesFromSource(tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex)
 
-        vis_plot = self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, format, title)
+        vis_plot = self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, fileFormat, title)
         hist_plot = None
 
         if computeHistogram:
-            hist_plot = self.plottingUtils.visibilityHisto(separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, self.outdir, format, title)
+            hist_plot = self.plottingUtils.visibilityHisto(separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, self.outdir, fileFormat, title)
 
         return vis_plot, hist_plot
 
@@ -239,10 +239,10 @@ class AGEng:
         self.logger.debug(self, "ti_tt_tot len: %d", len(ti_tt_tot))
         self.logger.debug(self, "tf_tt_tot len: %d", len(tf_tt_tot))
 
-
+        filenamePath = None
         if writeFiles:
 
-            filename = "offaxis_distances_{}_{}".format(tmin, tmax)
+            filename = f"offaxis_distances_{tmin}_{tmax}"
             outdirPath = Path(self.outdir).joinpath("offaxis_data")
             outdirPath.mkdir(parents=True, exist_ok=True)
             filenamePath = outdirPath.joinpath(filename)
@@ -250,9 +250,7 @@ class AGEng:
             self.logger.info(self, "Produced: %s", filenamePath)
 
 
-        return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
-
-
+        return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, filenamePath
 
     def _computeSeparationPerFile(self, doTimeMask, logFile, tmin_start, tmax_start, skyCordsFK5, zmax, step):
 
@@ -303,7 +301,7 @@ class AGEng:
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
 
         # tmin = np.min(TIME)
-        tmax = np.max(TIME)
+        # tmax = np.max(TIME)
 
         index_ti = 0
         index_tf = len(TIME)-1

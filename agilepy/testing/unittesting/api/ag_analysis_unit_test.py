@@ -137,16 +137,16 @@ class AGAnalysisUT(unittest.TestCase):
         _ = self.aga.generateMaps()
 
         maps = self.aga.displayCtsSkyMaps(saveImage=True)
-        for map in maps:
-            self.assertEqual(True, os.path.isfile(map))
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
 
         maps = self.aga.displayExpSkyMaps(saveImage=True)
-        for map in maps:
-            self.assertEqual(True, os.path.isfile(map))
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
 
         maps = self.aga.displayGasSkyMaps(saveImage=True)
-        for map in maps:
-            self.assertEqual(True, os.path.isfile(map))
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
 
 
     def test_update_source_position(self):
