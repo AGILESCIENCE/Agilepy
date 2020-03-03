@@ -72,9 +72,6 @@ class SourcesLibraryUT(unittest.TestCase):
                  "flux": source.spectrum.flux.free
                }
 
-
-
-
     def test_get_supported_catalogs(self):
         files = self.sl.getSupportedCatalogs()
         self.assertEqual(1, len(files))
@@ -90,13 +87,11 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertRaises(SourceModelFormatNotSupported, self.sl.loadSources, xmlsourcesconfPath)
 
-
     def test_load_wrong_file(self):
 
         xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/idontexitst.txt")
 
         self.assertRaises(FileNotFoundError, self.sl.loadSources, xmlsourcesconfPath)
-
 
     def test_load_catalog(self):
 
@@ -106,7 +101,6 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertEqual(175, len(added))
         self.assertEqual(175, len(self.sl.sources))
-
 
     def test_load_catalog_filtering_on_distances(self):
 
@@ -125,7 +119,6 @@ class SourcesLibraryUT(unittest.TestCase):
         added = self.sl.loadSources(catalogFile, rangeDist=(0, 20))
         self.assertEqual(14, len(added))
         self.assertEqual(14, len(self.sl.sources))
-
 
     def test_load_xml(self):
 
@@ -216,6 +209,24 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(6.69108e-15, res.multiFlux.value)
         self.assertEqual(None, res.multiDist.value)
 
+    def load_source_from_catalog_without_scaling(self):
+
+        sources = self.sl.loadSourcesFromCAT2()
+
+        self.assertEqual(175, len(sources))
+
+        self.assertEqual(7.45398e-08, sources[0].getFlux())
+
+    def load_source_from_catalog_with_scaling(self):
+
+        self.config.setOptions(emin=10, emax=1000)
+
+        sources = self.sl.loadSourcesFromCAT2()
+
+        self.assertEqual(175, len(sources))
+
+        self.assertEqual(6.940938928095228e-07, sources[0].getFlux())
+
     def test_select_sources_with_selection_string(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath)
@@ -283,7 +294,6 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(0, sources[0].spectrum.getFree("index"))
         self.assertEqual("0", sources[0].spectrum.getFree("index", strRepr=True))
 
-
     def test_free_sources_with_selection_lambda(self):
 
         self.sl.loadSources(self.xmlsourcesconfPath)
@@ -322,7 +332,6 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertEqual(2, len(sourcesxml))
 
-
     def test_write_to_file_txt(self):
 
         self.config = AgilepyConfig()
@@ -345,11 +354,6 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual("1.57017e-07 80.3286 1.12047 2.16619 0 2 _2AGLJ2032+4135 0 0 0 0 0.5 5.0 20 10000 0 100", lines[0].strip())
         self.assertEqual("1.69737e-07 79.9247 0.661449 1.99734 0 2 CYGX3 0 0 0 0 0.5 5.0 20 10000 0 100", lines[1].strip())
         self.assertEqual("1.19303e-06 78.2375 2.12298 1.75823 3 2 _2AGLJ2021+4029 0 1 3307.63 0 0.5 5.0 20.0 10000.0  0 100", lines[2].strip())
-
-
-
-
-
 
     def test_add_source(self):
 
@@ -412,13 +416,12 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertEqual(None, self.sl.addSource("newsource2", newSourceDict))
 
-
     def test_convert_catalog_to_xml(self):
 
         catalogFile = "$AGILE/catalogs/2AGL.multi"
 
         outfile = self.sl.convertCatalogToXml(catalogFile)
-
+        
         sourcesxml = parse(outfile).getroot()
 
         self.assertEqual(175, len(sourcesxml))
@@ -428,6 +431,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(175, len(added))
 
         self.assertEqual(175, len(self.sl.sources))
+
 
 
     def test_backup_restore(self):
@@ -455,6 +459,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.sl.restoreSL()
 
         self.assertEqual(2, len(self.sl.sources))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -678,6 +678,25 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.getSupportedCatalogs()
 
+    def loadSourcesFromCAT2(self, rangeDist = (0, float("inf"))):
+        """It loads the sources from the AGILE catalog (version 2).
+
+        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
+
+        If the energy range (emin, emax) specified by the user in the configuration file is different from the range (cat2_emin, cat2_emax),
+        the flux of every source in the CAT2 will be scaled.
+
+        Args:
+            rangeDist (tuple): a interval (min, max) of distances (degree)
+        Raises:
+            SourceModelFormatNotSupported: if the input file format is not supported.
+            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
+
+        Returns:
+            The List of sources that have been succesfully loaded into the SourcesLibrary.
+        """
+        return self.sourcesLibrary.loadSourcesFromCAT2(rangeDist)
+
     def loadSources(self, sourcesFilepath, rangeDist = (0, float("inf"))):
         """It loads the sources, reading them from a file. Three different types \
         of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).

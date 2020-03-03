@@ -27,6 +27,7 @@
 
 
 from typing import List
+from abc import ABC, abstractmethod
 
 from agilepy.utils.CustomExceptions import SpectrumTypeNotFoundError, \
                                            AttributeValueDatatypeNotSupportedError, \
@@ -172,7 +173,7 @@ class SourceDescription:
             exit(1)
 
 
-class Spectrum(SourceDescription):
+class Spectrum(ABC, SourceDescription):
 
     @staticmethod
     def getSpectrumObject(stype):
@@ -192,6 +193,9 @@ class Spectrum(SourceDescription):
         else:
             raise SpectrumTypeNotFoundError("Spectrum type '{}' is not supported. Supported spectrum types: ['PowerLaw', 'PLExpCutoff', 'PLSuperExpCutoff', 'LogParabola']".format(stype))
 
+    @abstractmethod
+    def getSpectralIndex(self):
+        pass
 
     def __init__(self, stype):
         self.stype = stype
@@ -206,7 +210,10 @@ class PowerLawSpectrum(Spectrum):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}'
 
     def getParameterDict(self):
-        return [self.index.toDict()]
+        return [self.flux.toDict(), self.index.toDict()]
+
+    def getSpectralIndex(self):
+        return self.index.value
 
 class PLExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
@@ -219,6 +226,9 @@ class PLExpCutoffSpectrum(Spectrum):
 
     def getParameterDict(self):
         return [self.flux.toDict(), self.index.toDict(), self.cutoffEnergy.toDict()]
+
+    def getSpectralIndex(self):
+        return self.index.value
 
 class PLSuperExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
@@ -233,6 +243,9 @@ class PLSuperExpCutoffSpectrum(Spectrum):
     def getParameterDict(self):
         return [self.flux.toDict(), self.index1.toDict(), self.cutoffEnergy.toDict(), self.index2.toDict()]
 
+    def getSpectralIndex(self):
+        return self.index1.value
+
 class LogParabolaSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
@@ -246,6 +259,9 @@ class LogParabolaSpectrum(Spectrum):
 
     def getParameterDict(self):
         return [self.flux.toDict(), self.index.toDict(), self.pivotEnergy.toDict(), self.curvature.toDict()]
+
+    def getSpectralIndex(self):
+        return self.index.value
 
 class SpatialModel(SourceDescription):
 
@@ -410,6 +426,14 @@ class Source:
         return strRepr
 
 
+    def getSpectralIndex(self):
+        return self.spectrum.getSpectralIndex()
+
+    def getFlux(self):
+        return self.spectrum.get("flux")
+
+    def setFlux(self, val):
+        return self.spectrum.set("flux", val)
 
     def getSelectionValue(self, paramName):
 

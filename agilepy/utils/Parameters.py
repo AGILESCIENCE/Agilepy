@@ -72,6 +72,11 @@ class Parameters:
                   [50,400],
                  ]
 
+
+    @staticmethod
+    def getCat2EminEmax():
+        return (100, 10000)
+
     @staticmethod
     def checkEnergyBin(energyBin):
         energyBin = [int(energy) for energy in energyBin]

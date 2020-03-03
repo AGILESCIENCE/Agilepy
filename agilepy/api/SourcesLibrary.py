@@ -36,6 +36,7 @@ from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
 
 from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.Parameters import Parameters
 
 from agilepy.utils.BooleanExpressionParser import BooleanParser
 from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
@@ -82,7 +83,24 @@ class SourcesLibrary:
 
         return [str(Path(catalogsPath).joinpath(f)) for f in listdir(catalogsPath) if ".multi" in f]
 
-    def loadSources(self, filePath, rangeDist = (0, float("inf")) ):
+    def loadSourcesFromCAT2(self, rangeDist = (0, float("inf")) ):
+
+        cat2 = self.config._expandEnvVar("$AGILE/catalogs/2AGL.multi")
+
+        cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
+        uEmin = self.config.getOptionValue("emin")
+        uEmax = self.config.getOptionValue("emax")
+
+        scaleFlux = False
+        if cat2Emin != uEmin or cat2Emax != uEmax:
+            scaleFlux = True
+            self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({cat2Emin},{cat2Emax}). A scaling of the sources flux will be performed.")
+
+
+        return self.loadSources(cat2, rangeDist, scaleFlux = scaleFlux)
+
+
+    def loadSources(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False ):
 
         filePath = self.config._expandEnvVar(filePath)
 
@@ -108,22 +126,18 @@ class SourcesLibrary:
 
         addedSources = []
 
-        for source in newSources:
+        newSources = [source for source in self._filterByDistance(newSources, rangeDist)]
 
-            distance = self.getSourceDistance(source)
+        addedSources = [source for source in self._addSourcesGenerator(newSources)]
 
-            if distance >= rangeDist[0] and distance <= rangeDist[1]:
+        if scaleFlux:
 
-                source.spatialModel.set("dist", distance)
-
-                added = self.addSource(source.name, source)
-
-                if added:
-                    addedSources.append(source)
+            addedSources = [source for source in self._scaleSourcesFlux(addedSources)]
 
         self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
 
         return addedSources
+
 
     def convertCatalogToXml(self, catalogFilepath):
 
@@ -923,3 +937,43 @@ class SourcesLibrary:
         #print("fixflag: ",fixflag)
 
         return str(fixflag)
+
+
+    def _addSourcesGenerator(self, sources):
+        for source in sources:
+            added = self.addSource(source.name, source)
+            if added:
+                yield added
+
+
+    def _filterByDistance(self, sources, rangeDist):
+        for source in sources:
+            distance = self.getSourceDistance(source)
+            if distance >= rangeDist[0] and distance <= rangeDist[1]:
+                source.spatialModel.set("dist", distance)
+                yield source
+
+    def _scaleSourcesFlux(self, sources):
+
+        cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
+        uEmin = self.config.getOptionValue("emin")
+        uEmax = self.config.getOptionValue("emax")
+
+        for source in sources:
+
+            si = source.getSpectralIndex()
+
+            fl = source.getFlux()
+
+            c = cat2Emin
+            d = cat2Emax
+            a = uEmin
+            b = uEmax
+
+            p1 = fl * (si-1) / ( c ** (1-si) - d ** (1-si) )
+
+            f1 = (p1 / (si-1)) * ( a ** (1-si) - b ** (1-si) )
+
+            source.setFlux(f1)
+
+            yield source
