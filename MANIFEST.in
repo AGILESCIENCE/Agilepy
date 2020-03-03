@@ -8,7 +8,7 @@ recursive-include * *.sh
 recursive-include * *.txt
 recursive-include * *.ipynb
 recursive-include * *.cts.gz
-
+recursive-include * *.coveragerc
 
 recursive-exclude * __pycache__
 recursive-exclude * *.egg-info
