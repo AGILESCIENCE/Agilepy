@@ -30,6 +30,7 @@ import shutil
 import unittest
 from pathlib import Path
 from time import sleep
+from datetime import datetime
 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
@@ -199,12 +200,38 @@ class AgilepyUtilsUT(unittest.TestCase):
 
 
 
-    """
-    TODO !! it should be 2020, 1, 23)
+
     def test_astro_utils_time_jd_to_civil(self):
 
+        tol = 0.043
+
         civ = AstroUtils.jd_to_civil(2458871.95616898)
-        self.assertEqual(civ, (2020, 1, 22.956168979872018))
+        self.assertEqual(civ[0], 2020)
+        self.assertEqual(civ[1], 1)
+        self.assertEqual(True, abs(23 - civ[2]) <= tol)
+        # it should be 2020, 1, 23)........
+
+
+    def test_astro_utils_time_utc_to_jd(self):
+
+        tol = 0.00000001
+
+        dt = datetime.strptime("2020-01-23T10:56:53", '%Y-%m-%dT%H:%M:%S')
+
+        jd = AstroUtils.to_jd(dt)
+
+        self.assertEqual(True, abs(2458871.95616898 - jd) <= tol)
+
+
+    def test_astro_utils_time_utc_to_mjd(self):
+
+        tol = 0.00000001
+
+        dt = datetime.strptime("2020-01-23T10:56:53", '%Y-%m-%dT%H:%M:%S')
+
+        mjd = AstroUtils.to_jd(dt, fmt="mjd")
+
+        self.assertEqual(True, abs(58871.45616898 - mjd) <= tol)
 
 
 
@@ -212,28 +239,51 @@ class AgilepyUtilsUT(unittest.TestCase):
 
     def test_astro_utils_time_utc_to_tt(self):
 
+        tol = 0.0001
+
         tt = AstroUtils.time_utc_to_tt("2020-01-23T10:56:53")
-        self.assertEqual(tt, 506861813)
+
+        self.assertEqual(True, abs(506861813 - tt) <= tol)
 
 
     def test_astro_utils_time_tt_to_utc(self):
 
+        sec_tol = 1
+
         utc = AstroUtils.time_tt_to_utc(506861813)
-        self.assertEqual(utc, "2020-01-23T10:56:53")
-    """
+        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
 
+        self.assertEqual(dt.year, 2020)
+        self.assertEqual(dt.month, 1)
+        self.assertEqual(dt.day, 23)
+        self.assertEqual(dt.hour, 10)
+        self.assertEqual(dt.minute, 56)
+        self.assertEqual(True, abs(53 - dt.second) <= sec_tol)
 
-
-    """
     def test_astro_utils_time_mjd_to_utc(self):
+
+        sec_tol = 1
+
         utc = AstroUtils.time_mjd_to_utc(58871.45616898)
-        self.assertEqual(utc, "2020-01-23T10:56:53")
+
+        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
+
+        self.assertEqual(dt.year, 2020)
+        self.assertEqual(dt.month, 1)
+        self.assertEqual(dt.day, 23)
+        self.assertEqual(dt.hour, 10)
+        self.assertEqual(dt.minute, 56)
+        self.assertEqual(True, abs(53 - dt.second) <= sec_tol)
+
+
 
     def test_astro_utils_time_utc_to_mjd(self):
 
+        sec_tol = 0.00000001
+
         mjd = AstroUtils.time_utc_to_mjd("2020-01-23T10:56:53")
-        self.assertEqual(mjd, 58871.45616898)
-    """
+
+        self.assertEqual(True, abs(58871.45616898 - mjd) <= sec_tol)
 
 if __name__ == '__main__':
     unittest.main()

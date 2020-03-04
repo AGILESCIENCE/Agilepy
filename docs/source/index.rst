@@ -28,6 +28,7 @@ Agilepy's documentation
 
   api/analysis_api
   api/engineering_api
+  api/astroutils_api
 
 .. toctree::
   :caption: How to
