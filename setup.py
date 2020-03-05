@@ -3,7 +3,6 @@
 
 from setuptools import setup, find_packages
 
-
 setup( name='agilepy',
        version='1.0.0',
        author='Baroncelli Leonardo, Addis Antonio, Bulgarelli Andrea, Parmiggiani Nicolò',
@@ -12,5 +11,5 @@ setup( name='agilepy',
        package_dir={ 'agilepy': 'agilepy' },
        include_package_data=True,
        license='GPL-3.0',
-       dependency_links=['https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tarball/master/#egg=BUILDXXX']
+       dependency_links=['https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tarball/master/#egg=master']
      )
