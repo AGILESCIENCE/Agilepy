@@ -203,7 +203,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
     def test_astro_utils_time_jd_to_civil(self):
 
-        tol = 0.043
+        tol = 0.044
 
         civ = AstroUtils.jd_to_civil(2458871.95616898)
         self.assertEqual(civ[0], 2020)
