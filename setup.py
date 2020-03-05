@@ -10,6 +10,5 @@ setup( name='agilepy',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
        include_package_data=True,
-       license='GPL-3.0',
-       dependency_links=['https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tarball/master/#egg=master']
+       license='GPL-3.0'
      )
