@@ -1,8 +1,9 @@
 # Agilepy
 
 [![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
-[![Actions Status](https://github.com/AGILESCIENCE/Agilepy/workflows/CI/CD/badge.svg)](https://github.com/AGILESCIENCE/Agilepy/actions)
+![Continuos integration workflow](https://github.com/AGILESCIENCE/Agilepy/workflows/Continuos%20integration%20workflow/badge.svg?branch=master&event=status)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Coverage)
 
 [![Anaconda-Server Badge](https://anaconda.org/addis.inaf/agilepy/badges/installer/conda.svg)](https://conda.anaconda.org/addis.inaf)
 [![Anaconda-Server Badge](https://anaconda.org/addis.inaf/agilepy/badges/version.svg)](https://anaconda.org/addis.inaf/agilepy)
