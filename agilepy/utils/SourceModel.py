@@ -388,8 +388,10 @@ class Source:
         for sp in spectrumParams:
             strRepr += f'\n\t- {sp}'
 
-
-        strRepr += f'\n  * Free params: '+' '.join(freeParams)
+        if len(freeParams) == 0:
+            strRepr += f'\n  * Free params: none'
+        else:
+            strRepr += f'\n  * Free params: '+' '.join(freeParams)
 
         if self.multi:
             strRepr += f'\n  * Multi analysis:'
