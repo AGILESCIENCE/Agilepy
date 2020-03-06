@@ -2,14 +2,12 @@
 Development
 ***********
 
-Git flow after v1.0.0
-=====================
+Git flow
+========
 
-Theory
-------
 
 Branches
-^^^^^^^^
+--------
 
 Two main branches:
 
@@ -21,13 +19,13 @@ Two support branches:
 * **feature** branch: each new feature (Trello's card) should be developed in its own feature branch, branching from **develop** and merged back into it. The **feature** branch are not pushed into the remote.
 * **hotfix** branch: if an hotfix is needed it should be develop in its own branch, branching from **master** and merged back to it.
 
-.. image:: static/gitflow.png
+.. image:: static/gitflow.jpg
   :width: 600
   :alt: Git flow
 
 
 Versioning
-^^^^^^^^^^
+----------
 The **master** branch contains only production releases: when the **develop** branch (or **hotfix** branch) is merged
 to **master** a new release tag must be created. Its name follows the `semantic versioning <https://semver.org/>`_.
 
@@ -41,7 +39,7 @@ Incrementing:
 
 
 Branches names
-^^^^^^^^^^^^^^
+--------------
 
 The **master** and the **develop** branch have an infinite lifetime, hence their name is fixed.
 
@@ -106,41 +104,10 @@ to facilitate this process.
     git tag -a <new-tag>
     git push origin <new-tag>
 
-Git flow before v1.0.0
-======================
 
-Clone the following repository:
-::
+DevOps
+======
 
-    cd
-    git clone https://github.com/AGILESCIENCE/Agilepy/
-    cd Agilepy
-
-
-Activate the anaconda virtual environment:
-::
-
-    conda activate <env_name>
-
-
-Export the following environment variable:
-::
-
-    export PYTHONPATH=.
-
-
-Update the source, then commit and push on origin/master.
-
-If you want your modification to be included into the anaconda package you need to
-
-- delete the remote v1.0.0 tag
-- delete the local v1.0.0 tag
-- create a new v1.0.0 tag, pointing to the last commit
-- push the commit and the tag on the master branch
-
-::
-
-    git push --delete origin v1.0.0
-    git tag -d v1.0.0
-    git tag v1.0.0 $(git log --format="%H" -n 1)
-    git push origin master --tags
+.. image:: static/agilepy_devops.jpg
+  :width: 1200
+  :alt: Git flow

@@ -77,6 +77,7 @@ jobs:
         CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
         CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
         CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
+
       run: |
         LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"
         curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"
@@ -86,4 +87,4 @@ jobs:
         conda activate agilepydevops
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
 
-        ./codacy-coverage-reporter report -l Python -r $agilepy_path/testing/unittesting/coverage/cov_xml_report
+        ./codacy-coverage-reporter report -l Python -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"

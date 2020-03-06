@@ -40,4 +40,3 @@ Agilepy's documentation
 
   help/help
   help/development
-  help/troubleshooting
