@@ -1,4 +1,4 @@
-name: CI/CD
+name: Continuos integration workflow
 
 on:
   push:
