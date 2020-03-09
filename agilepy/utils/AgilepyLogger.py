@@ -41,10 +41,8 @@ class AgilepyLogger():
 
     def initialize(self, outputDirectory, logFilenamePrefix, debug_lvl = 2):
 
-
-
         self.outputDirectory = Path(outputDirectory).joinpath('logs')
-
+        print("strftime:",strftime("%Y%m%d-%H%M%S"))
         self.logfilePath = self.outputDirectory.joinpath("%s_%s.log" % (logFilenamePrefix, strftime("%Y%m%d-%H%M%S")) )
 
         if self.initialized:

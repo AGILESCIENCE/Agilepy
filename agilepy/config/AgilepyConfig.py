@@ -35,6 +35,7 @@ from numbers import Number
 from os.path import dirname, realpath, join, expandvars
 from pathlib import Path
 
+from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
@@ -44,12 +45,12 @@ from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
 
 
 
-class AgilepyConfig():
+class AgilepyConfig(Observable):
     """
 
     """
     def __init__(self):
-
+        super().__init__()
         self.pp = pprint.PrettyPrinter(indent=2)
         self.initialized = False
         self.conf = None
@@ -97,15 +98,6 @@ class AgilepyConfig():
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
-
-    # def getCopy(self):
-
-
-
-    #@ deprecated
-    # def reset(self):
-    #    self.conf = deepcopy(self.conf_bkp)
-
 
     def getSectionOfOption(self, optionName):
 
@@ -188,12 +180,9 @@ class AgilepyConfig():
 
 
 
-
         self.validateConfiguration()
 
-
-
-
+        self.notify(optionName, self.conf[optionSection][optionName])
 
 
 
@@ -205,6 +194,12 @@ class AgilepyConfig():
                 return self.conf[key]
         else:
             return self.conf
+
+
+
+
+
+
 
 
     @staticmethod

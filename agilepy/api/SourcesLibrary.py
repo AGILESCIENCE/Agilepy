@@ -938,13 +938,11 @@ class SourcesLibrary:
 
         return str(fixflag)
 
-
     def _addSourcesGenerator(self, sources):
         for source in sources:
             added = self.addSource(source.name, source)
             if added:
                 yield added
-
 
     def _filterByDistance(self, sources, rangeDist):
         for source in sources:

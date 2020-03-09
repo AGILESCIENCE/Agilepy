@@ -29,6 +29,7 @@ import unittest
 import os
 import shutil
 from pathlib import Path
+from time import sleep
 
 from agilepy.api.AGAnalysis import AGAnalysis
 
@@ -39,66 +40,153 @@ class AGAnalysisUT(unittest.TestCase):
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
         self.sourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
         self.sourcesconfPathcalcBkg = os.path.join(self.currentDirPath,"conf/sourceconf_for_calcBkg.txt")
-        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
+        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
+    def test_overwriting_output_directory(self):
 
+        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
 
-    def test_analysis_pipeline(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        if outDir.exists() and outDir.is_dir():
+            shutil.rmtree(outDir)
 
-        maplistFilePath = self.aga.generateMaps()
+        ag = AGAnalysis(self.agilepyconfPath, overwriteOutputDir=False)
+
+        files = [f for f in os.listdir(outDir) if not f.startswith('.')]
+
+        self.assertEqual(True, outDir.is_dir())
+        self.assertEqual(True, len(files) > 1)
+        logfilename1 = os.listdir(outDir.joinpath("logs"))
+
+        self.assertRaises(FileExistsError, AGAnalysis, self.agilepyconfPath, overwriteOutputDir=False)
+
+        ag.destroy()
+        sleep(2)
+
+        ag = AGAnalysis(self.agilepyconfPath, overwriteOutputDir=True)
+
+        self.assertEqual(True, outDir.is_dir())
+        self.assertEqual(True, len(files) > 1)
+        logfilename2 = os.listdir(outDir.joinpath("logs"))
+
+        self.assertEqual(True, logfilename1.pop() != logfilename2.pop())
+
+        ag.destroy()
+
+    def test_generate_maps(self):
+
+        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
 
-        products_1 = self.aga.mle(maplistFilePath)
+        maps = os.listdir(outDir.joinpath("maps"))
+        self.assertEqual(16, len(maps))
+
+        lines = None
+        with open(maplistFilePath) as mfp:
+            lines = mfp.readlines()
+
+        self.assertEqual(4, len(lines))
+
+        ag.destroy()
+
+    def test_update_gal_iso(self):
+
+        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        ag.config.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8])
+        ag.config.setOptions(isocoeff=[10, 15, 10, 15])
+
+        galcoeffs = ag.config.getOptionValue("galcoeff")
+        isocoeffs = ag.config.getOptionValue("isocoeff")
+
+        maplistFilePath = ag.generateMaps()
+
+        matrix = ag.parseMaplistFile()
+        for idx, row in enumerate(matrix):
+            self.assertEqual(str(galcoeffs[idx]), row[4])
+            self.assertEqual(str(isocoeffs[idx]), row[5])
+
+        shutil.rmtree(outDir.joinpath("maps"))
+        outDir.joinpath("maps").mkdir(parents=False, exist_ok=True)
+
+        ag.config.setOptions(galcoeff=[0,0,0,0])
+        ag.config.setOptions(isocoeff=[0,0,0,0])
+
+        galcoeffs = ag.config.getOptionValue("galcoeff")
+        isocoeffs = ag.config.getOptionValue("isocoeff")
+
+        matrix = ag.parseMaplistFile()
+        for idx, row in enumerate(matrix):
+            self.assertEqual(str(galcoeffs[idx]), row[4])
+            self.assertEqual(str(isocoeffs[idx]), row[5])
+
+        ag.destroy()
+
+    def test_analysis_pipeline(self):
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        maplistFilePath = ag.generateMaps()
+        self.assertEqual(True, os.path.isfile(maplistFilePath))
+
+        products_1 = ag.mle(maplistFilePath)
         for p in products_1:
             self.assertEqual(True, os.path.isfile(p))
 
-        products_2 = self.aga.mle(maplistFilePath)
+        products_2 = ag.mle(maplistFilePath)
         for p in products_2:
             self.assertEqual(True, os.path.isfile(p))
 
+        ag.destroy()
+
     def test_source_dist_updated_after_mle(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        maplistFilePath = self.aga.generateMaps()
+        maplistFilePath = ag.generateMaps()
 
-        self.aga.mle(maplistFilePath)
-        source_1 = self.aga.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        ag.mle(maplistFilePath)
+        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
         dist_1 = source_1.multi.get("multiDist")
 
-        self.aga.setOptions(glon=81, glat=1)
+        ag.setOptions(glon=81, glat=1)
 
-        self.aga.mle(maplistFilePath)
-        source_2 = self.aga.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        ag.mle(maplistFilePath)
+        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
         dist_2 = source_2.multi.get("multiDist")
 
         self.assertNotEqual(dist_1, dist_2)
 
+        ag.destroy()
+
     def test_source_Flux_updated_after_mle(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        maplistFilePath = self.aga.generateMaps()
+        maplistFilePath = ag.generateMaps()
 
-        source_1 = self.aga.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
         flux_1 = source_1.spectrum.get("flux")
 
-        self.aga.mle(maplistFilePath)
-        source_2 = self.aga.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+        ag.mle(maplistFilePath)
+        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
         flux_2 = source_2.multi.get("multiFlux")
 
         self.assertNotEqual(flux_1, flux_2)
 
+        ag.destroy()
+
     def test_parse_maplistfile(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        self.aga.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
-        maplistFilePath = self.aga.generateMaps()
+        ag.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
+        maplistFilePath = ag.generateMaps()
 
-        maplistRows1 = self.aga.parseMaplistFile()
-        maplistRows2 = self.aga.parseMaplistFile(maplistFilePath)
+        maplistRows1 = ag.parseMaplistFile()
+        maplistRows2 = ag.parseMaplistFile(maplistFilePath)
 
         self.assertEqual(4, len(maplistRows1))
         self.assertEqual(4, len(maplistRows2))
@@ -111,129 +199,133 @@ class AGAnalysisUT(unittest.TestCase):
             for j in range(3):
                 self.assertEqual(True, os.path.isfile(maplistRows1[i][j]))
 
+        ag.destroy()
+
     def test_print_source(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        for s in self.aga.sourcesLibrary.sources:
-            print(s)
+        maplistFilePath = ag.generateMaps()
 
-        maplistFilePath = self.aga.generateMaps()
+        ag.freeSources('name == "2AGLJ2021+3654"', "pos", True)
 
-        self.aga.freeSources('name == "2AGLJ2021+3654"', "pos", True)
+        ag.mle(maplistFilePath)
 
-        self.aga.mle(maplistFilePath)
-
-        for s in self.aga.sourcesLibrary.sources:
+        for s in ag.sourcesLibrary.sources:
             print(s)
 
         self.assertEqual(True, True)
 
+        ag.destroy()
+
     def test_display_sky_maps(self):
 
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        _ = self.aga.generateMaps()
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        _ = ag.generateMaps()
 
-        maps = self.aga.displayCtsSkyMaps(singleMode=False, saveImage=True)
+        maps = ag.displayCtsSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayExpSkyMaps(singleMode=False, saveImage=True)
+        maps = ag.displayExpSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayGasSkyMaps(singleMode=False, saveImage=True)
+        maps = ag.displayGasSkyMaps(singleMode=False, saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
+
+        ag.destroy()
 
     def test_display_sky_maps_singlemode(self):
 
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        _ = self.aga.generateMaps()
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        _ = ag.generateMaps()
 
-        maps = self.aga.displayCtsSkyMaps(saveImage=True)
+        maps = ag.displayCtsSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayExpSkyMaps(saveImage=True)
+        maps = ag.displayExpSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
 
-        maps = self.aga.displayGasSkyMaps(saveImage=True)
+        maps = ag.displayGasSkyMaps(saveImage=True)
         for m in maps:
             self.assertEqual(True, os.path.isfile(m))
+
+        ag.destroy()
 
     def test_update_source_position(self):
 
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        self.aga.generateMaps()
-
-
-        self.aga.freeSources('name == "2AGLJ2021+4029"', "pos", False)
-
-        self.aga.mle()
+        ag.generateMaps()
 
 
-        self.assertRaises(ValueError, self.aga.updateSourcePosition, "2AGLJ2021+4029", useMulti=False)
+        ag.freeSources('name == "2AGLJ2021+4029"', "pos", False)
 
-        changed = self.aga.updateSourcePosition("2AGLJ2021+4029", useMulti=False, glon=78.2375, glat=2.12298)
+        ag.mle()
+
+
+        self.assertRaises(ValueError, ag.updateSourcePosition, "2AGLJ2021+4029", useMulti=False)
+
+        changed = ag.updateSourcePosition("2AGLJ2021+4029", useMulti=False, glon=78.2375, glat=2.12298)
         self.assertEqual(False, changed)
 
 
-        self.aga.freeSources('name == "2AGLJ2021+4029"', "pos", True)
+        ag.freeSources('name == "2AGLJ2021+4029"', "pos", True)
 
-        self.aga.mle()
+        ag.mle()
 
-        changed = self.aga.updateSourcePosition("2AGLJ2021+4029", useMulti=True)
+        changed = ag.updateSourcePosition("2AGLJ2021+4029", useMulti=True)
         self.assertEqual(False, changed)
+
+        ag.destroy()
 
 
     """
     def test_lc(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        self.aga.setOptions(glon=78.2375, glat=2.12298)
-        self.aga.freeSources('name == "2AGLJ2021+4029"', "flux", True)
+        ag.setOptions(glon=78.2375, glat=2.12298)
+        ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = self.aga.lightCurve("2AGLJ2021+4029")
+        lightCurveData = ag.lightCurve("2AGLJ2021+4029")
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
+    """
+
 
     def test_calc_bkg(self):
-        self.aga = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
-        self.aga.setOptions( tmin=58884.0, \
-                             tmax=58886.0, \
-                             timetype="MJD", \
-                             glon=79.8, \
-                             glat=0.7,
-                             evtfile = "/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
-                             logfile = "/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index",
-                             galcoeff = [-1, -1],
-                             isocoeff = [-1, -1]
-                            )
+        ag.setOptions(   tmin=456461778.0, \
+                         tmax=456537945.0, \
+                         timetype="TT",
+                         galcoeff=[-1, -1, -1, -1],
+                         isocoeff=[-1, -1, -1, -1]
+                     )
 
-        affected = self.aga.freeSources('name=="CYGX3"', "index", True)
-
-        isoBkg, galBkg = self.aga.calcBkg('CYGX3')
+        
+        isoBkg, galBkg = ag.calcBkg('CYGX3', pastTimeWindow=0.5)
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
 
-        cygnus = self.aga.selectSources('name=="CYGX3"', quiet=True).pop()
-        self.assertEqual(True, cygnus.spectrum.index.free)
 
-        configIso = self.aga.config.getOptionValue("isocoeff")
-        configGal = self.aga.config.getOptionValue("galcoeff")
-        print("configIso: ",configIso)
-        print("configGal: ",configGal)
-
-        for idx in range(len(configIso)):
-            self.assertEqual(isoBkg[idx], configIso[idx])
-            self.assertEqual(galBkg[idx], configGal[idx])
+        isoBkg, galBkg = ag.calcBkg('CYGX3', pastTimeWindow=0)
+        print("isoBkg:",isoBkg)
+        print("galBkg:",galBkg)
 
 
-    """
+        isoBkg, galBkg = ag.calcBkg('CYGX3', galcoeff=[0.6, 0.8, 0.6, 0.8], pastTimeWindow=0.5)
+        print("isoBkg:",isoBkg)
+        print("galBkg:",galBkg)
+
+
+        ag.destroy()
+
+
 if __name__ == '__main__':
     unittest.main()

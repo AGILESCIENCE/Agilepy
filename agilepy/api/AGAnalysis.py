@@ -26,7 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from os.path import join, exists, splitext
+from os.path import join, splitext
 from pathlib import Path
 from ntpath import basename
 from time import time
@@ -40,6 +40,7 @@ from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGen
 
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
+from agilepy.utils.MapList import MapList
 from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import AGILENotFoundError, \
@@ -63,13 +64,14 @@ class AGAnalysis:
 
     """
 
-    def __init__(self, configurationFilePath, sourcesFilePath = None):
+    def __init__(self, configurationFilePath, sourcesFilePath = None, overwriteOutputDir = False):
         """AGAnalysis constructor.
 
         Args:
             configurationFilePath (str): a relative or absolute path to the yaml configuration file.
-            sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
+            sourcesFilePath (str, optional): a relative or absolute path to a file containing the description of the sources. Defaults to None. \
             Three different types of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
+            overwriteOutputDir (bool, optional): if True and if the output directory is not empty, the output directory content is deleted. Defaults to False.
 
         Raises:
             FileExistsError: if the output directory already exists.
@@ -78,7 +80,7 @@ class AGAnalysis:
 
         Example:
             >>> from agilepy.api import AGAnalysis
-            >>> aganalysis = AGAnalysis('agconfig.yaml', 'sources.xml')
+            >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml', removeOutputDir=True)
 
         """
 
@@ -88,7 +90,12 @@ class AGAnalysis:
 
         outdir = self.config.getConf("output","outdir")
 
-        if exists(outdir):
+        if overwriteOutputDir and Path(outdir).exists():
+            rmtree(outdir)
+            Path(outdir).mkdir(parents=True, exist_ok=True)
+
+
+        if not overwriteOutputDir and Path(outdir).exists():
             raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(outdir))
 
         self.logger = AgilepyLogger()
@@ -109,14 +116,20 @@ class AGAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
-        self.currentMaplistFile = None
+        self.currentMapList = MapList()
+        # MapList Observes the observable AgilepyConfig
+        self.config.attach(self.currentMapList, "galcoeff")
+        self.config.attach(self.currentMapList, "isocoeff")
 
-    def __del__(self):
-        self.logger.reset()
 
     def destroy(self):
         self.sourcesLibrary.destroy()
         self.logger.reset()
+        self.config.detach(self.currentMapList, "galcoeff")
+        self.config.detach(self.currentMapList, "isocoeff")
+        self.currentMapList = None
+
+
     ############################################################################
     # utility                                                                  #
     ############################################################################
@@ -190,14 +203,14 @@ class AGAnalysis:
         Raises:
             MaplistIsNone: if no maplist file is passed and no maplist file have been generated yet.
         """
-        if not maplistFilePath and not self.currentMaplistFile:
+        if not maplistFilePath and self.currentMapList.getFile() is None:
 
             raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
                                  file as argument or call generateMaps(). ")
 
         if not maplistFilePath:
 
-            maplistFilePath = self.currentMaplistFile
+            maplistFilePath = self.currentMapList.getFile()
 
         with open(maplistFilePath, "r") as mlf:
 
@@ -212,7 +225,7 @@ class AGAnalysis:
             gas_map = elements[2]
             bin_center = elements[3]
             gas_coeff = elements[4]
-            iso_coeff = elements[5]
+            iso_coeff = elements[5].strip()
             maps.append( [cts_map, exp_map, gas_map, bin_center, gas_coeff, iso_coeff] )
 
         return maps
@@ -280,7 +293,7 @@ class AGAnalysis:
     # analysis                                                                 #
     ############################################################################
 
-    def generateMaps(self, config = None):
+    def generateMaps(self, config = None, maplistObj = None):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -306,19 +319,18 @@ class AGAnalysis:
         else:
             configBKP = AgilepyConfig.getCopy(self.config)
 
+        if maplistObj:
+            maplistObjBKP = maplistObj
+        else:
+            maplistObjBKP = self.currentMapList
 
         fovbinnumber = configBKP.getOptionValue("fovbinnumber")
         energybins = configBKP.getOptionValue("energybins")
 
         initialFovmin = configBKP.getOptionValue("fovradmin")
         initialFovmax = configBKP.getOptionValue("fovradmax")
-
         initialFileNamePrefix = configBKP.getOptionValue("filenameprefix")
 
-        outdir = configBKP.getOptionValue("outdir")
-
-        mapListFileContent = []
-        maplistFilePath = join(outdir, initialFileNamePrefix+".maplist4")
 
         for stepi in range(0, fovbinnumber):
 
@@ -381,37 +393,39 @@ class AGAnalysis:
                     f4 = intMapGenerator.call()
                     self.logger.info(self, "Science tool intMapGenerator produced:\n %s", f4)
 
-
-                    mapListFileContent.append( ctsMapGenerator.outfilePath + " " + \
-                                               expMapGenerator.outfilePath + " " + \
-                                               gasMapGenerator.outfilePath + " " + \
-                                               str(bincenter) + " " + \
-                                               str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]) + " " + \
-                                               str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx]) )
-
+                    maplistObjBKP.addRow(  ctsMapGenerator.outfilePath, \
+                                                expMapGenerator.outfilePath, \
+                                                gasMapGenerator.outfilePath, \
+                                                str(bincenter), \
+                                                str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
+                                                str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
+                                              )
                 else:
-
                     self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", stepe[0], stepe[1])
 
 
-        with open(maplistFilePath,"a") as mlf:
-            for line in mapListFileContent:
-                mlf.write(line+"\n")
+        outdir = configBKP.getOptionValue("outdir")
+
+        maplistObjBKP.setFile(Path(outdir).joinpath(initialFileNamePrefix))
+
+        maplistFilePath = maplistObjBKP.writeToFile()
 
         self.logger.info(self, "Maplist file created in %s", maplistFilePath)
-
-        self.currentMaplistFile = maplistFilePath
 
         self.logger.info(self, "Took %f seconds.", time() - timeStart)
 
         return maplistFilePath
 
-    def calcBkg(self, sourceName):
-        """It estimates the isotropic and galactic background coefficients using the data of 14 days before the tmin provided by the user.
+    def calcBkg(self, sourceName, galcoeff = None, pastTimeWindow = 14.0):
+        """It estimates the isotropic and galactic background coefficients.
            It automatically updates the configuration.
+
 
         Args:
             sourceName (str): the name of the source under analysis.
+            galcoeff (List, optional): the galactic background coefficients (one for each map).
+            pastTimeWindow (float, optional): the number of days previous tmin. It defaults to 14. If \
+                it's 0, the background coefficients will be estimated within the [tmin, tmax] interval.
 
         Returns:
             isoCoeff, galCoeff (List, List): the estimates of the background coefficients.
@@ -420,6 +434,8 @@ class AGAnalysis:
         """
         timeStart = time()
 
+
+        ################################################################## checks
         self.sourcesLibrary.backupSL()
 
         inputSource = self.selectSources(f'name == "{sourceName}"', quiet=True)
@@ -434,38 +450,53 @@ class AGAnalysis:
             rmtree(analysisDataDir)
 
 
+
+        ######################################################## configurations
         configBKP = AgilepyConfig.getCopy(self.config)
+        configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
+
+
+        ############################################################## galcoeff
+        if galcoeff is not None:
+            configBKP.setOptions(galcoeff=galcoeff)
+
+
+        ################################################################# times
         tmin = self.config.getOptionValue("tmin")
         tmax = self.config.getOptionValue("tmax")
         timetype = self.config.getOptionValue("timetype")
-        configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
 
-        # find new tmin tmax -= 14 days
-        tmax = tmin
-        if timetype == "TT":
-            tmin = tmin - 1209600
-        else:
-            tmin = tmin - 14
+        if timetype == "MJD":
             tmin = AstroUtils.time_mjd_to_tt(tmin)
             tmax = AstroUtils.time_mjd_to_tt(tmax)
 
-        self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
+        if pastTimeWindow != 0:
+            tmax = tmin
+            tmin = tmin - pastTimeWindow*86400
 
+        self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
-        # generate maps
-        maplistFilePath = self.generateMaps(config = configBKP)
 
-        # fixflag = 0 for each source different from "sourceName"
+        maplistObj = MapList()
+
+        ######################################################## maps generation
+        maplistFilePath = self.generateMaps(config = configBKP, maplistObj = maplistObj)
+
+
+        #################################### fixflag = 0 except for input source
         for s in self.getSources():
             self.fixSource(s)
 
         # "sourceName" must have flux = 1
         self.freeSources(f'name == "{sourceName}"', "flux", True)
 
-        # mle
-        configBKP.setOptions(filenameprefix = "calcBkg", outdir = str(analysisDataDir))
-        configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
+
+
+
+        #################################################################### mle
+        #configBKP.setOptions(filenameprefix = "calcBkg", outdir = str(analysisDataDir))
+        #configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
         # extract iso e gal coeff of "sourceName"
@@ -477,8 +508,8 @@ class AGAnalysis:
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
-
         return isoCoeff, galCoeff
+
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
@@ -514,14 +545,14 @@ class AGAnalysis:
         else:
             configBKP = AgilepyConfig.getCopy(self.config)
 
-        if not maplistFilePath and not self.currentMaplistFile:
+        if not maplistFilePath and self.currentMapList.getFile() is None:
 
             raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
                                  file as argument or call generateMaps(). ")
 
         if not maplistFilePath:
 
-            maplistFilePath = self.currentMaplistFile
+            maplistFilePath = self.currentMapList.getFile()
 
         multi = Multi("AG_multi", self.logger)
 
@@ -663,7 +694,7 @@ class AGAnalysis:
 
                     lcData += lcRow+"\n"
 
-        print(lcData)
+        self.logger.info(self, f"{lcData}")
         return lcData
 
     ############################################################################
@@ -1003,11 +1034,11 @@ class AGAnalysis:
 
     def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
 
-        if self.currentMaplistFile is None and maplistFile is None:
+        if self.currentMapList.getFile() is None and maplistFile is None:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
             return False
 
-        if self.currentMaplistFile is None:
+        if self.currentMapList.getFile() is None:
             maplistRows = self.parseMaplistFile(maplistFile)
         else:
             maplistRows = self.parseMaplistFile()
