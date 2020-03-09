@@ -182,7 +182,9 @@ class AgilepyConfig(Observable):
 
         self.validateConfiguration()
 
-        self.notify(optionName, self.conf[optionSection][optionName])
+        for optionName, optionValue in kwargs.items():
+
+            self.notify(optionName, self.conf[optionSection][optionName])
 
 
 
