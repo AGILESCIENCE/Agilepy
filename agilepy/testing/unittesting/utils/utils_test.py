@@ -64,8 +64,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         pu = PlottingUtils(self.config, self.agilepyLogger)
 
-        smooth = True
-        sigma = 4
+        smooth = 4
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
@@ -75,11 +74,12 @@ class AgilepyUtilsUT(unittest.TestCase):
         file = pu.displaySkyMap(
                     self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz", \
                     smooth = smooth,
-                    sigma = sigma,
                     fileFormat = fileFormat,
                     title = title,
                     cmap = cmap,
                     regFilePath = regFilePath,
+                    catalogRegions = None,
+                    catalogRegionsColor = "red",                    
                     saveImage=True)
 
         self.assertEqual(True, os.path.isfile(file))
@@ -89,8 +89,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         pu = PlottingUtils(self.config, self.agilepyLogger)
 
-        smooth = True
-        sigma = 4
+        smooth = 4
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
@@ -100,11 +99,12 @@ class AgilepyUtilsUT(unittest.TestCase):
         file = pu.displaySkyMapsSingleMode(
                     [img, img, img], \
                     smooth = smooth,
-                    sigma = sigma,
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
                     cmap = cmap,
                     regFilePath = regFilePath,
+                    catalogRegions = None,
+                    catalogRegionsColor = "red",
                     saveImage=True)
 
         self.assertEqual(True, os.path.isfile(file))

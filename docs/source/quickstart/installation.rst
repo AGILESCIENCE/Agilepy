@@ -26,7 +26,7 @@ In order to use the software you need to activate the virtual environment first:
 ::
 
     conda activate <virtualenv_name>
-    
+
 or
 
 ::
@@ -40,10 +40,10 @@ When you activate the environment the following environment variables will be se
     PATH=$AGILE/bin:$AGILE/scripts:$AGILE/scripts/extendesources:$PATH
     LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$CONDA_PREFIX/lib64:$AGILE/lib:$LD_LIBRARY_PATH
 
-Running tests:
+Running unit tests:
 ::
 
-    start_agilepy_tests.sh
+    start_coverage.sh
 
 
 

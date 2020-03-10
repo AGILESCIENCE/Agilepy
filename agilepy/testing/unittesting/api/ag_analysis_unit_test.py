@@ -294,8 +294,27 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
-    """
 
+
+    def test_display_sky_maps_singlemode_show(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        _ = ag.generateMaps()
+
+        maps = ag.displayCtsSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
+
+        maps = ag.displayExpSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
+
+        maps = ag.displayGasSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
+        for m in maps:
+            self.assertEqual(True, os.path.isfile(m))
+
+        ag.destroy()
+    """
 
     def test_calc_bkg(self):
 
@@ -308,7 +327,7 @@ class AGAnalysisUT(unittest.TestCase):
                          isocoeff=[-1, -1, -1, -1]
                      )
 
-        
+
         isoBkg, galBkg = ag.calcBkg('CYGX3', pastTimeWindow=0.5)
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
