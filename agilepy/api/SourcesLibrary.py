@@ -85,6 +85,8 @@ class SourcesLibrary:
 
         if catalogName == "2AGL":
             catPath = self.config._expandEnvVar("$AGILE/catalogs/2AGL.xml")
+            if not Path(catPath).exists():
+                catPath = self.config._expandEnvVar("$AGILE/catalogs/2AGL.multi")
 
             cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
             uEmin = self.config.getOptionValue("emin")
