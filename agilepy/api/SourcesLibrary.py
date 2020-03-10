@@ -77,30 +77,37 @@ class SourcesLibrary:
         self.sourcesBKP = None
         self.outdirPath = None
 
-    def getSupportedCatalogs(self):
+    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")) ):
 
-        catalogsPath = self.config._expandEnvVar("$AGILE/catalogs")
-
-        return [str(Path(catalogsPath).joinpath(f)) for f in listdir(catalogsPath) if ".multi" in f]
-
-    def loadSourcesFromCAT2(self, rangeDist = (0, float("inf")) ):
-
-        cat2 = self.config._expandEnvVar("$AGILE/catalogs/2AGL.multi")
-
-        cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-        uEmin = self.config.getOptionValue("emin")
-        uEmax = self.config.getOptionValue("emax")
-
+        supportedCatalogs = ["2AGL"]
         scaleFlux = False
-        if cat2Emin != uEmin or cat2Emax != uEmax:
-            scaleFlux = True
-            self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({cat2Emin},{cat2Emax}). A scaling of the sources flux will be performed.")
 
 
-        return self.loadSources(cat2, rangeDist, scaleFlux = scaleFlux)
+        if catalogName == "2AGL":
+            catPath = self.config._expandEnvVar("$AGILE/catalogs/2AGL.xml")
+
+            cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
+            uEmin = self.config.getOptionValue("emin")
+            uEmax = self.config.getOptionValue("emax")
+
+            if cat2Emin != uEmin or cat2Emax != uEmax:
+                scaleFlux = True
+                self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({cat2Emin},{cat2Emax}). A scaling of the sources flux will be performed.")
+
+        elif catalogName == "4FGL":
+
+            scaleFlux = False
+            raise FileNotFoundError(f"The catalog {catalogName} is going to be supported soon. Supported catalogs: {supportedCatalogs}")
+
+        else:
+            self.logger.critical(self, "The catalog %s is not supported. Supported catalogs: %s", catalogName, ' '.join(supportedCatalogs))
+            raise FileNotFoundError(f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
+
+        return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux = scaleFlux)
 
 
-    def loadSources(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False ):
+
+    def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False ):
 
         filePath = self.config._expandEnvVar(filePath)
 
@@ -397,6 +404,9 @@ class SourcesLibrary:
 
         multiOutput.multiUL.setAttributes(value = allValues[57])
 
+        multiOutput.multiExp.setAttributes(value = allValues[59])
+
+
         multiOutput.multiErgLog.setAttributes(value = allValues[64])
         multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
 
@@ -423,6 +433,9 @@ class SourcesLibrary:
 
         multiOutput.startDataTT.setAttributes(value = allValues[99])
         multiOutput.endDataTT.setAttributes(value = allValues[100])
+
+        multiOutput.multiExpRatio.setAttributes(value = allValues[109])
+
 
         return multiOutput
 

@@ -144,6 +144,7 @@ class AgilepyConfig(Observable):
         """
         if "tmin" in kwargs and "timetype" not in kwargs:
             raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+
         if "tmax" in kwargs and "timetype" not in kwargs:
             raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
 
@@ -183,6 +184,8 @@ class AgilepyConfig(Observable):
         self.validateConfiguration()
 
         for optionName, optionValue in kwargs.items():
+
+            optionSection = self.getSectionOfOption(optionName)
 
             self.notify(optionName, self.conf[optionSection][optionName])
 

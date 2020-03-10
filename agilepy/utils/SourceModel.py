@@ -305,6 +305,9 @@ class MultiOutput(SourceDescription):
 
         self.multiUL = OutputVal("multiUL", "float")
 
+        self.multiExp = OutputVal("multiExp", "float")
+
+
         self.multiErgLog = OutputVal("multiErgLog", "float")
         self.multiErgLogErr = OutputVal("multiErgLogErr", "float")
 
@@ -335,6 +338,7 @@ class MultiOutput(SourceDescription):
         self.startDataTT = OutputVal("startDataTT", "float")
         self.endDataTT = OutputVal("endDataTT", "float")
 
+        self.multiExpRatio = OutputVal("multiExpRatio", "float")
 
     def __str__(self):
         return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiUL}\n{self.multiDist} \
@@ -395,11 +399,13 @@ class Source:
 
         if self.multi:
             strRepr += f'\n  * Multi analysis:'
-            strRepr += f'\n\t- flux: {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
-            strRepr += f'\n\t- upper limit: {self.multi.get("multiUL")}'
-            strRepr += f'\n\t- ergLog: {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
+            strRepr += f'\n\t- flux(ph/cm2s): {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
+            strRepr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
+            strRepr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
             strRepr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
             strRepr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
+            strRepr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
+            strRepr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
 
             if "pos" in freeParams:
                 strRepr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'

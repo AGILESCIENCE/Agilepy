@@ -106,7 +106,7 @@ class AGAnalysis:
 
         if sourcesFilePath:
 
-            self.sourcesLibrary.loadSources(sourcesFilePath)
+            self.sourcesLibrary.loadSourcesFromFile(sourcesFilePath)
 
         self.plottingUtils = PlottingUtils(self.config, self.logger)
 
@@ -230,62 +230,65 @@ class AGAnalysis:
 
         return maps
 
-    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
         """It displays the last generated cts skymaps.
 
         Args:
-            maplistFile (str): the path to the .maplist file.
-            singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            smooth (bool): if set to true, gaussian smoothing will be computed
-            sigma (float): value requested for computing gaussian smoothing
-            saveImage (bool): if set to true, saves the image into outdir directory
-            fileFormat (str): the format of the image
-            title (str): the title of the image
-            cmap (str): Matplotlib colormap
-            regFilePath (str): the relative or absolute path to the input reg file
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
-    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
         """It displays the last generated exp skymaps.
 
         Args:
-            maplistFile (str): the path to the .maplist file.
-            singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            smooth (bool): if set to true, gaussian smoothing will be computed
-            sigma (float): value requested for computing gaussian smoothing
-            saveImage (bool): if set to true, saves the image into outdir directory
-            fileFormat (str): the format of the image
-            title (str): the title of the image
-            cmap (str): Matplotlib colormap
-            regFilePath (str): the relative or absolute path to the input reg file
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
-    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
         """It displays the last generated gas skymaps.
 
         Args:
-            maplistFile (str): the path to the .maplist file.
-            singleMode (bool): if set to true, all maps will be displayed as subplots on a single figure.
-            smooth (bool): if set to true, gaussian smoothing will be computed
-            sigma (float): value requested for computing gaussian smoothing
-            saveImage (bool): if set to true, saves the image into outdir directory
-            fileFormat (str): the format of the image
-            title (str): the title of the image
-            cmap (str): Matplotlib colormap
-            regFilePath (str): the relative or absolute path to the input reg file
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
 
 
@@ -709,26 +712,29 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.getSupportedCatalogs()
 
-    def loadSourcesFromCAT2(self, rangeDist = (0, float("inf"))):
-        """It loads the sources from the AGILE catalog (version 2).
+    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf"))):
+        """It loads the sources from a catalog.
 
         You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
 
-        If the energy range (emin, emax) specified by the user in the configuration file is different from the range (cat2_emin, cat2_emax),
-        the flux of every source in the CAT2 will be scaled.
+        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file is different from the catalog's energy range,
+        the flux of every source will be scaled.
 
         Args:
-            rangeDist (tuple): a interval (min, max) of distances (degree)
+            catalogName (str): the catalog name (2AGL, 4FGL).
+            rangeDist (tuple, optional): a interval (min, max) of distances (degree). It defaults to (0, +inf).
         Raises:
+            FileNotFoundError: if the catalog is not supported.
             SourceModelFormatNotSupported: if the input file format is not supported.
             SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
 
         Returns:
             The List of sources that have been succesfully loaded into the SourcesLibrary.
         """
-        return self.sourcesLibrary.loadSourcesFromCAT2(rangeDist)
+        return self.sourcesLibrary.loadSourcesFromCatalog(catalogName, rangeDist)
 
-    def loadSources(self, sourcesFilepath, rangeDist = (0, float("inf"))):
+
+    def loadSourcesFromFile(self, sourcesFilepath, rangeDist = (0, float("inf"))):
         """It loads the sources, reading them from a file. Three different types \
         of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
 
@@ -744,7 +750,7 @@ class AGAnalysis:
         Returns:
             The List of sources that have been succesfully loaded into the SourcesLibrary.
         """
-        return self.sourcesLibrary.loadSources(sourcesFilepath, rangeDist)
+        return self.sourcesLibrary.loadSourcesFromFile(sourcesFilepath, rangeDist)
 
     def selectSources(self, selection, quiet=False):
         """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
@@ -1032,7 +1038,7 @@ class AGAnalysis:
         return isoCoeff, galCoeff
 
 
-    def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=False, sigma=4, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None):
+    def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor=None):
 
         if self.currentMapList.getFile() is None and maplistFile is None:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
@@ -1076,7 +1082,7 @@ class AGAnalysis:
 
         if singleMode:
 
-            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, sigma=sigma, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFilePath=regFilePath)
+            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFilePath=regFilePath, catalogRegions=catalogRegions, catalogRegionsColor=catalogRegionsColor)
 
             outputs.append(outputfile)
 
@@ -1084,7 +1090,7 @@ class AGAnalysis:
 
             for idx,title in enumerate(titles):
 
-                outputfile = self.plottingUtils.displaySkyMap(files[idx], smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath)
+                outputfile = self.plottingUtils.displaySkyMap(files[idx], smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
                 outputs.append(outputfile)
 

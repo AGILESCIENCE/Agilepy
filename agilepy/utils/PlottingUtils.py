@@ -53,12 +53,16 @@ class PlottingUtils(metaclass=Singleton):
 
         # self._updateRC()
 
+    def getSupportedRegionsCatalogs(self):
+        return {
+            "2AGL":"$AGILE/catalogs/2AGL_2.reg"
+        }
 
-    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, sigma, saveImage, fileFormat, titles, cmap, regFilePath):
+    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
         # self._updateRC()
 
-        if regFilePath:
-            regFilePath = self.config._expandEnvVar(regFilePath)
+        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
+        regionsColors = ["green", catalogRegionsColor]
 
         numberOfSubplots = len(fitsFilepaths)
 
@@ -78,8 +82,8 @@ class PlottingUtils(metaclass=Singleton):
             hdu = fits.open(fitsFilepaths[idx])[0]
             wcs = WCS(hdu.header)
 
-            if smooth:
-                data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
+            if smooth > 0:
+                data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
             else:
                 data = hdu.data
 
@@ -87,7 +91,7 @@ class PlottingUtils(metaclass=Singleton):
 
             fig.colorbar(im, ax=axs[row][col])
 
-            axs[row][col] = self._configAxes(axs[row][col], titles[idx], regFilePath, wcs)
+            axs[row][col] = self._configAxes(axs[row][col], titles[idx], regionsFiles, regionsColors, wcs)
             #cmap = plt.cm.CMRmap
             #cmap.set_bad(color='black')
         if hideLast:
@@ -107,16 +111,16 @@ class PlottingUtils(metaclass=Singleton):
             filename = self.outdir.joinpath(prefix+"_"+skymaptype+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(str(filename))
             self.logger.info(self, "Produced: %s", filename)
-            return filename
+            return str(filename)
         else:
             plt.show()
             return None
 
-    def displaySkyMap(self, fitsFilepath, smooth, sigma, saveImage, fileFormat, title, cmap, regFilePath):
+    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor):
         # self._updateRC()
 
-        if regFilePath:
-            regFilePath = self.config._expandEnvVar(regFilePath)
+        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
+        regionsColors = ["green", catalogRegionsColor]
 
 
         hdu = fits.open(fitsFilepath)[0]
@@ -124,14 +128,14 @@ class PlottingUtils(metaclass=Singleton):
 
         fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw={'projection': wcs}, figsize=(12, 12))
 
-        if smooth:
-            data = ndimage.gaussian_filter(hdu.data, sigma=float(sigma), order=0, output=float)
+        if smooth > 0:
+            data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
         else:
             data = hdu.data
 
         plt.imshow(data, origin='lower', norm=None, cmap=cmap)
 
-        ax = self._configAxes(ax, title, regFilePath, wcs)
+        ax = self._configAxes(ax, title, regionsFiles, regionsColors, wcs)
 
         #cmap = plt.cm.CMRmap
         #cmap.set_bad(color='black')
@@ -143,7 +147,7 @@ class PlottingUtils(metaclass=Singleton):
             plt.savefig(filename)
             self.logger.info(self, "Produced: %s", filename)
             print("filename: ",filename)
-            return filename
+            return str(filename)
         else:
             plt.show()
             return None
@@ -266,7 +270,24 @@ class PlottingUtils(metaclass=Singleton):
 
         return filePath
 
+    def _getRegionsFiles(self, regFilePath, catalogRegions):
 
+        regionsFiles = []
+
+        if regFilePath:
+            regFilePath = self.config._expandEnvVar(regFilePath)
+            self.logger.info(self, "The region catalog %s will be loaded.", regFilePath)
+
+        regionsFiles.append(regFilePath)
+
+        regionsFilesDict = self.getSupportedRegionsCatalogs()
+        if catalogRegions in regionsFilesDict.keys():
+            catalogRegions = self.config._expandEnvVar(regionsFilesDict[catalogRegions])
+            self.logger.info(self, "The region catalog %s will be loaded.", catalogRegions)
+
+        regionsFiles.append(catalogRegions)
+
+        return regionsFiles
 
     def _updateRC(self):
         twocolumns = self.config.getConf("plotting","twocolumns")
@@ -307,18 +328,19 @@ class PlottingUtils(metaclass=Singleton):
 
         plt.rcParams.update(params)
 
-    def _configAxes(self, ax, title, regionFile, wcs):
+    def _configAxes(self, ax, title, regionFiles, regionsColors, wcs):
 
         if title:
             ax.set_title(title, fontsize='large')
 
 
         # interpolation = "gaussian",
-        if regionFile is not None:
-            regions = read_ds9(regionFile)
-            for region in regions:
-                pixelRegion = region.to_pixel(wcs=wcs)
-                pixelRegion.plot(ax=ax, color="green")
+        for idx, regionFile in enumerate(regionFiles):
+            if regionFile is not None:
+                regions = read_ds9(regionFile)
+                for region in regions:
+                    pixelRegion = region.to_pixel(wcs=wcs)
+                    pixelRegion.plot(ax=ax, edgecolor=regionsColors[idx])
 
         if "GLON" in wcs.wcs.ctype[0]:
             ax.set_xlabel('Galactic Longitude')
