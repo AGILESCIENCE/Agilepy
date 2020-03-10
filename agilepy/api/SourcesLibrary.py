@@ -397,6 +397,9 @@ class SourcesLibrary:
 
         multiOutput.multiUL.setAttributes(value = allValues[57])
 
+        multiOutput.multiExp.setAttributes(value = allValues[59])
+
+
         multiOutput.multiErgLog.setAttributes(value = allValues[64])
         multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
 
@@ -423,6 +426,9 @@ class SourcesLibrary:
 
         multiOutput.startDataTT.setAttributes(value = allValues[99])
         multiOutput.endDataTT.setAttributes(value = allValues[100])
+
+        multiOutput.multiExpRatio.setAttributes(value = allValues[109])
+
 
         return multiOutput
 
