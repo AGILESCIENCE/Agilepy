@@ -112,9 +112,11 @@ class AGAnalysis:
         self.config.attach(self.currentMapList, "galcoeff")
         self.config.attach(self.currentMapList, "isocoeff")
 
+    """
     def __del__(self):
         self.destroy()
-
+    """
+    
     def destroy(self):
         self.sourcesLibrary.destroy()
         self.logger.reset()
@@ -500,6 +502,7 @@ class AGAnalysis:
         isoCoeff, galCoeff = self._extractBkgCoeff(sourceFiles, sourceName)
 
         self.sourcesLibrary.restoreSL()
+
 
         self.config.setOptions(galcoeff=galCoeff, isocoeff=isoCoeff)
 
