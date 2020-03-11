@@ -258,14 +258,19 @@ class AGAnalysisUT(unittest.TestCase):
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         ag.setOptions(glon=78.2375, glat=2.12298)
+
+        ag.setOptions(tmin=456361778.000000, tmax=456537945.000000, timetype="TT")
+
         ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = ag.lightCurve("2AGLJ2021+4029")
+        lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=90000)
+
+        print(lightCurveData)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
+    """
 
-
-
+    """
     def test_display_sky_maps_singlemode_show(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)

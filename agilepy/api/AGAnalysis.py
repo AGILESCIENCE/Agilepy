@@ -38,6 +38,7 @@ from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi
 
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.MapList import MapList
@@ -682,7 +683,7 @@ class AGAnalysis:
 
         binDirectories = os.listdir(lcAnalysisDataDir)
 
-        lcData = "t_start t_end sqrt_ts flux flux_err flux_ul\n"
+        lcData = "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
 
         for bd in binDirectories:
 
@@ -1012,16 +1013,26 @@ class AGAnalysis:
 
     def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
 
+        # "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
+
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
-        tstart = multiOutput.get("startDataTT", strRepr=True)
-        tstop = multiOutput.get("endDataTT", strRepr=True)
         sqrtTS = multiOutput.get("multiSqrtTS", strRepr=True)
+
+        tstartTT = multiOutput.get("startDataTT", strRepr=True)
+        tstopTT = multiOutput.get("endDataTT", strRepr=True)
+
+        tstartMJD = AstroUtils.time_tt_to_mjd(tstartTT)
+        tstopMJD = AstroUtils.time_tt_to_mjd(tstopTT)
+
+        tstartUTC = AstroUtils.time_mjd_to_utc(tstartMJD)
+        tstopUTC = AstroUtils.time_mjd_to_utc(tstopMJD)
+
         flux = multiOutput.get("multiSqrtTS", strRepr=True)
         fluxErr = multiOutput.get("multiFluxErr", strRepr=True)
         fluxUL = multiOutput.get("multiUL", strRepr=True)
 
-        return f"{tstart} {tstop} {sqrtTS} {flux} {fluxErr} {fluxUL}"
+        return f"{sqrtTS} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {flux} {fluxErr} {fluxUL}"
 
     def _extractBkgCoeff(self, sourceFiles, sourceName):
 
