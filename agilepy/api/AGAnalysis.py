@@ -712,14 +712,14 @@ class AGAnalysis:
                     tstartUTC = AstroUtils.time_mjd_to_utc(tstartMJD)
                     tstopUTC = AstroUtils.time_mjd_to_utc(tstopMJD)
 
-                    lcRow = f"{lcDataDict["sqrtTS"]} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {lcDataDict["flux"]} {lcDataDict["fluxErr"]} {lcDataDict["fluxUL"]}\n"
+                    lcRow = f"{lcDataDict['sqrtTS']} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {lcDataDict['flux']} {lcDataDict['fluxErr']} {lcDataDict['fluxUL']}\n"
 
                     lcData += lcRow
 
                     timecounter += 1
 
         self.logger.info(self, f"{lcData}")
-        
+
         return lcData
 
     ############################################################################
