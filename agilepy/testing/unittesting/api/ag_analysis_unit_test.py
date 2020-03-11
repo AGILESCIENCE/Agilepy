@@ -290,28 +290,31 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
-        ag.setOptions(   tmin=456461778.0, \
-                         tmax=456537945.0, \
+        ag.setOptions(   tmin=456461778.0,
+                         tmax=456537945.0,
                          timetype="TT",
                          galcoeff=[-1, -1, -1, -1],
-                         isocoeff=[-1, -1, -1, -1]
+                         isocoeff=[10, 12, 10, 12]
                      )
 
+        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
 
-        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0.5)
+        print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
-        print("galBkg:",galBkg)
 
-
-        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
+        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[-1,-1,-1,-1], pastTimeWindow=0)
+        print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
-        print("galBkg:",galBkg)
 
 
-        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.6, 0.8, 0.6, 0.8], pastTimeWindow=0.5)
+        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0,0,0,0], pastTimeWindow=0)
+        print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
-        print("galBkg:",galBkg)
 
+
+        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
+        print("\ngalBkg:",galBkg)
+        print("isoBkg:",isoBkg)
 
         ag.destroy()
 

@@ -116,7 +116,7 @@ class AGAnalysis:
     def __del__(self):
         self.destroy()
     """
-    
+
     def destroy(self):
         self.sourcesLibrary.destroy()
         self.logger.reset()
@@ -454,10 +454,11 @@ class AGAnalysis:
         configBKP = AgilepyConfig.getCopy(self.config)
         configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
 
+        ######################################################## Own MapList
+        maplistObj = MapList(self.logger)
+        configBKP.attach(maplistObj, "galcoeff")
+        configBKP.attach(maplistObj, "isocoeff")
 
-        ############################################################## galcoeff
-        if galcoeff is not None:
-            configBKP.setOptions(galcoeff=galcoeff)
 
 
         ################################################################# times
@@ -477,10 +478,17 @@ class AGAnalysis:
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
 
-        maplistObj = MapList(self.logger)
 
         ######################################################## maps generation
         maplistFilePath = self.generateMaps(config = configBKP, maplistObj = maplistObj)
+
+
+
+
+        ############################################################## galcoeff
+        if galcoeff is not None:
+            configBKP.setOptions(galcoeff=galcoeff)
+
 
 
         #################################### fixflag = 0 except for input source

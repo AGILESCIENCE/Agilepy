@@ -55,12 +55,14 @@ class AgilepyConfig(Observable):
         self.initialized = False
         self.conf = None
 
+
     @staticmethod
     def getCopy(copyFrom):
         ac = AgilepyConfig()
         ac.conf = deepcopy(copyFrom.conf)
         ac.initialized = True
         return ac
+
 
     def loadConfigurations(self, configurationFilePath, validate = True):
 
@@ -85,6 +87,7 @@ class AgilepyConfig(Observable):
 
         self.initialized = True
 
+
     def validateConfiguration(self):
 
         errors = {}
@@ -98,6 +101,7 @@ class AgilepyConfig(Observable):
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
 
     def getSectionOfOption(self, optionName):
 
@@ -190,7 +194,6 @@ class AgilepyConfig(Observable):
             self.notify(optionName, self.conf[optionSection][optionName])
 
 
-
     def getConf(self, key=None, subkey=None):
         if key and key in self.conf:
             if subkey and subkey in self.conf[key]:
@@ -262,7 +265,6 @@ class AgilepyConfig(Observable):
 
         return False
 
-
     @staticmethod
     def _validateOptioNameAndValue(optionName, optionValue):
 
@@ -278,6 +280,7 @@ class AgilepyConfig(Observable):
             for idx, elem in enumerate(optionValue):
                 if not isinstance(elem, basicType):
                     return (False, f"The {idx}th elem of {optionName} has not the expected data type {basicType}, but: {type(elem)}")
+
         elif complexType is None:
             if not isinstance(optionValue, basicType):
                 return (False, f"The {optionName} has not the expected data type {basicType}, but: {type(optionValue)}")
@@ -379,7 +382,7 @@ class AgilepyConfig(Observable):
         fovbinnumber = confDict["maps"]["fovbinnumber"]
         numberOfMaps = numberOfEnergyBins*fovbinnumber
 
-        # if None
+
         if bkgCoeffVal is None:
             confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
 
@@ -402,8 +405,6 @@ class AgilepyConfig(Observable):
         else:
             print(f"Something's wrong..bkgCoeffName: {bkgCoeffName}, bkgCoeffVal: {bkgCoeffVal}")
             confDict["model"][bkgCoeffName] = None
-
-
 
     @staticmethod
     def _setPhaseCode(confDict):
@@ -457,16 +458,12 @@ class AgilepyConfig(Observable):
         else:
             confDict["mle"]["loccl"] = 1.38629
 
-
     @staticmethod
     def _loadFromYaml(file):
 
         with open(file, 'r') as yamlfile:
 
             return yaml.safe_load(yamlfile)
-
-
-
 
     @staticmethod
     def _validateMinMax(confDict, section, optionMin, optionMax):
@@ -482,8 +479,6 @@ class AgilepyConfig(Observable):
             errors[section+"/"+optionMin] = "%s cannot be equal to %s" % (optionMin, optionMax)
 
         return errors
-
-
 
     @staticmethod
     def _validateLOCCL(confDict):
