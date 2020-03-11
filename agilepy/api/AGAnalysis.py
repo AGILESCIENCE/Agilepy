@@ -29,7 +29,7 @@ import os
 from os.path import join, splitext
 from pathlib import Path
 from ntpath import basename
-from time import time
+from time import time, strftime
 from shutil import rmtree
 # from multiprocessing import Process
 
@@ -52,35 +52,25 @@ from agilepy.utils.CustomExceptions import AGILENotFoundError, \
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
 
-    This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour
-    and a ``xml descriptor file`` containing the list of the sources you want to take in account in your analysis.
-
-    Class attributes:
-
-    Attributes:
-        config (:obj:`AgilepyConfig`): it is used to read/update configuration values.
-        logger (:obj:`AgilepyLogger`): it is used to log messages with different importance levels.
-        sourcesLibrary (:obj:`SourcesLibrary`): it contains the list of the sources and several useful methods.
+    This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
 
     """
 
-    def __init__(self, configurationFilePath, sourcesFilePath = None, overwriteOutputDir = False):
+    def __init__(self, configurationFilePath, sourcesFilePath = None):
         """AGAnalysis constructor.
 
         Args:
             configurationFilePath (str): a relative or absolute path to the yaml configuration file.
             sourcesFilePath (str, optional): a relative or absolute path to a file containing the description of the sources. Defaults to None. \
             Three different types of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
-            overwriteOutputDir (bool, optional): if True and if the output directory is not empty, the output directory content is deleted. Defaults to False.
 
         Raises:
-            FileExistsError: if the output directory already exists.
             AGILENotFoundError: if the AGILE environment variable is not set.
             PFILESNotFoundError: if the PFILES environment variable is not set.
 
         Example:
             >>> from agilepy.api import AGAnalysis
-            >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml', removeOutputDir=True)
+            >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml')
 
         """
 
@@ -88,25 +78,26 @@ class AGAnalysis:
 
         self.config.loadConfigurations(configurationFilePath, validate=True)
 
-        outdir = self.config.getConf("output","outdir")
+        outdir = self.config.getConf("output","outdir")+"_"+strftime("%Y%m%d-%H%M%S")
 
-        if overwriteOutputDir and Path(outdir).exists():
-            rmtree(outdir)
-            Path(outdir).mkdir(parents=True, exist_ok=True)
+        self.config.setOptions(outdir=outdir)
 
+        Path(outdir).mkdir(parents=True, exist_ok=True)
 
-        if not overwriteOutputDir and Path(outdir).exists():
-            raise FileExistsError("The output directory %s already exists! Please, delete it or specify another output directory!"%(outdir))
 
         self.logger = AgilepyLogger()
 
         self.logger.initialize(outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
+
+
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
         if sourcesFilePath:
 
             self.sourcesLibrary.loadSourcesFromFile(sourcesFilePath)
+
+
 
         self.plottingUtils = PlottingUtils(self.config, self.logger)
 
@@ -116,12 +107,16 @@ class AGAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
-        self.currentMapList = MapList()
+        self.currentMapList = MapList(self.logger)
         # MapList Observes the observable AgilepyConfig
         self.config.attach(self.currentMapList, "galcoeff")
         self.config.attach(self.currentMapList, "isocoeff")
 
-
+    """
+    def __del__(self):
+        self.destroy()
+    """
+    
     def destroy(self):
         self.sourcesLibrary.destroy()
         self.logger.reset()
@@ -431,7 +426,8 @@ class AGAnalysis:
                 it's 0, the background coefficients will be estimated within the [tmin, tmax] interval.
 
         Returns:
-            isoCoeff, galCoeff (List, List): the estimates of the background coefficients.
+            galactic coefficients, isotropic coefficients, maplist file (List, List, str): the estimates of the background coefficients and the \
+                path to the updated maplist file.
 
 
         """
@@ -481,7 +477,7 @@ class AGAnalysis:
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
 
-        maplistObj = MapList()
+        maplistObj = MapList(self.logger)
 
         ######################################################## maps generation
         maplistFilePath = self.generateMaps(config = configBKP, maplistObj = maplistObj)
@@ -507,11 +503,12 @@ class AGAnalysis:
 
         self.sourcesLibrary.restoreSL()
 
+
         self.config.setOptions(galcoeff=galCoeff, isocoeff=isoCoeff)
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
-        return isoCoeff, galCoeff
+        return galCoeff, isoCoeff, maplistFilePath
 
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):

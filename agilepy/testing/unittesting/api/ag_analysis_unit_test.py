@@ -45,36 +45,6 @@ class AGAnalysisUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-    def test_overwriting_output_directory(self):
-
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
-
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
-
-        ag = AGAnalysis(self.agilepyconfPath, overwriteOutputDir=False)
-
-        files = [f for f in os.listdir(outDir) if not f.startswith('.')]
-
-        self.assertEqual(True, outDir.is_dir())
-        self.assertEqual(True, len(files) > 1)
-        logfilename1 = os.listdir(outDir.joinpath("logs"))
-
-        self.assertRaises(FileExistsError, AGAnalysis, self.agilepyconfPath, overwriteOutputDir=False)
-
-        ag.destroy()
-        sleep(2)
-
-        ag = AGAnalysis(self.agilepyconfPath, overwriteOutputDir=True)
-
-        self.assertEqual(True, outDir.is_dir())
-        self.assertEqual(True, len(files) > 1)
-        logfilename2 = os.listdir(outDir.joinpath("logs"))
-
-        self.assertEqual(True, logfilename1.pop() != logfilename2.pop())
-
-        ag.destroy()
-
     def test_generate_maps(self):
 
         outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
@@ -328,17 +298,17 @@ class AGAnalysisUT(unittest.TestCase):
                      )
 
 
-        isoBkg, galBkg = ag.calcBkg('CYGX3', pastTimeWindow=0.5)
+        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0.5)
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
 
 
-        isoBkg, galBkg = ag.calcBkg('CYGX3', pastTimeWindow=0)
+        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
 
 
-        isoBkg, galBkg = ag.calcBkg('CYGX3', galcoeff=[0.6, 0.8, 0.6, 0.8], pastTimeWindow=0.5)
+        isoBkg, galBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.6, 0.8, 0.6, 0.8], pastTimeWindow=0.5)
         print("isoBkg:",isoBkg)
         print("galBkg:",galBkg)
 

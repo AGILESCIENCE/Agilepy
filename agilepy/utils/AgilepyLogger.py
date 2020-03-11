@@ -28,7 +28,6 @@
 import sys
 import logging
 from pathlib import Path
-from time import strftime
 
 from agilepy.utils.CustomExceptions import LoggerTypeNotFound
 
@@ -43,7 +42,7 @@ class AgilepyLogger():
 
         self.outputDirectory = Path(outputDirectory).joinpath('logs')
 
-        self.logfilePath = self.outputDirectory.joinpath("%s_%s.log" % (logFilenamePrefix, strftime("%Y%m%d-%H%M%S")) )
+        self.logfilePath = self.outputDirectory.joinpath(f"{logFilenamePrefix}").with_suffix(".log")
 
         if self.initialized:
 

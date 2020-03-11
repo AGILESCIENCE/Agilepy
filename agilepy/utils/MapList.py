@@ -31,7 +31,8 @@ from typing import List
 from agilepy.utils.Observer import Observer
 
 class MapList(Observer):
-    def __init__(self):
+    def __init__(self, logger=None):
+        self.logger = logger
         self.outputFilePath = None
         self.ctsMap = []
         self.expMap = []
@@ -57,15 +58,22 @@ class MapList(Observer):
                 for idx,ctsmap in enumerate(self.ctsMap):
                     mlf.write(ctsmap+" "+self.expMap[idx]+" "+self.gasMap[idx]+" "+self.bincenter[idx]+" "+self.galcoeff[idx]+" "+self.isocoeff[idx]+"\n")
 
+        if self.logger:
+            self.logger.info(self, "Produced: %s", str(outputFilePath))
+
         return str(outputFilePath)
 
     def updateBkgCoeffs(self, galcoeff=None, isocoeff=None):
 
         if galcoeff is not None and isinstance(galcoeff, List) and len(galcoeff) == len(self.ctsMap):
             self.galcoeff = [str(g) for g in galcoeff]
+            if self.logger:
+                self.logger.info(self, f"Updating galactic coefficients: {self.galcoeff}")
 
         if isocoeff is not None and isinstance(isocoeff, List) and len(isocoeff) == len(self.ctsMap):
             self.isocoeff = [str(i) for i in isocoeff]
+            if self.logger:
+                self.logger.info(self, f"Updating isotropic coefficients: {self.isocoeff}")
 
         return self.writeToFile()
 
