@@ -665,7 +665,7 @@ class AGAnalysis:
         """
 
 
-        lcData = self.getLightCurveData(sourceName, lcAnalysisDataDir)
+        lcData = self.getLightCurveData(sourceName, lcAnalysisDataDir, binsize)
 
         lcOutputFilePath = Path(lcAnalysisDataDir).joinpath(f"light_curve_{tstart}_{tstop}.txt")
 
@@ -678,7 +678,7 @@ class AGAnalysis:
 
         return str(lcOutputFilePath)
 
-    def getLightCurveData(self, sourceName, lcAnalysisDataDir):
+    def getLightCurveData(self, sourceName, lcAnalysisDataDir, binsize):
 
 
         binDirectories = os.listdir(lcAnalysisDataDir)
@@ -691,6 +691,8 @@ class AGAnalysis:
 
             mleOutputFiles = os.listdir(mleOutputDirectories)
 
+            timecounter = 0
+
             for mleOutputFile in mleOutputFiles:
 
                 mleOutputFilename, mleOutputFileExtension = splitext(mleOutputFile)
@@ -699,11 +701,25 @@ class AGAnalysis:
 
                     mleOutputFilepath = mleOutputDirectories.joinpath(mleOutputFile)
 
-                    lcRow = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
+                    lcDataDict = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
 
-                    lcData += lcRow+"\n"
+                    tstartTT = lcDataDict["tstartTT"] * binsize * timecounter
+                    tstopTT = lcDataDict["tstartTT"] * binsize * timecounter
+
+                    tstartMJD = AstroUtils.time_tt_to_mjd(tstartTT)
+                    tstopMJD = AstroUtils.time_tt_to_mjd(tstopTT)
+
+                    tstartUTC = AstroUtils.time_mjd_to_utc(tstartMJD)
+                    tstopUTC = AstroUtils.time_mjd_to_utc(tstopMJD)
+
+                    lcRow = f"{lcDataDict["sqrtTS"]} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {lcDataDict["flux"]} {lcDataDict["fluxErr"]} {lcDataDict["fluxUL"]}\n"
+
+                    lcData += lcRow
+
+                    timecounter += 1
 
         self.logger.info(self, f"{lcData}")
+        
         return lcData
 
     ############################################################################
@@ -1011,28 +1027,22 @@ class AGAnalysis:
 
         return out
 
-    def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
+    def _extractLightCurveDataFromSourceFile(self, sourceFilePath, binsize):
 
         # "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
-        sqrtTS = multiOutput.get("multiSqrtTS", strRepr=True)
+        lcDataDict = {
+            "sqrtTS" : multiOutput.get("multiSqrtTS", strRepr=True),
+            "tstartTT" : float(multiOutput.get("startDataTT", strRepr=True)),
+            "tstopTT" : float(multiOutput.get("endDataTT", strRepr=True)),
+            "flux" : multiOutput.get("multiSqrtTS", strRepr=True),
+            "fluxErr" : multiOutput.get("multiFluxErr", strRepr=True),
+            "fluxUL" : multiOutput.get("multiUL", strRepr=True)
+        }
 
-        tstartTT = multiOutput.get("startDataTT", strRepr=True)
-        tstopTT = multiOutput.get("endDataTT", strRepr=True)
-
-        tstartMJD = AstroUtils.time_tt_to_mjd(tstartTT)
-        tstopMJD = AstroUtils.time_tt_to_mjd(tstopTT)
-
-        tstartUTC = AstroUtils.time_mjd_to_utc(tstartMJD)
-        tstopUTC = AstroUtils.time_mjd_to_utc(tstopMJD)
-
-        flux = multiOutput.get("multiSqrtTS", strRepr=True)
-        fluxErr = multiOutput.get("multiFluxErr", strRepr=True)
-        fluxUL = multiOutput.get("multiUL", strRepr=True)
-
-        return f"{sqrtTS} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {flux} {fluxErr} {fluxUL}"
+        return lcDataDict
 
     def _extractBkgCoeff(self, sourceFiles, sourceName):
 
