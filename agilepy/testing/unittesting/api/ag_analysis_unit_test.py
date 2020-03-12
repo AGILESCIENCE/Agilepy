@@ -70,7 +70,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        outDir = ag.getOption("outdir")
+        outDir = Path(ag.getOption("outdir"))
 
         ag.config.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8])
         ag.config.setOptions(isocoeff=[10, 15, 10, 15])
