@@ -49,12 +49,12 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        outDir = ag.getOptionValue("outdir")
+        outDir = ag.getOption("outdir")
 
         maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
 
-        maps = os.listdir(outDir.joinpath("maps"))
+        maps = os.listdir(Path(outDir).joinpath("maps"))
         self.assertEqual(16, len(maps))
 
         lines = None
@@ -67,9 +67,10 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_update_gal_iso(self):
 
+
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        outDir = ag.getOptionValue("outdir")
+        outDir = ag.getOption("outdir")
 
         ag.config.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8])
         ag.config.setOptions(isocoeff=[10, 15, 10, 15])
@@ -83,6 +84,7 @@ class AGAnalysisUT(unittest.TestCase):
         for idx, row in enumerate(matrix):
             self.assertEqual(str(galcoeffs[idx]), row[4])
             self.assertEqual(str(isocoeffs[idx]), row[5])
+
 
         if outDir.joinpath("maps").exists() and outDir.joinpath("maps").is_dir():
             shutil.rmtree(outDir.joinpath("maps"))
