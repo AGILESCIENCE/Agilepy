@@ -1027,7 +1027,7 @@ class AGAnalysis:
 
         return out
 
-    def _extractLightCurveDataFromSourceFile(self, sourceFilePath, binsize):
+    def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
 
         # "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
 
