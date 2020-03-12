@@ -624,6 +624,9 @@ class AGAnalysis:
         tstart = bins[0][0]
         tstop = bins[-1][1]
 
+
+        self.logger.info(self,"[LC] Number of temporal bins: %d. tstart=%f tstop=%f", len(bins), tstart, tstop)
+
         lcAnalysisDataDir = self.config.getOptionValue("outdir") + "/lc"
 
         binsForProcesses = AGAnalysis._chunkList(bins, processes)
@@ -633,9 +636,14 @@ class AGAnalysis:
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
 
-        self.logger.info(self, "Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
+        self.logger.info(self, "[LC] Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
 
-        for t1,t2 in bins:
+        for idx, bin in enumerate(bins):
+
+            t1 = bin[0]
+            t2 = bin[1]
+
+            self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", tstart, tstop, idx+1, len(bins))
 
             binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
 
@@ -685,13 +693,13 @@ class AGAnalysis:
 
         lcData = "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
 
+        timecounter = 0
+
         for bd in binDirectories:
 
             mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd).joinpath("mle")
 
             mleOutputFiles = os.listdir(mleOutputDirectories)
-
-            timecounter = 0
 
             for mleOutputFile in mleOutputFiles:
 
@@ -703,8 +711,8 @@ class AGAnalysis:
 
                     lcDataDict = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
 
-                    tstartTT = lcDataDict["tstartTT"] * binsize * timecounter
-                    tstopTT = lcDataDict["tstartTT"] * binsize * timecounter
+                    tstartTT = lcDataDict["tstartTT"] + binsize * timecounter
+                    tstopTT = lcDataDict["tstopTT"] + binsize * timecounter
 
                     tstartMJD = AstroUtils.time_tt_to_mjd(tstartTT)
                     tstopMJD = AstroUtils.time_tt_to_mjd(tstopTT)
