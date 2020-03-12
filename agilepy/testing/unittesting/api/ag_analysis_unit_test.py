@@ -47,9 +47,10 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_generate_maps(self):
 
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
-
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = ag.getOptionValue("outdir")
+
         maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
 
@@ -66,8 +67,9 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_update_gal_iso(self):
 
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = ag.getOptionValue("outdir")
 
         ag.config.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8])
         ag.config.setOptions(isocoeff=[10, 15, 10, 15])
@@ -82,7 +84,9 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(str(galcoeffs[idx]), row[4])
             self.assertEqual(str(isocoeffs[idx]), row[5])
 
-        shutil.rmtree(outDir.joinpath("maps"))
+        if outDir.joinpath("maps").exists() and outDir.joinpath("maps").is_dir():
+            shutil.rmtree(outDir.joinpath("maps"))
+
         outDir.joinpath("maps").mkdir(parents=False, exist_ok=True)
 
         ag.config.setOptions(galcoeff=[0,0,0,0])
