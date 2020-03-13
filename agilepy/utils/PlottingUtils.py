@@ -37,6 +37,8 @@ from os.path import join
 import numpy as np
 from pathlib import Path
 from time import strftime
+import plotly.graph_objects as go
+import pandas as pd
 
 from agilepy.utils.Utils import Singleton
 
@@ -363,3 +365,43 @@ class PlottingUtils(metaclass=Singleton):
         row = q
         col = r
         return row, col
+
+    def plot_lc(self, filename):
+        data = pd.read_csv(filename, header=0, sep=" ")
+        print(data)
+        data["(6)time_mjd"] = data["(6)time_mjd"].str.replace("/", " ")
+
+        new_data = pd.DataFrame()
+        new_data[["t1", "t2"]] = data["(6)time_mjd"].str.split(" ", n=1, expand=True).astype('float64')
+        new_data["tm"] = new_data.mean(axis=1)
+        new_data["x_plus"] = new_data["t2"] - new_data["tm"]
+        new_data["x_minus"] = new_data["tm"] - new_data["t1"]
+        print(new_data)
+        new_data["flux"] = data["(9)flux*10^-8"]
+        new_data["flux_err"] = data["(10)flux_err*10^-8"]
+        new_data["sqrts"] = data["(0)sqrtts"]
+        new_data["flux_ul"] = data["(11)flux_ul*10^-8"]
+
+        sel1 = new_data.loc[new_data["sqrts"] >= 3]
+        sel2 = new_data.loc[new_data["sqrts"] < 3]
+
+        fig = go.Figure()
+
+        fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
+                                  error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
+                                               arrayminus=sel2["x_minus"]), mode='markers',
+                                  marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
+        fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
+                                  error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
+                                               arrayminus=sel1["x_minus"]),
+                                  error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
+                                  name="sqrts >=3"))
+
+        # fig.add_traces(go.Scatter(x=new_data["tm"], y=[60]*len(new_data["tm"]), line=dict(dash="dash"), name="line1"))
+        # fig.add_traces(go.Scatter(x=new_data["tm"], y=[40] * len(new_data["tm"]), line=dict(dash="dash"), name="line2"))
+
+        # fig.update_xaxes(showline=True, linecolor="black")
+        # fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
+        # fig.update_layout(legend=dict(font=dict(size=20)))
+
+        fig.show()
