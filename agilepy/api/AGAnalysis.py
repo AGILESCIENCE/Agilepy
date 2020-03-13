@@ -26,7 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from os.path import join, splitext
+from os.path import join, splitext, expandvars
 from pathlib import Path
 from ntpath import basename
 from time import time, strftime
@@ -48,7 +48,8 @@ from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            PFILESNotFoundError, \
                                            ScienceToolInputArgMissing, \
                                            MaplistIsNone, \
-                                           SourceNotFound
+                                           SourceNotFound, \
+                                           EnvironmentVariableNotExpanded
 
 class AGAnalysis:
     """This class contains the high-level API methods you can use to run scientific analysis.
@@ -129,6 +130,112 @@ class AGAnalysis:
     ############################################################################
     # utility                                                                  #
     ############################################################################
+
+
+    @staticmethod
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl):
+        """Utility method to create a configuration file.
+
+        Args:
+            confFilePath (str):
+            userName (str):
+            sourceName (str):
+            tmin (float):
+            tmax (float):
+            glon (float):
+            glat (float):
+            outputDir (str):
+            verboselvl (int):
+
+        Returns:
+            None
+        """
+        analysisname = userName+"_"+sourceName
+
+        if "$" in outputDir:
+            expandedOutputDir = expandvars(outputDir)
+
+            if expandedOutputDir == outputDir:
+                print(f"Environment variable has not been expanded in {expanded}")
+                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {expanded}")
+
+        outputDir = Path(expandedOutputDir).joinpath(analysisname)
+
+        configuration = """
+input:
+  evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
+  logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
+
+output:
+  outdir: %s
+  filenameprefix: %s_product
+  logfilenameprefix: %s_log
+  verboselvl: %d
+
+selection:
+  tmin: %f
+  tmax: %f
+  timetype: %s
+  glon: %f
+  glat: %f
+  fovradmax: 60
+  albedorad: 80
+  proj: ARC
+
+maps:
+  mapsize: 40
+  spectralindex: 2.1
+  timestep: 160
+  binsize: 0.25
+  energybins:
+    - 100, 10000
+  fovbinnumber: 1
+
+model:
+  modelfile: null
+  galmode: 1
+  isomode: 1
+  galcoeff: null
+  isocoeff: null
+  emin_sources: 100
+  emax_sources: 10000
+
+mle:
+  ranal: 10
+  ulcl: 2
+  loccl: 95
+  expratioevaluation: yes
+  expratio_minthr: 0
+  expratio_maxthr: 15
+  expratio_size: 10
+
+        """%(str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
+
+        with open(confFilePath,"w") as cf:
+
+            cf.write(configuration)
+
+        print(configuration)
+
+    def deleteAnalysisDir(self):
+        """It deletes the output directory where all the products of the analysis are written.
+
+        Args:
+
+        Returns:
+            True if the directory is succesfully deleted, False otherwise.
+
+        """
+        outDir = Path(self.config.getConf("output", "outdir"))
+
+        if outDir.exists() and outDir.is_dir():
+            rmtree(outDir)
+            self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
+        else:
+            return False
+            self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
+
+        return True
 
     def setOptions(self, **kwargs):
         """It updates configuration options specifying one or more key=value pairs at once.
@@ -438,7 +545,7 @@ class AGAnalysis:
         ################################################################## checks
         self.sourcesLibrary.backupSL()
 
-        inputSource = self.selectSources(f'name == "{sourceName}"', quiet=True)
+        inputSource = self.selectSources(f'name == "{sourceName}"', show=False)
 
         if not inputSource:
             self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
@@ -518,7 +625,6 @@ class AGAnalysis:
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
         return galCoeff, isoCoeff, maplistFilePath
-
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
@@ -742,7 +848,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.getSupportedCatalogs()
 
-    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf"))):
+    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
         """It loads the sources from a catalog.
 
         You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
@@ -761,10 +867,9 @@ class AGAnalysis:
         Returns:
             The List of sources that have been succesfully loaded into the SourcesLibrary.
         """
-        return self.sourcesLibrary.loadSourcesFromCatalog(catalogName, rangeDist)
+        return self.sourcesLibrary.loadSourcesFromCatalog(catalogName, rangeDist, show = show)
 
-
-    def loadSourcesFromFile(self, sourcesFilepath, rangeDist = (0, float("inf"))):
+    def loadSourcesFromFile(self, sourcesFilepath, rangeDist = (0, float("inf")), show=False):
         """It loads the sources, reading them from a file. Three different types \
         of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
 
@@ -780,9 +885,9 @@ class AGAnalysis:
         Returns:
             The List of sources that have been succesfully loaded into the SourcesLibrary.
         """
-        return self.sourcesLibrary.loadSourcesFromFile(sourcesFilepath, rangeDist)
+        return self.sourcesLibrary.loadSourcesFromFile(sourcesFilepath, rangeDist, show = show)
 
-    def selectSources(self, selection, quiet=False):
+    def selectSources(self, selection, show=False):
         """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
 
         The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
@@ -806,7 +911,7 @@ class AGAnalysis:
         Returns:
             List of sources.
         """
-        return self.sourcesLibrary.selectSources(selection, quiet=quiet)
+        return self.sourcesLibrary.selectSources(selection, show =show)
 
     def getSources(self):
         """It returns all the sources.
@@ -816,7 +921,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.sources
 
-    def freeSources(self, selection, parameterName, free):
+    def freeSources(self, selection, parameterName, free, show=False):
         """It can set to True or False a parameter's ``free`` attribute of one or more source.
 
         Example of source model:
@@ -874,7 +979,7 @@ class AGAnalysis:
 
 
         """
-        return self.sourcesLibrary.freeSources(selection, parameterName, free)
+        return self.sourcesLibrary.freeSources(selection, parameterName, free, show)
 
     def fixSource(self, source):
         """Set to False all freeable params of a source.
@@ -918,7 +1023,7 @@ class AGAnalysis:
         """
         return self.sourcesLibrary.addSource(sourceName, sourceDict)
 
-    def deleteSources(self, selection):
+    def deleteSources(self, selection, show = False):
         """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
 
         Args:
@@ -927,7 +1032,7 @@ class AGAnalysis:
         Returns:
             The list containing the deleted sources.
         """
-        return self.sourcesLibrary.deleteSources(selection)
+        return self.sourcesLibrary.deleteSources(selection, show = show)
 
     def updateSourcePosition(self, sourceName, useMulti=True, glon=None, glat=None):
         """It updates a source (l,b) position parameters. You can explicity pass new values

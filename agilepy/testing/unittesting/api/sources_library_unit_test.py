@@ -435,9 +435,11 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
 
+        """
         for s in self.sl.getSources():
             print(s)
-
+        """
+        
         self.assertEqual(2, len(self.sl.sources))
 
         self.sl.backupSL()

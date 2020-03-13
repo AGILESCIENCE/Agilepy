@@ -41,7 +41,8 @@ from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
                                            ConfigFileOptionTypeError, \
                                            CannotSetHiddenOptionError, \
-                                           CannotSetNotUpdatableOptionError
+                                           CannotSetNotUpdatableOptionError, \
+                                           EnvironmentVariableNotExpanded
 
 
 
@@ -437,8 +438,8 @@ class AgilepyConfig(Observable):
         if "$" in path:
             expanded = expandvars(path)
             if expanded == path:
-                print("[AgilepyConfig] Environment variable has not been expanded in {}".format(expanded))
-                raise EnvironmentVariableNotExpanded("[AgilepyConfig] Environment variable has not been expanded in {}".format(expanded))
+                print(f"[AgilepyConfig] Environment variable has not been expanded in {expanded}")
+                raise EnvironmentVariableNotExpanded(f"[AgilepyConfig] Environment variable has not been expanded in {expanded}")
             else:
                 return expanded
         else:

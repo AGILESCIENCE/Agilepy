@@ -45,6 +45,19 @@ class AGAnalysisUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
+    def test_delete_output_directory(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = Path(ag.getOption("outdir"))
+
+        self.assertEqual(True, outDir.exists() and outDir.is_dir())
+
+        ag.deleteAnalysisDir()
+
+        self.assertEqual(False, outDir.exists())
+
+
     def test_generate_maps(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -308,8 +321,8 @@ class AGAnalysisUT(unittest.TestCase):
                          isocoeff=[10, 12, 10, 12]
                      )
 
+        """
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
-
         print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
 
@@ -321,7 +334,7 @@ class AGAnalysisUT(unittest.TestCase):
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0,0,0,0], pastTimeWindow=0)
         print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
-
+        """
 
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
         print("\ngalBkg:",galBkg)
