@@ -31,6 +31,8 @@ from pathlib import Path
 from ntpath import basename
 from time import time, strftime
 from shutil import rmtree
+import re
+pattern = re.compile('e([+\-]\d+)')
 # from multiprocessing import Process
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
@@ -733,7 +735,11 @@ mle:
 
         self.logger.info(self,"[LC] Number of temporal bins: %d. tstart=%f tstop=%f", len(bins), tstart, tstop)
 
-        lcAnalysisDataDir = self.config.getOptionValue("outdir") + "/lc"
+        lcAnalysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("lc")
+
+        if lcAnalysisDataDir.exists() and lcAnalysisDataDir.is_dir():
+            self.logger.info(self, "The directory %s already exists. Removing it..", str(lcAnalysisDataDir))
+            rmtree(lcAnalysisDataDir)
 
         binsForProcesses = AGAnalysis._chunkList(bins, processes)
 
@@ -749,14 +755,17 @@ mle:
             t1 = bin[0]
             t2 = bin[1]
 
-            self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", tstart, tstop, idx+1, len(bins))
+            self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", t1, t2, idx+1, len(bins))
 
-            binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
+            binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
+
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
-            maplistFilePath = self.generateMaps(config = configBKP)
+            maplistObj = MapList(self.logger)
+
+            maplistFilePath = self.generateMaps(config = configBKP, maplistObj=maplistObj)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
@@ -797,7 +806,7 @@ mle:
 
         binDirectories = os.listdir(lcAnalysisDataDir)
 
-        lcData = "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
+        lcData = "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
 
         timecounter = 0
 
@@ -817,22 +826,22 @@ mle:
 
                     lcDataDict = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
 
-                    tstartTT = lcDataDict["tstartTT"] + binsize * timecounter
-                    tstopTT = lcDataDict["tstopTT"] + binsize * timecounter
+                    time_start_tt = lcDataDict["time_start_tt"] + binsize * timecounter
+                    time_end_tt   = lcDataDict["time_end_tt"]   + binsize * timecounter
 
-                    tstartMJD = AstroUtils.time_tt_to_mjd(tstartTT)
-                    tstopMJD = AstroUtils.time_tt_to_mjd(tstopTT)
+                    time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
+                    time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
 
-                    tstartUTC = AstroUtils.time_mjd_to_utc(tstartMJD)
-                    tstopUTC = AstroUtils.time_mjd_to_utc(tstopMJD)
+                    time_start_utc = AstroUtils.time_mjd_to_utc(time_start_mjd)
+                    time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
 
-                    lcRow = f"{lcDataDict['sqrtTS']} {tstartMJD}/{tstopMJD} {tstartTT}/{tstopTT} {tstartUTC}/{tstopUTC} {lcDataDict['flux']} {lcDataDict['fluxErr']} {lcDataDict['fluxUL']}\n"
+                    # "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
 
-                    lcData += lcRow
+                    lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {lcDataDict['flux']} {lcDataDict['flux_err']} {lcDataDict['flux_ul']} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"
 
                     timecounter += 1
 
-        self.logger.info(self, f"{lcData}")
+        self.logger.info(self, f"\n{lcData}")
 
         return lcData
 
@@ -1119,13 +1128,14 @@ mle:
 
             binOutDir = f'{lcAnalysisDataDir}/bin_{t1}_{t2}'
 
-            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(filenameprefix = "lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             maplistFilePath = self.generateMaps(configBKP)
 
-            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(filenameprefix = "lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
+
             _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
     @staticmethod
@@ -1140,19 +1150,86 @@ mle:
 
         return out
 
+    def _fixToNegativeExponent(self, number, fixedExponent=-8):
+        if fixedExponent > 0:
+            return str(number)
+
+        if number == 0:
+            return str(number)
+
+        number_str = str(number)
+        exponent = pattern.findall(number_str)
+        #print("\nNumber: ", number)
+        #print("Number_str: ", number_str)
+        #print("Exponent:",exponent)
+        fixExponentString = f"e-0{abs(fixedExponent)}"
+
+        #print("fixExponentString:",fixExponentString)
+
+        if len(exponent) == 0:
+            if fixedExponent == 0:
+                return number
+            return str(number * 1e08)+fixExponentString
+
+        exponent = float(exponent.pop())
+
+        #print("exponent:",exponent)
+
+        if exponent == fixedExponent:
+            return str(number)
+
+        number_no_exp = float(number_str.split("e")[0])
+        #print("number_no_exp:",number_no_exp)
+        distance = abs(fixedExponent - exponent)
+        #print("distance:",distance)
+        if distance > 0:
+            number_no_exp = number_no_exp*(pow(10,distance))
+        else:
+            number_no_exp = number_no_exp/(pow(10,distance))
+
+        #print("number_no_exp:",number_no_exp)
+
+        number = str(round(number_no_exp, 5))+fixExponentString
+        #print("number:",number)
+        return number
+
     def _extractLightCurveDataFromSourceFile(self, sourceFilePath):
 
+
         # "(0)sqrtts (6)time_mjd (7)time_tt (8)time_utc (9)flux*10^-8 (10)flux_err*10^-8 (11)flux_ul*10^-8 \n"
+        # "sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist_peak l b r dist time_start_tt time_end_tt\n"
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
+        print(multiOutput.get("multiFlux"))
+        print(multiOutput.get("multiFluxErr"))
+        print(multiOutput.get("multiUL"))
+        input("..")
+        flux     = self._fixToNegativeExponent(multiOutput.get("multiFlux"), fixedExponent=-8)
+        flux_err = self._fixToNegativeExponent(multiOutput.get("multiFluxErr"), fixedExponent=-8)
+        flux_ul  = self._fixToNegativeExponent(multiOutput.get("multiUL"), fixedExponent=-8)
+
+
         lcDataDict = {
-            "sqrtTS" : multiOutput.get("multiSqrtTS", strRepr=True),
-            "tstartTT" : float(multiOutput.get("startDataTT", strRepr=True)),
-            "tstopTT" : float(multiOutput.get("endDataTT", strRepr=True)),
-            "flux" : multiOutput.get("multiSqrtTS", strRepr=True),
-            "fluxErr" : multiOutput.get("multiFluxErr", strRepr=True),
-            "fluxUL" : multiOutput.get("multiUL", strRepr=True)
+            "sqrt(ts)" : multiOutput.get("multiSqrtTS", strRepr=True),
+            "flux"     : flux,
+            "flux_err" : flux_err,
+            "flux_ul"  : flux_ul,
+
+            "gal" : ','.join(map(str, multiOutput.get("multiGalCoeff"))),
+            "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
+
+            "l_peak"    : multiOutput.get("multiLPeak", strRepr=True),
+            "b_peak"    : multiOutput.get("multiBPeak", strRepr=True),
+            "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strRepr=True),
+
+            "l"    : multiOutput.get("multiL", strRepr=True),
+            "b"    : multiOutput.get("multiB", strRepr=True),
+            "r"    : multiOutput.get("multir", strRepr=True),
+            "dist" : multiOutput.get("multiDistFromStartPosition", strRepr=True),
+
+            "time_start_tt" : float(multiOutput.get("startDataTT", strRepr=True)),
+            "time_end_tt"   : float(multiOutput.get("endDataTT", strRepr=True))
         }
 
         return lcDataDict
