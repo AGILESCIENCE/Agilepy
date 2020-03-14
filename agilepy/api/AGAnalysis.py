@@ -1201,10 +1201,6 @@ mle:
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
-        print(multiOutput.get("multiFlux"))
-        print(multiOutput.get("multiFluxErr"))
-        print(multiOutput.get("multiUL"))
-        input("..")
         flux     = self._fixToNegativeExponent(multiOutput.get("multiFlux"), fixedExponent=-8)
         flux_err = self._fixToNegativeExponent(multiOutput.get("multiFluxErr"), fixedExponent=-8)
         flux_ul  = self._fixToNegativeExponent(multiOutput.get("multiUL"), fixedExponent=-8)
