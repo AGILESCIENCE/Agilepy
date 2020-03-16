@@ -366,42 +366,47 @@ class PlottingUtils(metaclass=Singleton):
         col = r
         return row, col
 
-    def plot_lc(self, filename):
+    def plotLc(self, filename, upper, lower, saveImage):
+        # reading and setting dataframe
         data = pd.read_csv(filename, header=0, sep=" ")
+        data["flux"] = data["flux"] * 10 ** 8
+        data["flux_err"] = data["flux_err"] * 10 ** 8
+        data["flux_ul"] = data["flux_ul"] * 10 ** 8
+        data["gal"] = data["gal"] * 10 ** 8
+        data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data["x_plus"] = data["time_end_mjd"] - data["tm"]
+        data["x_minus"] = data["tm"] - data["time_start_mjd"]
         print(data)
-        data["(6)time_mjd"] = data["(6)time_mjd"].str.replace("/", " ")
 
-        new_data = pd.DataFrame()
-        new_data[["t1", "t2"]] = data["(6)time_mjd"].str.split(" ", n=1, expand=True).astype('float64')
-        new_data["tm"] = new_data.mean(axis=1)
-        new_data["x_plus"] = new_data["t2"] - new_data["tm"]
-        new_data["x_minus"] = new_data["tm"] - new_data["t1"]
-        print(new_data)
-        new_data["flux"] = data["(9)flux*10^-8"]
-        new_data["flux_err"] = data["(10)flux_err*10^-8"]
-        new_data["sqrts"] = data["(0)sqrtts"]
-        new_data["flux_ul"] = data["(11)flux_ul*10^-8"]
+        sel1 = data.loc[data["sqrt(ts)"] >= 3]
+        sel2 = data.loc[data["sqrt(ts)"] < 3]
 
-        sel1 = new_data.loc[new_data["sqrts"] >= 3]
-        sel2 = new_data.loc[new_data["sqrts"] < 3]
 
+        #Plotting
         fig = go.Figure()
 
-        fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
-                                  error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
-                                               arrayminus=sel2["x_minus"]), mode='markers',
-                                  marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
         fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
                                   error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
                                                arrayminus=sel1["x_minus"]),
                                   error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
                                   name="sqrts >=3"))
+        fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
+                                  error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
+                                               arrayminus=sel2["x_minus"]), mode='markers',
+                                  marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
 
-        # fig.add_traces(go.Scatter(x=new_data["tm"], y=[60]*len(new_data["tm"]), line=dict(dash="dash"), name="line1"))
-        # fig.add_traces(go.Scatter(x=new_data["tm"], y=[40] * len(new_data["tm"]), line=dict(dash="dash"), name="line2"))
+        fig.add_traces(go.Scatter(x=data["tm"], y=[upper] * len(data["tm"]), line=dict(dash="dash"), name="line1"))
+        fig.add_traces(go.Scatter(x=data["tm"], y=[lower] * len(data["tm"]), line=dict(dash="dash"), name="line2"))
 
-        # fig.update_xaxes(showline=True, linecolor="black")
-        # fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
-        # fig.update_layout(legend=dict(font=dict(size=20)))
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(mjd)")
+        fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
+        fig.update_layout(legend=dict(font=dict(size=20)))
 
-        fig.show()
+        if saveImage:
+            filePath = join(self.outdir, "LightCurve.png")
+            self.logger.info(self, "Light curve plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
