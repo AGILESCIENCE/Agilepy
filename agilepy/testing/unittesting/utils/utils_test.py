@@ -113,7 +113,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         pu = PlottingUtils(self.config, self.agilepyLogger)
         file_lc = self.datadir+"/lc-4.txt"
 
-        file = pu.plotLc(file_lc, 1500, 1000, False)
+        file = pu.plotLc(file_lc, 1500, 1000, True)
 
         self.assertEqual(True, os.path.isfile(file))
 
