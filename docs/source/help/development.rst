@@ -69,7 +69,7 @@ If you start from scratch:
 
     git clone --single-branch --branch develop https://github.com/AGILESCIENCE/Agilepy.git
 
-Creating a new **feature** branch:
+Create a new **feature** branch:
 ::
 
     git checkout develop
@@ -78,13 +78,27 @@ Creating a new **feature** branch:
 
 
 
-Development and testing of the new feature. Then, CHANGELOG.md update and merging back to **develop** branch.
+Development and testing of the new feature.
+
+When you're done, you commit your changes and update the CHANGELOG.md .
 
 ::
 
     vim CHANGELOG
     git commit -m ""
-    git checkout develop
+
+In the meantime it is possible that someone else have pushed his work into the develop branch. In this case
+you have to merge the changes in your feature branch.
+
+::
+
+    git pull **origin** develop
+
+
+Finally you can merge your feature branch back to **develop** branch.
+
+::
+
     git merge --no-ff feature-#61-bayesian-blocks
     git branch -d feature-#61-bayesian-blocks
     git push origin develop
@@ -95,7 +109,7 @@ Release of a new version
 
 Change the version of the software in setup.py. The version increment must be take
 in account all the commits of the **develop** branch. You can check the CHANGELOG.md
-to facilitate this process.
+to facilitate this process. Please, add the new tag within the CHANGELOG.md file.
 
 ::
 
