@@ -407,7 +407,7 @@ mle:
             It returns the path to the lightcurve plot written on disk
 
         """
-        return PlottingUtils.plotLc(filename, upperLine, lowerLine, saveImage)
+        return self.plottingUtils.plotLc(filename, upperLine, lowerLine, saveImage)
 
 
 

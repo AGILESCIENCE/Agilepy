@@ -376,7 +376,7 @@ class PlottingUtils(metaclass=Singleton):
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
         data["x_plus"] = data["time_end_mjd"] - data["tm"]
         data["x_minus"] = data["tm"] - data["time_start_mjd"]
-        print(data)
+        #print(data)
 
         sel1 = data.loc[data["sqrt(ts)"] >= 3]
         sel2 = data.loc[data["sqrt(ts)"] < 3]
