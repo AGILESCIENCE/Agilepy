@@ -79,7 +79,7 @@ class AgilepyUtilsUT(unittest.TestCase):
                     cmap = cmap,
                     regFilePath = regFilePath,
                     catalogRegions = None,
-                    catalogRegionsColor = "red",                    
+                    catalogRegionsColor = "red",
                     saveImage=True)
 
         self.assertEqual(True, os.path.isfile(file))
@@ -110,12 +110,18 @@ class AgilepyUtilsUT(unittest.TestCase):
         self.assertEqual(True, os.path.isfile(file))
 
     def test_display_light_curve(self):
+        
         pu = PlottingUtils(self.config, self.agilepyLogger)
+
         file_lc = self.datadir+"/lc-4.txt"
 
-        file = pu.plotLc(file_lc, 1500, 1000, True)
+        self.assertRaises(ValueError, pu.plotLc, file_lc, 1500, 1000, True)
 
-        self.assertEqual(True, os.path.isfile(file))
+        #with self.assertRaises(ValueError, pu.plotLc, file_lc, 1500, 1000, True) as cm:
+        #        input("..")
+        #            print(cm)
+
+        # self.assertEqual(True, os.path.isfile(file))
 
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)
