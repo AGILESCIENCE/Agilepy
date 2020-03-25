@@ -366,7 +366,7 @@ class PlottingUtils(metaclass=Singleton):
         col = r
         return row, col
 
-    def plotLc(self, filename, upper, lower, saveImage):
+    def plotLc(self, filename, lineValue, lineError, saveImage):
         # reading and setting dataframe
         data = pd.read_csv(filename, header=0, sep=" ")
         data["flux"] = data["flux"] * 10 ** 8
@@ -395,12 +395,13 @@ class PlottingUtils(metaclass=Singleton):
                                                arrayminus=sel2["x_minus"]), mode='markers',
                                   marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
 
-        fig.add_traces(go.Scatter(x=data["tm"], y=[upper] * len(data["tm"]), line=dict(dash="dash"), name="line1"))
-        fig.add_traces(go.Scatter(x=data["tm"], y=[lower] * len(data["tm"]), line=dict(dash="dash"), name="line2"))
+        if lineValue is not None and lineError is not None:
+            fig.add_traces(go.Scatter(x=data["tm"], y=[lineValue] * len(data["tm"]), error_y= dict(type="constant", value=lineError), line=dict(dash="dash"), name="line1"))
+
 
         fig.update_xaxes(showline=True, linecolor="black", title="Time(mjd)")
         fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
-        fig.update_layout(legend=dict(font=dict(size=20)))
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
 
         if saveImage:
             filePath = join(self.outdir, "LightCurve.png")
