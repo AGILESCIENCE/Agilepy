@@ -77,7 +77,7 @@ class SourcesLibrary:
         self.sourcesBKP = None
         self.outdirPath = None
 
-    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")) ):
+    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
 
         supportedCatalogs = ["2AGL"]
         scaleFlux = False
@@ -105,11 +105,11 @@ class SourcesLibrary:
             self.logger.critical(self, "The catalog %s is not supported. Supported catalogs: %s", catalogName, ' '.join(supportedCatalogs))
             raise FileNotFoundError(f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
 
-        return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux = scaleFlux)
+        return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux = scaleFlux, show = show)
 
 
 
-    def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False ):
+    def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False, show=False):
 
         filePath = self.config._expandEnvVar(filePath)
 
@@ -142,6 +142,10 @@ class SourcesLibrary:
         if scaleFlux:
 
             addedSources = [source for source in self._scaleSourcesFlux(addedSources)]
+
+        if show:
+            for s in addedSources:
+                self.logger.info(self, f"{s}")
 
         self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
 
@@ -199,7 +203,7 @@ class SourcesLibrary:
         """
         return [s.name for s in self.sources]
 
-    def selectSources(self, selection, quiet=False):
+    def selectSources(self, selection, show=False):
         """
         This method ... blablabla..
         """
@@ -217,9 +221,9 @@ class SourcesLibrary:
 
                 selected.append(source)
 
-        if not quiet:
+        if show:
             for s in selected:
-                print(s)
+                self.logger.info(self, f"{s}")
 
         return selected
 
@@ -238,11 +242,11 @@ class SourcesLibrary:
 
         return affected
 
-    def freeSources(self, selection, parameterName, free):
+    def freeSources(self, selection, parameterName, free, show=False):
         """
         Returns the list of sources affected by the update.
         """
-        sources = self.selectSources(selection, quiet=True)
+        sources = self.selectSources(selection, show=False)
 
         if len(sources) == 0:
             self.logger.warning(self, "No sources have been selected.")
@@ -258,24 +262,31 @@ class SourcesLibrary:
 
                 affected.append(s)
 
+                if show:
+                    self.logger.info(self, f"{s}")
+
         return affected
 
-    def deleteSources(self, selection):
+    def deleteSources(self, selection, show = False):
         """
         This method ... blabla ...
 
         returns: the list of the deleted sources
         """
-        deletedSources = self.selectSources(selection, quiet=True)
+        deletedSources = self.selectSources(selection, show=False)
 
         self.sources = [s for s in self.getSources() if s not in deletedSources]
+
+        if show:
+            for s in deletedSources:
+                self.logger.info(self, f"{s}")
 
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
     def updateSourcePosition(self, sourceName, useMulti, glon, glat):
 
-        sources = self.selectSources(lambda name : name == sourceName, quiet=True)
+        sources = self.selectSources(lambda name : name == sourceName, show=False)
 
         if len(sources) == 0:
             raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))
@@ -443,7 +454,7 @@ class SourcesLibrary:
 
     def updateMulti(self, multiOutputData):
 
-        sourcesFound = self.selectSources(lambda name : name == multiOutputData.get("name"), quiet=True)
+        sourcesFound = self.selectSources(lambda name : name == multiOutputData.get("name"), show=False)
 
         if len(sourcesFound) == 0:
             raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))

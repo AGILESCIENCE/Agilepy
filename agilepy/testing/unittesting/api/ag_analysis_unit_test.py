@@ -45,6 +45,19 @@ class AGAnalysisUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
+    def test_delete_output_directory(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = Path(ag.getOption("outdir"))
+
+        self.assertEqual(True, outDir.exists() and outDir.is_dir())
+
+        ag.deleteAnalysisDir()
+
+        self.assertEqual(False, outDir.exists())
+
+
     def test_generate_maps(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -308,8 +321,8 @@ class AGAnalysisUT(unittest.TestCase):
                          isocoeff=[10, 12, 10, 12]
                      )
 
+        """
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
-
         print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
 
@@ -321,13 +334,35 @@ class AGAnalysisUT(unittest.TestCase):
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0,0,0,0], pastTimeWindow=0)
         print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
-
+        """
 
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
         print("\ngalBkg:",galBkg)
         print("isoBkg:",isoBkg)
 
         ag.destroy()
+
+
+    def test_extract_light_curve_data(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+
+        sourceFile = Path(self.currentDirPath).joinpath("data/testcase0.source")
+
+        lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
+
+        print(lcdata)
+
+    def test_fix_exponent(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+
+        self.assertEqual('894.587e-08', ag._fixToNegativeExponent(8.94587e-06, fixedExponent=-8))
+        self.assertEqual('309.757e-08', ag._fixToNegativeExponent(3.09757e-06, fixedExponent=-8))
+        self.assertEqual('1623.16e-08', ag._fixToNegativeExponent(1.62316e-05, fixedExponent=-8))
+        self.assertEqual('1.524e-08', ag._fixToNegativeExponent(1.524e-8, fixedExponent=-8))
+        self.assertEqual('1.524e+18e-08', ag._fixToNegativeExponent(1.524e10, fixedExponent=-8))
+        self.assertEqual('0.0', ag._fixToNegativeExponent(0.0, fixedExponent=-8))
 
 
 if __name__ == '__main__':
