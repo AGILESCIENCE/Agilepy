@@ -366,7 +366,7 @@ class PlottingUtils(metaclass=Singleton):
         col = r
         return row, col
 
-    def plotLc(self, filename, lineValue, lineError, saveImage):
+    def plotLc(self, filename, lineValue, lineError, saveImage=False):
         # reading and setting dataframe
         data = pd.read_csv(filename, header=0, sep=" ")
         data["flux"] = data["flux"] * 10 ** 8
