@@ -414,10 +414,10 @@ mle:
             return False
 
         elif self.lightCurveData is not None and filename is not None:
-            return self.plottingUtils.plotLc(filename, lineValue, lineError, saveImage)
+            return self.plottingUtils.plotLc(filename, lineValue, lineError)
 
         elif self.lightCurveData is not None and filename is None:
-            return self.plottingUtils.plotLc(self.lightCurveData, lineValue, lineError, saveImage)
+            return self.plottingUtils.plotLc(self.lightCurveData, lineValue, lineError)
 
 
 
