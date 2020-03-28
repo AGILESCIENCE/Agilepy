@@ -137,24 +137,37 @@ class AGAnalysis:
 
 
     @staticmethod
-    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl):
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
         """Utility method to create a configuration file.
 
         Args:
-            confFilePath (str):
-            userName (str):
-            sourceName (str):
-            tmin (float):
-            tmax (float):
-            glon (float):
-            glat (float):
-            outputDir (str):
-            verboselvl (int):
+            confFilePath (str): the path and filename of the configuration file that is going to be created.
+            userName (str): the username of who is running the software.
+            sourceName (str): the name of the source.
+            tmin (float): the start time of the analysis.
+            tmax (float): the stop time of the analysis.
+            glon (float): the galactic longitude (L) of the analysis.
+            glat (float): the galactic latitude (B) of the analysis.
+            outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
+            verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
+            evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+
+        Raises:
+            EnvironmentVariableNotExpanded: if an environmental variabile is found into a configuration path but it cannot be expanded.
+            FileNotFoundError: if the evtfile of logfile are not found.
+            ConfigurationsNotValidError: if at least one configuration value is bad.
 
         Returns:
             None
         """
         analysisname = userName+"_"+sourceName
+
+        if not Path(evtfile).exists():
+            raise FileNotFoundError(f"The file {evtfile} cannot be found.")
+
+        if not Path(logfile).exists():
+            raise FileNotFoundError(f"The file {logfile} cannot be found.")
 
         if "$" in outputDir:
             expandedOutputDir = expandvars(outputDir)
@@ -167,8 +180,8 @@ class AGAnalysis:
 
         configuration = """
 input:
-  evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
-  logfile: /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
+  evtfile: %s
+  logfile: %s
 
 output:
   outdir: %s
@@ -213,13 +226,17 @@ mle:
   expratio_maxthr: 15
   expratio_size: 10
 
-        """%(str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """%(evtfile, logfile, str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
 
         with open(confFilePath,"w") as cf:
 
             cf.write(configuration)
 
-        print(configuration)
+        config = AgilepyConfig()
+
+        config.loadConfigurations(confFilePath, validate=True)
+
+
 
     def deleteAnalysisDir(self):
         """It deletes the output directory where all the products of the analysis are written.
@@ -745,8 +762,6 @@ mle:
         """
         timeStart = time()
 
-
-
         if not tmin or not tmax or not timetype:
             tmin = self.config.getOptionValue("tmin")
             tmax = self.config.getOptionValue("tmax")
@@ -778,6 +793,9 @@ mle:
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
+        (_, last, _) = AgilepyConfig._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
+        idxTmax = float(AgilepyConfig._extractTimes(last)[1])
+
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
 
@@ -787,6 +805,11 @@ mle:
 
             t1 = bin[0]
             t2 = bin[1]
+
+            if t2 > idxTmax:
+                newbinsize = idxTmax - t1
+                self.logger.warning(self, f"[LC] The last bin [{t1}, {t2}] of the light curve analysis falls outside the range of the available data [.. , {idxTmax}]. The binsize is reduced to {newbinsize} seconds, the new bin is [{t1}, {idxTmax}]")
+                t2 = idxTmax
 
             self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", t1, t2, idx+1, len(bins))
 
@@ -819,7 +842,6 @@ mle:
         for pID, p, binsNumber in processes:
             p.join()
         """
-
 
         lcData = self.getLightCurveData(sourceName, lcAnalysisDataDir, binsize)
 

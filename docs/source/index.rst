@@ -31,11 +31,6 @@ Agilepy's documentation
   api/astroutils_api
 
 .. toctree::
-  :caption: How to
-
-  how_to/mle
-
-.. toctree::
   :caption: Help
 
   help/help
