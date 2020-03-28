@@ -99,6 +99,7 @@ class AgilepyConfig(Observable):
         errors.update( AgilepyConfig._validateLOCCL(self.conf) )
         errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "fovradmin", "fovradmax") )
         errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "emin", "emax") )
+        errors.update( AgilepyConfig._validateTimetype(self.conf))
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))
@@ -466,6 +467,18 @@ class AgilepyConfig(Observable):
 
             return yaml.safe_load(yamlfile)
 
+
+    @staticmethod
+    def _validateTimetype(confDict):
+
+        errors = {}
+
+        if confDict["selection"]["timetype"] not in ["TT", "MJD"]:
+
+            errors["selection/timetype"] = f"timetype value {confDict['selection']['timetype']} not supported. Supported values: 'TT', 'MJD' "
+
+        return errors
+
     @staticmethod
     def _validateMinMax(confDict, section, optionMin, optionMax):
 
@@ -558,20 +571,20 @@ class AgilepyConfig(Observable):
         userTmax = confDict["selection"]["tmax"]
 
         if float(userTmin) < float(idxTmin):
-            errors["input/tmin"]="tmin: {} is outside the time range of {} ( < idxTmin). Time range: [{}, {}]" \
+            errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
                                   .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmin) > float(idxTmax):
-            errors["input/tmin"]="tmin: {} is outside the time range of {} ( > idxTmax). Time range: [{}, {}]" \
+            errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin > indexTmax). Index file time range: [{}, {}]" \
                                   .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
 
 
         if float(userTmax) > float(idxTmax):
-            errors["input/tmax"]="tmax: {} is outside the time range of {} ( > idxTmax). Time range: [{}, {}]" \
+            errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax > indexTmax). Index file time range: [{}, {}]" \
                                   .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmax) < float(idxTmin):
-            errors["input/tmax"]="tmax: {} is outside the time range of {} ( < idxTmin). Time range: [{}, {}]" \
+            errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax < indexTmin). Index file time range: [{}, {}]" \
                                   .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
 
 
