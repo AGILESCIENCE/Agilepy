@@ -85,7 +85,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         self.assertEqual(True, os.path.isfile(file))
 
 
-    def test_display_sky_map_single_mode(self):
+    def test_display_sky_map_single_mode_3_imgs(self):
 
         pu = PlottingUtils(self.config, self.agilepyLogger)
 
@@ -109,8 +109,32 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         self.assertEqual(True, os.path.isfile(file))
 
+    def test_display_sky_map_single_mode_2_imgs(self):
+
+        pu = PlottingUtils(self.config, self.agilepyLogger)
+
+        smooth = 4
+        fileFormat = ".png"
+        title = "testcase"
+        cmap = "CMRmap"
+        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
+
+        file = pu.displaySkyMapsSingleMode(
+                    [img, img], \
+                    smooth = smooth,
+                    fileFormat = fileFormat,
+                    titles = [title+"_1", title+"_2", title+"_3"],
+                    cmap = cmap,
+                    regFilePath = regFilePath,
+                    catalogRegions = None,
+                    catalogRegionsColor = "red",
+                    saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(file))
+
     def test_display_light_curve(self):
-        
+
         pu = PlottingUtils(self.config, self.agilepyLogger)
 
         file_lc = self.datadir+"/lc-4.txt"
