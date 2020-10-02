@@ -134,6 +134,16 @@ class AgilepyConfigUT(unittest.TestCase):
         # wrong length
         # self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, energybins=[[200, 400]])
 
+        # galcoeff and isocoeff are None and len(energybins) = 1
+        conf3Path = os.path.join(self.currentDirPath,"conf/conf3.yaml")
+
+        self.config.loadConfigurations(conf3Path)
+
+        self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
+        self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
+
+        self.config.setOptions(energybins=[[200, 400], [400, 1000]])
+
 
     def test_bkg_coeff(self):
 
