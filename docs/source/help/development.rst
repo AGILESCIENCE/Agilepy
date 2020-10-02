@@ -58,16 +58,19 @@ e.g. hotfix-#57-1.0.0
 
 The release number is the one of the production release from which it originates from.
 
-Practice
---------
+Getting started
+---------------
 
 Development of a new feature
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you start from scratch:
 ::
-
-    git clone --single-branch --branch develop https://github.com/AGILESCIENCE/Agilepy.git
+    conda config --add channels conda-forge
+    conda create -n agilepyenv -c agilescience agilepyenv
+    conda activate agilepyenv
+    git clone https://github.com/AGILESCIENCE/Agilepy.git
+    cd Agilepy && python setup.py develop
 
 Create a new **feature** branch:
 ::
@@ -80,12 +83,12 @@ Create a new **feature** branch:
 
 Development and testing of the new feature.
 
-When you're done, you commit your changes and update the CHANGELOG.md .
+When you have finished, update the CHANGELOG.md and commit your changes.
 
 ::
 
     vim CHANGELOG
-    git commit -m ""
+    git commit -m "feature-#61-bayesian-blocks done"
 
 In the meantime it is possible that someone else have pushed his work into the develop branch. In this case
 you have to merge the changes in your feature branch.

@@ -208,8 +208,8 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
 Section: *'model'*
 ==================
 
-The '*galcoeff*' and '*isocoeff*' options values can take the default value of null or they can be a a list of values separated by a comma,
-for example:
+The '*galcoeff*' and '*isocoeff*' options values can take the default value of null or they can be a a list of values separated by a comma.
+If they are set to null it means they are free to change. 
 
 .. code-block:: yaml
 
