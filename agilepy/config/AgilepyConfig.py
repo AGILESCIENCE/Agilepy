@@ -185,7 +185,9 @@ class AgilepyConfig(Observable):
 
                 AgilepyConfig._convertBackgroundCoeff(self.conf, optionName)
 
+            if optionName == "energybins" or optionName == "fovbinnumber":
 
+                AgilepyConfig._extendBackgroundCoeff(self.conf)
 
         self.validateConfiguration()
 
@@ -384,7 +386,6 @@ class AgilepyConfig(Observable):
         fovbinnumber = confDict["maps"]["fovbinnumber"]
         numberOfMaps = numberOfEnergyBins*fovbinnumber
 
-
         if bkgCoeffVal is None:
             confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
 
@@ -407,6 +408,21 @@ class AgilepyConfig(Observable):
         else:
             print(f"Something's wrong..bkgCoeffName: {bkgCoeffName}, bkgCoeffVal: {bkgCoeffVal}")
             confDict["model"][bkgCoeffName] = None
+
+    @staticmethod
+    def _extendBackgroundCoeff(confDict):
+        numberOfEnergyBins = len(confDict["maps"]["energybins"])
+        fovbinnumber = confDict["maps"]["fovbinnumber"]
+        numberOfMaps = numberOfEnergyBins*fovbinnumber
+
+        while(len(confDict["model"]["isocoeff"])<numberOfMaps):
+            confDict["model"]["isocoeff"].append(-1)
+
+        while(len(confDict["model"]["galcoeff"])<numberOfMaps):
+            confDict["model"]["galcoeff"].append(-1)
+
+
+
 
     @staticmethod
     def _setPhaseCode(confDict):
@@ -514,6 +530,7 @@ class AgilepyConfig(Observable):
 
         numberOfEnergyBins = len(confDict["maps"]["energybins"])
         fovbinnumber = confDict["maps"]["fovbinnumber"]
+
         numberOfMaps = numberOfEnergyBins*fovbinnumber
 
         isocoeff = confDict["model"]["isocoeff"]
