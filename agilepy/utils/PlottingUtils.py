@@ -28,6 +28,7 @@
 
 #mpl.use("Agg")
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
 from regions import read_ds9
@@ -39,6 +40,7 @@ from pathlib import Path
 from time import strftime
 import plotly.graph_objects as go
 import pandas as pd
+from math import ceil
 
 from agilepy.utils.Utils import Singleton
 
@@ -60,6 +62,12 @@ class PlottingUtils(metaclass=Singleton):
             "2AGL":"$AGILE/catalogs/2AGL_2.reg"
         }
 
+    """
+        fig1   fig2
+        fig3   fig4
+        fig5   fig6
+        ..     ..
+    """
     def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
         # self._updateRC()
 
@@ -75,14 +83,17 @@ class PlottingUtils(metaclass=Singleton):
 
         hdu = fits.open(fitsFilepaths[0])[0]
         wcs = WCS(hdu.header)
-        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2), subplot_kw={'projection': wcs}, figsize=(12, 12))
+
+        nrows = ceil(numberOfSubplots/2)
+        ncols = 2
+
+        fig, axs = plt.subplots(nrows, ncols, subplot_kw={'projection': wcs}, figsize=(14, 14), squeeze=False)
 
         for idx, fitsImage in enumerate(fitsFilepaths):
 
-            row,col = self._getCell(idx, int(numberOfSubplots/2))
+            row, col = divmod(idx, ncols)
 
             hdu = fits.open(fitsFilepaths[idx])[0]
-            wcs = WCS(hdu.header)
 
             if smooth > 0:
                 data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
@@ -93,13 +104,12 @@ class PlottingUtils(metaclass=Singleton):
 
             fig.colorbar(im, ax=axs[row][col])
 
+            wcs = WCS(hdu.header)
             axs[row][col] = self._configAxes(axs[row][col], titles[idx], regionsFiles, regionsColors, wcs)
             #cmap = plt.cm.CMRmap
             #cmap.set_bad(color='black')
         if hideLast:
-            lastR = int(numberOfSubplots/2 - 1)
-            lastC = lastR
-            axs[lastR][lastC].remove()
+            axs[-1][-1].remove()
 
         # fig.tight_layout(pad=3.0)
         plt.subplots_adjust(bottom=-0.1)
@@ -359,12 +369,7 @@ class PlottingUtils(metaclass=Singleton):
 
         return ax
 
-    def _getCell(self, idx, numberOfSubplots):
-        # print(f"{idx} / {numberOfSubplots}")
-        q, r = divmod(idx, numberOfSubplots)
-        row = q
-        col = r
-        return row, col
+
 
     def plotLc(self, filename, lineValue, lineError, saveImage=False):
         # reading and setting dataframe

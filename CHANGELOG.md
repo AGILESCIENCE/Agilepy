@@ -1,5 +1,8 @@
 # Changelog
 
+## Release 1.1.2
+* (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True
+
 ## Release 1.1.1 - 28/03/20
 * (\#151) The method getConfiguration() accepts also "evtfile" and "logfile" and it raises an Exception if those files are not compabile with "tmin" and "tmax".
 * The flare advocate template notebook is moved under the analysis_notebook folder.  
