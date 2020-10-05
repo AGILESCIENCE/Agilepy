@@ -53,32 +53,32 @@ The method above will create the following configuration file:
     albedorad: 80
     proj: ARC
 
-maps:
-  mapsize: 40
-  spectralindex: 2.1
-  timestep: 160
-  binsize: 0.25
-  energybins:
-    - 100, 10000
-  fovbinnumber: 1
+  maps:
+    mapsize: 40
+    spectralindex: 2.1
+    timestep: 160
+    binsize: 0.25
+    energybins:
+      - 100, 10000
+    fovbinnumber: 1
 
-model:
-  modelfile: null
-  galmode: 1
-  isomode: 1
-  galcoeff: null
-  isocoeff: null
-  emin_sources: 100
-  emax_sources: 10000
+  model:
+    modelfile: null
+    galmode: 1
+    isomode: 1
+    galcoeff: null
+    isocoeff: null
+    emin_sources: 100
+    emax_sources: 10000
 
-mle:
-  ranal: 10
-  ulcl: 2
-  loccl: 95
-  expratioevaluation: yes
-  expratio_minthr: 0
-  expratio_maxthr: 15
-  expratio_size: 10
+  mle:
+    ranal: 10
+    ulcl: 2
+    loccl: 95
+    expratioevaluation: yes
+    expratio_minthr: 0
+    expratio_maxthr: 15
+    expratio_size: 10
 
 
 The next paragraphs describe the configuration options.
