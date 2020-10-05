@@ -4,15 +4,32 @@
 Configuration file
 ******************
 
-A configuration file is needed to customize the software behaviour and it must be passed to the AGAnalysis class constructor.
+A `yaml <https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html>`_ configuration file is required in order to run Agilepy.
 
-The configuration file's format is `yaml <https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html>`_ .
+It is composed by several sections and each section holds several configuration options, some of which are optional (having a default value), some others are required.
 
-It is composed by several sections and each section holds several configuration options, some of which are optional (having a default value), some are required.
+It supports environment variables (they can be used to define file system paths).
 
-It supports the environment variables, that you can use to define filesystem paths.
+It can be created easily, calling the following static method and passing the minimal set of (required) configuration parameters.
 
-The minimal configuration a user is required to write, it is composed by the following options:
+::
+
+    AGAnalysis.getConfiguration(
+          "./agconfig.yaml", # the destination path of the configuration file
+          "username", # the name of the flare advocate
+          "OJ287", # the name of the source
+          58930, # tmin
+          58936, # tmax
+          "MJD", # time type
+          206.8121188769472, # glon
+          35.8208923457401, # glat
+          "$HOME/agilepy_analysis", # the destination path of the output directory
+          1, # the verbosity level
+          evtfile="$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index", # optional parameter
+          logfile="$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index" # optional parameter
+    )
+
+The method above will create the following configuration file:
 
 .. code-block:: yaml
 
@@ -21,43 +38,72 @@ The minimal configuration a user is required to write, it is composed by the fol
     logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
 
   output:
-    outdir: $AGILE/agilepy-test-data/unittesting-output/utils/logs
-    filenameprefix: testcase
-    logfilenameprefix: testcase
-    verboselvl: 2
+    outdir: "$HOME/agilepy_analysis"
+    filenameprefix: OJ287_product
+    logfilenameprefix: OJ287_log
+    verboselvl: 1
 
   selection:
-    tmin: 456361778
-    tmax: 456537945
-    timetype: TT
-    glon: 80
-    glat: 0
+    tmin: 58930
+    tmax: 58936
+    timetype: MJD
+    glon: 206.8121188769472
+    glat: 35.8208923457401
+    fovradmax: 60
+    albedorad: 80
+    proj: ARC
+
+maps:
+  mapsize: 40
+  spectralindex: 2.1
+  timestep: 160
+  binsize: 0.25
+  energybins:
+    - 100, 10000
+  fovbinnumber: 1
+
+model:
+  modelfile: null
+  galmode: 1
+  isomode: 1
+  galcoeff: null
+  isocoeff: null
+  emin_sources: 100
+  emax_sources: 10000
+
+mle:
+  ranal: 10
+  ulcl: 2
+  loccl: 95
+  expratioevaluation: yes
+  expratio_minthr: 0
+  expratio_maxthr: 15
+  expratio_size: 10
 
 
-The next paragraphs of this document will describe each configuration option.
-
+The next paragraphs describe the configuration options.
 
 Section: *'input'*
 ==================
-This section defines the input data files.
-The input data files are indexes: each row of the file holds the position of an
-actual event data/log file together with the time interval it refers to.
+This section defines the input data files. The input data files are indexes: each
+row holds the file system position of an actual event data/log file, together with
+the time interval it refers to.
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
-   evtfile, "Path to index evt file name", str, yes, null
-   logfile, "Path to index log file name", str, Yes, null
+   evtfile, "Path to index evt file name", str, no, /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
+   logfile, "Path to index log file name", str, no, /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
 
 
 Section: *'output'*
 ===================
-The output section collects options related to the output files generation.
+The output section collects options related to the output files generation and logging.
 
 The *'outdir'* option sets the root directory of the analysis results where all output files are written.
 
-Agilepy has two type of loggers, one logging messages on the console, the other logging message on file.
+Agilepy use two loggers, one logs messages on the console, the other writes messages on disk.
 The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The Agilepy file logger verbosity is set to 2 by default.
 There are 4 kind of messages based on their importance factor:
 
@@ -68,7 +114,7 @@ There are 4 kind of messages based on their importance factor:
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
    "outdir", "Path of the output directory", "str", "yes", "null"
    "filenameprefix", "The filename prefix of each output file", "str", "yes", "null"
@@ -81,18 +127,18 @@ There are 4 kind of messages based on their importance factor:
 Section: *'selection'*
 ======================
 
-The temporal, spatial and spectral binning of the data can be customized using the configuration option of this section.
+The temporal, spatial and spectral binning of the data can be customized using the configuration options of this section.
 
-The *ROI* (region of interest) center is defined by giving explicit Galactic sky coordinates (glon and glat).
+The center of the *ROI* (region of interest) is defined by explicit Galactic sky coordinates (glon and glat).
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
    "emin", "Energy min in MeV", "int", 100, "no"
    "emax", "Energy max in MeV", "int", 10000, "no"
-   "glat", "Center of the ROI ('*latitude*' or *'b'*)", "float", "null", "no"
-   "glon", "Center of the ROI ('*longitude*' or *'l'*)", "float", "null", "no"
+   "glat", "Center of the ROI ('*latitude*' or *'b'*)", "float", "null", "yes"
+   "glon", "Center of the ROI ('*longitude*' or *'l'*)", "float", "null", "yes"
    "tmin", "Minimum time (in MJD or TT)", "float", "null", "yes"
    "tmax", "Maximum time (in MJD or TT)", "float", "null", "yes"
    "timetype", "| The date format of tmin and tmax.
@@ -209,13 +255,13 @@ Section: *'model'*
 ==================
 
 The '*galcoeff*' and '*isocoeff*' options values can take the default value of null or they can be a a list of values separated by a comma.
-If they are set to null it means they are free to change. 
+If they are set to null it means they are free to change.
 
 .. code-block:: yaml
 
     model:
-      galcoeff: 0.6, 0.8, 0.6, 0.8
-      isocoeff: 10, 15, 10, 15
+      galcoeff: 0.8, 0.6, 0.5, 0.4
+      isocoeff: 8, 10, 12, 14
 
 In this case, you should pay attention on how the sky maps are generated: the
 following example show which iso/gal coefficients are assigned to which map.
@@ -233,23 +279,23 @@ following example show which iso/gal coefficients are assigned to which map.
       fovbinnumber: 2
 
     model:
-      galcoeff: 0.6, 0.8, 0.6, 0.8
-      isocoeff: 10, 15, 10, 15
+      galcoeff: 0.8, 0.6, 0.5, 0.4
+      isocoeff: 8, 10, 12, 14
 
 | **FOV bins:**
 | (0, 30), (30, 60)
 
 
-| **Map #1** has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:0.6 isocoeff:10
-| **Map #2** has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:0.8 isocoeff:15
-| **Map #3** has: fovmax:30 fovmax:60 emin:100 emax:300   galcoeff:0.6 isocoeff:10
-| **Map #4** has: fovmax:30 fovmax:60 emin:300 emax:1000  galcoeff:0.8 isocoeff:15
+| **Map #1** has: fovmax:0  fovmax:30 emin:100 emax:300   galcoeff:0.8 isocoeff:8
+| **Map #2** has: fovmax:0  fovmax:30 emin:300 emax:1000  galcoeff:0.6 isocoeff:10
+| **Map #3** has: fovmax:30 fovmax:60 emin:100 emax:300   galcoeff:0.5 isocoeff:12
+| **Map #4** has: fovmax:30 fovmax:60 emin:300 emax:1000  galcoeff:0.4 isocoeff:14
 
 
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
    "modelfile", "| A file name that contains point
    | sources, diffuse and isotropic components", "string", "null", "yes"
@@ -279,7 +325,7 @@ The maximum likelihood estimation analysis is configured by the following option
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Default", "Required"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
    "ranal", "Radius of analysis", float, 10, No
    "ulcl", "Upper limit confidence level, expressed as sqrt(TS)", float, 2, No
@@ -290,7 +336,7 @@ Exp-ratio evaluation options
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
-   :widths: 20, 20, 20, 20, 100
+   :widths: 20, 100, 20, 20, 20
 
    expratioevaluation, bool, yes, none, ""
    expratio_minthr, float, 0, none, ""
@@ -305,6 +351,6 @@ This section defines the plotting configuration.
 
 .. csv-table::
     :header: "Option", "Description", "Type", "Required", "Default"
-    :widths: 20, 20, 20, 20, 100
+    :widths: 20, 100, 20, 20, 20
 
     twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, no, False
