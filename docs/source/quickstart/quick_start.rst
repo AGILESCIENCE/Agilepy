@@ -7,21 +7,23 @@ To import the library:
 
     from agilepy.api import AGAnalysis
 
-You can create the (required) yaml configuration file, using the following utility method:
+You can create the (required) yaml configuration file, calling the following static method:
 
 ::
 
     AGAnalysis.getConfiguration(
-      confFilePath = "agconfig.yaml",
-      userName = "username",
-      sourceName = "OJ287",
-      tmin = 58930,
-      tmax = 58936,
-      timetype = "MJD",
-      glon = 206.8121188769472,
-      glat = 35.8208923457401,
-      outputDir = "$HOME/agilepy_analysis",
-      verboselvl = 1
+          "./agconfig.yaml", # the destination path of the configuration file
+          "username", # the name of the flare advocate
+          "OJ287", # the name of the source
+          58930, # tmin
+          58936, # tmax
+          "MJD", # time type
+          206.8121188769472, # glon
+          35.8208923457401, # glat
+          "$HOME/agilepy_analysis", # the destination path of the output directory
+          1, # the verbosity level
+          evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", # optional parameter
+          logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index" # optional parameter
     )
 
 
@@ -51,7 +53,7 @@ To generate sky maps:
 
     maplistfile = ag.generateMaps()
 
-To display the sky maps:
+To display and interact with the sky maps:
 
 ::
 
@@ -66,14 +68,14 @@ To perform an maximum likelyhood estimation analysis:
 
     sourcefiles = ag.mle()
 
-You can query the Sources Library with an arbitrary boolean expression string:
+You can query the Sources Library with an arbitrary boolean expression string..
 
 ::
 
     selectedSources = ag.selectSources("flux > 0 AND dist <= 1 OR sqrtTS > 3")
 
 
-To fix or free a source parameter:
+..and fix or free a source's parameter:
 
 ::
 
@@ -87,7 +89,7 @@ You can generate a light curve data file with...
     lightCurveData = ag.lightCurve("CYGX3", tmin=58930 , tmax=58936, binsize=10800)
 
 
-...and display the light curve plot with:
+...and display the interactive light curve plot with:
 
 ::
 
