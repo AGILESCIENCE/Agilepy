@@ -25,9 +25,9 @@ def MET2orbit(tmin, tmax, path_to_LOG, source='MySource', send=True):
         if (tstart <=tmax) & (tstop >= tmax):
             index_f = i
         if (i >= index_i) & (i <= index_f):
-            print index_i, index_f, orbit
-            print >> file, str(orbit)+'[1][INSTR_STATUS > 0]' #add row filtering to have good instr_status
-    print "files ", file, " created successfully"
+            print(index_i, index_f, orbit)
+            print(str(orbit)+'[1][INSTR_STATUS > 0]', file=file) #add row filtering to have good instr_status
+    print("files ", file, " created successfully")
     file.close()
     if send == True:
         os.system("./merge_orbit_logs.sh "+str(filename)+" merged_list_"+str(tmin)+"_"+str(tmax)+".fits")
@@ -48,41 +48,41 @@ def orbit2MET(orbita):
         if orbit == orbita:
             ti_desired = tstart
             tf_desired = tstop
-            print>> file, ti_desired, tf_desired
+            print(ti_desired, tf_desired, file=file)
         line = index.readline()
 
 if __name__ == '__main__':
     ask_for_path = [True, True]
     while ask_for_path[0] == True:
         if ask_for_path[1] == False:
-            continued = raw_input('Do you want to continue? (y/n): ')
+            continued = input('Do you want to continue? (y/n): ')
             if continued == 'n' or continued == 'no':
-                print ' See you soon!'
+                print(' See you soon!')
                 break
             elif continued == 'y' or continued == 'yes':
                 ask_for_path[1] = True
         # Ask for the binary system and take its parameters
-        path = raw_input('Write a path where to look for the LOG.index file: ')
+        path = input('Write a path where to look for the LOG.index file: ')
         try:
             os.system("ls "+path)
         except:
-            answer = raw_input('Wrong name. \n Do you want to continue? (y/n): ')
+            answer = input('Wrong name. \n Do you want to continue? (y/n): ')
             if answer == 'n' or answer == 'no':
-                print 'See you soon!'
+                print('See you soon!')
                 break
             else:
                 continue
         while ask_for_path[1] == True:
-            time_i = raw_input('introduce initial time in MET units: ')
-            time_f = raw_input('introduce final time in MET units: ')
+            time_i = input('introduce initial time in MET units: ')
+            time_f = input('introduce final time in MET units: ')
             try:
                 MET2orbit(float(time_i), float(time_f), path)
                 ask_for_path[1] = False
                 break
             except:
-                answer = raw_input('Wrong name. \n Do you want to continue? (y/n):')
+                answer = input('Wrong name. \n Do you want to continue? (y/n):')
                 if answer == 'n' or answer == 'no':
-                    print 'See you soon!'
+                    print('See you soon!')
                     break
                     ask_for_path[1] = False
                     ask_for_path[0] = False

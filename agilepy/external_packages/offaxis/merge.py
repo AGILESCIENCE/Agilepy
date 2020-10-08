@@ -41,7 +41,7 @@ class merge:
             lat_filt = lat_meantime[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
             lat_sep_filt = lat_separation[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
 
-        print 'Plotting figure...'
+        print('Plotting figure...')
         f = plt.figure()
         ax = f.add_subplot(111)
 #ax.plot(agl_meantime, agl_separation, '-r', lat_meantime, lat_separation, 'gs')
@@ -70,7 +70,7 @@ class merge:
 
         legend = plt.legend(loc='lower right', shadow=True, fontsize='xx-small')
 
-        print 'Saving figure...'
+        print('Saving figure...')
 #        ax.set_xlim(np.min(agl_filt)-self.t0, np.max(agl_filt)-self.t0)
         ax.set_xlim(np.min(agl_filt-self.t0), np.max(agl_filt-self.t0))
         ax.set_title(str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf))
@@ -88,7 +88,7 @@ class merge:
             agile_center, agile_hist, agile_width = np.loadtxt('agile_histogram_visibility.txt', unpack=True)
         if(mode=="fermi" or mode=="all"):
             fermi_center, fermi_hist, fermi_width = np.loadtxt('fermi_histogram_visibility.txt', unpack=True)
-        print 'Plotting histogram...'
+        print('Plotting histogram...')
         f = plt.figure()
         ax = f.add_subplot(111)
 
@@ -110,7 +110,7 @@ class merge:
         if show==True:
             f.show()
         else:
-            print 'Saving histogram...'
+            print('Saving histogram...')
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png'))
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf'), format="pdf")
 
@@ -118,5 +118,5 @@ class merge:
     def PlotAgileCounts(self):
 
         agile_mjd = np.array([54732.16,54732.33]) - self.t0
-        #print agile_mjd
+        #print(agile_mjd)
         return agile_mjd

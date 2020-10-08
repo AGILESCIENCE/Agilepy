@@ -73,8 +73,8 @@ class fermicheck:
         given by src_ra and src_dec.
             Output: separation (array), time_i (array), time_f (array)
         """
-        print "Computing angular distance to the center of f.o.v"
-        print"This might take a while..."
+        print("Computing angular distance to the center of f.o.v")
+        print("This might take a while...")
 
         # reading the Attitude Fermi file (the one that finishes with _SC.fits)
         file     = pyfits.open(self.SC_filename)
@@ -101,7 +101,7 @@ class fermicheck:
 
         c1  = SkyCoord(src_ra, src_dec, unit='deg', frame='icrs')
         c2  = SkyCoord(SC['RA_SCZ'][index_ti:index_tf:int(self.step)], SC['DEC_SCZ'][index_ti:index_tf:int(self.step)], unit='deg', frame='icrs')
-#        print 'c1=', len(c1), 'c2=', len(c2) # to ensure c1 and c2 have the same length
+#        print('c1=', len(c1), 'c2=', len(c2) # to ensure c1 and c2 have the same length
         sep = c2.separation(c1)
         return np.asfarray(sep), SC['START'][index_ti:index_tf:int(self.step)], SC['STOP'][index_ti:index_tf:int(self.step)]
 
@@ -111,8 +111,8 @@ class fermicheck:
         (Modified Julian Date).
         Output: t_start (list), t_stop (list)
         """
-        print "Converting MET to MJD time."
-        print "This might take a while..."
+        print("Converting MET to MJD time.")
+        print("This might take a while...")
 
         file     = pyfits.open(self.SC_filename)
         SC       = file[1].data
@@ -125,8 +125,8 @@ class fermicheck:
         index_ti = bisect.bisect_left(SC['START'],self.timelimiti)
         index_tf = bisect.bisect_left(SC['STOP'],self.timelimitf)
 
-        print 'Time_i =', SC['START'][index_ti]
-        print 'Time_f =', SC['STOP'][index_tf]
+        print('Time_i =', SC['START'][index_ti])
+        print('Time_f =', SC['STOP'][index_tf])
 
         tref     = datetime.datetime(2001,1,1,0,0,0)
         t_start  = []
@@ -173,7 +173,7 @@ class fermicheck:
         lenght   = len(separation[separation < self.zmax])
 
         for i in np.arange(0,lenght):
-            print >> gti_file, tiMET[i], tfMET[i]
+            print(tiMET[i], tfMET[i], file=gti_file)
 
 
     def PlotVisibility(self, twocolumn=False, show=False, im_fmt='eps', histogram=True, plot=True):
@@ -250,31 +250,31 @@ class fermicheck:
         ttotal_obs = np.sum(deltat)
         ttotal_under_zmax = np.sum(tfMET[separation<self.zmax]-tiMET[separation<self.zmax])
         ttotal_above_zmax = np.sum(tfMET[separation>self.zmax]-tiMET[separation>self.zmax])
-        print "Total integration time=", "{0:.2f}".format((ttotal_obs*self.step)), " s", 'Total_bins:', total_obs, len(tiMET), 'Mean sep. < ', self.zmax, ':', str(round(np.mean(separation[separation<self.zmax]),4))
-        print "Total absolute time=","{0:.2f}".format((self.tstop-self.tstart )*86400) #NEW
-        print "Total time spent at separation < ", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*self.step), "s"
-        print "Relative time spent at separation <", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*100./ttotal_obs), "%"
-        print "Relative time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(ttotal_above_zmax*100./ttotal_obs), "%"
-        print "Absolute time spent at separation <", self.zmax, " deg:", "{0:.2f}".format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100), " %" #NEW
-        print "Absolute time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100), " %" #NEW
-        print "Duty Cycle: ", "{0:.2f}".format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100), "%" #NEW
+        print("Total integration time=", "{0:.2f}".format((ttotal_obs*self.step)), " s", 'Total_bins:', total_obs, len(tiMET), 'Mean sep. < ', self.zmax, ':', str(round(np.mean(separation[separation<self.zmax]),4)))
+        print("Total absolute time=","{0:.2f}".format((self.tstop-self.tstart )*86400)) #NEW
+        print("Total time spent at separation < ", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*self.step), "s")
+        print("Relative time spent at separation <", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*100./ttotal_obs), "%")
+        print("Relative time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(ttotal_above_zmax*100./ttotal_obs), "%")
+        print("Absolute time spent at separation <", self.zmax, " deg:", "{0:.2f}".format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100), " %") #NEW
+        print("Absolute time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100), " %") #NEW
+        print("Duty Cycle: ", "{0:.2f}".format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100), "%") #NEW
 
         f = open(self.out_name, "a")
-        print >> f, "FERMI"
-        print >> f,"Total integration time=", "{0:.2f}".format((ttotal_obs*self.step)), " s", 'Total_bins:', total_obs, len(tiMET), 'Mean sep. < ', self.zmax, ':', str(round(np.mean(separation[separation<self.zmax]),4))
-        print >> f,"Total absolute time=","{0:.2f}".format((self.tstop-self.tstart )*86400) #NEW
-        print >> f,"Total time spent at separation < ", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*self.step), "s"
-        print >> f,"Relative time spent at separation <", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*100./ttotal_obs), "%"
-        print >> f,"Relative time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(ttotal_above_zmax*100./ttotal_obs), "%"
-        print >> f,"Absolute time spent at separation <", self.zmax, " deg:", "{0:.2f}".format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100), " %" #NEW
-        print >> f,"Absolute time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100), " %" #NEW
-        print >> f,"Duty Cycle: ", "{0:.2f}".format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100), "%" #NEW
+        print("FERMI", file=f)
+        print("Total integration time=", "{0:.2f}".format((ttotal_obs*self.step)), " s", 'Total_bins:', total_obs, len(tiMET), 'Mean sep. < ', self.zmax, ':', str(round(np.mean(separation[separation<self.zmax]),4)), file=f)
+        print("Total absolute time=","{0:.2f}".format((self.tstop-self.tstart )*86400), file=f) #NEW
+        print("Total time spent at separation < ", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*self.step), "s", file=f)
+        print("Relative time spent at separation <", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*100./ttotal_obs), "%", file=f)
+        print("Relative time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(ttotal_above_zmax*100./ttotal_obs), "%", file=f)
+        print("Absolute time spent at separation <", self.zmax, " deg:", "{0:.2f}".format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100), " %", file=f) #NEW
+        print("Absolute time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100), " %", file=f) #NEW
+        print("Duty Cycle: ", "{0:.2f}".format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100), "%", file=f) #NEW
         f.close()
 
         filesep = open('time_vs_separation_fermi.txt', 'w')
         l = len(separation)
         for i in np.arange(l):
-            print >> filesep, meantime[i], separation[i]
+            print(meantime[i], separation[i], file=filesep)
         filesep.close()
 
 # This commented lines where to plot grey shade in the corresponding detected flares by AGILE for MWC 656
@@ -303,7 +303,7 @@ class fermicheck:
 #            ax.fill_between([t_agilei_mjd[i], t_agilef_mjd[i]], 0, 200, color='grey', alpha=0.5)
 
         if plot == True:
-            print 'Plotting figure...'
+            print('Plotting figure...')
             f  = plt.figure()
             ax = f.add_subplot(111)
             ax.plot(meantime, separation, '-b')
@@ -313,7 +313,7 @@ class fermicheck:
             ax.set_xlabel('MJD')
             ax.set_ylabel('off-axis angle [$^{\\circ}$]')
 
-            print 'Saving figure...'
+            print('Saving figure...')
             ax.set_xlim(np.min(meantime), np.max(meantime))
             if show==True:
                 f.show()
@@ -321,7 +321,7 @@ class fermicheck:
                 f.savefig('fermi_visibility_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tiMET))+'_tstop'+str(np.max(tfMET))+'.'+str(im_fmt))
 
         if histogram == True:
-            print "Plotting histogram..."
+            print("Plotting histogram...")
             bins  = [0, 10, 20, 30, 40, 50, 60, 70]
             bins2 = [70, 180]
             hist, bins = np.histogram(separation, bins=bins, density=False)
@@ -330,9 +330,9 @@ class fermicheck:
             center = (bins[:-1] + bins[1:]) / 2
             width2 = 1. * (bins2[1] - bins2[0])
             center2 = (bins2[:-1] + bins2[1:]) / 2
-#            print hist, bins, center, width
-#            print hist2, bins2, center2, width2
-#            print len(separation)
+#            print(hist, bins, center, width)
+#            print(hist2, bins2, center2, width2)
+#            print(len(separation))
 
             f2  = plt.figure()
             ax2 = f2.add_subplot(111)
@@ -350,12 +350,12 @@ class fermicheck:
             #fil = open('fermi_histogram_visibility'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tiMET))+'_tstop'+str(np.max(tfMET))+'.txt', 'w')
             fil = open('fermi_histogram_visibility.txt', 'w')
             for i in np.arange(len(center)):
-                print >> fil, center[i], hist[i]*29.1058/ttotal_obs*100., width
+                print(center[i], hist[i]*29.1058/ttotal_obs*100., width, file=fil)
             for i in np.arange(len(center2)):
-                print >> fil, center2[i], hist2[i]*29.1058/ttotal_obs*100., width2
+                print(center2[i], hist2[i]*29.1058/ttotal_obs*100., width2, file=fil)
             fil.close()
 
-            print 'Saving figure...'
+            print('Saving figure...')
             if show==True:
                 f2.show()
             else:
