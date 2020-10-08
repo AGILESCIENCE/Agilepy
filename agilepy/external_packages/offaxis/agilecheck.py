@@ -12,7 +12,8 @@ from astropy import coordinates as coord
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 #import aplpy
-import pyfits
+#import pyfits
+from astropy.io import fits
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import bisect
 
@@ -86,9 +87,9 @@ class agilecheck:
         print("This might take a while...")
 
         # reading the Attitude AGILE file (the one created by merging the .log files)
-        file1 = pyfits.open(self.agile_spacecraft)
+        file1 = fits.open(self.agile_spacecraft)
         SC = file1[1].data
-
+        file1.close()
 
 #       This is to avoid problems with moments for which the AGILE pointing was set to RA=NaN, DEC=NaN
         TIME = SC['TIME'][np.logical_not(np.isnan(SC['ATTITUDE_RA_Y']))]
@@ -137,8 +138,9 @@ class agilecheck:
         print("Converting MET to MJD time.")
         print("This might take a while...")
 
-        file     = pyfits.open(self.agile_spacecraft)
+        file     = fits.open(self.agile_spacecraft)
         SC       = file[1].data
+        file.close()
 
 #       This is to avoid problems with moments for which the AGILE pointing was set to RA=NaN, DEC=NaN
         TIME = SC['TIME'][np.logical_not(np.isnan(SC['ATTITUDE_RA_Y']))]

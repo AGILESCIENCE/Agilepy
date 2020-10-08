@@ -12,7 +12,8 @@ from astropy import coordinates as coord
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 #import aplpy
-import pyfits
+#import pyfits
+from astropy.io import fits
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import bisect
 
@@ -77,7 +78,7 @@ class fermicheck:
         print("This might take a while...")
 
         # reading the Attitude Fermi file (the one that finishes with _SC.fits)
-        file     = pyfits.open(self.SC_filename)
+        file     = fits.open(self.SC_filename)
         SC       = file[1].data
         # if non specified, the initial and final time will be the first and last time in the SC file, respectively
         if self.timelimiti == -1:
@@ -114,9 +115,10 @@ class fermicheck:
         print("Converting MET to MJD time.")
         print("This might take a while...")
 
-        file     = pyfits.open(self.SC_filename)
+        file     = fits.open(self.SC_filename)
         SC       = file[1].data
-
+        file.close()
+        
         if self.timelimiti == -1:
             self.timelimiti = np.min(SC['START'])
         if self.timelimitf == -1:
