@@ -10,7 +10,6 @@ from astropy.time import Time
 from astropy import coordinates as coord
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-import pyfits
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import bisect
 
@@ -18,15 +17,14 @@ import bisect
 class merge:
     """ This class provides plots to check the off-axis angle of a source wrt AGILE center FoV.    """
 
-    def __init__(self, zmax=75., timelimiti=-1, timelimitf=-1, step=0.1, t0=0., lines=[]):
+    def __init__(self, zmax=75., timelimiti=-1, timelimitf=-1, step=0.1, t0=0.):
         self.zmax        = zmax
         self.timelimiti  = timelimiti
         self.timelimitf  = timelimitf
         self.step        = step*10.
         self.t0          = t0
-        self.lines       = lines
 
-    def Plotmerge(self, show=False, showcnt=True, mode="all"):
+    def Plotmerge(self, show=False, mode="all"):
 
         if(mode=="agile" or mode=="all"):
             agl_meantime, agl_separation = np.loadtxt('time_vs_separation_agile.txt', unpack=True)
@@ -53,9 +51,6 @@ class merge:
             ax.plot(lat_filt - self.t0, lat_sep_filt, color='red', label='Fermi')
 
         #agilecnt_mjd = self.PlotAgileCounts()
-        if showcnt==True:
-            for x in self.lines:
-                ax.axvline(x, linestyle='--', color='k', linewidth=0.5)
 
         ax.set_ylim(0., self.zmax+5.0)
         ax.set_xlim((self.timelimiti - self.t0)-0.2, (self.timelimitf-self.t0)+0.2)

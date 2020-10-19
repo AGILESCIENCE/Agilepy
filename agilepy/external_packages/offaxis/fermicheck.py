@@ -80,6 +80,8 @@ class fermicheck:
         # reading the Attitude Fermi file (the one that finishes with _SC.fits)
         file     = fits.open(self.SC_filename)
         SC       = file[1].data
+        #header   = file[1].header
+        
         # if non specified, the initial and final time will be the first and last time in the SC file, respectively
         if self.timelimiti == -1:
             self.timelimiti = np.min(SC['START'])
@@ -233,6 +235,7 @@ class fermicheck:
         separation, tiMET, tfMET = self.calc_separation()
         ti_mjd = []
         tf_mjd = []
+        separation = separation.value
 
         for i in np.arange(len(tiMET)):
             timjd = self.calc_mjd_simple(tiMET[i])

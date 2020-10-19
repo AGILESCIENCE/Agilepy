@@ -231,6 +231,8 @@ class agilecheck:
 #================== end of plotting settings =====================
 
         separation, tTTi, tTTf = self.calc_separation()
+
+        separation = separation.value
         ti_mjd = []
         tf_mjd = []
 
