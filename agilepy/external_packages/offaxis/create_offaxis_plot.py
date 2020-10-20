@@ -1,35 +1,44 @@
-# parameters:
+# DESCRIPTION
+#       Agilepy software
 #
-# 1) time window path, this file must contains rows for different time windows in MJD format
-# 54746.0 54747.0
-# 54915.0 54916.0
-# 2) ra: position of the source
-# 3) dec: position of the source
-# 4) path to Fermi data fits
-# 5) path to AGILE index file (/AGILE_PROC3/DATA_2/INDEX/LOG.log.index)
-# 6) run number
-# 7) zmax: maximum zenith distance of the source to the center of the detector (unit: degrees) (50.0,60.0 ecc)
-# 8) mode: agile || fermi || all
+# NOTICE
+#      Any information contained in this software
+#      is property of the AGILE TEAM and is strictly
+#      private and confidential.
+#      Copyright (C) 2005-2020 AGILE Team.
+#          Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+#          Addis Antonio <antonio.addis@inaf.it>
+#          Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
+#          Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
+#      All rights reserved.
 
-# example
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
 
-# OUTPUT
-# a list of directory for each time window, format dir_[run]_[tstart]_[tstop]
-# output_[zmax]_[time window path] file for results
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
 
-
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os,sys
 import numpy as np
-from fermicheck import *
+from agilepy.external_packages.offaxis.fermicheck import fermicheck
+from agilepy.external_packages.offaxis.agilecheck import agilecheck 
+from agilepy.external_packages.offaxis.merge import merge
+from agilepy.external_packages.offaxis.MET2orbit import MET2orbit
 from astropy.table import Table, vstack
 from astropy.io import fits
-from agilecheck import *
-from merge import *
 import os
 import glob
 
 class Create_offaxis_plot:
+    """It plots offaxis curves using agile and fermi fits files
+    """
 
     def __init__(self, time_windows, ra, dec, path_dati_fermi, path_log_index, run_number, zmax, mode, step):
         
@@ -169,3 +178,5 @@ class Create_offaxis_plot:
             check.histogram_merge(mode=self.mode)
 
             os.chdir("..")
+
+        return new_dir
