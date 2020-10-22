@@ -55,6 +55,8 @@ class APDisplayAGILEFermiComparison:
         return result
 
     def plot(self, ax, agile_data, fermi_data, arg_lines, plotrate):
+        """It plots aperture photometry data
+        """
 
         #---AGILE----
 

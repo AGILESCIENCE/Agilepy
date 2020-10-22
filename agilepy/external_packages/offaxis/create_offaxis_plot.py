@@ -157,8 +157,8 @@ class Create_offaxis_plot:
 
             if(self.mode == "agile" or self.mode == "all"):
 
-                agile_met_start = (tstart - 53005.0) *  86400.0;
-                agile_met_stop = (tstop - 53005.0) *  86400.0;
+                agile_met_start = (tstart - 53005.0) *  86400.0
+                agile_met_stop = (tstop - 53005.0) *  86400.0
 
                 print("agile "+str(agile_met_start)+" "+str(agile_met_stop))
 
