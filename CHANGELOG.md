@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 1.2.0
+* (\#170) Added APDisplayAGILEFermiComparison class to compare ap and offaxis results
+* (\#172) Added Offaxis tool to compute agile and fermi offaxis
+
 ## Release 1.1.2
 * (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True.
 * (\#152) The setOptions() call to increment the number of energy bins while galcoeff and isocoeff are equal = null  won't throw an error anymore.
