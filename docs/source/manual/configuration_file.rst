@@ -14,7 +14,7 @@ It can be created easily, calling the following static method and passing the mi
 
 ::
 
-    AGAnalysis.getConfiguration(
+    AGmle.getConfiguration(
           "./agconfig.yaml", # the destination path of the configuration file
           "username", # the name of the flare advocate
           "OJ287", # the name of the source

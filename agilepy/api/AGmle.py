@@ -53,7 +53,7 @@ from agilepy.utils.CustomExceptions import AGILENotFoundError, \
                                            SourceNotFound, \
                                            EnvironmentVariableNotExpanded
 
-class AGAnalysis:
+class AGmle:
     """This class contains the high-level API methods you can use to run scientific analysis.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
@@ -61,7 +61,7 @@ class AGAnalysis:
     """
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
-        """AGAnalysis constructor.
+        """AGmle constructor.
 
         Args:
             configurationFilePath (str): a relative or absolute path to the yaml configuration file.
@@ -73,8 +73,8 @@ class AGAnalysis:
             PFILESNotFoundError: if the PFILES environment variable is not set.
 
         Example:
-            >>> from agilepy.api import AGAnalysis
-            >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml')
+            >>> from agilepy.api import AGmle
+            >>> agmle = AGmle('agconfig.yaml', sourcesFilePath='sources.xml')
 
         """
 
@@ -280,7 +280,7 @@ mle:
 
         Example:
 
-            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
+            >>> agmle.setOptions(mapsize=60, binsize=0.5)
             True
 
         """
@@ -457,7 +457,7 @@ mle:
             ScienceToolInputArgMissing: if not all the required configuration options have been set.
 
         Example:
-            >>> aganalysis.generateMaps()
+            >>> agmle.generateMaps()
             /home/rt/agilepy/output/testcase.maplist4
 
         """
@@ -488,7 +488,7 @@ mle:
                 fovmin = initialFovmin
                 fovmax = initialFovmax
             else:
-                bincenter, fovmin, fovmax = AGAnalysis._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
+                bincenter, fovmin, fovmax = AGmle._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
             for bgCoeffIdx, stepe in enumerate(energybins):
@@ -692,8 +692,8 @@ mle:
             MaplistIsNone: is the input argument is None.
 
         Example:
-            >>> maplistFilePath = aganalysis.generateMaps()
-            >>> aganalysis.mle(maplistFilePath)
+            >>> maplistFilePath = agmle.generateMaps()
+            >>> agmle.mle(maplistFilePath)
             [/home/rt/agilepy/output/testcase0001_2AGLJ2021+4029.source /home/rt/agilepy/output/testcase0001_2AGLJ2021+3654.source]
 
         """
@@ -789,7 +789,7 @@ mle:
             rmtree(lcAnalysisDataDir)
 
         processes = 1
-        binsForProcesses = AGAnalysis._chunkList(bins, processes)
+        binsForProcesses = AGmle._chunkList(bins, processes)
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
@@ -1037,10 +1037,10 @@ mle:
             named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
             is greater than zero.
 
-            >>> aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
+            >>> agmle.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
             [..]
 
-            >>> aganalysis.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
+            >>> agmle.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
             [..]
 
 
@@ -1074,7 +1074,7 @@ mle:
                 "flux": 35.79e-08,
                 "curvature": 0.682363
             }
-            newSource = aganalysis.addSource("2AGLJ1801-2334", newSourceDict)
+            newSource = agmle.addSource("2AGLJ1801-2334", newSourceDict)
 
         Args:
             sourceName (str): the name of the source
