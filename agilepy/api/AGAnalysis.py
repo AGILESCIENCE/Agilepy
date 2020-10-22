@@ -29,31 +29,33 @@ import os
 from os.path import join, splitext, expandvars
 from pathlib import Path
 from ntpath import basename
-from time import time, strftime
 from shutil import rmtree
+from time import time
 import re
 pattern = re.compile('e([+\-]\d+)')
-# from multiprocessing import Process
 
-from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
 
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi
 
+from agilepy.config.AgilepyConfig import AgilepyConfig
+
+
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.MapList import MapList
-from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import AGILENotFoundError, \
-                                           PFILESNotFoundError, \
-                                           ScienceToolInputArgMissing, \
-                                           MaplistIsNone, \
-                                           SourceNotFound, \
-                                           EnvironmentVariableNotExpanded
 
-class AGmle:
+from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
+                                            PFILESNotFoundError, \
+                                            ScienceToolInputArgMissing, \
+                                            MaplistIsNone, \
+                                            SourceNotFound, \
+                                            EnvironmentVariableNotExpanded, \
+                                            ConfigurationsNotValidError
+
+class AGAnalysis(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run scientific analysis.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
@@ -61,7 +63,7 @@ class AGmle:
     """
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
-        """AGmle constructor.
+        """AGAnalysis constructor.
 
         Args:
             configurationFilePath (str): a relative or absolute path to the yaml configuration file.
@@ -73,27 +75,13 @@ class AGmle:
             PFILESNotFoundError: if the PFILES environment variable is not set.
 
         Example:
-            >>> from agilepy.api import AGmle
-            >>> agmle = AGmle('agconfig.yaml', sourcesFilePath='sources.xml')
+            >>> from agilepy.api import AGAnalysis
+            >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml')
 
         """
+        super().__init__(configurationFilePath)
 
-        self.config = AgilepyConfig()
-
-        self.config.loadConfigurations(configurationFilePath, validate=True)
-
-        outdir = self.config.getConf("output","outdir")+"_"+strftime("%Y%m%d-%H%M%S")
-
-        self.config.setOptions(outdir=outdir)
-
-        Path(outdir).mkdir(parents=True, exist_ok=True)
-
-
-        self.logger = AgilepyLogger()
-
-        self.logger.initialize(outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
@@ -101,27 +89,13 @@ class AGmle:
 
             self.sourcesLibrary.loadSourcesFromFile(sourcesFilePath)
 
-
-
-        self.plottingUtils = PlottingUtils(self.config, self.logger)
-
-        if "AGILE" not in os.environ:
-            raise AGILENotFoundError("$AGILE is not set.")
-
-        if "PFILES" not in os.environ:
-            raise PFILESNotFoundError("$PFILES is not set.")
-
-        self.currentMapList = MapList(self.logger)
         # MapList Observes the observable AgilepyConfig
+        self.currentMapList = MapList(self.logger)
         self.config.attach(self.currentMapList, "galcoeff")
         self.config.attach(self.currentMapList, "isocoeff")
 
         self.lightCurveData = None
 
-    """
-    def __del__(self):
-        self.destroy()
-    """
 
     def destroy(self):
         self.sourcesLibrary.destroy()
@@ -134,7 +108,6 @@ class AGmle:
     ############################################################################
     # utility                                                                  #
     ############################################################################
-
 
     @staticmethod
     def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
@@ -173,8 +146,8 @@ class AGmle:
             expandedOutputDir = expandvars(outputDir)
 
             if expandedOutputDir == outputDir:
-                print(f"Environment variable has not been expanded in {expanded}")
-                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {expanded}")
+                print(f"Environment variable has not been expanded in {outputDir}")
+                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {outputDir}")
 
         outputDir = Path(expandedOutputDir).joinpath(analysisname)
 
@@ -189,24 +162,40 @@ output:
   logfilenameprefix: %s_log
   verboselvl: %d
 
-selection:
+selection:  
+  emin: 100
+  emax: 10000
   tmin: %f
   tmax: %f
   timetype: %s
   glon: %f
   glat: %f
+  proj: ARC
+  timelist: None
+  filtercode: 5
+  fovradmin: 0
   fovradmax: 60
   albedorad: 80
-  proj: ARC
+  dq: 0
+  phasecode: null
+  lonpole: 180
+  lpointing: null
+  bpointing: null
+  maplistgen: "None"
 
 maps:
   mapsize: 40
+  useEDPmatrixforEXP: yes
+  expstep: null
   spectralindex: 2.1
   timestep: 160
+  projtype: WCS
+  proj: ARC
   binsize: 0.25
   energybins:
     - 100, 10000
   fovbinnumber: 1
+  offaxisangle: 30
 
 model:
   modelfile: null
@@ -216,6 +205,10 @@ model:
   isocoeff: null
   emin_sources: 100
   emax_sources: 10000
+  galmode2: 0
+  galmode2fit: 0
+  isomode2: 0
+  isomode2fit: 0
 
 mle:
   ranal: 10
@@ -225,6 +218,17 @@ mle:
   expratio_minthr: 0
   expratio_maxthr: 15
   expratio_size: 10
+  minimizertype: Minuit
+  minimizeralg: Migrad
+  minimizerdefstrategy: 2
+  mindefaulttolerance: 0.01
+  integratortype: 1
+  contourpoints: 40
+  edpcorrection: 0.75
+  fluxcorrection: 1
+
+plotting:
+  twocolumns: False
 
         """%(evtfile, logfile, str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
 
@@ -232,9 +236,6 @@ mle:
 
             cf.write(configuration)
 
-        config = AgilepyConfig()
-
-        config.loadConfigurations(confFilePath, validate=True)
 
 
 
@@ -280,7 +281,7 @@ mle:
 
         Example:
 
-            >>> agmle.setOptions(mapsize=60, binsize=0.5)
+            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
             True
 
         """
@@ -457,7 +458,7 @@ mle:
             ScienceToolInputArgMissing: if not all the required configuration options have been set.
 
         Example:
-            >>> agmle.generateMaps()
+            >>> aganalysis.generateMaps()
             /home/rt/agilepy/output/testcase.maplist4
 
         """
@@ -488,7 +489,7 @@ mle:
                 fovmin = initialFovmin
                 fovmax = initialFovmax
             else:
-                bincenter, fovmin, fovmax = AGmle._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
+                bincenter, fovmin, fovmax = AGAnalysis._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
             for bgCoeffIdx, stepe in enumerate(energybins):
@@ -692,8 +693,8 @@ mle:
             MaplistIsNone: is the input argument is None.
 
         Example:
-            >>> maplistFilePath = agmle.generateMaps()
-            >>> agmle.mle(maplistFilePath)
+            >>> maplistFilePath = aganalysis.generateMaps()
+            >>> aganalysis.mle(maplistFilePath)
             [/home/rt/agilepy/output/testcase0001_2AGLJ2021+4029.source /home/rt/agilepy/output/testcase0001_2AGLJ2021+3654.source]
 
         """
@@ -789,12 +790,12 @@ mle:
             rmtree(lcAnalysisDataDir)
 
         processes = 1
-        binsForProcesses = AGmle._chunkList(bins, processes)
+        binsForProcesses = AGAnalysis._chunkList(bins, processes)
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
-        (_, last, _) = AgilepyConfig._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
-        idxTmax = float(AgilepyConfig._extractTimes(last)[1])
+        (_, last, _) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
+        idxTmax = float(Utils._extractTimes(last)[1])
 
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
@@ -1037,10 +1038,10 @@ mle:
             named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
             is greater than zero.
 
-            >>> agmle.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
+            >>> aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
             [..]
 
-            >>> agmle.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
+            >>> aganalysis.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
             [..]
 
 
@@ -1074,7 +1075,7 @@ mle:
                 "flux": 35.79e-08,
                 "curvature": 0.682363
             }
-            newSource = agmle.addSource("2AGLJ1801-2334", newSourceDict)
+            newSource = aganalysis.addSource("2AGLJ1801-2334", newSourceDict)
 
         Args:
             sourceName (str): the name of the source
@@ -1306,7 +1307,6 @@ mle:
         self.logger.debug(self, f"Multioutput: {multiOutput}")
 
         return isoCoeff, galCoeff
-
 
     def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor=None):
 

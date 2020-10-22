@@ -7,7 +7,7 @@
 * (\#160) Interactive plots in notebooks
 * (\#170) Added APDisplayAGILEFermiComparison class to compare ap and offaxis results
 * (\#172) Added Offaxis tool to compute agile and fermi offaxis
-* (\#173) Refactoring: AGAnalysis is renamed to AGmle. 
+* (\#173) Refactoring
 
 ## Release 1.1.1 - 28/03/20
 * (\#151) The method getConfiguration() accepts also "evtfile" and "logfile" and it raises an Exception if those files are not compabile with "tmin" and "tmax".

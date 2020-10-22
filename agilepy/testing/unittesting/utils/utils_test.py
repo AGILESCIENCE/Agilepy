@@ -32,6 +32,8 @@ from pathlib import Path
 from time import sleep
 from datetime import datetime
 
+
+from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
@@ -44,7 +46,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
 
         self.config = AgilepyConfig()
-        self.config.loadConfigurations(self.agilepyconfPath, validate=False)
+        self.config.loadBaseConfigurations(self.agilepyconfPath, validate=False)
 
         self.agilepyLogger = AgilepyLogger()
 
@@ -68,7 +70,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
 
 
         file = pu.displaySkyMap(
@@ -93,7 +95,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
@@ -117,7 +119,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = self.config._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(

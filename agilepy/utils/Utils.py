@@ -25,6 +25,11 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
+from os.path import expandvars
+
+
+from agilepy.utils.CustomExceptions import EnvironmentVariableNotExpanded
 
 class Singleton(type):
     _instances = {}
@@ -34,3 +39,39 @@ class Singleton(type):
         else:
             cls._instances[cls].__init__(*args, **kwargs)
         return cls._instances[cls]
+
+
+class Utils:
+
+    @staticmethod
+    def _expandEnvVar(path):
+        if "$" in path:
+            expanded = expandvars(path)
+            if expanded == path:
+                print(f"[CompletionStrategies] Environment variable has not been expanded in {expanded}")
+                raise EnvironmentVariableNotExpanded(f"[CompletionStrategies] Environment variable has not been expanded in {expanded}")
+            else:
+                return expanded
+        else:
+            return path
+
+
+    @staticmethod
+    def _parseListNotation(strList):
+        # check regular expression??
+        return [float(elem.strip()) for elem in strList.split(',')]
+
+    @staticmethod
+    def _getFirstAndLastLineInFile(file):
+        with open(file, 'rb') as evtindex:
+            firstLine = next(evtindex).decode()
+            lineSize = len(firstLine.encode('utf-8'))
+            evtindex.seek(-500, os.SEEK_END)
+            lastLine = evtindex.readlines()[-1].decode()
+            return (firstLine, lastLine, lineSize)
+
+    @staticmethod
+    def _extractTimes(indexFileLine):
+        elements = indexFileLine.split(" ")
+        return (elements[1], elements[2])
+    

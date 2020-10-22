@@ -49,7 +49,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
         self.config = AgilepyConfig()
-        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
 
         self.logger = AgilepyLogger()
         self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
@@ -312,7 +312,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
 
         self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
 
@@ -330,7 +330,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
 
         sourcesFile = os.path.join(self.currentDirPath,"conf/sourcesconf_for_write_to_file_txt.txt")
 
@@ -353,7 +353,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
 
         self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
 
@@ -431,7 +431,7 @@ class SourcesLibraryUT(unittest.TestCase):
     def test_backup_restore(self):
         self.config = AgilepyConfig()
 
-        self.config.loadConfigurations(self.agilepyconfPath, validate=True)
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
 
         self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
 

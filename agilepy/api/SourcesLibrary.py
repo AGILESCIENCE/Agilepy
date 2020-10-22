@@ -35,6 +35,8 @@ from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
 
+from agilepy.utils.Utils import Utils
+
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Parameters import Parameters
 
@@ -84,9 +86,9 @@ class SourcesLibrary:
 
 
         if catalogName == "2AGL":
-            catPath = self.config._expandEnvVar("$AGILE/catalogs/2AGL.xml")
+            catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.xml")
             if not Path(catPath).exists():
-                catPath = self.config._expandEnvVar("$AGILE/catalogs/2AGL.multi")
+                catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.multi")
 
             cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
             uEmin = self.config.getOptionValue("emin")
@@ -111,7 +113,7 @@ class SourcesLibrary:
 
     def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False, show=False):
 
-        filePath = self.config._expandEnvVar(filePath)
+        filePath = Utils._expandEnvVar(filePath)
 
         _, fileExtension = splitext(filePath)
 
@@ -154,7 +156,7 @@ class SourcesLibrary:
 
     def convertCatalogToXml(self, catalogFilepath):
 
-        catalogFilepath = self.config._expandEnvVar(catalogFilepath)
+        catalogFilepath = Utils._expandEnvVar(catalogFilepath)
 
         filename, fileExtension = splitext(catalogFilepath)
 

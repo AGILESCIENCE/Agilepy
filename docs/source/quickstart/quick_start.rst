@@ -5,13 +5,13 @@ To import the library:
 
 ::
 
-    from agilepy.api import AGmle
+    from agilepy.api import AGAnalysis
 
 You can create the (required) yaml configuration file, calling the following static method:
 
 ::
 
-    AGmle.getConfiguration(
+    AGAnalysis.getConfiguration(
           "./agconfig.yaml", # the destination path of the configuration file
           "username", # the name of the flare advocate
           "OJ287", # the name of the source
@@ -27,11 +27,11 @@ You can create the (required) yaml configuration file, calling the following sta
     )
 
 
-In order to interact with the library you need to obtain an instance of the AGmle class:
+In order to interact with the library you need to obtain an instance of the AGAnalysis class:
 
 ::
 
-    ag = AGmle('agconfig.yaml')
+    ag = AGAnalysis('agconfig.yaml')
 
 
 The you have to load the models of the sources (you can filter them by their distance (degree) from l,b provided within the configuration file):

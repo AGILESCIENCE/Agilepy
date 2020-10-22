@@ -31,9 +31,9 @@ import shutil
 from pathlib import Path
 from time import sleep
 
-from agilepy.api.AGmle import AGmle
+from agilepy.api.AGAnalysis import AGAnalysis
 
-class AGmleUT(unittest.TestCase):
+class AGAnalysisUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
@@ -47,7 +47,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_delete_output_directory(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         outDir = Path(ag.getOption("outdir"))
 
@@ -60,7 +60,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_generate_maps(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         outDir = ag.getOption("outdir")
 
@@ -81,7 +81,7 @@ class AGmleUT(unittest.TestCase):
     def test_update_gal_iso(self):
 
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         outDir = Path(ag.getOption("outdir"))
 
@@ -118,7 +118,7 @@ class AGmleUT(unittest.TestCase):
         ag.destroy()
 
     def test_analysis_pipeline(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
@@ -134,7 +134,7 @@ class AGmleUT(unittest.TestCase):
         ag.destroy()
 
     def test_source_dist_updated_after_mle(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         maplistFilePath = ag.generateMaps()
 
@@ -153,7 +153,7 @@ class AGmleUT(unittest.TestCase):
         ag.destroy()
 
     def test_source_Flux_updated_after_mle(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         maplistFilePath = ag.generateMaps()
 
@@ -169,7 +169,7 @@ class AGmleUT(unittest.TestCase):
         ag.destroy()
 
     def test_parse_maplistfile(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         ag.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
         maplistFilePath = ag.generateMaps()
@@ -191,7 +191,7 @@ class AGmleUT(unittest.TestCase):
         ag.destroy()
 
     def test_print_source(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         maplistFilePath = ag.generateMaps()
 
@@ -199,8 +199,8 @@ class AGmleUT(unittest.TestCase):
 
         ag.mle(maplistFilePath)
 
-        for s in ag.sourcesLibrary.sources:
-            print(s)
+        #for s in ag.sourcesLibrary.sources:
+        #    print(s)
 
         self.assertEqual(True, True)
 
@@ -208,7 +208,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_display_sky_maps(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(singleMode=False, saveImage=True)
@@ -227,7 +227,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_display_sky_maps_singlemode(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(saveImage=True)
@@ -246,7 +246,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_update_source_position(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         ag.generateMaps()
 
@@ -274,7 +274,7 @@ class AGmleUT(unittest.TestCase):
 
 
     def test_lc(self):
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
         ag.setOptions(glon=78.2375, glat=2.12298)
 
@@ -284,7 +284,7 @@ class AGmleUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=20000)
 
-        print(lightCurveData)
+        #print(lightCurveData)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
@@ -292,7 +292,7 @@ class AGmleUT(unittest.TestCase):
     """
     def test_display_sky_maps_singlemode_show(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
@@ -312,7 +312,7 @@ class AGmleUT(unittest.TestCase):
 
     def test_calc_bkg(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
         ag.setOptions(   tmin=456461778.0,
                          tmax=456537945.0,
@@ -344,17 +344,17 @@ class AGmleUT(unittest.TestCase):
 
     def test_extract_light_curve_data(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
         sourceFile = Path(self.currentDirPath).joinpath("data/testcase0.source")
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
-        print(lcdata)
+        #print(lcdata)
 
     def test_fix_exponent(self):
 
-        ag = AGmle(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
         self.assertEqual('894.587e-08', ag._fixToNegativeExponent(8.94587e-06, fixedExponent=-8))
         self.assertEqual('309.757e-08', ag._fixToNegativeExponent(3.09757e-06, fixedExponent=-8))

@@ -30,19 +30,20 @@ import os
 import shutil
 from pathlib import Path
 
-from agilepy.api.AGEng import AGEng
+from agilepy.utils.Utils import Utils
+from agilepy.api.AGEngVisibility1 import AGEngVisibility1
 
-class AGEngUT(unittest.TestCase):
+class AGEngVisibility1UT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf_ageng.yaml")
         self.outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
 
         if self.outDir.exists() and self.outDir.is_dir():
             shutil.rmtree(self.outDir)
 
-        self.ageng = AGEng(self.agilepyconfPath)
+        self.ageng = AGEngVisibility1(self.agilepyconfPath)
 
 
     def test_compute_pointing_distances_from_source(self):
@@ -50,7 +51,11 @@ class AGEngUT(unittest.TestCase):
         # file = "/data/AGILE/LOG_INDEX/LOG.log.index"
         zmax = 60
         step = 10
-        _, _, _, _, _, _, _, separationFile = self.ageng._computePointingDistancesFromSource(456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, logfilesIndex=None, writeFiles=True)
+        logfilesIndex = "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+
+        logfilesIndex = Utils._expandEnvVar(logfilesIndex)
+
+        _, _, _, _, _, _, _, separationFile = self.ageng._computePointingDistancesFromSource(logfilesIndex, 456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, writeFiles=True)
 
         # self.assertEqual(True, os.path.isfile(separationFile))
 
@@ -62,14 +67,15 @@ class AGEngUT(unittest.TestCase):
         ref="gal"
         zmax=60
         step=10
-        logfilesIndex=None
         histogram=True
         writeFiles=True
         saveImage=True
         fileFormat="png"
         title="Visibility plot 184075134 - 184275134"
 
-        visplot, histoplot = self.ageng.visibilityPlot(456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, logfilesIndex, saveImage, fileFormat, title)
+        logfilesIndex = "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+
+        visplot, histoplot = self.ageng.visibilityPlot(logfilesIndex, 456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, saveImage, fileFormat, title)
 
         self.assertEqual(True, os.path.isfile(visplot))
         self.assertEqual(True, os.path.isfile(histoplot))

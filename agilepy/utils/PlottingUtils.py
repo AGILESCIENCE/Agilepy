@@ -41,6 +41,7 @@ from time import strftime
 import plotly.graph_objects as go
 import pandas as pd
 from math import ceil
+from agilepy.utils.Utils import Utils
 
 from agilepy.utils.Utils import Singleton
 
@@ -287,14 +288,14 @@ class PlottingUtils(metaclass=Singleton):
         regionsFiles = []
 
         if regFilePath:
-            regFilePath = self.config._expandEnvVar(regFilePath)
+            regFilePath = Utils._expandEnvVar(regFilePath)
             self.logger.info(self, "The region catalog %s will be loaded.", regFilePath)
 
         regionsFiles.append(regFilePath)
 
         regionsFilesDict = self.getSupportedRegionsCatalogs()
         if catalogRegions in regionsFilesDict.keys():
-            catalogRegions = self.config._expandEnvVar(regionsFilesDict[catalogRegions])
+            catalogRegions = Utils._expandEnvVar(regionsFilesDict[catalogRegions])
             self.logger.info(self, "The region catalog %s will be loaded.", catalogRegions)
 
         regionsFiles.append(catalogRegions)

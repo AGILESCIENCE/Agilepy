@@ -32,17 +32,23 @@ import numbers
 from typing import List
 from copy import deepcopy
 from numbers import Number
-from os.path import dirname, realpath, join, expandvars
+from os.path import dirname, realpath, join
 from pathlib import Path
 
+from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
+from agilepy.config.AGEngVisibility1Config import AGEngVisibility1Config
+from agilepy.config.AGEngVisibility2Config import AGEngVisibility2Config
+
+from agilepy.config.ValidationStrategies import ValidationStrategies
+from agilepy.config.CompletionStrategies import CompletionStrategies
 from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import ConfigurationsNotValidError, \
-                                           OptionNotFoundInConfigFileError, \
-                                           ConfigFileOptionTypeError, \
-                                           CannotSetHiddenOptionError, \
-                                           CannotSetNotUpdatableOptionError, \
-                                           EnvironmentVariableNotExpanded
+from agilepy.utils.CustomExceptions import  ConfigurationsNotValidError, \
+                                            OptionNotFoundInConfigFileError, \
+                                            ConfigFileOptionTypeError, \
+                                            CannotSetHiddenOptionError, \
+                                            CannotSetNotUpdatableOptionError, \
+                                            AnalysisClassNotSupported
 
 
 
@@ -65,44 +71,65 @@ class AgilepyConfig(Observable):
         return ac
 
 
-    def loadConfigurations(self, configurationFilePath, validate = True):
-
-        currentDir = dirname(realpath(__file__))
-
-        default_conf = AgilepyConfig._loadFromYaml(join(currentDir,"./conf.default.yaml"))
+    def loadBaseConfigurations(self, configurationFilePath):
 
         user_conf = AgilepyConfig._loadFromYaml(configurationFilePath)
+        
 
-        mergedConf = AgilepyConfig._mergeConfigurations(default_conf, user_conf)
+        errors = []
 
-        AgilepyConfig._checkRequiredParams(mergedConf)
+        if user_conf["output"]["outdir"] is None:
+            errors.append("Please, set output/outdir")
 
-        conf = AgilepyConfig._completeConfiguration(mergedConf)
+        if user_conf["output"]["filenameprefix"] is None:
+            errors.append("Please, set output/filenameprefix")
 
-        self.conf = conf
-        # self.conf_bkp = deepcopy(self.conf)
+        if user_conf["output"]["logfilenameprefix"] is None:
+            errors.append("Please, set output/logfilenameprefix")
 
-        if validate:
-
-            self.validateConfiguration()
-
-        self.initialized = True
-
-
-    def validateConfiguration(self):
-
-        errors = {}
-
-        errors.update( AgilepyConfig._validateBackgroundCoeff(self.conf) )
-        errors.update( AgilepyConfig._validateIndexFiles(self.conf) )
-        errors.update( AgilepyConfig._validateTimeInIndex(self.conf) )
-        errors.update( AgilepyConfig._validateLOCCL(self.conf) )
-        errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "fovradmin", "fovradmax") )
-        errors.update( AgilepyConfig._validateMinMax(self.conf, "selection", "emin", "emax") )
-        errors.update( AgilepyConfig._validateTimetype(self.conf))
+        if user_conf["output"]["verboselvl"] is None:
+            errors.append("Please, set output/verboselvl")
 
         if errors:
-            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+            raise ConfigurationsNotValidError("{}".format(errors))
+
+        CompletionStrategies._expandOutdirEnvVars(user_conf)
+
+        self.conf = user_conf
+
+
+    def loadConfigurationsForClass(self, className):
+
+        if className == "AGAnalysis":
+            
+            AGAnalysisConfig.checkRequiredParams(self.conf)
+
+            AGAnalysisConfig.completeConfiguration(self.conf)
+
+            AGAnalysisConfig.validateConfiguration(self.conf)
+
+
+        elif className == "AGEngVisibility1":
+
+            AGEngVisibility1Config.checkRequiredParams(self.conf)
+
+            AGEngVisibility1Config.completeConfiguration(self.conf)
+
+            AGEngVisibility1Config.validateConfiguration(self.conf)
+
+
+        elif className == "AGEngVisibility2":
+
+            AGEngVisibility2Config.checkRequiredParams(self.conf)
+
+            AGEngVisibility2Config.completeConfiguration(self.conf)
+
+            AGEngVisibility2Config.validateConfiguration(self.conf)
+
+        else:
+            raise AnalysisClassNotSupported("The class: {} is not supported".format(className))
+
+        self.initialized = True
 
 
     def getSectionOfOption(self, optionName):
@@ -144,7 +171,7 @@ class AgilepyConfig(Observable):
             self.conf[section][optionName] = optionValue
 
 
-    def setOptions(self, force=False, **kwargs):
+    def setOptions(self, force=False, validate=True, **kwargs):
         """
 
         """
@@ -179,17 +206,17 @@ class AgilepyConfig(Observable):
 
             if optionName == "loccl":
 
-                AgilepyConfig._transformLoccl(self.conf)
+                CompletionStrategies._transformLoccl(self.conf)
 
             if optionName == "isocoeff" or optionName == "galcoeff":
 
-                AgilepyConfig._convertBackgroundCoeff(self.conf, optionName)
+                CompletionStrategies._convertBackgroundCoeff(self.conf, optionName)
 
             if optionName == "energybins" or optionName == "fovbinnumber":
 
-                AgilepyConfig._extendBackgroundCoeff(self.conf)
-
-        self.validateConfiguration()
+                CompletionStrategies._extendBackgroundCoeff(self.conf)
+        
+        # TODO VALIDARE I CAMPI!! (validamiiiiii)
 
         for optionName, optionValue in kwargs.items():
 
@@ -291,190 +318,16 @@ class AgilepyConfig(Observable):
 
         return (True, "")
 
-    @staticmethod
-    def _mergeConfigurations(dict1, dict2):
-        """
-        Merge dict2 (user defined conf) with dict1 (default conf) (this op is not symmetric)
-        """
-        merged = {}
-        for sectionName in dict1.keys():
-            merged[sectionName] = {}
-
-        for sectionName in dict1.keys():
-            for key in dict1[sectionName].keys():
-                if sectionName in dict2 and key in dict2[sectionName].keys():
-                    if key=="glon":
-                        merged[sectionName]["glon"] = dict2[sectionName]["glon"] + 0.000001
-                    else:
-                        merged[sectionName][key] = dict2[sectionName][key]
-                else:
-                    merged[sectionName][key] = dict1[sectionName][key]
-
-        return merged
-
-    @staticmethod
-    def _completeConfiguration(confDict):
-        AgilepyConfig._convertEnergyBinsStrings(confDict)
-        AgilepyConfig._convertBackgroundCoeff(confDict, "isocoeff")
-        AgilepyConfig._convertBackgroundCoeff(confDict, "galcoeff")
-        AgilepyConfig._setTime(confDict)
-        AgilepyConfig._setPhaseCode(confDict)
-        AgilepyConfig._setExpStep(confDict)
-        AgilepyConfig._expandEnvVars(confDict)
-        AgilepyConfig._transformLoccl(confDict)
-        return confDict
-
-    @staticmethod
-    def _checkRequiredParams(confDict):
-
-        errors = []
-
-        if confDict["input"]["evtfile"] is None:
-            errors.append("Please, set input/evtfile")
-
-        if confDict["input"]["logfile"] is None:
-            errors.append("Please, set input/logfile")
-
-        if confDict["output"]["outdir"] is None:
-            errors.append("Please, set output/outdir")
-
-        if confDict["output"]["filenameprefix"] is None:
-            errors.append("Please, set output/filenameprefix")
-
-        if confDict["output"]["logfilenameprefix"] is None:
-            errors.append("Please, set output/logfilenameprefix")
-
-        if confDict["output"]["verboselvl"] is None:
-            errors.append("Please, set output/verboselvl")
-
-        if confDict["selection"]["timetype"] is None:
-            errors.append("Please, set selection/timetype (MJD or TT)")
-
-        if confDict["selection"]["tmin"] is None:
-            errors.append("Please, set selection/tmin")
-
-        if confDict["selection"]["tmax"] is None:
-            errors.append("Please, set selection/tmax")
-
-        if confDict["selection"]["glon"] is None:
-            errors.append("Please, set selection/glon")
-
-        if confDict["selection"]["glat"] is None:
-            errors.append("Please, set selection/glat")
-
-        if errors:
-            raise ConfigurationsNotValidError("{}".format(errors))
-
-    @staticmethod
-    def _parseListNotation(strList):
-        # check regular expression??
-        return [float(elem.strip()) for elem in strList.split(',')]
-
-    @staticmethod
-    def _convertEnergyBinsStrings(confDict):
-        l = []
-        for stringList in confDict["maps"]["energybins"]:
-            res = AgilepyConfig._parseListNotation(stringList)
-            l.append([int(r) for r in res])
-        confDict["maps"]["energybins"] = l
-
-    @staticmethod
-    def _convertBackgroundCoeff(confDict, bkgCoeffName):
-
-        bkgCoeffVal = confDict["model"][bkgCoeffName]
-        numberOfEnergyBins = len(confDict["maps"]["energybins"])
-        fovbinnumber = confDict["maps"]["fovbinnumber"]
-        numberOfMaps = numberOfEnergyBins*fovbinnumber
-
-        if bkgCoeffVal is None:
-            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
-
-        # if -1
-        elif bkgCoeffVal == -1:
-            confDict["model"][bkgCoeffName] = [-1 for i in range(numberOfMaps)]
-
-        # if only one value
-        elif isinstance(bkgCoeffVal, numbers.Number):
-            confDict["model"][bkgCoeffName] = [bkgCoeffVal]
-
-        # if comma separated values
-        elif isinstance(bkgCoeffVal, str):
-            confDict["model"][bkgCoeffName] = AgilepyConfig._parseListNotation(bkgCoeffVal)
-
-        # if List
-        elif isinstance(bkgCoeffVal, List):
-            confDict["model"][bkgCoeffName] = bkgCoeffVal
-
-        else:
-            print(f"Something's wrong..bkgCoeffName: {bkgCoeffName}, bkgCoeffVal: {bkgCoeffVal}")
-            confDict["model"][bkgCoeffName] = None
-
-    @staticmethod
-    def _extendBackgroundCoeff(confDict):
-        numberOfEnergyBins = len(confDict["maps"]["energybins"])
-        fovbinnumber = confDict["maps"]["fovbinnumber"]
-        numberOfMaps = numberOfEnergyBins*fovbinnumber
-
-        while(len(confDict["model"]["isocoeff"])<numberOfMaps):
-            confDict["model"]["isocoeff"].append(-1)
-
-        while(len(confDict["model"]["galcoeff"])<numberOfMaps):
-            confDict["model"]["galcoeff"].append(-1)
 
 
 
 
-    @staticmethod
-    def _setPhaseCode(confDict):
-        if not confDict["selection"]["phasecode"]:
-            if confDict["selection"]["tmax"] >= 182692800.0:
-                confDict["selection"]["phasecode"] = 6 #SPIN
-            else:
-                confDict["selection"]["phasecode"] = 18 #POIN
 
-    @staticmethod
-    def _setTime(confDict):
-        if confDict["selection"]["timetype"] == "MJD":
-            confDict["selection"]["tmax"] = AstroUtils.time_mjd_to_tt(confDict["selection"]["tmax"])
-            confDict["selection"]["tmin"] = AstroUtils.time_mjd_to_tt(confDict["selection"]["tmin"])
-            confDict["selection"]["timetype"] = "TT"
 
-    @staticmethod
-    def _setExpStep(confDict):
-        if not confDict["maps"]["expstep"]:
-             confDict["maps"]["expstep"] = round(1 / confDict["maps"]["binsize"], 2)
 
-    @staticmethod
-    def _expandEnvVars(confDict):
-        confDict["input"]["evtfile"] = AgilepyConfig._expandEnvVar(confDict["input"]["evtfile"])
-        confDict["input"]["logfile"] = AgilepyConfig._expandEnvVar(confDict["input"]["logfile"])
-        confDict["output"]["outdir"] = AgilepyConfig._expandEnvVar(confDict["output"]["outdir"])
 
-    @staticmethod
-    def _expandEnvVar(path):
-        if "$" in path:
-            expanded = expandvars(path)
-            if expanded == path:
-                print(f"[AgilepyConfig] Environment variable has not been expanded in {expanded}")
-                raise EnvironmentVariableNotExpanded(f"[AgilepyConfig] Environment variable has not been expanded in {expanded}")
-            else:
-                return expanded
-        else:
-            return path
 
-    @staticmethod
-    def _transformLoccl(confDict):
 
-        userLoccl = confDict["mle"]["loccl"]
-
-        if userLoccl == 99:
-            confDict["mle"]["loccl"] = 9.21034
-        elif userLoccl == 95:
-            confDict["mle"]["loccl"] = 5.99147
-        elif userLoccl == 68:
-            confDict["mle"]["loccl"] = 2.29575
-        else:
-            confDict["mle"]["loccl"] = 1.38629
 
     @staticmethod
     def _loadFromYaml(file):
@@ -484,139 +337,3 @@ class AgilepyConfig(Observable):
             return yaml.safe_load(yamlfile)
 
 
-    @staticmethod
-    def _validateTimetype(confDict):
-
-        errors = {}
-
-        if confDict["selection"]["timetype"] not in ["TT", "MJD"]:
-
-            errors["selection/timetype"] = f"timetype value {confDict['selection']['timetype']} not supported. Supported values: 'TT', 'MJD' "
-
-        return errors
-
-    @staticmethod
-    def _validateMinMax(confDict, section, optionMin, optionMax):
-
-        errors = {}
-
-        if confDict[section][optionMin] > confDict[section][optionMax]:
-
-            errors[section+"/"+optionMin] = "%s cannot be greater than %s" % (optionMin, optionMax)
-
-        if confDict[section][optionMin] == confDict[section][optionMax]:
-
-            errors[section+"/"+optionMin] = "%s cannot be equal to %s" % (optionMin, optionMax)
-
-        return errors
-
-    @staticmethod
-    def _validateLOCCL(confDict):
-
-        errors = {}
-
-        loccl = confDict["mle"]["loccl"]
-
-        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629]:
-
-            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
-
-        return errors
-
-    @staticmethod
-    def _validateBackgroundCoeff(confDict):
-
-        errors = {}
-
-        numberOfEnergyBins = len(confDict["maps"]["energybins"])
-        fovbinnumber = confDict["maps"]["fovbinnumber"]
-
-        numberOfMaps = numberOfEnergyBins*fovbinnumber
-
-        isocoeff = confDict["model"]["isocoeff"]
-        galcoeff = confDict["model"]["galcoeff"]
-
-        numberOfIsoCoeff = len(isocoeff)
-
-        if numberOfIsoCoeff < numberOfMaps:
-
-            error_str = f"The number of bg isotropic coefficients {isocoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
-
-            errors["model/isocoeff"] = error_str
-
-        numberOfGalCoeff = len(galcoeff)
-
-        if numberOfGalCoeff < numberOfMaps:
-
-            error_str = f"The number of bg galactic coefficients {galcoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
-
-            errors["model/galcoeff"] = error_str
-
-        return errors
-
-    @staticmethod
-    def _validateIndexFiles(confDict):
-
-        errors = {}
-
-        pathEvt = Path(confDict["input"]["evtfile"])
-
-        if not pathEvt.exists() or not pathEvt.is_file():
-            errors["input/evtfile"]="File {} not exists".format(confDict["input"]["evtfile"])
-
-        pathLog = Path(confDict["input"]["logfile"])
-
-        if not pathLog.exists() or not pathLog.is_file():
-            errors["input/logfile"]="File {} not exists".format(confDict["input"]["logfile"])
-
-        return errors
-
-    @staticmethod
-    def _validateTimeInIndex(confDict):
-        errors = {}
-
-        (first, last, lineSize) = AgilepyConfig._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
-
-        idxTmin = AgilepyConfig._extractTimes(first)[0]
-        idxTmax = AgilepyConfig._extractTimes(last)[1]
-
-        if lineSize > 1024:
-            print("[AgilepyConfig] ! WARNING ! The byte size of the first input/evtfile line {} is {} B.\
-                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(firstLine, lineSize, tmin, tmax))
-
-        userTmin = confDict["selection"]["tmin"]
-        userTmax = confDict["selection"]["tmax"]
-
-        if float(userTmin) < float(idxTmin):
-            errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
-
-        if float(userTmin) > float(idxTmax):
-            errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
-
-
-        if float(userTmax) > float(idxTmax):
-            errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
-
-        if float(userTmax) < float(idxTmin):
-            errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
-
-
-        return errors
-
-    @staticmethod
-    def _getFirstAndLastLineInFile(file):
-        with open(file, 'rb') as evtindex:
-            firstLine = next(evtindex).decode()
-            lineSize = len(firstLine.encode('utf-8'))
-            evtindex.seek(-500, os.SEEK_END)
-            lastLine = evtindex.readlines()[-1].decode()
-            return (firstLine, lastLine, lineSize)
-
-    @staticmethod
-    def _extractTimes(indexFileLine):
-        elements = indexFileLine.split(" ")
-        return (elements[1], elements[2])
