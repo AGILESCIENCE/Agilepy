@@ -2,15 +2,40 @@ from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 
 class AGEngVisibility2Config:
-    
-    @staticmethod
-    def checkRequiredParams(confDict):
+
+    def checkRequiredParams(self, confDict):
         pass
     
-    @staticmethod
-    def completeConfiguration(confDict):
+    def completeConfiguration(self, confDict):
         pass
 
-    @staticmethod
-    def validateConfiguration(confDict):
+    def validateConfiguration(self, confDict):
+        pass
+
+
+    def checkOptionsType(self, **kwargs):
+
+        for optionName, optionValue in kwargs.items():
+            
+            # dimension / datatype
+            # (int, 0) = int scalar
+            # (float, 1) = float array
+            # (int, 2) = int matrix
+            validType = ()
+
+            # String
+            if optionName in ["logfile", "outdir", "filenameprefix", "logfilenameprefix"]:
+
+                validType = (str, 0)
+
+            else:
+
+                validType = (None, None)
+    
+
+
+            ValidationStrategies._validateOptionType(optionName, optionValue, validType)
+
+
+    def completeUpdate(self, optionName, confDict):
         pass

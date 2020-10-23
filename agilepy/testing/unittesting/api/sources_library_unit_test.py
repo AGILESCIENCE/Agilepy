@@ -50,6 +50,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.logger = AgilepyLogger()
         self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))

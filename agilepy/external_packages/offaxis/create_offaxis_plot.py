@@ -40,7 +40,7 @@ class Create_offaxis_plot:
     """It plots offaxis curves using agile and fermi fits files
     """
 
-    def __init__(self, time_windows, ra, dec, path_dati_fermi, path_log_index, run_number, zmax, mode, step):
+    def __init__(self, time_windows, ra, dec, path_dati_fermi, path_log_index, run_number, zmax, mode, step, outdir):
         
         self.time_windows = time_windows
         self.ra = ra
@@ -51,6 +51,7 @@ class Create_offaxis_plot:
         self.zmax = zmax
         self.mode = mode
         self.step = step
+        self.outdir = outdir
         
 
     def merge_fits(self, input_file, tmin, tmax, output_file):
@@ -131,7 +132,8 @@ class Create_offaxis_plot:
             print("new ----- \n "+str(tstart)+" "+str(tstop))
 
             #create dir
-            new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
+            #new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
+            new_dir = self.outdir
             os.mkdir(new_dir)
             os.chdir(new_dir)
 

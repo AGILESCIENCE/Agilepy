@@ -26,8 +26,11 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from pathlib import Path
+from typing import List
+from numbers import Number
 
 from agilepy.utils.Utils import Utils
+from agilepy.utils.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
     
@@ -90,10 +93,12 @@ class ValidationStrategies:
 
         if lineSize > 1024:
             print("[ValidationStrategies] ! WARNING ! The byte size of the first input/evtfile line {} is {} B.\
-                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(firstLine, lineSize, tmin, tmax))
+                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(first, lineSize, idxTmin, idxTmax))
 
         userTmin = confDict["selection"]["tmin"]
         userTmax = confDict["selection"]["tmax"]
+
+
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
@@ -111,7 +116,6 @@ class ValidationStrategies:
         if float(userTmax) < float(idxTmin):
             errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax < indexTmin). Index file time range: [{}, {}]" \
                                   .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
-
 
         return errors
 
@@ -153,3 +157,60 @@ class ValidationStrategies:
             errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
 
         return errors
+
+
+    @staticmethod
+    def _validateOptionType(optionName, optionValue, validType):
+
+        # validType  (type, dimensione)
+        # optionValue possible values: 1  3.4   [1]  [4.5]  [[1,1], [1,2]]  [[1.0,1.1], [1.3,2.4]]   "ciao"   ["ciao"]   [["ciao","ciao"], ["ciao", "ciao"]]
+
+        # verify the data dimension
+
+        # if scalar
+        if not isinstance(optionValue, List):
+
+            if validType[1] != 0:
+                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
+            
+            # int is a Number...
+            if (type(optionValue)==int or type(optionValue)==float) and validType[0]==Number:
+                pass
+            
+            elif type(optionValue) != validType[0]:
+                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected type={} but you passed {} of type={}".format(optionName, validType[0], optionValue, type(optionValue)))
+
+
+
+        # if array1D
+        elif isinstance(optionValue, List) and not isinstance(optionValue[0], List):
+
+            if validType[1] != 1:
+                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=Array1d (List) but you passed dimension={}".format(optionName, type(optionValue)))
+
+            for i, elem in enumerate(optionValue):
+
+                # int is a Number...
+                if (type(elem)==int or type(elem)==float) and validType[0]==Number:
+                    pass
+
+                elif type(elem) != validType[0]:
+                    raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected type={} but you passed {}. Elem of index {} ({}) has the type={}".format(optionName, validType[0], optionValue, i, elem, type(elem)))
+
+
+
+        # if array2D
+        elif isinstance(optionValue, List) and isinstance(optionValue[0], List):
+
+            if validType[1] != 2:
+                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=Array2d (List<List>) but you passed dimension={}".format(optionName, type(optionValue)))
+
+            for i, arr in enumerate(optionValue):
+                for j, elem in enumerate(arr): 
+                
+                    # int is a Number...
+                    if (type(elem)==int or type(elem)==float) and validType[0]==Number:
+                        pass
+
+                    elif type(elem) != validType[0]:
+                        raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected type={} but you passed {}. Elem of index {},{} ({}) has the type={}".format(optionName, validType[0], optionValue, i, j, elem, type(elem)))

@@ -31,9 +31,9 @@ import pprint
 import numbers
 from typing import List
 from copy import deepcopy
-from numbers import Number
 from os.path import dirname, realpath, join
 from pathlib import Path
+from time import strftime
 
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
 from agilepy.config.AGEngVisibility1Config import AGEngVisibility1Config
@@ -45,7 +45,6 @@ from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import  ConfigurationsNotValidError, \
                                             OptionNotFoundInConfigFileError, \
-                                            ConfigFileOptionTypeError, \
                                             CannotSetHiddenOptionError, \
                                             CannotSetNotUpdatableOptionError, \
                                             AnalysisClassNotSupported
@@ -60,14 +59,16 @@ class AgilepyConfig(Observable):
         super().__init__()
         self.pp = pprint.PrettyPrinter(indent=2)
         self.initialized = False
-        self.conf = None
+        self.conf = None # the actual dictionary containing the key-value configuration pairs
+        self.analysisConfig = None # contains the validation/completion logics for the analysis class
 
 
     @staticmethod
     def getCopy(copyFrom):
         ac = AgilepyConfig()
         ac.conf = deepcopy(copyFrom.conf)
-        ac.initialized = True
+        ac.analysisConfig = deepcopy(copyFrom.analysisConfig)
+        ac.initialized = copyFrom.initialized
         return ac
 
 
@@ -75,11 +76,12 @@ class AgilepyConfig(Observable):
 
         user_conf = AgilepyConfig._loadFromYaml(configurationFilePath)
         
-
         errors = []
 
         if user_conf["output"]["outdir"] is None:
             errors.append("Please, set output/outdir")
+
+        user_conf["output"]["outdir"] = user_conf["output"]["outdir"]+"_"+strftime("%Y%m%d-%H%M%S")    
 
         if user_conf["output"]["filenameprefix"] is None:
             errors.append("Please, set output/filenameprefix")
@@ -102,32 +104,25 @@ class AgilepyConfig(Observable):
 
         if className == "AGAnalysis":
             
-            AGAnalysisConfig.checkRequiredParams(self.conf)
-
-            AGAnalysisConfig.completeConfiguration(self.conf)
-
-            AGAnalysisConfig.validateConfiguration(self.conf)
-
+            self.analysisConfig = AGAnalysisConfig()
 
         elif className == "AGEngVisibility1":
 
-            AGEngVisibility1Config.checkRequiredParams(self.conf)
-
-            AGEngVisibility1Config.completeConfiguration(self.conf)
-
-            AGEngVisibility1Config.validateConfiguration(self.conf)
+            self.analysisConfig = AGEngVisibility1Config()
 
 
         elif className == "AGEngVisibility2":
 
-            AGEngVisibility2Config.checkRequiredParams(self.conf)
-
-            AGEngVisibility2Config.completeConfiguration(self.conf)
-
-            AGEngVisibility2Config.validateConfiguration(self.conf)
+            self.analysisConfig = AGEngVisibility2Config()
 
         else:
             raise AnalysisClassNotSupported("The class: {} is not supported".format(className))
+
+        self.analysisConfig.checkRequiredParams(self.conf)
+
+        self.analysisConfig.completeConfiguration(self.conf)
+
+        self.analysisConfig.validateConfiguration(self.conf)
 
         self.initialized = True
 
@@ -171,17 +166,9 @@ class AgilepyConfig(Observable):
             self.conf[section][optionName] = optionValue
 
 
-    def setOptions(self, force=False, validate=True, **kwargs):
-        """
-
-        """
-        if "tmin" in kwargs and "timetype" not in kwargs:
-            raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
-
-        if "tmax" in kwargs and "timetype" not in kwargs:
-            raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
-
-
+    def setOptions(self, validate=True, **kwargs):
+        
+        # Base checks
         for optionName, optionValue in kwargs.items():
 
             optionSection = self.getSectionOfOption(optionName)
@@ -190,34 +177,27 @@ class AgilepyConfig(Observable):
                 raise OptionNotFoundInConfigFileError("Section '{}' not found in configuration file.".format(optionSection))
 
             if AgilepyConfig._notUpdatable(optionName):
-                if not force:
-                    raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
+                raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
 
-            if AgilepyConfig._isHidden(optionName):
-                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionSection))
+        # Analysis class config checks
+        self.analysisConfig.checkOptionsType(**kwargs)
 
-
-            isOk, errorMsg = AgilepyConfig._validateOptioNameAndValue(optionName, optionValue)
-
-            if not isOk:
-                raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: {}".format(optionName, errorMsg))
+        # Update the values!
+        for optionName, optionValue in kwargs.items():
+            
+            optionSection = self.getSectionOfOption(optionName)
 
             self.conf[optionSection][optionName] = optionValue
 
-            if optionName == "loccl":
+            # Completion strategies
+            self.analysisConfig.completeUpdate(optionName, self.conf)
 
-                CompletionStrategies._transformLoccl(self.conf)
 
-            if optionName == "isocoeff" or optionName == "galcoeff":
 
-                CompletionStrategies._convertBackgroundCoeff(self.conf, optionName)
+        # Validation strategies
+        self.analysisConfig.validateConfiguration(self.conf)
 
-            if optionName == "energybins" or optionName == "fovbinnumber":
-
-                CompletionStrategies._extendBackgroundCoeff(self.conf)
-        
-        # TODO VALIDARE I CAMPI!! (validamiiiiii)
-
+        # Notify the observables
         for optionName, optionValue in kwargs.items():
 
             optionSection = self.getSectionOfOption(optionName)
@@ -236,97 +216,11 @@ class AgilepyConfig(Observable):
 
 
 
-
-
-
-
-
-    @staticmethod
-    def _getOptionExpectedTypes(optionName):
-        """
-        None if it does not exixst
-        """
-
-        # int
-        if optionName in ["verboselvl", "filtercode", "emin", "emax", "fovradmin", \
-                          "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
-                          "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                          "emax_sources", "loccl"]:
-            return (None, Number)
-
-        # Number
-        if optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
-                          "timestep", "binsize", "ranal", "ulcl", \
-                          "expratio_minthr", "expratio_maxthr", "expratio_size"]:
-            return (None, Number)
-
-        # String
-        elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
-                            "timetype", "timelist", "projtype", "proj", "modelfile"]:
-            return (None, str)
-
-        elif optionName in ["useEDPmatrixforEXP", "expratioevaluation", "twocolumns"]:
-            return (None, bool)
-
-        # List of Numbers
-        elif optionName in ["energybins"]:
-            return (List, List)
-
-        # List of Numbers
-        elif optionName in ["galcoeff", "isocoeff"]:
-            return (List, Number)
-
-        else:
-            return (None, None)
-
     @staticmethod
     def _notUpdatable(optionName):
         if optionName in ["logfilenameprefix", "verboselvl"]:
             return True
         return False
-
-    @staticmethod
-    def _isHidden(optionName):
-
-        if optionName in [ "lonpole", "lpointing", "bpointing", "maplistgen", "offaxisangle", \
-                           "galmode2", "galmode2fit", "isomode2", "isomode2fit", "minimizertype", \
-                           "minimizeralg", "minimizerdefstrategy", "mindefaulttolerance", "integratortype", \
-                           "contourpoints", "edpcorrection", "fluxcorrection"]:
-            return True
-
-        return False
-
-    @staticmethod
-    def _validateOptioNameAndValue(optionName, optionValue):
-
-        complexType, basicType = AgilepyConfig._getOptionExpectedTypes(optionName)
-
-        if complexType is None and basicType is None:
-            return (False, f"Something is wrong with complexType: {complexType} and basicType {basicType} of optionName: {optionName}")
-
-        if complexType == List and not isinstance(optionValue, complexType):
-            return (False, f"The option value {optionName} has not the expected data type {complexType} of {basicType}, but: {type(optionValue)}")
-
-        if complexType == List:
-            for idx, elem in enumerate(optionValue):
-                if not isinstance(elem, basicType):
-                    return (False, f"The {idx}th elem of {optionName} has not the expected data type {basicType}, but: {type(elem)}")
-
-        elif complexType is None:
-            if not isinstance(optionValue, basicType):
-                return (False, f"The {optionName} has not the expected data type {basicType}, but: {type(optionValue)}")
-
-        return (True, "")
-
-
-
-
-
-
-
-
-
-
 
 
     @staticmethod

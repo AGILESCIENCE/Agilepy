@@ -36,7 +36,8 @@ from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
                                            ConfigFileOptionTypeError, \
                                            CannotSetHiddenOptionError, \
                                            CannotSetNotUpdatableOptionError, \
-                                           ConfigurationsNotValidError
+                                           ConfigurationsNotValidError, \
+                                           OptionNameNotSupportedError
 
 
 class AgilepyConfigUT(unittest.TestCase):
@@ -55,6 +56,7 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=456361777, timetype="TT")
 
@@ -64,14 +66,16 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmax=456537946, timetype="TT")
 
-
+ 
     def test_validation_min_max(self):
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, fovradmin=10, fovradmax=0)
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, emin=10, emax=0)
@@ -82,6 +86,7 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         # float instead of int is ok.
         self.assertEqual(None, self.config.setOptions(tmin=456361779, timetype="TT"))
@@ -115,6 +120,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
 
         self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
         self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
@@ -138,6 +144,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf3Path = os.path.join(self.currentDirPath,"conf/conf3.yaml")
 
         self.config.loadBaseConfigurations(conf3Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
         self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
@@ -153,6 +160,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
 
         self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
         self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
@@ -168,6 +176,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf1Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
 
         self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
         self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
@@ -211,6 +220,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
 
         self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(5.99147, self.config.getOptionValue("loccl"))
 
@@ -226,6 +236,7 @@ class AgilepyConfigUT(unittest.TestCase):
         conf2Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
 
         self.config.loadBaseConfigurations(conf2Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
 

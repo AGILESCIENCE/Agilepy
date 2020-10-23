@@ -3,10 +3,10 @@ input:
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/config"
-  filenameprefix: "testcase"
-  logfilenameprefix: "testcase"
-  verboselvl: 1
+  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
+  filenameprefix: "utils-testcase"
+  logfilenameprefix: "utils-testcase"
+  verboselvl: 2
 
 selection:
   emin: 100
@@ -27,6 +27,7 @@ selection:
   lpointing: null
   bpointing: null
   maplistgen: "None"
+
 
 maps:
   mapsize: 40
@@ -50,8 +51,8 @@ model:
   modelfile: null
   galmode: 1
   isomode: 1
-  galcoeff: 0.6, 0.8, 0.6, 0.8
-  isocoeff: 10, 15, 10, 15
+  galcoeff: null
+  isocoeff: null
   emin_sources: 100
   emax_sources: 10000
   galmode2: 0
@@ -59,10 +60,11 @@ model:
   isomode2: 0
   isomode2fit: 0
 
+
 mle:
   ranal: 10
   ulcl: 2
-  loccl: 99
+  loccl: 95
   # Parameters for exp ratio evaluation
   expratioevaluation: yes
   expratio_minthr: 0

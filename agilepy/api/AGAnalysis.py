@@ -29,7 +29,6 @@ import os
 from os.path import join, splitext, expandvars
 from pathlib import Path
 from ntpath import basename
-from shutil import rmtree
 from time import time
 import re
 pattern = re.compile('e([+\-]\d+)')
@@ -46,6 +45,7 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.MapList import MapList
 from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.Utils import Utils
 
 from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
                                             PFILESNotFoundError, \
@@ -239,81 +239,9 @@ plotting:
 
 
 
-    def deleteAnalysisDir(self):
-        """It deletes the output directory where all the products of the analysis are written.
-
-        Args:
-
-        Returns:
-            True if the directory is succesfully deleted, False otherwise.
-
-        """
-        outDir = Path(self.config.getConf("output", "outdir"))
-
-        if outDir.exists() and outDir.is_dir():
-            rmtree(outDir)
-            self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
-        else:
-            return False
-            self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
-
-        return True
-
-    def setOptions(self, **kwargs):
-        """It updates configuration options specifying one or more key=value pairs at once.
-
-        Args:
-            \*\*kwargs: key-values pairs, separated by a comma.
-
-        Returns:
-            None
-
-        Raises:
-            ConfigFileOptionTypeError: if the type of the option value is not wrong.
-            ConfigurationsNotValidError: if the values are not coherent with the configuration.
-            CannotSetHiddenOptionError: if the option is hidden.
-            OptionNotFoundInConfigFileError: if the option is not found.
-
-        Note:
-            The ``config`` attribute is initialized by reading the corresponding
-            yaml configuration file, loading its contents in memory. Updating the values
-            held by this object will not affect the original values written on disk.
-
-        Example:
-
-            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
-            True
-
-        """
-        return self.config.setOptions(**kwargs)
-
-    def getOption(self, optionName):
-        """It reads an option value from the configuration.
-
-        Args:
-            optionName (str): the name of the option.
-
-        Returns:
-            The option value
-
-        Raises:
-            OptionNotFoundInConfigFileError: if the optionName is not found in the configuration.
-        """
 
 
 
-        return self.config.getOptionValue(optionName)
-
-    def printOptions(self, section=None):
-        """It prints the configuration options in the console.
-
-        Args:
-            section (str): you can specify a configuration file section to be printed out.
-
-        Returns:
-            None
-        """
-        return self.config.printOptions(section)
 
     def parseMaplistFile(self, maplistFilePath=None):
         """It parses the maplistfile in order to return sky map files paths.
@@ -507,8 +435,8 @@ plotting:
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
-                    configBKP.setOptions(fovradmin=fovmin, fovradmax=fovmax)
-                    configBKP.addOptions("selection", emin=emin, emax=emax)
+                    configBKP.setOptions(fovradmin=int(fovmin), fovradmax=int(fovmax))
+                    configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
                     configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
 

@@ -27,7 +27,7 @@
 
 import os
 from pathlib import Path
-from time import strftime
+from shutil import rmtree
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AgilepyLogger import AgilepyLogger
@@ -46,13 +46,11 @@ class AGBaseAnalysis:
         self.config = AgilepyConfig()
 
         # load only "input" and "output" sections
-        self.config.loadBaseConfigurations(configurationFilePath, validate=True)
+        self.config.loadBaseConfigurations(configurationFilePath)
 
         # Creating output directory
 
-        self.outdir = self.config.getConf("output","outdir")+"_"+strftime("%Y%m%d-%H%M%S")
-
-        self.config.setOptions(outdir=self.outdir, validate=False)
+        self.outdir = self.config.getConf("output","outdir")
 
         Path(self.outdir).mkdir(parents=True, exist_ok=True)
 
@@ -73,4 +71,81 @@ class AGBaseAnalysis:
             raise PFILESNotFoundError("$PFILES is not set.")
 
 
- 
+    def deleteAnalysisDir(self):
+
+        """It deletes the output directory where all the products of the analysis are written.
+
+        Args:
+
+        Returns:
+            True if the directory is succesfully deleted, False otherwise.
+
+        """
+        outDir = Path(self.config.getConf("output", "outdir"))
+
+        if outDir.exists() and outDir.is_dir():
+            rmtree(outDir)
+            self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
+        else:
+            return False
+            self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
+
+        return True
+
+
+
+    def setOptions(self, **kwargs):
+        """It updates configuration options specifying one or more key=value pairs at once.
+
+        Args:
+            \*\*kwargs: key-values pairs, separated by a comma.
+
+        Returns:
+            None
+
+        Raises:
+            ConfigFileOptionTypeError: if the type of the option value is not wrong.
+            ConfigurationsNotValidError: if the values are not coherent with the configuration.
+            CannotSetHiddenOptionError: if the option is hidden.
+            OptionNotFoundInConfigFileError: if the option is not found.
+
+        Note:
+            The ``config`` attribute is initialized by reading the corresponding
+            yaml configuration file, loading its contents in memory. Updating the values
+            held by this object will not affect the original values written on disk.
+
+        Example:
+
+            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
+            True
+
+        """
+        return self.config.setOptions(**kwargs)
+
+
+    def getOption(self, optionName):
+        """It reads an option value from the configuration.
+
+        Args:
+            optionName (str): the name of the option.
+
+        Returns:
+            The option value
+
+        Raises:
+            OptionNotFoundInConfigFileError: if the optionName is not found in the configuration.
+        """
+
+        return self.config.getOptionValue(optionName)
+
+
+    def printOptions(self, section=None):
+        """It prints the configuration options in the console.
+
+        Args:
+            section (str): you can specify a configuration file section to be printed out.
+
+        Returns:
+            None
+        """
+        return self.config.printOptions(section)

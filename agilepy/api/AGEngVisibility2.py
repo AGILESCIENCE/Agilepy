@@ -53,6 +53,7 @@ class AGEngVisibility2(AGBaseAnalysis):
 
         self.config.loadConfigurationsForClass("AGEngVisibility2")
 
+       
 
 
 
@@ -73,11 +74,13 @@ class AGEngVisibility2(AGBaseAnalysis):
         Returns:
             dir (str): A new directory containing the results
         """
+        self.outdir = self.config.getOptionValue("outdir")
 
         agile_datapath = Utils._expandEnvVar(agile_datapath)
         fermi_datapath = Utils._expandEnvVar(fermi_datapath)
 
-        offaxis = Create_offaxis_plot(time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode, step)
+
+        offaxis = Create_offaxis_plot(time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode, step, outdir = self.outdir)
 
         dir = offaxis.run()
 
