@@ -33,7 +33,6 @@ from agilepy.external_packages.offaxis.merge import merge
 from agilepy.external_packages.offaxis.MET2orbit import MET2orbit
 from astropy.table import Table, vstack
 from astropy.io import fits
-import os
 import glob
 
 class Create_offaxis_plot:
@@ -88,7 +87,6 @@ class Create_offaxis_plot:
             2) merged_list.fits, which is a fits file containing the attitude information, that will be passed to
             the agilecheck.py script. The merged file will be filtered on-the-fly in order to have always INSTR_STATUS>0.
         """
-        import os
         index  = open(path_to_LOG, 'r')
         filename = str(source)+'_list_of_orbits_'+str(tmin)+'_'+str(tmax)+'.txt'
         file   = open(filename, 'w')
@@ -133,7 +131,7 @@ class Create_offaxis_plot:
 
             #create dir
             #new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
-            new_dir = self.outdir
+            new_dir = self.outdir+"/dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
             os.mkdir(new_dir)
             os.chdir(new_dir)
 
@@ -166,7 +164,7 @@ class Create_offaxis_plot:
 
                 self.MET2orbit(agile_met_start, agile_met_stop, self.path_log_index)
 
-                merged_file = glob.glob('./merged_list_*.fits')[0]
+                merged_file = glob.glob('merged_list_*.fits')[0]
                 check = agilecheck(merged_file, self.ra, self.dec, tstart, tstop, zmax=self.zmax, timelimiti=agile_met_start, timelimitf=agile_met_stop, step=self.step, out_name="output_"+str(self.zmax)+".txt")
                 check.PlotVisibility()
 

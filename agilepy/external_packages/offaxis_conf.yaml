@@ -1,16 +1,8 @@
-input:
-  evtfile: /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
-  logfile: /data01/ASDC_PROC3/DATA_ASDCe/INDEX/LOG.log.index
 
 output:
-  outdir: $AGILE/agilepy/external_packages/offaxis
-  filenameprefix: eng_api_tutorial
-  logfilenameprefix: eng_api_tutorial_log
+  outdir: /data01/homes/addis/Agilepy/agilepy/external_packages/offaxis/test
+  filenameprefix: test_product
+  logfilenameprefix: test_log
   verboselvl: 1
 
-selection:
-  tmin: 54732.0
-  tmax: 54733.0
-  timetype: MJD
-  glon: 263.85
-  glat: -32.93
+        
