@@ -17,12 +17,13 @@ import bisect
 class merge:
     """ This class provides plots to check the off-axis angle of a source wrt AGILE center FoV.    """
 
-    def __init__(self, zmax=75., timelimiti=-1, timelimitf=-1, step=0.1, t0=0.):
+    def __init__(self, logger, zmax=75., timelimiti=-1, timelimitf=-1, step=0.1, t0=0.):
         self.zmax        = zmax
         self.timelimiti  = timelimiti
         self.timelimitf  = timelimitf
         self.step        = step*10.
         self.t0          = t0
+        self.logger      = logger
 
     def Plotmerge(self, show=False, mode="all"):
 
@@ -39,7 +40,7 @@ class merge:
             lat_filt = lat_meantime[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
             lat_sep_filt = lat_separation[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
 
-        print('Plotting figure...')
+        self.logger.info(self, 'Plotting figure...')
         f = plt.figure()
         ax = f.add_subplot(111)
 #ax.plot(agl_meantime, agl_separation, '-r', lat_meantime, lat_separation, 'gs')
@@ -83,7 +84,7 @@ class merge:
             agile_center, agile_hist, agile_width = np.loadtxt('agile_histogram_visibility.txt', unpack=True)
         if(mode=="fermi" or mode=="all"):
             fermi_center, fermi_hist, fermi_width = np.loadtxt('fermi_histogram_visibility.txt', unpack=True)
-        print('Plotting histogram...')
+        self.logger.info(self, 'Plotting histogram...')
         f = plt.figure()
         ax = f.add_subplot(111)
 
@@ -105,7 +106,7 @@ class merge:
         if show==True:
             f.show()
         else:
-            print('Saving histogram...')
+            self.logger.info(self,'Saving histogram...')
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png'))
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf'), format="pdf")
 
