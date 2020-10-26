@@ -259,14 +259,15 @@ class agilecheck:
         ttotal_abs = (self.tstop-self.tstart)*86400
         ttotal_under_zmax = np.sum(tTTf[separation<self.zmax]-tTTi[separation<self.zmax])
         ttotal_above_zmax = np.sum(tTTf[separation>self.zmax]-tTTi[separation>self.zmax])
-        print("Total integration time=", "{0:.2f}".format(ttotal_obs*self.step), " s", 'Total_bins:', total_obs, len(tTTf), 'Mean sep. < ', self.zmax, ':', str(round(np.mean(separation[separation<self.zmax]),4)))
-        print("Total absolute time=", "{0:.2f}".format(ttotal_abs)) #NEW
-        print("Total time spent at separation < ", self.zmax, " deg:", "{0:.2f}".format(ttotal_under_zmax*self.step), "s")
-        print("Relative time spent at separation <", self.zmax, " deg:",  "{0:.2f}".format((ttotal_under_zmax*self.step)/(ttotal_obs*self.step)*100.), "%")
-        print("Relative time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_obs*self.step)*100.), "%")
-        print("Absolute time spent at separation <", self.zmax, " deg:", "{0:.2f}".format((ttotal_under_zmax*self.step)/(ttotal_abs)*100.), " %") #NEW
-        print("Absolute time spent at separation >", self.zmax, " deg:", "{0:.2f}".format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_abs)*100.), " %") #NEW
-        print("Duty Cycle: ", "{0:.2f}".format((((ttotal_obs*self.step) / (ttotal_abs)))*100.), "%") #NEW
+
+        self.logger.info(self, f"Total integration time = {'{0:.2f}'.format(ttotal_obs*self.step)} s Total_bins: {total_obs} {len(tTTf)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
+        self.logger.info(self, f"Total absolute time= {'{0:.2f}'.format(ttotal_abs)}") #NEW
+        self.logger.info(self, f"Total time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*self.step)} s")
+        self.logger.info(self, f"Relative time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_obs*self.step)*100.)} %%")
+        self.logger.info(self, f"Relative time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_obs*self.step)*100.)} %%")
+        self.logger.info(self, f"Absolute time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_abs)*100.)} %%") #NEW
+        self.logger.info(self, f"Absolute time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_abs)*100.)} %%") #NEW
+        self.logger.info(self, f"Duty Cycle: {'{0:.2f}'.format((((ttotal_obs*self.step) / (ttotal_abs)))*100.)} %%") #NEW
 
         f = open(self.out_name, "a")
         print("AGILE", file=f)
