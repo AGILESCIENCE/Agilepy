@@ -30,23 +30,20 @@ from os.path import join, splitext, expandvars
 from pathlib import Path
 from ntpath import basename
 from time import time
+from shutil import rmtree
 import re
 pattern = re.compile('e([+\-]\d+)')
 
 from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
-
 from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
-
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.MapList import MapList
-from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Utils
-
 from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \

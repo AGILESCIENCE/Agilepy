@@ -36,8 +36,8 @@ from pathlib import Path
 from time import strftime
 
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
-from agilepy.config.AGEngVisibility1Config import AGEngVisibility1Config
-from agilepy.config.AGEngVisibility2Config import AGEngVisibility2Config
+from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
+from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
@@ -106,14 +106,14 @@ class AgilepyConfig(Observable):
             
             self.analysisConfig = AGAnalysisConfig()
 
-        elif className == "AGEngVisibility1":
+        elif className == "AGEngAgileOffaxisVisibility":
 
-            self.analysisConfig = AGEngVisibility1Config()
+            self.analysisConfig = AGEngAgileOffaxisVisibilityConfig()
 
 
-        elif className == "AGEngVisibility2":
+        elif className == "AGEngAgileFermiOffAxisVisibilityComparison":
 
-            self.analysisConfig = AGEngVisibility2Config()
+            self.analysisConfig = AGEngAgileFermiOffAxisVisibilityComparisonConfig()
 
         else:
             raise AnalysisClassNotSupported("The class: {} is not supported".format(className))

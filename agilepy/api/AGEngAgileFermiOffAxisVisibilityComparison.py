@@ -35,29 +35,29 @@ from pathlib import Path
 from agilepy.utils.CustomExceptions import EnvironmentVariableNotExpanded
 
 
-class AGEngVisibility2(AGBaseAnalysis):
+class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
     """This class contains the high-level API methods to run offaxis and offaxis_ap_comparison tools. It's a AGEng subclass"""
     
     def __init__(self, configurationFilePath):
-        """AGEngVisibility2 constructor.
+        """AGEngAgileFermiOffAxisVisibilityComparison constructor.
 
         Args:
             configurationFilePath (str): the relative or absolute path to the yaml configuration file.
 
         Example:
-            >>> from agilepy.api import AGEngVisibility2
-            >>> ageng = AGEngVisibility2('agconfig.yaml')
+            >>> from agilepy.api.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
+            >>> ageng = AGEngAgileFermiOffAxisVisibilityComparison('agconfig.yaml')
 
         """
         super().__init__(configurationFilePath)
 
-        self.config.loadConfigurationsForClass("AGEngVisibility2")
+        self.config.loadConfigurationsForClass("AGEngAgileFermiOffAxisVisibilityComparison")
 
        
 
 
 
-    def visibilityPlot2(self, time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode=all, step=1):
+    def visibilityPlot(self, time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode=all, step=1):
         """It runs offaxis tools and creates a directory containing the result files
         
         Args:

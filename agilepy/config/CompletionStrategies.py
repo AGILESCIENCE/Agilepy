@@ -29,6 +29,7 @@ from typing import List
 import numbers
 
 from agilepy.utils.Utils import Utils
+from agilepy.utils.AstroUtils import AstroUtils
 
 class CompletionStrategies:
 

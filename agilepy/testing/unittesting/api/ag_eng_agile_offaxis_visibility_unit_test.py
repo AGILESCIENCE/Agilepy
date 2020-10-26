@@ -31,9 +31,9 @@ import shutil
 from pathlib import Path
 
 from agilepy.utils.Utils import Utils
-from agilepy.api.AGEngVisibility1 import AGEngVisibility1
+from agilepy.api.AGEngAgileOffaxisVisibility import AGEngAgileOffaxisVisibility
 
-class AGEngVisibility1UT(unittest.TestCase):
+class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
@@ -43,7 +43,7 @@ class AGEngVisibility1UT(unittest.TestCase):
         if self.outDir.exists() and self.outDir.is_dir():
             shutil.rmtree(self.outDir)
 
-        self.ageng = AGEngVisibility1(self.agilepyconfPath)
+        self.ageng = AGEngAgileOffaxisVisibility(self.agilepyconfPath)
 
 
     def test_compute_pointing_distances_from_source(self):

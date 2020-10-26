@@ -1,8 +1,8 @@
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 
-class AGEngVisibility2Config:
-
+class AGEngAgileOffaxisVisibilityConfig:
+    
     def checkRequiredParams(self, confDict):
         pass
     
@@ -35,7 +35,6 @@ class AGEngVisibility2Config:
 
 
             ValidationStrategies._validateOptionType(optionName, optionValue, validType)
-
 
     def completeUpdate(self, optionName, confDict):
         pass

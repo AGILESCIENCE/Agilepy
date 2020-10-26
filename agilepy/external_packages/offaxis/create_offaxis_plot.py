@@ -118,6 +118,9 @@ class Create_offaxis_plot:
 
 
     def run(self):
+
+        dirs = []
+
         for times in self.time_windows:
 
             #count = count + 1
@@ -132,6 +135,9 @@ class Create_offaxis_plot:
             #create dir
             #new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
             new_dir = self.outdir+"/dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
+            
+            dirs.append(new_dir)
+
             os.mkdir(new_dir)
             os.chdir(new_dir)
 
@@ -179,4 +185,4 @@ class Create_offaxis_plot:
 
             os.chdir("..")
 
-        return new_dir
+        return dirs

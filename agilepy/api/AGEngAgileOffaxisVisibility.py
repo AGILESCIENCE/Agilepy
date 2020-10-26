@@ -40,7 +40,7 @@ from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.CustomExceptions import WrongCoordinateSystemError, EnvironmentVariableNotExpanded
 
-class AGEngVisibility1(AGBaseAnalysis):
+class AGEngAgileOffaxisVisibility(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run engineering analysis.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
@@ -53,19 +53,19 @@ class AGEngVisibility1(AGBaseAnalysis):
     """
 
     def __init__(self, configurationFilePath):
-        """AGEngVisibility1 constructor.
+        """AGEngAgileOffaxisVisibility constructor.
 
         Args:
             configurationFilePath (str): the relative or absolute path to the yaml configuration file.
 
         Example:
-            >>> from agilepy.api import AGEngVisibility1
-            >>> ageng = AGEngVisibility1('agconfig.yaml')
+            >>> from agilepy.api import AGEngAgileOffaxisVisibility
+            >>> ageng = AGEngAgileOffaxisVisibility('agconfig.yaml')
 
         """
         super().__init__(configurationFilePath)
 
-        self.config.loadConfigurationsForClass("AGEngVisibility1")
+        self.config.loadConfigurationsForClass("AGEngAgileOffaxisVisibility")
     
 
     @staticmethod

@@ -47,7 +47,7 @@ The **feature** branch takes the following format:
 
     feature-#<card-number>-<short-description>
 
-e.g. feature-#61-bayesian-blocks
+e.g. feature-#61-new-cool-feature
 
 The **hotfix** branch name takes the following format:
 
@@ -67,7 +67,7 @@ Development of a new feature
 If you start from scratch:
 ::
     conda config --add channels conda-forge
-    conda create -n agilepyenv -c agilescience agilepyenv
+    conda create -n agilepyenv -c agilescience agilepy-environment
     conda activate agilepyenv
     git clone https://github.com/AGILESCIENCE/Agilepy.git
     cd Agilepy && python setup.py develop
@@ -77,7 +77,7 @@ Create a new **feature** branch:
 
     git checkout develop
     git pull origin develop
-    git checkout -b feature-#61-bayesian-blocks develop
+    git checkout -b feature-#61-new-cool-feature develop
 
 
 
@@ -88,7 +88,7 @@ When you have finished, update the CHANGELOG.md and commit your changes.
 ::
 
     vim CHANGELOG
-    git commit -m "feature-#61-bayesian-blocks done"
+    git commit -m "feature-#61-new-cool-feature done"
 
 In the meantime it is possible that someone else have pushed his work into the develop branch. In this case
 you have to merge the changes in your feature branch.
@@ -102,8 +102,8 @@ Finally you can merge your feature branch back to **develop** branch.
 
 ::
 
-    git merge --no-ff feature-#61-bayesian-blocks
-    git branch -d feature-#61-bayesian-blocks
+    git merge --no-ff feature-#61-new-cool-feature
+    git branch -d feature-#61-new-cool-feature
     git push origin develop
 
 
