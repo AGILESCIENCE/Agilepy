@@ -25,7 +25,7 @@ else
 
   python "$agilepy_path/testing/unittesting/api/ag_analysis_unit_test.py" -v
   python "$agilepy_path/testing/unittesting/api/sources_library_unit_test.py" -v
-  python "$agilepy_path/testing/unittesting/config/agilepy_config_test.py" -v
+  python "$agilepy_path/testing/unittesting/config/agilepy_ag_analysis_config_test.py" -v
   python "$agilepy_path/testing/unittesting/utils/utils_test.py" -v
 
 

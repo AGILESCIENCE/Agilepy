@@ -1,0 +1,5 @@
+2020-10-22 12:57:21,521 [INFO    ] [AgilepyLogger] File and Console loggers are active. Log file: $AGILE/agilepy-test-data/unittesting-output/api/eng_data/logs/logtestcase.log
+2020-10-22 12:57:21,521 [INFO    ] [AGEng] Computing pointing distances from source (129.700000, 3.700000) gal in [456361778.000000, 456373279.000000]
+2020-10-22 12:57:21,525 [DEBUG   ] [AGEng] Galactict coords: l:129.700000 b:3.700000
+2020-10-22 12:57:21,525 [DEBUG   ] [AGEng] FK5 coords: ra:29.462234 dec:65.695308 
+2020-10-22 12:57:21,526 [DEBUG   ] [AGEng] Selecting files from $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index [456361778 to 456373279]

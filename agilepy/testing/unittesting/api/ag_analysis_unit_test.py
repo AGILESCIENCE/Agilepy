@@ -199,8 +199,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.mle(maplistFilePath)
 
-        for s in ag.sourcesLibrary.sources:
-            print(s)
+        #for s in ag.sourcesLibrary.sources:
+        #    print(s)
 
         self.assertEqual(True, True)
 
@@ -284,7 +284,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=20000)
 
-        print(lightCurveData)
+        #print(lightCurveData)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
@@ -337,9 +337,8 @@ class AGAnalysisUT(unittest.TestCase):
         """
 
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
-        print("\ngalBkg:",galBkg)
-        print("isoBkg:",isoBkg)
-
+       
+       
         ag.destroy()
 
 
@@ -351,7 +350,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
-        print(lcdata)
+        #print(lcdata)
 
     def test_fix_exponent(self):
 

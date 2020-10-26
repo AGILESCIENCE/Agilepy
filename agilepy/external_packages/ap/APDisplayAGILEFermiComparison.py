@@ -142,10 +142,11 @@ class APDisplayAGILEFermiComparison:
 
     def plot_offaxis(self, ax1, ax2, path, tstart, tstop, zmax, step, t0, arg_lines):
 
-        try:
-            agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
-        except:
-            return
+        #try:
+        agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
+        #except:
+        #    return
+
 
         agl_filt = agl_meantime[(agl_meantime > tstart) & (agl_meantime < tstop)]
         agl_sep_filt = agl_separation[(agl_meantime > tstart) & (agl_meantime < tstop)]
@@ -153,8 +154,11 @@ class APDisplayAGILEFermiComparison:
 
         lat_meantime, lat_separation = np.loadtxt(path+'/time_vs_separation_fermi.txt', unpack=True)
 
+        
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
+
+        print(tstart, tstop)
 
         ax1.plot(agl_filt - t0, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
 

@@ -49,18 +49,33 @@ The method above will create the following configuration file:
     timetype: MJD
     glon: 206.8121188769472
     glat: 35.8208923457401
+    proj: ARC
+    timelist: None
+    filtercode: 5
+    fovradmin: 0
     fovradmax: 60
     albedorad: 80
-    proj: ARC
+    dq: 0
+    phasecode: null
+    lonpole: 180
+    lpointing: null
+    bpointing: null
+    maplistgen: "None"
 
   maps:
     mapsize: 40
+    useEDPmatrixforEXP: yes
+    expstep: null
     spectralindex: 2.1
     timestep: 160
+    projtype: WCS
+    proj: ARC
+    # skytype: 4
     binsize: 0.25
     energybins:
       - 100, 10000
     fovbinnumber: 1
+    offaxisangle: 30
 
   model:
     modelfile: null
@@ -70,16 +85,34 @@ The method above will create the following configuration file:
     isocoeff: null
     emin_sources: 100
     emax_sources: 10000
+    
+    galmode2: 0
+    galmode2fit: 0
+    isomode2: 0
+    isomode2fit: 0
 
   mle:
     ranal: 10
     ulcl: 2
-    loccl: 95
+    loccl: 
+    
     expratioevaluation: yes
     expratio_minthr: 0
     expratio_maxthr: 15
     expratio_size: 10
 
+    minimizertype: Minuit
+    minimizeralg: Migrad
+    minimizerdefstrategy: 2
+    mindefaulttolerance: 0.01
+    integratortype: 1
+    contourpoints: 40
+
+    edpcorrection: 0.75
+    fluxcorrection: 1
+    
+  plotting:
+    twocolumns: False
 
 The next paragraphs describe the configuration options.
 
@@ -244,7 +277,7 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
    | 2) SKY000-5
    | 3) SKY001 (old galcenter, binsize 0.1, full sky),
    | 4) SKY002 (new galcenter, binsize 0.1, full sky) ", "int", "4", "no"
-   "binsize", "Spatial bin size in degrees", "float", 0.1, "no"
+   "binsize", "Spatial bin size in degrees", "float", 0.25, "no"
    "energybin", "------- completare -----------", "List<String>", "[100, 10000]", "no"
    "fovbinnumber", "| Number of bins between fovradmin and fovradmax.
    | Dim = (fovradmax-fovradmin)/fovbinnumber", "int", 1, "no"

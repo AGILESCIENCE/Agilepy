@@ -32,13 +32,15 @@ from astropy.io import fits
 from os.path import join
 from pathlib import Path
 
-from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.utils.Utils import Utils, expandvars
+
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import WrongCoordinateSystemError
+from agilepy.utils.CustomExceptions import WrongCoordinateSystemError, EnvironmentVariableNotExpanded
 
-class AGEng:
+class AGEngAgileOffaxisVisibility(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run engineering analysis.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
@@ -51,38 +53,72 @@ class AGEng:
     """
 
     def __init__(self, configurationFilePath):
-        """AGEng constructor.
+        """AGEngAgileOffaxisVisibility constructor.
 
         Args:
             configurationFilePath (str): the relative or absolute path to the yaml configuration file.
 
         Example:
-            >>> from agilepy.api import AGEng
-            >>> ageng = AGEng('agconfig.yaml')
+            >>> from agilepy.api import AGEngAgileOffaxisVisibility
+            >>> ageng = AGEngAgileOffaxisVisibility('agconfig.yaml')
 
         """
+        super().__init__(configurationFilePath)
 
-        self.config = AgilepyConfig()
+        self.config.loadConfigurationsForClass("AGEngAgileOffaxisVisibility")
+    
 
-        self.config.loadConfigurations(configurationFilePath, validate=True)
+    @staticmethod
+    def getConfiguration(confFilePath, userName, outputDir, verboselvl):
+        """Utility method to create a configuration file.
 
-        self.outdir = join(self.config.getConf("output","outdir"), "eng_data")
+        Args:
+            confFilePath (str): the path and filename of the configuration file that is going to be created.
+            userName (str): the username of who is running the software.
+            outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
+            verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
 
-        Path(self.outdir).mkdir(parents=True, exist_ok=True)
+        Raises:
+            EnvironmentVariableNotExpanded: if an environmental variabile is found into a configuration path but it cannot be expanded.
+            FileNotFoundError: if the evtfile of logfile are not found.
+            ConfigurationsNotValidError: if at least one configuration value is bad.
 
-        self.logger = AgilepyLogger()
+        Returns:
+            None
+        """
+        analysisname = userName
 
-        self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
+        if "$" in outputDir:
+            expandedOutputDir = expandvars(outputDir)
 
-        self.plottingUtils = PlottingUtils(self.config, self.logger)
+            if expandedOutputDir == outputDir:
+                print(f"Environment variable has not been expanded in {outputDir}")
+                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {outputDir}")
+
+        outputDir = Path(expandedOutputDir).joinpath(analysisname)
+
+        configuration = """
+output:
+  outdir: %s
+  filenameprefix: %s_product
+  logfilenameprefix: %s_log
+  verboselvl: %d
+
+        """%(str(outputDir), analysisname, analysisname, verboselvl)
+
+        with open(confFilePath,"w") as cf:
+
+            cf.write(configuration)
 
 
-    def visibilityPlot(self, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, logfilesIndex=None, saveImage=True, fileFormat="png", title="Visibility Plot"):
+
+    def visibilityPlot(self, logfilesIndex, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, saveImage=True, fileFormat="png", title="Visibility Plot"):
         """ It computes the angular separations between the center of the
         AGILE GRID field of view and the coordinates for a given position in the sky,
         given by src_ra and src_dec.
 
         Args:
+            logfilesIndex (str): the index file for the logs files.
             tmin (float): inferior observation time limit to analize.
             tmax (float): superior observation time limit to analize.
             src_x (float): source position x (unit: degrees)
@@ -90,7 +126,6 @@ class AGEng:
             zmax (float): maximum zenith distance of the source to the center of the detector (unit: degrees)
             step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 0.1 s.
             writeFiles (bool): if True, two text files with the separions data will be written on file.
-            logfilesIndex (str) (optional): the index file for the logs files. If specified it will ovverride the one in the configuration file.
             saveImage (bool): If True, the image will be saved on disk
             fileFormat (str): The output format of the image
             title (str): The plot title
@@ -104,7 +139,9 @@ class AGEng:
             skyCordsFK5.ra.deg
             skyCordsFK5.dec.deg
         """
-        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, sepFile = self._computePointingDistancesFromSource(tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex)
+        logfilesIndex = Utils._expandEnvVar(logfilesIndex)
+
+        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, sepFile = self._computePointingDistancesFromSource(logfilesIndex, tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles)
 
         vis_plot = self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, fileFormat, title)
         hist_plot = None
@@ -114,7 +151,7 @@ class AGEng:
 
         return vis_plot, hist_plot
 
-    def _computePointingDistancesFromSource(self, tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles, logfilesIndex):
+    def _computePointingDistancesFromSource(self, logfilesIndex, tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles):
         """ It computes the angular separations between the center of the
         AGILE GRID field of view and the coordinates for a given position in the sky,
         given by src_ra and src_dec.
@@ -142,7 +179,7 @@ class AGEng:
         self.logger.info(self, "Computing pointing distances from source (%f, %f) %s in [%f, %f]",src_x, src_y, ref, tmin, tmax)
 
         if not logfilesIndex:
-            logfilesIndex = self.config.getConf("input", "logfile")
+            raise ValueError("'logfilesIndex' cannot be None")
 
         if ref == "equ":
             skyCordsFK5 = SkyCoord(ra=src_x*u.degree, dec=src_y*u.degree, frame='fk5')
@@ -254,7 +291,8 @@ class AGEng:
 
     def _computeSeparationPerFile(self, doTimeMask, logFile, tmin_start, tmax_start, skyCordsFK5, zmax, step):
 
-        logFile = AgilepyConfig._expandEnvVar(logFile)
+        logFile = Utils._expandEnvVar(logFile)
+                    
         hdulist = fits.open(logFile)
         SC = hdulist[1].data
         self.logger.debug(self, "Total events: %f", len(SC["TIME"]))
