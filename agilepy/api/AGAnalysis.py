@@ -48,10 +48,8 @@ from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \
-                                            SourceNotFound, \
-                                            EnvironmentVariableNotExpanded, \
-                                            ConfigurationsNotValidError
-
+                                            SourceNotFound
+                                            
 class AGAnalysis(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run scientific analysis.
 
@@ -126,30 +124,10 @@ class AGAnalysis(AGBaseAnalysis):
             evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
             logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
 
-        Raises:
-            EnvironmentVariableNotExpanded: if an environmental variabile is found into a configuration path but it cannot be expanded.
-            FileNotFoundError: if the evtfile of logfile are not found.
-            ConfigurationsNotValidError: if at least one configuration value is bad.
 
         Returns:
             None
         """
-        analysisname = userName+"_"+sourceName
-
-        if not Path(evtfile).exists():
-            raise FileNotFoundError(f"The file {evtfile} cannot be found.")
-
-        if not Path(logfile).exists():
-            raise FileNotFoundError(f"The file {logfile} cannot be found.")
-
-        if "$" in outputDir:
-            expandedOutputDir = expandvars(outputDir)
-
-            if expandedOutputDir == outputDir:
-                print(f"Environment variable has not been expanded in {outputDir}")
-                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {outputDir}")
-
-        outputDir = Path(expandedOutputDir).joinpath(analysisname)
 
         configuration = """
 input:
@@ -158,8 +136,10 @@ input:
 
 output:
   outdir: %s
-  filenameprefix: %s_product
-  logfilenameprefix: %s_log
+  filenameprefix: analysis_product
+  logfilenameprefix: analysis_log
+  sourcename: %s
+  username: %s
   verboselvl: %d
 
 selection:  
@@ -234,7 +214,7 @@ ap:
 plotting:
   twocolumns: False
 
-        """%(evtfile, logfile, str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """%(evtfile, logfile, outputDir, userName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
 
         with open(confFilePath,"w") as cf:
 

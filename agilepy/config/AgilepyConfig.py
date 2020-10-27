@@ -33,7 +33,6 @@ from typing import List
 from copy import deepcopy
 from os.path import dirname, realpath, join
 from pathlib import Path
-from time import strftime
 
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
 from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
@@ -81,13 +80,17 @@ class AgilepyConfig(Observable):
         if user_conf["output"]["outdir"] is None:
             errors.append("Please, set output/outdir")
 
-        user_conf["output"]["outdir"] = user_conf["output"]["outdir"]+"_"+strftime("%Y%m%d-%H%M%S")    
-
         if user_conf["output"]["filenameprefix"] is None:
             errors.append("Please, set output/filenameprefix")
 
         if user_conf["output"]["logfilenameprefix"] is None:
             errors.append("Please, set output/logfilenameprefix")
+
+        if user_conf["output"]["sourcename"] is None:
+            errors.append("Please, set output/sourcename")
+
+        if user_conf["output"]["username"] is None:
+            errors.append("Please, set output/username")
 
         if user_conf["output"]["verboselvl"] is None:
             errors.append("Please, set output/verboselvl")
@@ -96,6 +99,7 @@ class AgilepyConfig(Observable):
             raise ConfigurationsNotValidError("{}".format(errors))
 
         CompletionStrategies._expandOutdirEnvVars(user_conf)
+        CompletionStrategies._completeOutdirName(user_conf)
 
         self.conf = user_conf
 

@@ -35,6 +35,28 @@ from agilepy.utils.CustomExceptions import ConfigFileOptionTypeError
 class ValidationStrategies:
     
     @staticmethod
+    def _validateEvtFile(confDict):
+
+        errors = {}
+        
+        if not Path(confDict["input"]["evtfile"]).exists():
+            error_str = f"The evtfile={confDict['input']['evtfile']} does not exist."
+            errors["input/evtfile"] = error_str            
+        
+        return errors
+
+    @staticmethod
+    def _validateLogFile(confDict):
+        
+        errors = {}
+
+        if not Path(confDict["input"]["logfile"]).exists():
+            error_str = f"The logfile={confDict['input']['logfile']} does not exist."
+            errors["input/logfile"] = error_str            
+        
+        return errors
+
+    @staticmethod
     def _validateBackgroundCoeff(confDict):
 
         errors = {}

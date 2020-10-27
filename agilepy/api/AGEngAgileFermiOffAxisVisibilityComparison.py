@@ -32,7 +32,6 @@ from agilepy.external_packages.offaxis import create_offaxis_plot, agilecheck, f
 from agilepy.external_packages.ap.APDisplayAGILEFermiComparison import *
 from agilepy.utils.Utils import Utils, expandvars
 from pathlib import Path
-from agilepy.utils.CustomExceptions import EnvironmentVariableNotExpanded
 
 
 class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
@@ -121,33 +120,20 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
 
-        Raises:
-            EnvironmentVariableNotExpanded: if an environmental variabile is found into a configuration path but it cannot be expanded.
-            FileNotFoundError: if the evtfile of logfile are not found.
-            ConfigurationsNotValidError: if at least one configuration value is bad.
-
         Returns:
             None
         """
-        analysisname = userName
-
-        if "$" in outputDir:
-            expandedOutputDir = expandvars(outputDir)
-
-            if expandedOutputDir == outputDir:
-                print(f"Environment variable has not been expanded in {outputDir}")
-                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {outputDir}")
-
-        outputDir = Path(expandedOutputDir).joinpath(analysisname)
 
         configuration = """
 output:
   outdir: %s
-  filenameprefix: %s_product
-  logfilenameprefix: %s_log
+  filenameprefix: eng_product
+  logfilenameprefix: eng_log
+  username: %s
+  sourcename: agilefermioffaxis
   verboselvl: %d
 
-        """%(str(outputDir), analysisname, analysisname, verboselvl)
+        """%(outputDir, userName, verboselvl)
 
         with open(confFilePath,"w") as cf:
 

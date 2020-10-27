@@ -1,11 +1,13 @@
 input:
-  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
-  logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+  evtfile: $AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index
+  logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/config"
-  filenameprefix: "testcase"
-  logfilenameprefix: "testcase"
+  outdir: $AGILE/agilepy-test-data/unittesting-output/config
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
+  username: user-test
   verboselvl: 1
 
 selection:
@@ -13,7 +15,7 @@ selection:
   emax: 10000
   tmin: 456361778
   tmax: 456537945
-  timetype: "TT"
+  timetype: TT
   glon: 80
   glat: 0
   timelist: None

@@ -39,8 +39,10 @@ The method above will create the following configuration file:
 
   output:
     outdir: "$HOME/agilepy_analysis"
-    filenameprefix: OJ287_product
-    logfilenameprefix: OJ287_log
+    filenameprefix: analysis_product
+    logfilenameprefix: analysis_log
+    sourcename: OJ287
+    username: user-xxx
     verboselvl: 1
 
   selection:
@@ -156,6 +158,8 @@ There are 4 kind of messages based on their importance factor:
    "outdir", "Path of the output directory", "str", "yes", "null"
    "filenameprefix", "The filename prefix of each output file", "str", "yes", "null"
    "logfilenameprefix", "The filename prefix of the log file", "str", "yes", "null"
+   "sourcename", "The name of the source under analysis", "str", "yes", "null"
+   "userName", "The name of the user performing the analysis", "str", "yes", "null" 
    "verboselvl", "| 0 ⇒ *CRITICAL* and *WARNING* messages are logged on the console.
    | 1 ⇒ *CRITICAL*, *WARNING* and *INFO* messages are logged on the console.
    | 2 ⇒ *CRITICAL*, *WARNING*, *INFO* and *DEBUG* messages are logged on the console",  "int", "no", 1

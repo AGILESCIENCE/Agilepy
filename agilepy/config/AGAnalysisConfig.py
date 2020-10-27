@@ -36,8 +36,8 @@ class AGAnalysisConfig():
 
 
     def completeConfiguration(self, confDict):
-        CompletionStrategies._expandEvtfileEnvVars(confDict)
-        CompletionStrategies._expandLogfileEnvVars(confDict)
+        CompletionStrategies._expandFileEnvVars(confDict, "evtfile")
+        CompletionStrategies._expandFileEnvVars(confDict, "logfile")
         CompletionStrategies._glonDeltaIncrement(confDict)
         CompletionStrategies._convertEnergyBinsStrings(confDict)
         CompletionStrategies._convertBackgroundCoeff(confDict, "isocoeff")
@@ -53,6 +53,8 @@ class AGAnalysisConfig():
 
         errors = {}
 
+        errors.update( ValidationStrategies._validateEvtFile(confDict) )
+        errors.update( ValidationStrategies._validateLogFile(confDict) )
         errors.update( ValidationStrategies._validateBackgroundCoeff(confDict) )
         errors.update( ValidationStrategies._validateIndexFiles(confDict) )
         errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
@@ -162,3 +164,7 @@ class AGAnalysisConfig():
         if optionName == "energybins" or optionName == "fovbinnumber":
 
             CompletionStrategies._extendBackgroundCoeff(confDict)
+
+        if optionName == "evtfile" or optionName == "logfile":
+
+            CompletionStrategies._expandFileEnvVars(confDict, optionName)
