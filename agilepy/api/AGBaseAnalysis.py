@@ -87,8 +87,8 @@ class AGBaseAnalysis:
             rmtree(outDir)
             self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
         else:
-            return False
             self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
+            return False
 
         return True
 
@@ -98,7 +98,7 @@ class AGBaseAnalysis:
         """It updates configuration options specifying one or more key=value pairs at once.
 
         Args:
-            \*\*kwargs: key-values pairs, separated by a comma.
+            kwargs: key-values pairs, separated by a comma.
 
         Returns:
             None

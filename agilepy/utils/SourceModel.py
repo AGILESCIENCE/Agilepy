@@ -29,10 +29,11 @@
 from typing import List
 from abc import ABC, abstractmethod
 
-from agilepy.utils.CustomExceptions import SpectrumTypeNotFoundError, \
-                                           AttributeValueDatatypeNotSupportedError, \
-                                           SelectionParamNotSupported, \
-                                           NotFreeableParamsError
+from agilepy.utils.CustomExceptions import  SpectrumTypeNotFoundError, \
+                                            AttributeValueDatatypeNotSupportedError, \
+                                            SelectionParamNotSupported, \
+                                            NotFreeableParamsError, \
+                                            WrongSpatialModelTypeError
 
 class Value:
     def __init__(self, name, datatype=None):

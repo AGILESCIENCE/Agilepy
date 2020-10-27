@@ -2,7 +2,10 @@ from numbers import Number
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
-from agilepy.utils.CustomExceptions import CannotSetNotUpdatableOptionError, ConfigurationsNotValidError, OptionNameNotSupportedError
+from agilepy.utils.CustomExceptions import  CannotSetNotUpdatableOptionError, \
+                                            ConfigurationsNotValidError, \
+                                            OptionNameNotSupportedError, \
+                                            CannotSetHiddenOptionError
 
 class AGAnalysisConfig():
 
@@ -70,7 +73,7 @@ class AGAnalysisConfig():
     def checkOptions(self, **kwargs):
 
         
-        for optionName, optionValue in kwargs.items():
+        for optionName in kwargs.keys():
 
             if optionName == "tmin" and "timetype" not in kwargs:
                 raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
@@ -79,7 +82,7 @@ class AGAnalysisConfig():
                 raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
 
             if self.isHidden(optionName):
-                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionSection))
+                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionName))
 
 
     def isHidden(self, optionName):

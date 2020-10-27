@@ -870,14 +870,6 @@ plotting:
     # sources management                                                       #
     ############################################################################
 
-    def getSupportedCatalogs(self):
-        """It returns a list of filepaths corresponding to the supported catalogs you can load.
-
-        Returns:
-            A List of filepaths.
-        """
-        return self.sourcesLibrary.getSupportedCatalogs()
-
     def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
         """It loads the sources from a catalog.
 
@@ -1137,6 +1129,8 @@ plotting:
 
         return bincenter, fovmin, fovmax
 
+
+    """
     def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
 
         logger = AgilepyLogger()
@@ -1158,7 +1152,8 @@ plotting:
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
-
+    """
+    
     @staticmethod
     def _chunkList(lst, num):
         avg = len(lst) / float(num)

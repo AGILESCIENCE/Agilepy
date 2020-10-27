@@ -194,7 +194,7 @@ output:
 
         if not logFiles:
             self.logger.warning(self, "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
-            return [], [], [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg
+            return [], [], [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, None
 
 
         total = len(logFiles)
