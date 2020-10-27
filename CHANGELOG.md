@@ -9,6 +9,7 @@
 * (\#172) Added Offaxis tool to compute agile and fermi offaxis
 * (\#173) Refactoring: internal refactoring, AGEngVisibility1 renamed in AGEngAgileOffaxisVisibility, AGEngVisibility2 renamed in AGEngAgileFermiOffaxisVisibilityComparison, notebooks/documentation updated.  
 * (\#176) Added AG_ap science tool => new AGAnalysis API method aperturePhotometry(). When displayLightCurve() is called the type of light curve to display must be choosen.
+* (\#180) Agilepy logger in external packages
 
 ## Release 1.1.1 - 28/03/20
 * (\#151) The method getConfiguration() accepts also "evtfile" and "logfile" and it raises an Exception if those files are not compabile with "tmin" and "tmax".
