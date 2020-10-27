@@ -146,9 +146,9 @@ class agilecheck:
 #       This is to avoid problems with moments for which the AGILE pointing was set to RA=NaN, DEC=NaN
         TIME = SC['TIME'][np.logical_not(np.isnan(SC['ATTITUDE_RA_Y']))]
         #TIME = SC["TIME"][SC['MODE'] != 0]
-        ATTITUDE_RA_Y = SC['ATTITUDE_RA_Y'][np.logical_not(np.isnan(SC['ATTITUDE_RA_Y']))]
+        #ATTITUDE_RA_Y = SC['ATTITUDE_RA_Y'][np.logical_not(np.isnan(SC['ATTITUDE_RA_Y']))]
         #ATTITUDE_RA_Y = SC["ATTITUDE_RA_Y"][SC['MODE'] != 0]
-        ATTITUDE_DEC_Y = SC['ATTITUDE_DEC_Y'][np.logical_not(np.isnan(SC['ATTITUDE_DEC_Y']))]
+        #ATTITUDE_DEC_Y = SC['ATTITUDE_DEC_Y'][np.logical_not(np.isnan(SC['ATTITUDE_DEC_Y']))]
         #ATTITUDE_DEC_Y = SC["ATTITUDE_DEC_Y"][SC['MODE'] != 0]
 
         deltatime = 0.1
@@ -258,7 +258,7 @@ class agilecheck:
         ttotal_obs = np.sum(deltat)
         ttotal_abs = (self.tstop-self.tstart)*86400
         ttotal_under_zmax = np.sum(tTTf[separation<self.zmax]-tTTi[separation<self.zmax])
-        ttotal_above_zmax = np.sum(tTTf[separation>self.zmax]-tTTi[separation>self.zmax])
+        #ttotal_above_zmax = np.sum(tTTf[separation>self.zmax]-tTTi[separation>self.zmax])
 
         self.logger.info(self, f"Total integration time = {'{0:.2f}'.format(ttotal_obs*self.step)} s Total_bins: {total_obs} {len(tTTf)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
         self.logger.info(self, f"Total absolute time= {'{0:.2f}'.format(ttotal_abs)}") #NEW

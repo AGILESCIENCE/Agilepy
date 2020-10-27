@@ -64,7 +64,7 @@ class merge:
         #plt.setp(ax.get_xaxis().get_offset_text(), visible=False)
         ax.set_ylabel('off-axis angle [$^{\\circ}$]')
 
-        legend = plt.legend(loc='lower right', shadow=True, fontsize='xx-small')
+        #legend = plt.legend(loc='lower right', shadow=True, fontsize='xx-small')
 
         print('Saving figure...')
 #        ax.set_xlim(np.min(agl_filt)-self.t0, np.max(agl_filt)-self.t0)
@@ -100,7 +100,7 @@ class merge:
         labels  = [0, 10, 20, 30, 40, 50, 60, 180]
         xlabels = [0, 10, 20, 30, 40, 50, 60, 100]
         plt.xticks(xlabels, labels)
-        legend = ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
+        #legend = ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
 
         if show==True:

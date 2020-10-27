@@ -170,8 +170,8 @@ class fermicheck:
         Output: file with columns tiMET, tfMET
         """
         ti_mjd, tf_mjd = self.calc_mjd()
-        total_obs = (np.max(tf_mjd)-np.min(ti_mjd))//1
-        meantime = (np.asfarray(ti_mjd)+np.asfarray(tf_mjd))/2.
+        #total_obs = (np.max(tf_mjd)-np.min(ti_mjd))//1
+        #meantime = (np.asfarray(ti_mjd)+np.asfarray(tf_mjd))/2.
         separation, tiMET, tfMET = self.calc_separation()
         ti, tf = np.min(tiMET), np.max(tfMET)
         gti_file = open("gtis_file_ra"+str(self.src_ra)+"_dec"+str(self.src_dec)+"_"+str(ti)+"_"+str(tf)+".txt","w")
@@ -251,7 +251,7 @@ class fermicheck:
         meantime = (ti_mjd+tf_mjd)/2.
 
         deltat = tfMET - tiMET
-        daltat1 = deltat[1]
+        #daltat1 = deltat[1]
 
         ttotal_obs = np.sum(deltat)
         ttotal_under_zmax = np.sum(tfMET[separation<self.zmax]-tiMET[separation<self.zmax])
