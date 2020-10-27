@@ -282,7 +282,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=20000)
+        lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
