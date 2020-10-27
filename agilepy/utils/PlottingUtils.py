@@ -417,3 +417,28 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
+
+    def plotSimpleLc(self, filename, lineValue, lineError, saveImage=False):
+        # reading and setting dataframe
+        data = pd.read_csv(filename, index_col=False, header=0, names=["tmin_tt","tmax_tt","exp","cts"], sep=" ")
+
+        tmean = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+
+        #Plotting
+        fig = go.Figure()
+
+        fig.add_traces(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"))
+
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
+        fig.update_yaxes(showline=True, linecolor="black", title="Counts")
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
+
+        if saveImage:
+            outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"
+            filePath = join(self.outdir, outfilename)
+            self.logger.info(self, "Light curve plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None

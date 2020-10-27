@@ -105,14 +105,14 @@ class AGAnalysisConfig():
             if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                                 "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                                "emax_sources", "loccl"]:
+                                "emax_sources", "loccl", "timeslot"]:
                 
                 validType = (int, 0)
 
             # Number (int and float)
             elif optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
                                 "timestep", "binsize", "ranal", "ulcl", \
-                                "expratio_minthr", "expratio_maxthr", "expratio_size"]:
+                                "expratio_minthr", "expratio_maxthr", "expratio_size", "radius"]:
 
                 validType = (Number, 0)
 
