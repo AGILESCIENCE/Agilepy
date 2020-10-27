@@ -78,5 +78,9 @@ mle:
   edpcorrection: 0.75
   fluxcorrection: 1
 
+ap:
+  radius: 0.25
+  timeslot: 3600  
+
 plotting:
   twocolumns: False

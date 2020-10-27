@@ -284,9 +284,19 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=20000)
 
-        #print(lightCurveData)
-
         self.assertEqual(True, os.path.isfile(lightCurveData))
+
+
+
+
+    def test_simple_lc(self):
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag.setOptions(glon=78.2375, glat=2.12298)
+        ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
+        ag.aperturePhotometry()
+        outfile = ag.displayLightCurve("ap", saveImage=False)
+        # ORCA bug
+        # self.assertEqual(True, os.path.isfile(outfile))
 
 
     """
@@ -363,6 +373,24 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertEqual('1.524e+18e-08', ag._fixToNegativeExponent(1.524e10, fixedExponent=-8))
         self.assertEqual('0.0', ag._fixToNegativeExponent(0.0, fixedExponent=-8))
 
+
+
+
+    def test_aperture_photometry(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = ag.getOption("outdir")
+
+        ap_file, ap_ph_file = ag.aperturePhotometry()
+        
+        
+        self.assertEqual(True, os.path.isfile(ap_file))
+
+        # the second product is not produced in this case
+        self.assertEqual(None, ap_ph_file) 
+
+        ag.destroy()
 
 if __name__ == '__main__':
     unittest.main()

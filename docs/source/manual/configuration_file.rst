@@ -110,7 +110,11 @@ The method above will create the following configuration file:
 
     edpcorrection: 0.75
     fluxcorrection: 1
-    
+  
+  ap:
+    radius: 3
+    timeslot: 3600
+  
   plotting:
     twocolumns: False
 
@@ -375,6 +379,19 @@ Exp-ratio evaluation options
    expratio_minthr, float, 0, none, ""
    expratio_maxthr, float, 15, none, ""
    expratio_size, float, 10, none, ""
+
+
+Section: *'ap'*
+===============
+
+This section describes the configuration parameters for the Aperture Photometry analysis.
+
+.. csv-table::
+    :header: "Option", "Description", "Type", "Required", "Default"
+    :widths: 20, 100, 20, 20, 20
+
+    radius, "The radius of analysis", float, no, 3
+    timeslot, "The size of the temporal bin", int, no, 3600
 
 
 Section: *'plot'*

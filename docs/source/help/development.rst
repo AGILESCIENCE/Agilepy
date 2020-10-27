@@ -106,6 +106,40 @@ Finally you can merge your feature branch back to **develop** branch.
     git branch -d feature-#61-new-cool-feature
     git push origin develop
 
+Add configuration parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say we want to add the following configuration section to the AGAnalysis' configuration file.
+
+::
+    ap:
+        radius: 0.25
+        timeslot: 3600
+
+* Add the new section to the AGAnalysis.getConfiguration() method.
+* Add the type of the configuration parameters within the AGAnalysisConfig.checkOptionsType() method (in the corresponding lists).
+* If the parameters need some kind of validation (this is not the case), add a new method in ValidationStrategies and call it within the AGAnalysisConfig.validateConfiguration() (check examples).
+* If the parameters need some kind of transformation (this is not the case), add a new method in CompletionStrategies and call it within the AGAnalysisConfig.completeConfiguration() (check examples).
+* Add the new configuration section to all the unit test configuration files. 
+* Document the new configuration parameters within the manual/configuration_file.rst file. 
+
+Add a new science tool
+^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say we want to add a new (c++) science tool: AG_ap.
+
+* Add a new class within the api/ScienceTools.py script. You need to implement some abstract methods.
+* You can use the new class as follows: 
+
+:: 
+
+    apTool = AP("AG_ap", self.logger)
+    apTool.configureTool(self.config)
+    if not apTool.allRequiredOptionsSet(self.config):
+        raise ScienceToolInputArgMissing("Some options have not been set.")
+    products = apTool.call()
+
+
 
 Release of a new version
 ^^^^^^^^^^^^^^^^^^^^^^^^
