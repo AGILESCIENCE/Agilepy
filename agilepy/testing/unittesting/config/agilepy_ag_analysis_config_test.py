@@ -241,5 +241,26 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
 
 
+
+    def test_evt_log_files_env_vars(self):
+
+        self.config = AgilepyConfig()
+
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+
+        self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))
+        self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
+
+        self.config.setOptions(
+                    evtfile="$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index",
+                    logfile="$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+                )
+
+        self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))
+        self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
+
 if __name__ == '__main__':
     unittest.main()

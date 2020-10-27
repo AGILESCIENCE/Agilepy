@@ -6,6 +6,8 @@ output:
   outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
   filenameprefix: "utils-testcase"
   logfilenameprefix: "utils-testcase"
+  sourcename: source-test
+  username: user-test
   verboselvl: 2
 
 selection:

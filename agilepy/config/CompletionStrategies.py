@@ -27,6 +27,8 @@
 
 from typing import List
 import numbers
+from pathlib import Path
+from time import strftime
 
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
@@ -119,13 +121,12 @@ class CompletionStrategies:
         confDict["output"]["outdir"] = Utils._expandEnvVar(confDict["output"]["outdir"])
 
     @staticmethod
-    def _expandEvtfileEnvVars(confDict):
-        confDict["input"]["evtfile"] = Utils._expandEnvVar(confDict["input"]["evtfile"])
+    def _completeOutdirName(confDict):
+        confDict["output"]["outdir"] = Path(confDict["output"]["outdir"]).joinpath(confDict["output"]["username"]+"_"+confDict["output"]["sourcename"]+"_"+strftime("%Y%m%d-%H%M%S"))
 
     @staticmethod
-    def _expandLogfileEnvVars(confDict):
-        confDict["input"]["logfile"] = Utils._expandEnvVar(confDict["input"]["logfile"])
-
+    def _expandFileEnvVars(confDict, filetype):
+        confDict["input"][filetype] = Utils._expandEnvVar(confDict["input"][filetype])
 
     @staticmethod
     def _transformLoccl(confDict):
