@@ -80,7 +80,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
         fermi_datapath = Utils._expandEnvVar(fermi_datapath)
 
 
-        offaxis = Create_offaxis_plot(time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode, step, outdir = self.outdir)
+        offaxis = Create_offaxis_plot(time_windows, ra, dec, fermi_datapath, agile_datapath, run, zmax, mode, step, outdir=self.outdir, logger=self.logger)
 
         dir = offaxis.run()
 
@@ -105,7 +105,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         """
 
-        comparison = APDisplayAGILEFermiComparison()
+        comparison = APDisplayAGILEFermiComparison(self.logger)
 
         comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, lines, plotrate)
 

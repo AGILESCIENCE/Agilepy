@@ -34,6 +34,9 @@ class APDisplayAGILEFermiComparison:
     """This class compares and plots Aperture photometry results with offaxis results
     """
 
+    def __init__(self, logger):
+        self.logger = logger
+
 
     def search_interval(self, arr1, arr2):
         result = []
@@ -68,9 +71,11 @@ class APDisplayAGILEFermiComparison:
             #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
             tw = tm -  AstroUtils.time_tt_to_mjd(agile_data["tstart"])
             ax.errorbar(tm, agile_data["rate"]*1e8, color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
-            print('AGILE mean', agile_data["rate"].mean()*1e8)
-            print('AGILE median', agile_data["rate"].median()*1e8)
-            print('AGILE std', agile_data["rate"].std()*1e8)
+
+            self.logger.info(self, f"AGILE mean {agile_data['rate'].mean()*1e8}")
+            self.logger.info(f"AGILE median {agile_data['rate'].median()*1e8}")
+            self.logger.info(self, f"AGILE std {agile_data['rate'].std()*1e8}")
+
             agilemean = agile_data["rate"].median()*1e8
             agilestd = agile_data["rate"].std()*1e8
         else:
@@ -78,9 +83,11 @@ class APDisplayAGILEFermiComparison:
             #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
             tw = tm -  AstroUtils.time_tt_to_mjd(agile_data["tstart"])
             ax.errorbar(tm, agile_data["cts"], color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
-            print('AGILE mean', agile_data["cts"].mean())
-            print('AGILE median', agile_data["cts"].median())
-            print('AGILE std', agile_data["cts"].std())
+
+            self.logger.info(self, f"AGILE mean, {agile_data['cts'].mean()}")
+            self.logger.info(self, f"AGILE median {agile_data['cts'].median()}")
+            self.logger.info(self, f"AGILE std {agile_data['cts'].std()}")
+
             agilemean = agile_data["cts"].median()
             agilestd = agile_data["cts"].std()
 
@@ -102,9 +109,11 @@ class APDisplayAGILEFermiComparison:
             twFermi = tmFermi -  AstroUtils.time_tt_to_mjd(fermi_data["tstart"])
             #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
             ax.errorbar(tmFermi, fermi_data["rate"]*1e8, color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
-            print('Fermi mean', fermi_data["rate"].mean()*1e8)
-            print('Fermi median', fermi_data["rate"].median()*1e8)
-            print('Fermi std', fermi_data["rate"].std()*1e8)
+
+            self.logger.info(self, f"Fermi mean {fermi_data['rate'].mean()*1e8}")
+            self.logger.info(self, f"Fermi median {fermi_data['rate'].median()*1e8}")
+            self.logger.info(self, f"Fermi std {fermi_data['rate'].std()*1e8}")
+
             fermimean = fermi_data["rate"].median()*1e8
             fermistd = fermi_data["rate"].std()*1e8
         else:
@@ -115,9 +124,11 @@ class APDisplayAGILEFermiComparison:
             twFermi = tmFermi -  AstroUtils.time_tt_to_mjd(fermi_data["tstart"])
             #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
             ax.errorbar(tmFermi, fermi_data["cts"], color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
-            print('Fermi mean', fermi_data["cts"].mean())
-            print('Fermi median', fermi_data["cts"].median())
-            print('Fermi std', fermi_data["cts"].std())
+
+            self.logger.info(self, f"Fermi mean {fermi_data['cts'].mean()}")
+            self.logger.info(self, f"Fermi median {fermi_data['cts'].median()}")
+            self.logger.info(self, f"Fermi std' {fermi_data['cts'].std()}")
+
             fermimean = fermi_data["cts"].mean()
             fermistd = fermi_data["cts"].std()
 
@@ -127,7 +138,7 @@ class APDisplayAGILEFermiComparison:
         ax.axhline(fermimean + 3 * fermistd, linestyle='dashdot', color='r', linewidth=1)
 
         time_diff = fermi_data["tstop"] - fermi_data["tstart"]
-        print("Total time in GTI(bottom plot)" ,time_diff.sum())
+        self.logger.info(self, f"Total time in GTI(bottom plot) {time_diff.sum()}")
             
 
 
@@ -158,7 +169,7 @@ class APDisplayAGILEFermiComparison:
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
 
-        print(tstart, tstop)
+        self.logger.info(self, f"{tstart}, {tstop}")
 
         ax1.plot(agl_filt - t0, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
 
@@ -170,7 +181,7 @@ class APDisplayAGILEFermiComparison:
 
             if (lat_filt[i+1] - lat_filt[i]) * 86400 >= 300:
 
-                print("Green box in: ", lat_filt[i], lat_filt[i+1])
+                self.logger.debug(self, f"Green box in: {lat_filt[i]}, {lat_filt[i+1]}")
 
                 lat_filt2.append([lat_filt[i], lat_filt[i+1]])
 
@@ -223,14 +234,14 @@ class APDisplayAGILEFermiComparison:
 
         ######
 
-        print("Total time in GTI", total_s_in_gti)
+        self.logger.info(self, f"Total time in GTI {total_s_in_gti}")
 
         try:
             for i in range(0,len(arg_lines),2):
                 ax1.axvspan(xmin=arg_lines[i], xmax=arg_lines[i+1], facecolor='y', alpha=0.1)
                 ax2.axvspan(xmin=arg_lines[i], xmax=arg_lines[i+1], facecolor='y', alpha=0.1)
         except:
-            print("No lines")
+            self.logger.info(self, "No lines")
         
 
         ax1.set_ylim(0., zmax+5.0)
@@ -265,8 +276,8 @@ class APDisplayAGILEFermiComparison:
                 ntrials = ntrials + 1
                 #print(time, time+1, cts, fermimean, fermistd, fermimean + 3 * fermistd, cts >= (fermimean + 3 * fermistd))
                 if cts >= (fermimean + 5 * fermistd):
-                    print("####")
-                    print(fermi_data2["tstart"])
+                    self.logger.info(self, "####")
+                    self.logger.info(self, f"{fermi_data2['tstart']}")
                     #print(fermi_data2["tstart"][n])
                     nsig = nsig + 1
                     break
@@ -274,8 +285,8 @@ class APDisplayAGILEFermiComparison:
 
             
 
-        print("ntrials ", ntrials)
-        print("nsig ", nsig)
+        self.logger.info(self, f"ntrials {ntrials}")
+        self.logger.info(self, f"nsig {nsig}")
 
     def load_and_plot(self, agile, fermi, tstart, tstop, path, lines=[], plotrate=False):
         """Main function, it loads and plots the data
