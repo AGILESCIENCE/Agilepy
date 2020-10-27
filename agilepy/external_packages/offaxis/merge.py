@@ -1,16 +1,13 @@
 import os
 import pylab
-import matplotlib
-from matplotlib import *
-import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
-import numpy as np
 import astropy
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter, MultipleLocator, FormatStrFormatter
 from astropy.time import Time
 from astropy import coordinates as coord
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import bisect
 
 
