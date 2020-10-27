@@ -34,6 +34,9 @@ from agilepy.utils.CustomExceptions import ScienceToolProductNotFound, ScienceTo
 
 class ProcessWrapper(ABC):
 
+    OPTIONAL_PRODUCT = 0
+    REQUIRED_PRODUCT = 1
+
     def __init__(self, exeName, agilepyLogger):
 
         self.logger = agilepyLogger
@@ -41,7 +44,7 @@ class ProcessWrapper(ABC):
         self.args = []
         self.outputDir = None
         self.outfilePath = None
-        self.products = []
+        self.products = {} 
         self.callCounter = 0
 
     @abstractmethod
@@ -94,8 +97,10 @@ class ProcessWrapper(ABC):
 
         products = []
         for product in self.products:
-            if not os.path.isfile(product):
+            if not os.path.isfile(product) and self.products[product] == ProcessWrapper.REQUIRED_PRODUCT:
                 raise ScienceToolProductNotFound("Product %s has NOT been produced by science tool. \nScience tool stdout:\n\n%s"%(product, toolstdout))
+            elif not os.path.isfile(product) and self.products[product] == ProcessWrapper.OPTIONAL_PRODUCT:
+                products.append(None)
             else:
                 products.append(product)
 
