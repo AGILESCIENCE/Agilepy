@@ -750,7 +750,9 @@ plotting:
 
             self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", t1, t2, idx+1, len(bins))
 
-            binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
+            #binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
+
+            binOutDir = str(lcAnalysisDataDir.joinpath(f"{idx}_bin_{t1}_{t2}"))
 
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
@@ -820,8 +822,8 @@ plotting:
 
                     lcDataDict = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
 
-                    time_start_tt = lcDataDict["time_start_tt"] + binsize * timecounter
-                    time_end_tt   = lcDataDict["time_end_tt"]   + binsize * timecounter
+                    time_start_tt = lcDataDict["time_start_tt"] # + binsize * timecounter
+                    time_end_tt   = lcDataDict["time_end_tt"]   # + binsize * timecounter
 
                     time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
                     time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
