@@ -1,8 +1,0 @@
-
-output:
-  outdir: /data01/homes/addis/Agilepy/agilepy/external_packages/offaxis/test
-  filenameprefix: test_product
-  logfilenameprefix: test_log
-  verboselvl: 1
-
-        

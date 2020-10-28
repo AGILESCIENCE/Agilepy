@@ -160,8 +160,9 @@ class SourcesLibrary:
 
         filename, fileExtension = splitext(catalogFilepath)
 
-        if fileExtension not in [".multi", ".txt"]:
-            raise SourceModelFormatNotSupported("Format of {} not supported. Supported formats: {}".format(filePath, ' '.join(supportFormats)))
+        supportedFormats = [".multi", ".txt"]
+        if fileExtension not in supportedFormats:
+            raise SourceModelFormatNotSupported("Format of {} not supported. Supported formats: {}".format(catalogFilepath, ' '.join(supportedFormats)))
 
         newSources = self._loadFromSourcesTxt(catalogFilepath)
 
@@ -291,7 +292,7 @@ class SourcesLibrary:
         sources = self.selectSources(lambda name : name == sourceName, show=False)
 
         if len(sources) == 0:
-            raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))
+            raise SourceNotFound(f"Source '{sourceName}' has not been found in the sources library")
 
         source = sources.pop()
 
@@ -511,7 +512,7 @@ class SourcesLibrary:
 
     @singledispatch
     def _addSource(sourceObject, sourceName, self):
-        raise NotImplementedError('Unsupported type: {}'.format(type(selection)))
+        raise NotImplementedError('Unsupported type: {}'.format(type(sourceObject)))
 
     @_addSource.register(Source)
     def _(sourceObject, sourceName, self):
@@ -638,7 +639,7 @@ class SourcesLibrary:
             for sourceDescription in source:
 
                 if sourceDescription.tag not in ["spectrum", "spatialModel"]:
-                    SourcesLibrary._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescr.tag))
+                    SourcesLibrary._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescription.tag))
 
                 if sourceDescription.tag == "spectrum":
                     sourceDescrDC = Spectrum.getSpectrumObject(sourceDescription.attrib["type"])

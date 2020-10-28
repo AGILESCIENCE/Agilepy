@@ -27,9 +27,9 @@
 
 from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
 
-from agilepy.external_packages.offaxis.create_offaxis_plot import *
+from agilepy.external_packages.offaxis.create_offaxis_plot import Create_offaxis_plot
 from agilepy.external_packages.offaxis import create_offaxis_plot, agilecheck, fermicheck
-from agilepy.external_packages.ap.APDisplayAGILEFermiComparison import *
+from agilepy.external_packages.ap.APDisplayAGILEFermiComparison import APDisplayAGILEFermiComparison
 from agilepy.utils.Utils import Utils, expandvars
 from pathlib import Path
 

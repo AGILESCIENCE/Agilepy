@@ -90,7 +90,7 @@ class PlottingUtils(metaclass=Singleton):
 
         fig, axs = plt.subplots(nrows, ncols, subplot_kw={'projection': wcs}, figsize=(14, 14), squeeze=False)
 
-        for idx, fitsImage in enumerate(fitsFilepaths):
+        for idx in range(len(fitsFilepaths)):
 
             row, col = divmod(idx, ncols)
 

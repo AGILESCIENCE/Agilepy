@@ -1,20 +1,14 @@
-import matplotlib.pyplot as plt
 import os
 import pylab
 import numpy as np
 import datetime
-import matplotlib
-from matplotlib import*
 import matplotlib.pyplot as plt
-import astropy
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from astropy.time import Time
 from astropy import coordinates as coord
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-#import aplpy
-#import pyfits
 from astropy.io import fits
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import bisect
 
 def agileMET_to_mjd(t_in):

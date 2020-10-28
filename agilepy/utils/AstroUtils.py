@@ -51,22 +51,22 @@ class AstroUtils:
             return -2
         else:
             d1 = b1 - b2
-            d2 = l1 - l2;
+            d2 = l1 - l2
 
             b11 = math.pi / 2.0 - (b1 * math.pi / 180.0)
             b21 = math.pi / 2.0 - (b2 * math.pi / 180.0)
-            m4 = math.cos(b11) * math.cos(b21) + math.sin(b11) * math.sin(b21) * math.cos(d2 * math.pi / 180.0);
+            m4 = math.cos(b11) * math.cos(b21) + math.sin(b11) * math.sin(b21) * math.cos(d2 * math.pi / 180.0)
             if m4 > 1:
                 m4 = 1
 
             try:
-                return math.acos(m4) * 180.0 / math.pi;
+                return math.acos(m4) * 180.0 / math.pi
 
             except Exception as e:
 
                 print("\nException in AstroUtils.distance (error in acos() ): ", e)
 
-                return math.sqrt(d1 * d1 + d2 * d2);
+                return math.sqrt(d1 * d1 + d2 * d2)
 
     # BASIC CONVERSIONS
     @staticmethod
@@ -169,14 +169,14 @@ class AstroUtils:
         Returns:
             input converted in tt format.
         """
-        ls1 = timeutc.split("T")[0];
-        ls2 = timeutc.split("T")[1];
-        year=ls1.split("-")[0];
-        month=ls1.split("-")[1];
-        day=ls1.split("-")[2];
-        hour=ls2.split(":")[0];
-        min=ls2.split(":")[1];
-        sec=ls2.split(":")[2];
+        #ls1 = timeutc.split("T")[0]
+        ls2 = timeutc.split("T")[1]
+        #year=ls1.split("-")[0]
+        #month=ls1.split("-")[1]
+        #day=ls1.split("-")[2]
+        hour=ls2.split(":")[0]
+        min=ls2.split(":")[1]
+        sec=ls2.split(":")[2]
 
         utc_offset = 2400000.5
         mjdref = 53005.0

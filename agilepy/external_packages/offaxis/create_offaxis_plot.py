@@ -25,6 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import glob
 import os,sys
 import numpy as np
 from agilepy.external_packages.offaxis.fermicheck import fermicheck
@@ -32,7 +33,6 @@ from agilepy.external_packages.offaxis.agilecheck import agilecheck
 from agilepy.external_packages.offaxis.merge import merge
 from astropy.table import Table, vstack
 from astropy.io import fits
-import glob
 
 class Create_offaxis_plot:
     """It plots offaxis curves using agile and fermi fits files
