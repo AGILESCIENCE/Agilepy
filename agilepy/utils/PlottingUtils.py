@@ -71,7 +71,7 @@ class PlottingUtils(metaclass=Singleton):
     """
     def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
         # self._updateRC()
-
+        print(fitsFilepaths[0])
         regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
         regionsColors = ["green", catalogRegionsColor]
 

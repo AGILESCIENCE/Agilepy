@@ -184,7 +184,7 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    "tmax", "Maximum time (in MJD or TT)", "float", "null", "yes"
    "timetype", "| The date format of tmin and tmax.
    | Possibile values: [*'MJD'*, *'TT'*]", "str", "null", "yes"
-   "timelist", "| A list of time intervals tstart tstop in TT
+   "timelist", "| it's a path to a file containing a list of time intervals in TT
    | format to generate maps
    | integrated within a time window.
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
