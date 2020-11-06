@@ -329,7 +329,23 @@ plotting:
 
 
     def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated int skymaps.
 
+        Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
         return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
 
