@@ -327,6 +327,12 @@ plotting:
         """
         return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
+
+    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+
+        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+
     def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
         """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
         If you pass a filename containing the light curve data, this file will be used instead of using the data generated 
@@ -1294,15 +1300,21 @@ plotting:
             titles.append(title)
 
             if skyMapType == "CTS":
-                mapIndex = 0
+                files.append(maplistRow[0])
 
             elif skyMapType == "EXP":
-                mapIndex = 1
+                files.append(maplistRow[1])
 
-            else:
-                mapIndex = 2
+            elif skyMapType == "GAS":
+                files.append(maplistRow[2])
+            
+            elif skyMapType == "INT":
+                name = maplistRow[0].split(".cts.gz")
+                name = name[0]+".int.gz"
 
-            files.append(maplistRow[mapIndex])
+                files.append(name)
+
+
 
         if len(files) == 1 and singleMode is True:
             self.logger.warning(self, "singleMode has been turned off because only one map is going to be displayed.")
