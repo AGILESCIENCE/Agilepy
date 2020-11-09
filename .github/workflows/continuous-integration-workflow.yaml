@@ -57,6 +57,7 @@ jobs:
         sttag=`cat sciencetools_version.txt`
         source ~/.bashrc
         conda config --add channels conda-forge
+        conda config --add channels plotly
         conda create -y -n agilepydevops -c agilescience agilepy-environment==$sttag
 
 
