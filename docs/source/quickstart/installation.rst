@@ -9,6 +9,7 @@ need to decide the name of the virtual environment that will be created by anaco
 ::
 
     conda config --add channels conda-forge
+    conda config --add channels plotly
     conda create -n <virtualenv_name> -c agilescience agilepy
 
 Supported platforms:
