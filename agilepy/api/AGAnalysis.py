@@ -378,8 +378,11 @@ plotting:
             return False
 
 
-        if filename is not None:
+        if filename is not None and analysisName == "mle":
             return self.plottingUtils.plotLc(filename, lineValue, lineError)
+
+        if filename is not None and analysisName == "ap":
+            return self.plottingUtils.plotSimpleLc(filename, lineValue, lineError)
 
 
         if analysisName == "mle" and self.lightCurveData["mle"] is None:
@@ -477,10 +480,10 @@ plotting:
 
                     ctsMapGenerator.configureTool(configBKP)
                     expMapGenerator.configureTool(configBKP)
-                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath})
-                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath, "ctsMapGeneratorOutfilePath" : ctsMapGenerator.outfilePath})
+                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0]})
+                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0], "ctsMapGeneratorOutfilePath" : next(iter(ctsMapGenerator.products.items()))[0]})
 
-                    configBKP.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+                    configBKP.addOptions("maps", expmap=next(iter(expMapGenerator.products.items()))[0], ctsmap=next(iter(ctsMapGenerator.products.items()))[0])
 
                     if not ctsMapGenerator.allRequiredOptionsSet(configBKP) or \
                        not expMapGenerator.allRequiredOptionsSet(configBKP) or \
@@ -501,9 +504,9 @@ plotting:
                     f4 = intMapGenerator.call()
                     self.logger.info(self, "Science tool intMapGenerator produced:\n %s", f4)
 
-                    maplistObjBKP.addRow(  ctsMapGenerator.outfilePath, \
-                                                expMapGenerator.outfilePath, \
-                                                gasMapGenerator.outfilePath, \
+                    maplistObjBKP.addRow(  next(iter(ctsMapGenerator.products.items()))[0], \
+                                                next(iter(expMapGenerator.products.items()))[0], \
+                                                next(iter(gasMapGenerator.products.items()))[0], \
                                                 str(bincenter), \
                                                 str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
                                                 str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])

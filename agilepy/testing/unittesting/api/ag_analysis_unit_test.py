@@ -284,6 +284,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
+        ag.displayLightCurve("mle")
+
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
 

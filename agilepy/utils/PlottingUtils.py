@@ -33,12 +33,16 @@ from astropy.wcs import WCS
 from astropy.io import fits
 from regions import read_ds9
 import scipy.ndimage as ndimage
+import scipy
 import ntpath
 from os.path import join
 import numpy as np
 from pathlib import Path
+from scipy.stats import norm
 from time import strftime
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.figure_factory as ff
 import pandas as pd
 from math import ceil
 from agilepy.utils.Utils import Utils
@@ -390,7 +394,6 @@ class PlottingUtils(metaclass=Singleton):
 
         #Plotting
         fig = go.Figure()
-
         fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
                                   error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
                                                arrayminus=sel1["x_minus"]),
@@ -425,13 +428,36 @@ class PlottingUtils(metaclass=Singleton):
         tmean = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
 
         #Plotting
-        fig = go.Figure()
 
-        fig.add_traces(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"))
+
+
+        fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+
+        fig.add_trace(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"), row=1, col=1)
+
+        fig.add_trace(go.Scatter(x=tmean, y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
+
+        #fig.add_trace(go.Histogram(y=data["exp"], histnorm='probability'), row=2, col=2)
+
+        #fig.add_trace(ff.create_distplot([data["exp"]], ["label"], curve_type="normal"), row=2, col=2)
+        
+        counts, bins = np.histogram(data["exp"], bins=40)
+
+        bins = 0.5 * (bins[:-1] + bins[1:])
+
+        mu, sigma = scipy.stats.norm.fit(data["exp"])
+        print(mu, sigma)
+        best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
+
+        fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)
+
+        fig.add_trace(go.Scatter(x=bins, y=best_fit_line), row=2, col=2)
 
         fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
-        fig.update_yaxes(showline=True, linecolor="black", title="Counts")
-        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
+        fig.update_yaxes(showline=True, linecolor="black", title="Counts", row=1, col=1)
+        fig.update_yaxes(showline=True, linecolor="black", title="Exp", row=2, col=1)
+
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"), height=800, width=1600, xaxis_showticklabels=True)
 
         if saveImage:
             outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"

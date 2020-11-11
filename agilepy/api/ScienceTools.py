@@ -38,34 +38,34 @@ class CtsMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
-        outputName = confDict.getOptionValue("filenameprefix")+".cts.gz"
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        outputName = config.getOptionValue("filenameprefix")+".cts.gz"
 
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {   
-            self.outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
         }
-        self.args = [ self.outfilePath,  \
-                      confDict.getOptionValue("evtfile"), # = indexfilter 
-                      confDict.getOptionValue("timelist"), \
-                      confDict.getOptionValue("mapsize"), \
-                      confDict.getOptionValue("binsize"), \
-                      confDict.getOptionValue("glon"), \
-                      confDict.getOptionValue("glat"), \
-                      confDict.getOptionValue("lonpole"), \
-                      confDict.getOptionValue("albedorad"), \
-                      confDict.getOptionValue("phasecode"), \
-                      confDict.getOptionValue("filtercode"), \
-                      confDict.getOptionValue("proj"), \
-                      confDict.getOptionValue("tmin"), \
-                      confDict.getOptionValue("tmax"), \
-                      confDict.getOptionValue("emin"), \
-                      confDict.getOptionValue("emax"), \
-                      confDict.getOptionValue("fovradmin"), \
-                      confDict.getOptionValue("fovradmax"), \
+        self.args = [ outfilePath,  \
+                      config.getOptionValue("evtfile"), # = indexfilter 
+                      config.getOptionValue("timelist"), \
+                      config.getOptionValue("mapsize"), \
+                      config.getOptionValue("binsize"), \
+                      config.getOptionValue("glon"), \
+                      config.getOptionValue("glat"), \
+                      config.getOptionValue("lonpole"), \
+                      config.getOptionValue("albedorad"), \
+                      config.getOptionValue("phasecode"), \
+                      config.getOptionValue("filtercode"), \
+                      config.getOptionValue("proj"), \
+                      config.getOptionValue("tmin"), \
+                      config.getOptionValue("tmax"), \
+                      config.getOptionValue("emin"), \
+                      config.getOptionValue("emax"), \
+                      config.getOptionValue("fovradmin"), \
+                      config.getOptionValue("fovradmax"), \
                     ]
 
 
@@ -81,47 +81,47 @@ class ExpMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
-        outputName = confDict.getOptionValue("filenameprefix")+".exp.gz"
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        outputName = config.getOptionValue("filenameprefix")+".exp.gz"
 
         edpmatrix = "None"
-        if confDict.getOptionValue("useEDPmatrixforEXP"):
+        if config.getOptionValue("useEDPmatrixforEXP"):
             edpmatrix = Parameters.edpmatrix
 
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {   
-            self.outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
         }
 
-        self.args = [ self.outfilePath,  \
-                      confDict.getOptionValue("logfile"), # = indexlog
+        self.args = [ outfilePath,  \
+                      config.getOptionValue("logfile"), # = indexlog
                       Parameters.sarmatrix, \
                       edpmatrix, \
-                      confDict.getOptionValue("maplistgen"), \
-                      confDict.getOptionValue("timelist"), \
-                      confDict.getOptionValue("mapsize"), \
-                      confDict.getOptionValue("binsize"), \
-                      confDict.getOptionValue("glon"), \
-                      confDict.getOptionValue("glat"), \
-                      confDict.getOptionValue("lonpole"), \
-                      confDict.getOptionValue("albedorad"), \
+                      config.getOptionValue("maplistgen"), \
+                      config.getOptionValue("timelist"), \
+                      config.getOptionValue("mapsize"), \
+                      config.getOptionValue("binsize"), \
+                      config.getOptionValue("glon"), \
+                      config.getOptionValue("glat"), \
+                      config.getOptionValue("lonpole"), \
+                      config.getOptionValue("albedorad"), \
                       0.5, \
                       360, \
                       5.0, \
-                      confDict.getOptionValue("phasecode"), \
-                      confDict.getOptionValue("proj"), \
-                      confDict.getOptionValue("expstep"), \
-                      confDict.getOptionValue("timestep"), \
-                      confDict.getOptionValue("spectralindex"), \
-                      confDict.getOptionValue("tmin"), \
-                      confDict.getOptionValue("tmax"), \
-                      confDict.getOptionValue("emin"), \
-                      confDict.getOptionValue("emax"), \
-                      confDict.getOptionValue("fovradmin"), \
-                      confDict.getOptionValue("fovradmax"), \
+                      config.getOptionValue("phasecode"), \
+                      config.getOptionValue("proj"), \
+                      config.getOptionValue("expstep"), \
+                      config.getOptionValue("timestep"), \
+                      config.getOptionValue("spectralindex"), \
+                      config.getOptionValue("tmin"), \
+                      config.getOptionValue("tmax"), \
+                      config.getOptionValue("emin"), \
+                      config.getOptionValue("emax"), \
+                      config.getOptionValue("fovradmin"), \
+                      config.getOptionValue("fovradmax"), \
                     ]
 
 
@@ -135,21 +135,21 @@ class GasMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
-        outputName = confDict.getOptionValue("filenameprefix")+".gas.gz"
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        outputName = config.getOptionValue("filenameprefix")+".gas.gz"
 
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {
-            self.outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
         }
 
         self.args = [ extraParams["expMapGeneratorOutfilePath"], \
-                      self.outfilePath,  \
-                      confDict.getOptionValue("skymapL"), \
-                      confDict.getOptionValue("skymapH"), \
+                      outfilePath,  \
+                      config.getOptionValue("skymapL"), \
+                      config.getOptionValue("skymapH"), \
                     ]
 
 
@@ -163,18 +163,18 @@ class IntMapGenerator(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix", "expmap", "ctsmap"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "maps")
-        outputName = confDict.getOptionValue("filenameprefix")+".int.gz"
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        outputName = config.getOptionValue("filenameprefix")+".int.gz"
+        outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {
-            self.outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
         }
 
         self.args = [ extraParams["expMapGeneratorOutfilePath"], \
-                      self.outfilePath,  \
+                      outfilePath,  \
                       extraParams["ctsMapGeneratorOutfilePath"], \
                     ]
 
@@ -191,47 +191,47 @@ class Multi(ProcessWrapper):
     def getRequiredOptions(self):
         return ["outdir", "filenameprefix"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "mle")
-        outputName = confDict.getOptionValue("filenameprefix")+(str(self.callCounter).zfill(4))
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "mle")
+        outputName = config.getOptionValue("filenameprefix")+(str(self.callCounter).zfill(4))
+        outfilePath = os.path.join(self.outputDir, outputName)
 
-        for sourceName in confDict.getOptionValue("multisources"):
+        for sourceName in config.getOptionValue("multisources"):
             prodName = os.path.join(self.outputDir, outputName+"_"+sourceName+".source")
             self.products[prodName] = ProcessWrapper.REQUIRED_PRODUCT
 
         expratioevaluation = 0
-        if confDict.getOptionValue("expratioevaluation"):
+        if config.getOptionValue("expratioevaluation"):
             expratioevaluation = 1
 
 
         self.args = [
-            confDict.getOptionValue("maplist"), \
+            config.getOptionValue("maplist"), \
             Parameters.matrixconf, \
-            confDict.getOptionValue("ranal"), \
-            confDict.getOptionValue("galmode"), \
-            confDict.getOptionValue("isomode"), \
-            confDict.getOptionValue("sourcelist"), \
-            self.outfilePath, \
-            confDict.getOptionValue("ulcl"), \
-            confDict.getOptionValue("loccl"), \
-            confDict.getOptionValue("galmode2"), \
-            confDict.getOptionValue("galmode2fit"), \
-            confDict.getOptionValue("isomode2"), \
-            confDict.getOptionValue("isomode2fit"), \
-            confDict.getOptionValue("edpcorrection"), \
-            confDict.getOptionValue("fluxcorrection"), \
-            confDict.getOptionValue("minimizertype"), \
-            confDict.getOptionValue("minimizeralg"), \
-            confDict.getOptionValue("minimizerdefstrategy"), \
-            confDict.getOptionValue("mindefaulttolerance"), \
-            confDict.getOptionValue("integratortype"), \
+            config.getOptionValue("ranal"), \
+            config.getOptionValue("galmode"), \
+            config.getOptionValue("isomode"), \
+            config.getOptionValue("sourcelist"), \
+            outfilePath, \
+            config.getOptionValue("ulcl"), \
+            config.getOptionValue("loccl"), \
+            config.getOptionValue("galmode2"), \
+            config.getOptionValue("galmode2fit"), \
+            config.getOptionValue("isomode2"), \
+            config.getOptionValue("isomode2fit"), \
+            config.getOptionValue("edpcorrection"), \
+            config.getOptionValue("fluxcorrection"), \
+            config.getOptionValue("minimizertype"), \
+            config.getOptionValue("minimizeralg"), \
+            config.getOptionValue("minimizerdefstrategy"), \
+            config.getOptionValue("mindefaulttolerance"), \
+            config.getOptionValue("integratortype"), \
             expratioevaluation, \
-            confDict.getOptionValue("expratio_minthr"), \
-            confDict.getOptionValue("expratio_maxthr"), \
-            confDict.getOptionValue("expratio_size"), \
-            confDict.getOptionValue("contourpoints"),
+            config.getOptionValue("expratio_minthr"), \
+            config.getOptionValue("expratio_maxthr"), \
+            config.getOptionValue("expratio_size"), \
+            config.getOptionValue("contourpoints"),
         ]
 
 
@@ -245,45 +245,168 @@ class AP(ProcessWrapper):
     def getRequiredOptions(self):
         return ["logfile", "evtfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, config, extraParams=None):
         """
         This method must initialize the 'args', 'products' and 'outputDir' attributes of the object.
         """
 
-        self.outputDir = os.path.join(confDict.getOptionValue("outdir"), "ap")
-        outputName = confDict.getOptionValue("filenameprefix")
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "ap")
+        outputName = config.getOptionValue("filenameprefix")
 
-        self.outfilePath = os.path.join(self.outputDir, outputName)
+        outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {
-            self.outfilePath : ProcessWrapper.REQUIRED_PRODUCT,
-            self.outfilePath+".ph" : ProcessWrapper.OPTIONAL_PRODUCT
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT,
+            outfilePath+".ph" : ProcessWrapper.OPTIONAL_PRODUCT
         }
 
-        self.args = [ self.outfilePath,  \
-                      confDict.getOptionValue("logfile"), # = indexlog
-                      confDict.getOptionValue("evtfile"), # = indexfiler
+        self.args = [ outfilePath,  \
+                      config.getOptionValue("logfile"), # = indexlog
+                      config.getOptionValue("evtfile"), # = indexfiler
                       Parameters.sarmatrix, \
                       Parameters.edpmatrix, \
-                      confDict.getOptionValue("timelist"), \
-                      confDict.getOptionValue("binsize"), \
-                      confDict.getOptionValue("radius"), \
-                      confDict.getOptionValue("glon"), \
-                      confDict.getOptionValue("glat"), \
-                      confDict.getOptionValue("lonpole"), \
-                      confDict.getOptionValue("albedorad"), \
+                      config.getOptionValue("timelist"), \
+                      config.getOptionValue("binsize"), \
+                      config.getOptionValue("radius"), \
+                      config.getOptionValue("glon"), \
+                      config.getOptionValue("glat"), \
+                      config.getOptionValue("lonpole"), \
+                      config.getOptionValue("albedorad"), \
                       0.5, \
                       360.0, \
                       5.0, \
-                      confDict.getOptionValue("phasecode"), \
-                      confDict.getOptionValue("timestep"), \
-                      confDict.getOptionValue("spectralindex"), \
-                      confDict.getOptionValue("tmin"), \
-                      confDict.getOptionValue("tmax"), \
-                      confDict.getOptionValue("emin"), \
-                      confDict.getOptionValue("emax"), \
-                      confDict.getOptionValue("fovradmin"), \
-                      confDict.getOptionValue("fovradmax"), \
-                      confDict.getOptionValue("filtercode"), \
-                      confDict.getOptionValue("timeslot")
+                      config.getOptionValue("phasecode"), \
+                      config.getOptionValue("timestep"), \
+                      config.getOptionValue("spectralindex"), \
+                      config.getOptionValue("tmin"), \
+                      config.getOptionValue("tmax"), \
+                      config.getOptionValue("emin"), \
+                      config.getOptionValue("emax"), \
+                      config.getOptionValue("fovradmin"), \
+                      config.getOptionValue("fovradmax"), \
+                      config.getOptionValue("filtercode"), \
+                      config.getOptionValue("timeslot")
                     ]
+
+
+class Cwt2(ProcessWrapper):
+
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
+
+    
+    def getRequiredOptions(self):
+        return ["ctsmap", "outputdir", "filenameprefix"]
+
+    def configureTool(self, config, extraParams=None):
+
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "wavelet_analysis/cwt2")
+        
+        outputName = config.getOptionValue("filenameprefix")
+        outfilePath = os.path.join(self.outputDir, outputName+"_CWT2"+".wtf")
+
+        self.products = {
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+        }
+
+        self.args = [
+            "-v -w log -s",
+            str(config.getOptionValue("scaletype"))+":"+str(config.getOptionValue("scalenum"))+":"+str(config.getOptionValue("scalemin"))+":"+str(config.getOptionValue("scalemax")),
+            "-i",
+            config.getOptionValue("ctsmap"),
+            "-o",
+            outfilePath
+            ]
+
+class Met(ProcessWrapper):
+
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
+
+    
+    def getRequiredOptions(self):
+        return ["outputdir", "filenameprefix"]
+
+    def configureTool(self, config, extraParams=None):
+        
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "wavelet_analysis/met")
+        outputName = config.getOptionValue("filenameprefix")
+        outfilePath = os.path.join(self.outputDir, outputName+"_MET"+".met")
+
+        self.products = {
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+        }
+
+        self.args = [
+            "-v -n",
+            config.getOptionValue("methistsize"),
+            "-i",
+            extraParams["Cwt2OutfilePath"][0],
+            "-o",
+            outfilePath
+            ]
+
+
+class Ccl(ProcessWrapper):
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
+
+    def getRequiredOptions(self):
+        return ["outputprefix", "filenameprefix"]
+
+    def configureTool(self, config, extraParams=None):
+
+        self.outputDir = os.path.join(config.getOptionValue("outdir"), "wavelet_analysis/ccl")
+        outputName = config.getOptionValue("filenameprefix")
+        outfilePath = os.path.join(self.outputDir, outputName+"_CCL"+".list")
+
+        self.products = {
+            outfilePath : ProcessWrapper.REQUIRED_PRODUCT
+        }
+
+        self.args = ["-v"]
+
+        if (float(config.getOptionValue("cclsizemin")) != -1)  or (float(config.getOptionValue("cclsizemax")) != -1):
+            self.args.extend([
+                "-c",
+                str(config.getOptionValue("cclsizemin"))+":"+str(config.getOptionValue("cclsizemax")),
+                ])
+        
+        if (float(config.getOptionValue("cclradmin")) != -1) or (float(config.getOptionValue("cclradmax") != -1)):
+            self.args.extend([
+                "-r",
+                str(config.getOptionValue("cclradmin"))+":"+str(config.getOptionValue("cclradmax"))
+            ])
+
+        if (float(config.getOptionValue("cclscalemin")) != -1) or (float(config.getOptionValue("cclscalemax")) != -1):
+            self.args.extend([
+                "-s",
+                str(config.getOptionValue("cclscalemin"))+":"+str(config.getOptionValue("cclscalemax"))
+            ])
+
+        self.args.extend([
+            "-i",
+            extraParams["MetOutfilePath"][0],
+            ">",
+            outfilePath
+        ])
+
+
+
+
+
+    
+
+    
+    
+    
+
+
+
+
+
+
+
