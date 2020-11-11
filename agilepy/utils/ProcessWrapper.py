@@ -43,9 +43,9 @@ class ProcessWrapper(ABC):
         self.exeName = exeName
         self.args = []
         self.outputDir = None
-        self.outfilePath = None
         self.products = {} 
         self.callCounter = 0
+        self.isAgileTool = True
 
     @abstractmethod
     def configureTool(self, confDict, extraParams=None):
@@ -78,20 +78,23 @@ class ProcessWrapper(ABC):
 
         Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 
-        # copy par file
-        pfile_location = os.path.join(os.environ["AGILE"],"share")
-        pfile = os.path.join(pfile_location,self.exeName+".par")
+        if self.isAgileTool:
+            # copy par file
+            pfile_location = os.path.join(os.environ["AGILE"],"share")
+            pfile = os.path.join(pfile_location,self.exeName+".par")
 
-        command = "cp "+pfile+" ./"
-        self.executeCommand(command, printStdout=False)
+            command = "cp "+pfile+" ./"
+            self.executeCommand(command, printStdout=False)
 
+        
         # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
 
-        # remove par file
-        command = "rm ./"+self.exeName+".par"
-        self.executeCommand(command, printStdout=False)
+        if self.isAgileTool:
+            # remove par file
+            command = "rm ./"+self.exeName+".par"
+            self.executeCommand(command, printStdout=False)
 
         self.callCounter += 1
 

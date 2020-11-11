@@ -37,6 +37,7 @@ from pathlib import Path
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
 from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
 from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
+from agilepy.config.AGAnalysisWaveletConfig import AGAnalysisWaveletConfig
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
@@ -118,6 +119,10 @@ class AgilepyConfig(Observable):
         elif className == "AGEngAgileFermiOffAxisVisibilityComparison":
 
             self.analysisConfig = AGEngAgileFermiOffAxisVisibilityComparisonConfig()
+
+        elif className == "AGAnalysisWavelet":
+            
+            self.analysisConfig = AGAnalysisWaveletConfig()
 
         else:
             raise AnalysisClassNotSupported("The class: {} is not supported".format(className))
