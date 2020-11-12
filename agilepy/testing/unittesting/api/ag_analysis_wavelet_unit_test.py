@@ -36,6 +36,11 @@ from agilepy.api.AGAnalysisWavelet import AGAnalysisWavelet
 
 class AGAnalysisWaveletUT(unittest.TestCase):
 
+    def setUp(self):
+        
+        self.currentDirPath = Path(__file__).parent.absolute()
+        self.ctsmap = os.path.join(self.currentDirPath,"data/analysis_product_EMIN00100_EMAX10000_01.cts.gz")
+        
     def testGetConfiguration(self):
 
         confFile = "./agilepy_conf.yaml"
@@ -45,7 +50,7 @@ class AGAnalysisWaveletUT(unittest.TestCase):
         userName="Anto",
         outputDir="$HOME/test_wavelet",
         verboselvl=2,
-        ctsmap="/data01/homes/addis/Agilepy/agilepy/testing/unittesting/api/data/analysis_product_EMIN00100_EMAX10000_01.cts.gz",
+        ctsmap=self.ctsmap,
         scaletype="dyadic",
         scalemin=2,
         scalemax=1024,
@@ -72,7 +77,7 @@ class AGAnalysisWaveletUT(unittest.TestCase):
         userName="Anto",
         outputDir="$HOME/test_wavelet",
         verboselvl=2,
-        ctsmap="/data01/homes/addis/Agilepy/agilepy/testing/unittesting/api/data/analysis_product_EMIN00100_EMAX10000_01.cts.gz",
+        ctsmap=self.ctsmap,
         scaletype="dyadic",
         scalemin=2,
         scalemax=1024,
@@ -104,7 +109,7 @@ class AGAnalysisWaveletUT(unittest.TestCase):
         userName="Anto",
         outputDir="$HOME/test_wavelet",
         verboselvl=2,
-        ctsmap="/data01/homes/addis/Agilepy/agilepy/testing/unittesting/api/data/analysis_product_EMIN00100_EMAX10000_01.cts.gz",
+        ctsmap=self.ctsmap,
         scaletype="dyadic",
         scalemin=2,
         scalemax=1024,
