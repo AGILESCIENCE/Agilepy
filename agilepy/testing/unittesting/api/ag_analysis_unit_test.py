@@ -288,7 +288,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
-
+        ag.destroy()
 
 
     def test_simple_lc(self):
@@ -299,7 +299,7 @@ class AGAnalysisUT(unittest.TestCase):
         outfile = ag.displayLightCurve("ap", saveImage=False)
         # ORCA bug
         # self.assertEqual(True, os.path.isfile(outfile))
-
+        ag.destroy()
 
     """
     def test_display_sky_maps_singlemode_show(self):
@@ -363,6 +363,7 @@ class AGAnalysisUT(unittest.TestCase):
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
         #print(lcdata)
+        ag.destroy()
 
     def test_fix_exponent(self):
 
@@ -375,7 +376,7 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertEqual('1.524e+18e-08', ag._fixToNegativeExponent(1.524e10, fixedExponent=-8))
         self.assertEqual('0.0', ag._fixToNegativeExponent(0.0, fixedExponent=-8))
 
-
+        ag.destroy()
 
 
     def test_aperture_photometry(self):
