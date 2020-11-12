@@ -21,19 +21,19 @@ else
 
   echo "agilepy_path: $agilepy_path"
 
-  pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
-         --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
-         --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.config \
-         --cov-append \
-         "$agilepy_path/testing/unittesting/config"
+  # pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+  #        --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
+  #        --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
+  #        --cov=agilepy.config \
+  #        --cov-append \
+  #        "$agilepy_path/testing/unittesting/config"
 
-  pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
-         --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
-         --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.utils \
-         --cov-append \
-         "$agilepy_path/testing/unittesting/utils"
+  # pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+  #        --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
+  #        --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
+  #        --cov=agilepy.utils \
+  #        --cov-append \
+  #        "$agilepy_path/testing/unittesting/utils"
 
 
   pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
