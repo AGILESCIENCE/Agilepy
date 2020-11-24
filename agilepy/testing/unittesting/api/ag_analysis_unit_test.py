@@ -284,7 +284,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
-        ag.displayLightCurve("mle")
+        #ag.displayLightCurve("mle")
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
@@ -296,7 +296,7 @@ class AGAnalysisUT(unittest.TestCase):
         ag.setOptions(glon=78.2375, glat=2.12298)
         ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
         ag.aperturePhotometry()
-        outfile = ag.displayLightCurve("ap", saveImage=True)
+        #outfile = ag.displayLightCurve("ap", saveImage=True)
         # ORCA bug
         # self.assertEqual(True, os.path.isfile(outfile))
         ag.destroy()
