@@ -273,22 +273,22 @@ class AGAnalysisUT(unittest.TestCase):
 
 
 
-    def test_lc(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+    # def test_lc(self):
+    #     ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        ag.setOptions(glon=78.2375, glat=2.12298)
+    #     ag.setOptions(glon=78.2375, glat=2.12298)
 
-        ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
+    #     ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
 
-        ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
+    #     ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
+    #     lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
-        ag.displayLightCurve("mle")
+    #     ag.displayLightCurve("mle")
 
-        self.assertEqual(True, os.path.isfile(lightCurveData))
+    #     self.assertEqual(True, os.path.isfile(lightCurveData))
 
-        ag.destroy()
+    #     ag.destroy()
 
 
     def test_simple_lc(self):
@@ -296,7 +296,7 @@ class AGAnalysisUT(unittest.TestCase):
         ag.setOptions(glon=78.2375, glat=2.12298)
         ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
         ag.aperturePhotometry()
-        outfile = ag.displayLightCurve("ap", saveImage=False)
+        outfile = ag.displayLightCurve("ap", saveImage=True)
         # ORCA bug
         # self.assertEqual(True, os.path.isfile(outfile))
         ag.destroy()
