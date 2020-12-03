@@ -385,11 +385,8 @@ class PlottingUtils(metaclass=Singleton):
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
         data["x_plus"] = data["time_end_mjd"] - data["tm"]
         data["x_minus"] = data["tm"] - data["time_start_mjd"]
-        #print(data)
-
         sel1 = data.loc[data["sqrt(ts)"] >= 3]
         sel2 = data.loc[data["sqrt(ts)"] < 3]
-
 
         #Plotting
         fig = go.Figure()
@@ -410,7 +407,7 @@ class PlottingUtils(metaclass=Singleton):
         fig.update_xaxes(showline=True, linecolor="black", title="Time(mjd)")
         fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
         fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
-
+        
         if saveImage:
             filePath = join(self.outdir, "LightCurve.png")
             self.logger.info(self, "Light curve plot at: %s", filePath)
