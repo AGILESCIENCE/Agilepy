@@ -57,7 +57,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(False, outDir.exists())
 
-
     def test_generate_maps(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -284,11 +283,13 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
+        self.assertEqual(True, os.path.isfile(lightCurveData))
+
         print("lightCurveData: ", lightCurveData)
 
-        ag.displayLightCurve("mle", saveImage=True)
+        lightCurvePlot = ag.displayLightCurve("mle", saveImage=True)
 
-        self.assertEqual(True, os.path.isfile(lightCurveData))
+        self.assertEqual(True, os.path.isfile(lightCurvePlot))
 
         ag.destroy()
 
@@ -297,10 +298,10 @@ class AGAnalysisUT(unittest.TestCase):
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         ag.setOptions(glon=78.2375, glat=2.12298)
         ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
-        ag.aperturePhotometry()
-        outfile = ag.displayLightCurve("ap", saveImage=True)
-        # ORCA bug
-        # self.assertEqual(True, os.path.isfile(outfile))
+        lightCurveData = ag.aperturePhotometry()[0]
+        self.assertEqual(True, os.path.isfile(lightCurveData))
+        lightCurvePlot = ag.displayLightCurve("ap", saveImage=True)
+        self.assertEqual(True, os.path.isfile(lightCurvePlot))
         ag.destroy()
 
     """
