@@ -284,6 +284,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
+        print("lightCurveData: ", lightCurveData)
+
         ag.displayLightCurve("mle", saveImage=True)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
@@ -361,8 +363,7 @@ class AGAnalysisUT(unittest.TestCase):
         sourceFile = Path(self.currentDirPath).joinpath("data/testcase0.source")
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
-
-        #print(lcdata)
+        
         ag.destroy()
 
     def test_fix_exponent(self):
