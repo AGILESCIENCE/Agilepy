@@ -91,7 +91,7 @@ class PlottingUtils(metaclass=Singleton):
         nrows = ceil(numberOfSubplots/2)
         ncols = 2
 
-        fig, axs = plt.subplots(nrows, ncols, subplot_kw={'projection': wcs}, figsize=(14, 14), squeeze=False)
+        fig, axs = plt.subplots(nrows, ncols, subplot_kw={'projection': wcs}, figsize=(20, 20), squeeze=False)
 
         for idx in range(len(fitsFilepaths)):
 
@@ -106,7 +106,7 @@ class PlottingUtils(metaclass=Singleton):
 
             im = axs[row][col].imshow(data, origin='lower', norm=None, cmap=cmap)
 
-            fig.colorbar(im, ax=axs[row][col])
+            fig.colorbar(im, ax=axs[row][col],fraction=0.046, pad=0.04)
 
             wcs = WCS(hdu.header)
             axs[row][col] = self._configAxes(axs[row][col], titles[idx], regionsFiles, regionsColors, wcs)
@@ -116,7 +116,9 @@ class PlottingUtils(metaclass=Singleton):
             axs[-1][-1].remove()
 
         # fig.tight_layout(pad=3.0)
-        plt.subplots_adjust(bottom=-0.1)
+        #plt.subplots_adjust(bottom=-0.1)
+
+        
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepaths[0])
@@ -359,12 +361,12 @@ class PlottingUtils(metaclass=Singleton):
                     pixelRegion.plot(ax=ax, edgecolor=regionsColors[idx])
 
         if "GLON" in wcs.wcs.ctype[0]:
-            ax.set_xlabel('Galactic Longitude')
-            ax.set_ylabel('Galactic Latitude')
+            ax.set_xlabel('Galactic Longitude' + " (" + str(wcs.wcs.cunit[0]) + ")")
+            ax.set_ylabel('Galactic Latitude' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         elif "RA" in wcs.wcs.ctype[0]:
-            ax.set_xlabel('Right ascension')
-            ax.set_ylabel('Declination')
+            ax.set_xlabel('Right ascension' + " (" + str(wcs.wcs.cunit[0]) + ")")
+            ax.set_ylabel('Declination' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         else:
             self.logger.warning(self, f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
