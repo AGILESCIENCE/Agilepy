@@ -28,17 +28,24 @@
 
 #mpl.use("Agg")
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
 from regions import read_ds9
 import scipy.ndimage as ndimage
+import scipy
 import ntpath
 from os.path import join
 import numpy as np
 from pathlib import Path
+from scipy.stats import norm
 from time import strftime
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.figure_factory as ff
 import pandas as pd
+from math import ceil
+from agilepy.utils.Utils import Utils
 
 from agilepy.utils.Utils import Singleton
 
@@ -60,9 +67,14 @@ class PlottingUtils(metaclass=Singleton):
             "2AGL":"$AGILE/catalogs/2AGL_2.reg"
         }
 
+    """
+        fig1   fig2
+        fig3   fig4
+        fig5   fig6
+        ..     ..
+    """
     def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
         # self._updateRC()
-
         regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
         regionsColors = ["green", catalogRegionsColor]
 
@@ -75,14 +87,17 @@ class PlottingUtils(metaclass=Singleton):
 
         hdu = fits.open(fitsFilepaths[0])[0]
         wcs = WCS(hdu.header)
-        fig, axs = plt.subplots(int(numberOfSubplots/2),int(numberOfSubplots/2), subplot_kw={'projection': wcs}, figsize=(12, 12))
 
-        for idx, fitsImage in enumerate(fitsFilepaths):
+        nrows = ceil(numberOfSubplots/2)
+        ncols = 2
 
-            row,col = self._getCell(idx, int(numberOfSubplots/2))
+        fig, axs = plt.subplots(nrows, ncols, subplot_kw={'projection': wcs}, figsize=(20, 20), squeeze=False)
+
+        for idx in range(len(fitsFilepaths)):
+
+            row, col = divmod(idx, ncols)
 
             hdu = fits.open(fitsFilepaths[idx])[0]
-            wcs = WCS(hdu.header)
 
             if smooth > 0:
                 data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
@@ -91,18 +106,19 @@ class PlottingUtils(metaclass=Singleton):
 
             im = axs[row][col].imshow(data, origin='lower', norm=None, cmap=cmap)
 
-            fig.colorbar(im, ax=axs[row][col])
+            fig.colorbar(im, ax=axs[row][col],fraction=0.046, pad=0.04)
 
+            wcs = WCS(hdu.header)
             axs[row][col] = self._configAxes(axs[row][col], titles[idx], regionsFiles, regionsColors, wcs)
             #cmap = plt.cm.CMRmap
             #cmap.set_bad(color='black')
         if hideLast:
-            lastR = int(numberOfSubplots/2 - 1)
-            lastC = lastR
-            axs[lastR][lastC].remove()
+            axs[-1][-1].remove()
 
         # fig.tight_layout(pad=3.0)
-        plt.subplots_adjust(bottom=-0.1)
+        #plt.subplots_adjust(bottom=-0.1)
+
+        
 
         if saveImage:
             _, filename = ntpath.split(fitsFilepaths[0])
@@ -277,14 +293,14 @@ class PlottingUtils(metaclass=Singleton):
         regionsFiles = []
 
         if regFilePath:
-            regFilePath = self.config._expandEnvVar(regFilePath)
+            regFilePath = Utils._expandEnvVar(regFilePath)
             self.logger.info(self, "The region catalog %s will be loaded.", regFilePath)
 
         regionsFiles.append(regFilePath)
 
         regionsFilesDict = self.getSupportedRegionsCatalogs()
         if catalogRegions in regionsFilesDict.keys():
-            catalogRegions = self.config._expandEnvVar(regionsFilesDict[catalogRegions])
+            catalogRegions = Utils._expandEnvVar(regionsFilesDict[catalogRegions])
             self.logger.info(self, "The region catalog %s will be loaded.", catalogRegions)
 
         regionsFiles.append(catalogRegions)
@@ -345,12 +361,12 @@ class PlottingUtils(metaclass=Singleton):
                     pixelRegion.plot(ax=ax, edgecolor=regionsColors[idx])
 
         if "GLON" in wcs.wcs.ctype[0]:
-            ax.set_xlabel('Galactic Longitude')
-            ax.set_ylabel('Galactic Latitude')
+            ax.set_xlabel('Galactic Longitude' + " (" + str(wcs.wcs.cunit[0]) + ")")
+            ax.set_ylabel('Galactic Latitude' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         elif "RA" in wcs.wcs.ctype[0]:
-            ax.set_xlabel('Right ascension')
-            ax.set_ylabel('Declination')
+            ax.set_xlabel('Right ascension' + " (" + str(wcs.wcs.cunit[0]) + ")")
+            ax.set_ylabel('Declination' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         else:
             self.logger.warning(self, f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
@@ -359,12 +375,7 @@ class PlottingUtils(metaclass=Singleton):
 
         return ax
 
-    def _getCell(self, idx, numberOfSubplots):
-        # print(f"{idx} / {numberOfSubplots}")
-        q, r = divmod(idx, numberOfSubplots)
-        row = q
-        col = r
-        return row, col
+
 
     def plotLc(self, filename, lineValue, lineError, saveImage=False):
         # reading and setting dataframe
@@ -376,15 +387,11 @@ class PlottingUtils(metaclass=Singleton):
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
         data["x_plus"] = data["time_end_mjd"] - data["tm"]
         data["x_minus"] = data["tm"] - data["time_start_mjd"]
-        #print(data)
-
         sel1 = data.loc[data["sqrt(ts)"] >= 3]
         sel2 = data.loc[data["sqrt(ts)"] < 3]
 
-
         #Plotting
         fig = go.Figure()
-
         fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
                                   error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
                                                arrayminus=sel1["x_minus"]),
@@ -402,9 +409,57 @@ class PlottingUtils(metaclass=Singleton):
         fig.update_xaxes(showline=True, linecolor="black", title="Time(mjd)")
         fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
         fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
-
+        
         if saveImage:
             filePath = join(self.outdir, "LightCurve.png")
+            self.logger.info(self, "Light curve plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
+
+    def plotSimpleLc(self, filename, lineValue, lineError, saveImage=False):
+        # reading and setting dataframe
+        data = pd.read_csv(filename, index_col=False, header=0, names=["tmin_tt","tmax_tt","exp","cts"], sep=" ")
+
+        tmean = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+
+        #Plotting
+
+
+
+        fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+
+        fig.add_trace(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"), row=1, col=1)
+
+        fig.add_trace(go.Scatter(x=tmean, y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
+
+        #fig.add_trace(go.Histogram(y=data["exp"], histnorm='probability'), row=2, col=2)
+
+        #fig.add_trace(ff.create_distplot([data["exp"]], ["label"], curve_type="normal"), row=2, col=2)
+        
+        counts, bins = np.histogram(data["exp"], bins=40)
+
+        bins = 0.5 * (bins[:-1] + bins[1:])
+
+        mu, sigma = scipy.stats.norm.fit(data["exp"])
+        print(mu, sigma)
+        best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
+
+        fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)
+
+        fig.add_trace(go.Scatter(x=bins, y=best_fit_line), row=2, col=2)
+
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
+        fig.update_yaxes(showline=True, linecolor="black", title="Counts", row=1, col=1)
+        fig.update_yaxes(showline=True, linecolor="black", title="Exp", row=2, col=1)
+
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"), height=800, width=1600, xaxis_showticklabels=True)
+
+        if saveImage:
+            outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"
+            filePath = join(self.outdir, outfilename)
             self.logger.info(self, "Light curve plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath

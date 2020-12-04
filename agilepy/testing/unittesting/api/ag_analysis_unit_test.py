@@ -57,7 +57,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(False, outDir.exists())
 
-
     def test_generate_maps(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -199,8 +198,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.mle(maplistFilePath)
 
-        for s in ag.sourcesLibrary.sources:
-            print(s)
+        #for s in ag.sourcesLibrary.sources:
+        #    print(s)
 
         self.assertEqual(True, True)
 
@@ -282,12 +281,28 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
-        lightCurveData = ag.lightCurve("2AGLJ2021+4029", binsize=20000)
-
-        print(lightCurveData)
+        lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
+        print("lightCurveData: ", lightCurveData)
+
+        lightCurvePlot = ag.displayLightCurve("mle", saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(lightCurvePlot))
+
+        ag.destroy()
+
+
+    def test_simple_lc(self):
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag.setOptions(glon=78.2375, glat=2.12298)
+        ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
+        lightCurveData = ag.aperturePhotometry()[0]
+        self.assertEqual(True, os.path.isfile(lightCurveData))
+        lightCurvePlot = ag.displayLightCurve("ap", saveImage=True)
+        self.assertEqual(True, os.path.isfile(lightCurvePlot))
+        ag.destroy()
 
     """
     def test_display_sky_maps_singlemode_show(self):
@@ -337,9 +352,8 @@ class AGAnalysisUT(unittest.TestCase):
         """
 
         galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
-        print("\ngalBkg:",galBkg)
-        print("isoBkg:",isoBkg)
-
+       
+       
         ag.destroy()
 
 
@@ -350,8 +364,8 @@ class AGAnalysisUT(unittest.TestCase):
         sourceFile = Path(self.currentDirPath).joinpath("data/testcase0.source")
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
-
-        print(lcdata)
+        
+        ag.destroy()
 
     def test_fix_exponent(self):
 
@@ -364,6 +378,24 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertEqual('1.524e+18e-08', ag._fixToNegativeExponent(1.524e10, fixedExponent=-8))
         self.assertEqual('0.0', ag._fixToNegativeExponent(0.0, fixedExponent=-8))
 
+        ag.destroy()
+
+
+    def test_aperture_photometry(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        outDir = ag.getOption("outdir")
+
+        ap_file, ap_ph_file = ag.aperturePhotometry()
+        
+        
+        self.assertEqual(True, os.path.isfile(ap_file))
+
+        # the second product is not produced in this case
+        self.assertEqual(None, ap_ph_file) 
+
+        ag.destroy()
 
 if __name__ == '__main__':
     unittest.main()

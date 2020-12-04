@@ -34,15 +34,18 @@ from agilepy.utils.CustomExceptions import ScienceToolProductNotFound, ScienceTo
 
 class ProcessWrapper(ABC):
 
+    OPTIONAL_PRODUCT = 0
+    REQUIRED_PRODUCT = 1
+
     def __init__(self, exeName, agilepyLogger):
 
         self.logger = agilepyLogger
         self.exeName = exeName
         self.args = []
         self.outputDir = None
-        self.outfilePath = None
-        self.products = []
+        self.products = {} 
         self.callCounter = 0
+        self.isAgileTool = True
 
     @abstractmethod
     def configureTool(self, confDict, extraParams=None):
@@ -75,27 +78,32 @@ class ProcessWrapper(ABC):
 
         Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 
-        # copy par file
-        pfile_location = os.path.join(os.environ["AGILE"],"share")
-        pfile = os.path.join(pfile_location,self.exeName+".par")
+        if self.isAgileTool:
+            # copy par file
+            pfile_location = os.path.join(os.environ["AGILE"],"share")
+            pfile = os.path.join(pfile_location,self.exeName+".par")
 
-        command = "cp "+pfile+" ./"
-        self.executeCommand(command, printStdout=False)
+            command = "cp "+pfile+" ./"
+            self.executeCommand(command, printStdout=False)
 
+        
         # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
 
-        # remove par file
-        command = "rm ./"+self.exeName+".par"
-        self.executeCommand(command, printStdout=False)
+        if self.isAgileTool:
+            # remove par file
+            command = "rm ./"+self.exeName+".par"
+            self.executeCommand(command, printStdout=False)
 
         self.callCounter += 1
 
         products = []
         for product in self.products:
-            if not os.path.isfile(product):
+            if not os.path.isfile(product) and self.products[product] == ProcessWrapper.REQUIRED_PRODUCT:
                 raise ScienceToolProductNotFound("Product %s has NOT been produced by science tool. \nScience tool stdout:\n\n%s"%(product, toolstdout))
+            elif not os.path.isfile(product) and self.products[product] == ProcessWrapper.OPTIONAL_PRODUCT:
+                products.append(None)
             else:
                 products.append(product)
 

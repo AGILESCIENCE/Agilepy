@@ -29,31 +29,28 @@ import os
 from os.path import join, splitext, expandvars
 from pathlib import Path
 from ntpath import basename
-from time import time, strftime
+from time import time
 from shutil import rmtree
 import re
 pattern = re.compile('e([+\-]\d+)')
-# from multiprocessing import Process
+
+from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.api.SourcesLibrary import SourcesLibrary
+from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi, AP
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
-from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi
-
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.utils.Parameters import Parameters
 from agilepy.utils.MapList import MapList
-from agilepy.utils.AgilepyLogger import AgilepyLogger
-from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import AGILENotFoundError, \
-                                           PFILESNotFoundError, \
-                                           ScienceToolInputArgMissing, \
-                                           MaplistIsNone, \
-                                           SourceNotFound, \
-                                           EnvironmentVariableNotExpanded
-
-class AGAnalysis:
+from agilepy.utils.Utils import Utils
+from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
+                                            PFILESNotFoundError, \
+                                            ScienceToolInputArgMissing, \
+                                            MaplistIsNone, \
+                                            SourceNotFound
+                                            
+class AGAnalysis(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run scientific analysis.
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
@@ -77,23 +74,9 @@ class AGAnalysis:
             >>> aganalysis = AGAnalysis('agconfig.yaml', sourcesFilePath='sources.xml')
 
         """
+        super().__init__(configurationFilePath)
 
-        self.config = AgilepyConfig()
-
-        self.config.loadConfigurations(configurationFilePath, validate=True)
-
-        outdir = self.config.getConf("output","outdir")+"_"+strftime("%Y%m%d-%H%M%S")
-
-        self.config.setOptions(outdir=outdir)
-
-        Path(outdir).mkdir(parents=True, exist_ok=True)
-
-
-        self.logger = AgilepyLogger()
-
-        self.logger.initialize(outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-
+        self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
@@ -101,27 +84,16 @@ class AGAnalysis:
 
             self.sourcesLibrary.loadSourcesFromFile(sourcesFilePath)
 
-
-
-        self.plottingUtils = PlottingUtils(self.config, self.logger)
-
-        if "AGILE" not in os.environ:
-            raise AGILENotFoundError("$AGILE is not set.")
-
-        if "PFILES" not in os.environ:
-            raise PFILESNotFoundError("$PFILES is not set.")
-
-        self.currentMapList = MapList(self.logger)
         # MapList Observes the observable AgilepyConfig
+        self.currentMapList = MapList(self.logger)
         self.config.attach(self.currentMapList, "galcoeff")
         self.config.attach(self.currentMapList, "isocoeff")
 
-        self.lightCurveData = None
+        self.lightCurveData = {
+            "mle" : None,
+            "ap" : None
+        }
 
-    """
-    def __del__(self):
-        self.destroy()
-    """
 
     def destroy(self):
         self.sourcesLibrary.destroy()
@@ -134,7 +106,6 @@ class AGAnalysis:
     ############################################################################
     # utility                                                                  #
     ############################################################################
-
 
     @staticmethod
     def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
@@ -153,30 +124,10 @@ class AGAnalysis:
             evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
             logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
 
-        Raises:
-            EnvironmentVariableNotExpanded: if an environmental variabile is found into a configuration path but it cannot be expanded.
-            FileNotFoundError: if the evtfile of logfile are not found.
-            ConfigurationsNotValidError: if at least one configuration value is bad.
 
         Returns:
             None
         """
-        analysisname = userName+"_"+sourceName
-
-        if not Path(evtfile).exists():
-            raise FileNotFoundError(f"The file {evtfile} cannot be found.")
-
-        if not Path(logfile).exists():
-            raise FileNotFoundError(f"The file {logfile} cannot be found.")
-
-        if "$" in outputDir:
-            expandedOutputDir = expandvars(outputDir)
-
-            if expandedOutputDir == outputDir:
-                print(f"Environment variable has not been expanded in {expanded}")
-                raise EnvironmentVariableNotExpanded(f"Environment variable has not been expanded in {expanded}")
-
-        outputDir = Path(expandedOutputDir).joinpath(analysisname)
 
         configuration = """
 input:
@@ -185,28 +136,46 @@ input:
 
 output:
   outdir: %s
-  filenameprefix: %s_product
-  logfilenameprefix: %s_log
+  filenameprefix: analysis_product
+  logfilenameprefix: analysis_log
+  sourcename: %s
+  username: %s
   verboselvl: %d
 
-selection:
+selection:  
+  emin: 100
+  emax: 10000
   tmin: %f
   tmax: %f
   timetype: %s
   glon: %f
   glat: %f
+  proj: ARC
+  timelist: None
+  filtercode: 5
+  fovradmin: 0
   fovradmax: 60
   albedorad: 80
-  proj: ARC
+  dq: 0
+  phasecode: null
+  lonpole: 180
+  lpointing: null
+  bpointing: null
+  maplistgen: "None"
 
 maps:
   mapsize: 40
+  useEDPmatrixforEXP: yes
+  expstep: null
   spectralindex: 2.1
   timestep: 160
+  projtype: WCS
+  proj: ARC
   binsize: 0.25
   energybins:
     - 100, 10000
   fovbinnumber: 1
+  offaxisangle: 30
 
 model:
   modelfile: null
@@ -216,6 +185,10 @@ model:
   isocoeff: null
   emin_sources: 100
   emax_sources: 10000
+  galmode2: 0
+  galmode2fit: 0
+  isomode2: 0
+  isomode2fit: 0
 
 mle:
   ranal: 10
@@ -225,94 +198,34 @@ mle:
   expratio_minthr: 0
   expratio_maxthr: 15
   expratio_size: 10
+  minimizertype: Minuit
+  minimizeralg: Migrad
+  minimizerdefstrategy: 2
+  mindefaulttolerance: 0.01
+  integratortype: 1
+  contourpoints: 40
+  edpcorrection: 0.75
+  fluxcorrection: 1
 
-        """%(evtfile, logfile, str(outputDir), sourceName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
+ap:
+  radius: 3
+  timeslot: 3600
+
+plotting:
+  twocolumns: False
+
+        """%(evtfile, logfile, outputDir, userName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
 
         with open(confFilePath,"w") as cf:
 
             cf.write(configuration)
 
-        config = AgilepyConfig()
-
-        config.loadConfigurations(confFilePath, validate=True)
 
 
 
-    def deleteAnalysisDir(self):
-        """It deletes the output directory where all the products of the analysis are written.
-
-        Args:
-
-        Returns:
-            True if the directory is succesfully deleted, False otherwise.
-
-        """
-        outDir = Path(self.config.getConf("output", "outdir"))
-
-        if outDir.exists() and outDir.is_dir():
-            rmtree(outDir)
-            self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
-        else:
-            return False
-            self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
-
-        return True
-
-    def setOptions(self, **kwargs):
-        """It updates configuration options specifying one or more key=value pairs at once.
-
-        Args:
-            \*\*kwargs: key-values pairs, separated by a comma.
-
-        Returns:
-            None
-
-        Raises:
-            ConfigFileOptionTypeError: if the type of the option value is not wrong.
-            ConfigurationsNotValidError: if the values are not coherent with the configuration.
-            CannotSetHiddenOptionError: if the option is hidden.
-            OptionNotFoundInConfigFileError: if the option is not found.
-
-        Note:
-            The ``config`` attribute is initialized by reading the corresponding
-            yaml configuration file, loading its contents in memory. Updating the values
-            held by this object will not affect the original values written on disk.
-
-        Example:
-
-            >>> aganalysis.setOptions(mapsize=60, binsize=0.5)
-            True
-
-        """
-        return self.config.setOptions(**kwargs)
-
-    def getOption(self, optionName):
-        """It reads an option value from the configuration.
-
-        Args:
-            optionName (str): the name of the option.
-
-        Returns:
-            The option value
-
-        Raises:
-            OptionNotFoundInConfigFileError: if the optionName is not found in the configuration.
-        """
 
 
 
-        return self.config.getOptionValue(optionName)
-
-    def printOptions(self, section=None):
-        """It prints the configuration options in the console.
-
-        Args:
-            section (str): you can specify a configuration file section to be printed out.
-
-        Returns:
-            None
-        """
-        return self.config.printOptions(section)
 
     def parseMaplistFile(self, maplistFilePath=None):
         """It parses the maplistfile in order to return sky map files paths.
@@ -414,28 +327,77 @@ mle:
         """
         return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
 
-    def displayLightCurve(self, filename=None, lineValue=None, lineError=None):
-        """It displays the Light curve generated by LightCurve method.
+
+    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated int skymaps.
 
         Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+
+    def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
+        """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
+        If you pass a filename containing the light curve data, this file will be used instead of using the data generated 
+        by the mentioned methods. 
+
+        Args:
+            analysisName (str, required): the analysis used to generate the light curve data: choose between 'mle' or 'ap'.
             filename (str, optional): the path of the Lightcurve text data file. It defaults to None. If None the last generated file will be used.
             lineValue (int, optional): mean flux value. It defaults to None.
             lineError (int, optional): mean flux error lines. It defaults to None.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
 
         Returns:
             It returns the lightcurve plot
 
         """
-        if self.lightCurveData is None and filename is None:
-            self.logger.warning("The light curve has not been generated yet and the filename is None. Please, call lightCurve() or pass a valid filename")
+        if analysisName is None:
+            self.logger.warning(self, "analysisName cannot be null.")
             return False
 
-        elif self.lightCurveData is not None and filename is not None:
+        if analysisName not in ["mle", "ap"]:
+            self.logger.warning(self, "The analysisName={} is not supported. You can choose between 'mle' and 'ap'.")
+            return False
+
+        if (filename is None) and (self.lightCurveData["mle"] is None) and (self.lightCurveData["ap"] is None):
+            self.logger.warning(self, "The light curve has not been generated yet and the filename is None. Please, call lightCurveMLE() or aperturePhotometry() or pass a valid filename")
+            return False
+
+
+        if filename is not None and analysisName == "mle":
             return self.plottingUtils.plotLc(filename, lineValue, lineError)
 
-        elif self.lightCurveData is not None and filename is None:
-            return self.plottingUtils.plotLc(self.lightCurveData, lineValue, lineError)
+        if filename is not None and analysisName == "ap":
+            return self.plottingUtils.plotSimpleLc(filename, lineValue, lineError)
 
+
+        if analysisName == "mle" and self.lightCurveData["mle"] is None:
+            self.logger.warning(self, "The light curve has not been generated yet. Please, lightCurveMLE().")
+            return False
+
+        if analysisName == "ap" and self.lightCurveData["ap"] is None:
+            self.logger.warning(self, "The light curve has not been generated yet. Please, aperturePhotometry().")
+            return False
+
+        if self.lightCurveData[analysisName] is not None and analysisName=="mle":
+            return self.plottingUtils.plotLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
+
+        if self.lightCurveData[analysisName] is not None and analysisName=="ap":
+            return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
 
 
     ############################################################################
@@ -506,8 +468,8 @@ mle:
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
-                    configBKP.setOptions(fovradmin=fovmin, fovradmax=fovmax)
-                    configBKP.addOptions("selection", emin=emin, emax=emax)
+                    configBKP.setOptions(fovradmin=int(fovmin), fovradmax=int(fovmax))
+                    configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
                     configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
 
@@ -518,10 +480,10 @@ mle:
 
                     ctsMapGenerator.configureTool(configBKP)
                     expMapGenerator.configureTool(configBKP)
-                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath})
-                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": expMapGenerator.outfilePath, "ctsMapGeneratorOutfilePath" : ctsMapGenerator.outfilePath})
+                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0]})
+                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0], "ctsMapGeneratorOutfilePath" : next(iter(ctsMapGenerator.products.items()))[0]})
 
-                    configBKP.addOptions("maps", expmap=expMapGenerator.outfilePath, ctsmap=ctsMapGenerator.outfilePath)
+                    configBKP.addOptions("maps", expmap=next(iter(expMapGenerator.products.items()))[0], ctsmap=next(iter(ctsMapGenerator.products.items()))[0])
 
                     if not ctsMapGenerator.allRequiredOptionsSet(configBKP) or \
                        not expMapGenerator.allRequiredOptionsSet(configBKP) or \
@@ -542,9 +504,9 @@ mle:
                     f4 = intMapGenerator.call()
                     self.logger.info(self, "Science tool intMapGenerator produced:\n %s", f4)
 
-                    maplistObjBKP.addRow(  ctsMapGenerator.outfilePath, \
-                                                expMapGenerator.outfilePath, \
-                                                gasMapGenerator.outfilePath, \
+                    maplistObjBKP.addRow(  next(iter(ctsMapGenerator.products.items()))[0], \
+                                                next(iter(expMapGenerator.products.items()))[0], \
+                                                next(iter(gasMapGenerator.products.items()))[0], \
                                                 str(bincenter), \
                                                 str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
                                                 str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
@@ -747,7 +709,7 @@ mle:
 
         return sourceFiles
 
-    def lightCurve(self, sourceName, tmin = None, tmax = None, timetype = None, binsize = 86400):
+    def lightCurveMLE(self, sourceName, tmin = None, tmax = None, timetype = None, binsize = 86400):
         """It generates a cvs file containing the data for a light curve plot.
 
         Args:
@@ -793,8 +755,8 @@ mle:
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
-        (_, last, _) = AgilepyConfig._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
-        idxTmax = float(AgilepyConfig._extractTimes(last)[1])
+        (_, last, _) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
+        idxTmax = float(Utils._extractTimes(last)[1])
 
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
@@ -813,7 +775,9 @@ mle:
 
             self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", t1, t2, idx+1, len(bins))
 
-            binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
+            #binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
+
+            binOutDir = str(lcAnalysisDataDir.joinpath(f"{idx}_bin_{t1}_{t2}"))
 
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
@@ -854,14 +818,13 @@ mle:
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
-        self.lightCurveData = str(lcOutputFilePath)
+        self.lightCurveData["mle"] = str(lcOutputFilePath)
 
         return str(lcOutputFilePath)
 
     def getLightCurveData(self, sourceName, lcAnalysisDataDir, binsize):
 
-
-        binDirectories = os.listdir(lcAnalysisDataDir)
+        binDirectories = sorted(os.listdir(lcAnalysisDataDir))
 
         lcData = "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
 
@@ -883,8 +846,8 @@ mle:
 
                     lcDataDict = self._extractLightCurveDataFromSourceFile(str(mleOutputFilepath))
 
-                    time_start_tt = lcDataDict["time_start_tt"] + binsize * timecounter
-                    time_end_tt   = lcDataDict["time_end_tt"]   + binsize * timecounter
+                    time_start_tt = lcDataDict["time_start_tt"] # + binsize * timecounter
+                    time_end_tt   = lcDataDict["time_end_tt"]   # + binsize * timecounter
 
                     time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
                     time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
@@ -893,8 +856,10 @@ mle:
                     time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
 
                     # "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
-
-                    lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {lcDataDict['flux']} {lcDataDict['flux_err']} {lcDataDict['flux_ul']} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"
+                    if "nan" in lcDataDict['flux']:
+                        lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {0} {0} {0} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"                
+                    else:
+                        lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {lcDataDict['flux']} {lcDataDict['flux_err']} {lcDataDict['flux_ul']} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"
 
                     timecounter += 1
 
@@ -902,18 +867,36 @@ mle:
 
         return lcData
 
+    def aperturePhotometry(self):
+        """It generates a cvs file containing the data for a light curve plot.
+        The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
+
+        Returns:
+            The absolute path to the light curve data output file.
+
+        Raises:
+            ScienceToolInputArgMissing: if not all the required configuration options have been set.
+        """
+        apTool = AP("AG_ap", self.logger)
+
+        apTool.configureTool(self.config)
+
+        if not apTool.allRequiredOptionsSet(self.config):
+
+            raise ScienceToolInputArgMissing("Some options have not been set.")
+
+        products = apTool.call()
+        self.logger.info(self, f"Science tool AP produced:\n {products}")
+
+        self.lightCurveData["ap"] = products[0]
+
+        return products[0], products[1] 
+
+
 
     ############################################################################
     # sources management                                                       #
     ############################################################################
-
-    def getSupportedCatalogs(self):
-        """It returns a list of filepaths corresponding to the supported catalogs you can load.
-
-        Returns:
-            A List of filepaths.
-        """
-        return self.sourcesLibrary.getSupportedCatalogs()
 
     def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
         """It loads the sources from a catalog.
@@ -1174,6 +1157,8 @@ mle:
 
         return bincenter, fovmin, fovmax
 
+
+    """
     def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
 
         logger = AgilepyLogger()
@@ -1195,7 +1180,8 @@ mle:
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
-
+    """
+    
     @staticmethod
     def _chunkList(lst, num):
         avg = len(lst) / float(num)
@@ -1307,7 +1293,6 @@ mle:
 
         return isoCoeff, galCoeff
 
-
     def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor=None):
 
         if self.currentMapList.getFile() is None and maplistFile is None:
@@ -1335,15 +1320,21 @@ mle:
             titles.append(title)
 
             if skyMapType == "CTS":
-                mapIndex = 0
+                files.append(maplistRow[0])
 
             elif skyMapType == "EXP":
-                mapIndex = 1
+                files.append(maplistRow[1])
 
-            else:
-                mapIndex = 2
+            elif skyMapType == "GAS":
+                files.append(maplistRow[2])
+            
+            elif skyMapType == "INT":
+                name = maplistRow[0].split(".cts.gz")
+                name = name[0]+".int.gz"
 
-            files.append(maplistRow[mapIndex])
+                files.append(name)
+
+
 
         if len(files) == 1 and singleMode is True:
             self.logger.warning(self, "singleMode has been turned off because only one map is going to be displayed.")

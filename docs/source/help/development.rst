@@ -47,7 +47,7 @@ The **feature** branch takes the following format:
 
     feature-#<card-number>-<short-description>
 
-e.g. feature-#61-bayesian-blocks
+e.g. feature-#61-new-cool-feature
 
 The **hotfix** branch name takes the following format:
 
@@ -58,34 +58,37 @@ e.g. hotfix-#57-1.0.0
 
 The release number is the one of the production release from which it originates from.
 
-Practice
---------
+Getting started
+---------------
 
 Development of a new feature
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you start from scratch:
 ::
-
-    git clone --single-branch --branch develop https://github.com/AGILESCIENCE/Agilepy.git
+    conda config --add channels conda-forge
+    conda create -n agilepyenv -c agilescience agilepy-environment
+    conda activate agilepyenv
+    git clone https://github.com/AGILESCIENCE/Agilepy.git
+    cd Agilepy && python setup.py develop
 
 Create a new **feature** branch:
 ::
 
     git checkout develop
     git pull origin develop
-    git checkout -b feature-#61-bayesian-blocks develop
+    git checkout -b feature-#61-new-cool-feature develop
 
 
 
 Development and testing of the new feature.
 
-When you're done, you commit your changes and update the CHANGELOG.md .
+When you have finished, update the CHANGELOG.md and commit your changes.
 
 ::
 
     vim CHANGELOG
-    git commit -m ""
+    git commit -m "feature-#61-new-cool-feature done"
 
 In the meantime it is possible that someone else have pushed his work into the develop branch. In this case
 you have to merge the changes in your feature branch.
@@ -99,9 +102,43 @@ Finally you can merge your feature branch back to **develop** branch.
 
 ::
 
-    git merge --no-ff feature-#61-bayesian-blocks
-    git branch -d feature-#61-bayesian-blocks
+    git merge --no-ff feature-#61-new-cool-feature
+    git branch -d feature-#61-new-cool-feature
     git push origin develop
+
+Add configuration parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say we want to add the following configuration section to the AGAnalysis' configuration file.
+
+::
+    ap:
+        radius: 0.25
+        timeslot: 3600
+
+* Add the new section to the AGAnalysis.getConfiguration() method.
+* Add the type of the configuration parameters within the AGAnalysisConfig.checkOptionsType() method (in the corresponding lists).
+* If the parameters need some kind of validation (this is not the case), add a new method in ValidationStrategies and call it within the AGAnalysisConfig.validateConfiguration() (check examples).
+* If the parameters need some kind of transformation (this is not the case), add a new method in CompletionStrategies and call it within the AGAnalysisConfig.completeConfiguration() (check examples).
+* Add the new configuration section to all the unit test configuration files. 
+* Document the new configuration parameters within the manual/configuration_file.rst file. 
+
+Add a new science tool
+^^^^^^^^^^^^^^^^^^^^^^
+
+Let's say we want to add a new (c++) science tool: AG_ap.
+
+* Add a new class within the api/ScienceTools.py script. You need to implement some abstract methods.
+* You can use the new class as follows: 
+
+:: 
+
+    apTool = AP("AG_ap", self.logger)
+    apTool.configureTool(self.config)
+    if not apTool.allRequiredOptionsSet(self.config):
+        raise ScienceToolInputArgMissing("Some options have not been set.")
+    products = apTool.call()
+
 
 
 Release of a new version

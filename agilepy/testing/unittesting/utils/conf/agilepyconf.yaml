@@ -6,12 +6,82 @@ output:
   outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
   filenameprefix: "utils-testcase"
   logfilenameprefix: "utils-testcase"
+  sourcename: source-test
+  username: user-test
   verboselvl: 1
 
-
 selection:
+  emin: 100
+  emax: 10000
   tmin: 456361778
   tmax: 456537945
   timetype: "TT"
   glon: 80
   glat: 0
+  timelist: None
+  filtercode: 5
+  fovradmin: 0
+  fovradmax: 60
+  albedorad: 80
+  dq: 0
+  phasecode: null
+  lonpole: 180
+  lpointing: null
+  bpointing: null
+  maplistgen: "None"
+
+
+maps:
+  mapsize: 40
+  useEDPmatrixforEXP: yes
+  expstep: null
+  spectralindex: 2.1
+  timestep: 160
+  projtype: WCS
+  proj: ARC
+  energybins:
+    - 100, 300
+    - 300, 1000
+    # - 1000, 3000
+    # - 3000,10000
+
+  fovbinnumber: 2
+  binsize: 0.2
+  offaxisangle: 30
+
+model:
+  modelfile: null
+  galmode: 1
+  isomode: 1
+  galcoeff: null
+  isocoeff: null
+  emin_sources: 100
+  emax_sources: 10000
+  galmode2: 0
+  galmode2fit: 0
+  isomode2: 0
+  isomode2fit: 0
+
+
+mle:
+  ranal: 10
+  ulcl: 2
+  loccl: 95
+  # Parameters for exp ratio evaluation
+  expratioevaluation: yes
+  expratio_minthr: 0
+  expratio_maxthr: 15
+  expratio_size: 10
+  # Hidden for optimizer
+  minimizertype: Minuit
+  minimizeralg: Migrad
+  minimizerdefstrategy: 2
+  mindefaulttolerance: 0.01
+  integratortype: 1
+  contourpoints: 40
+  # Hidden for internal corrections
+  edpcorrection: 0.75
+  fluxcorrection: 1
+
+plotting:
+  twocolumns: False

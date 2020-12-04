@@ -1,5 +1,8 @@
 Engineering API
 ===============
 
-.. autoclass:: api.AGEng.AGEng
-    :members: __init__, visibilityPlot
+.. autoclass:: api.AGEngAgileOffaxisVisibility.AGEngAgileOffaxisVisibility
+    :members: __init__, getConfiguration, visibilityPlot
+
+.. autoclass:: api.AGEngAgileFermiOffAxisVisibilityComparison.AGEngAgileFermiOffAxisVisibilityComparison
+    :members: __init__, getConfiguration, visibilityPlot, apOffaxisComparation

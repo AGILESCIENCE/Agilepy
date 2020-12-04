@@ -12,5 +12,7 @@ echo "Script dir: $script_dir"
 
 python "$script_dir/../testing/unittesting/api/ag_analysis_unit_test.py" -v
 python "$script_dir/../testing/unittesting/api/sources_library_unit_test.py" -v
-python "$script_dir/../testing/unittesting/config/agilepy_config_test.py" -v
+python "$script_dir/../testing/unittesting/config/agilepy_ag_analysis_config_test.py" -v
 python "$script_dir/../testing/unittesting/utils/utils_test.py" -v
+python "$script_dir/../testing/unittesting/api/ag_analysis_wavelet_unit_test.py" -v
+python "$script_dir/../testing/unittesting/api/ag_eng_agile_offaxis_visibility_unit_test.py" -v
