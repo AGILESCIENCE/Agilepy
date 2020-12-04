@@ -66,6 +66,7 @@ Development of a new feature
 
 If you start from scratch:
 ::
+    
     conda config --add channels conda-forge
     conda create -n agilepyenv -c agilescience agilepy-environment
     conda activate agilepyenv
