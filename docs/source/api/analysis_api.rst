@@ -7,3 +7,6 @@ Analysis API
 
 .. autoclass:: api.AGAnalysis.AGAnalysis
     :members: __init__, getConfiguration, loadSourcesFromCatalog, loadSourcesFromFile, convertCatalogToXml, parseMaplistFile, generateMaps, calcBkg, mle, updateSourcePosition, aperturePhotometry, lightCurveMLE, getSources, selectSources, freeSources, addSource, deleteSources, displayCtsSkyMaps, displayExpSkyMaps, displayGasSkyMaps, displayLightCurve
+
+.. autoclass:: api.AGAnalysisWavelet.AGAnalysisWavelet
+    :members: __init__, getConfiguration, waveletAnalysis, waveletDisplay
