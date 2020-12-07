@@ -98,7 +98,7 @@ output:
   filenameprefix: wavelet_product
   logfilenameprefix: eng_log
   username: %s
-  sourcename: offaxis
+  sourcename: wavelet
   verboselvl: %d
 
 map:
