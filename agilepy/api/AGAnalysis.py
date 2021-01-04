@@ -216,7 +216,7 @@ plotting:
 
         """%(evtfile, logfile, outputDir, userName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
 
-        with open(confFilePath,"w") as cf:
+        with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
             cf.write(configuration)
 

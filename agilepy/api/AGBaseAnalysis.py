@@ -30,6 +30,7 @@ from pathlib import Path
 from shutil import rmtree
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.utils.Utils import Utils
 from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.config.ValidationStrategies import ValidationStrategies
@@ -46,7 +47,7 @@ class AGBaseAnalysis:
         self.config = AgilepyConfig()
 
         # load only "input" and "output" sections
-        self.config.loadBaseConfigurations(configurationFilePath)
+        self.config.loadBaseConfigurations(Utils._expandEnvVar(configurationFilePath))
 
         # Creating output directory
 

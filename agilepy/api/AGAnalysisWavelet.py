@@ -35,7 +35,7 @@ from agilepy.utils.Utils import Utils
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.api.ScienceTools import Cwt2, Met, Ccl
 
-from os.path import join
+from os.path import join, expandvars
 from astropy.wcs import WCS
 from astropy.io import fits
 import scipy.ndimage as ndimage
@@ -121,7 +121,7 @@ wavelet:
 
         """%(outputDir, userName, verboselvl, ctsmap, scaletype, scalemin, scalemax, scalenum, methistsize, cclsizemin, cclsizemax, cclradmin, cclradmax, cclscalemin, cclscalemax)
 
-        with open(confFilePath,"w") as cf:
+        with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
             cf.write(configuration)
     
