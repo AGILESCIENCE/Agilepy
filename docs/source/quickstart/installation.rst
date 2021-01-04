@@ -62,8 +62,3 @@ the root folder of your anaconda installation.
 
 It contains all the dependencies Agilepy requires. Here, there is the "agiletools"
 directory, containing AGILE's scientific software.
-
-
-How to get AGILE data
-^^^^^^^^^^^^^^^^^^^^^
-TODO
