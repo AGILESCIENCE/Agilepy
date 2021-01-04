@@ -29,7 +29,7 @@ import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.io import fits
-from os.path import join
+from os.path import join, expandvars
 from pathlib import Path
 
 from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
@@ -93,7 +93,7 @@ output:
 
         """%(outputDir, userName, verboselvl)
 
-        with open(confFilePath,"w") as cf:
+        with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
             cf.write(configuration)
 
