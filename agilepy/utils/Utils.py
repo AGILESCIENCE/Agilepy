@@ -66,9 +66,9 @@ class Utils:
         with open(file, 'rb') as evtindex:
             firstLine = next(evtindex).decode()
             lineSize = len(firstLine.encode('utf-8'))
-            evtindex.seek(-500, os.SEEK_END)
+            evtindex.seek(-lineSize, os.SEEK_END)
             lastLine = evtindex.readlines()[-1].decode()
-            return (firstLine, lastLine, lineSize)
+            return (firstLine, lastLine)
 
     @staticmethod
     def _extractTimes(indexFileLine):

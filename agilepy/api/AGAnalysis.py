@@ -755,7 +755,7 @@ plotting:
 
         configBKP = AgilepyConfig.getCopy(self.config)
 
-        (_, last, _) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
+        (_, last) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
         idxTmax = float(Utils._extractTimes(last)[1])
 
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
