@@ -108,14 +108,10 @@ class ValidationStrategies:
     def _validateTimeInIndex(confDict):
         errors = {}
 
-        (first, last, lineSize) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
+        (first, last) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
 
         idxTmin = Utils._extractTimes(first)[0]
         idxTmax = Utils._extractTimes(last)[1]
-
-        if lineSize > 1024:
-            print("[ValidationStrategies] ! WARNING ! The byte size of the first input/evtfile line {} is {} B.\
-                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(first, lineSize, idxTmin, idxTmax))
 
         userTmin = confDict["selection"]["tmin"]
         userTmax = confDict["selection"]["tmax"]

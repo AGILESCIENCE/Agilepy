@@ -59,8 +59,13 @@ class AgilepyUtilsUT(unittest.TestCase):
         if self.outDir.exists() and self.outDir.is_dir():
             shutil.rmtree(self.outDir)
 
+        self.tmpDir = Path("./tmp")
+        self.tmpDir.mkdir(exist_ok=True)
+
     def tearDown(self):
         self.agilepyLogger.reset()
+        if self.tmpDir.exists() and self.tmpDir.is_dir():
+            shutil.rmtree(self.tmpDir)
 
     def test_display_sky_map(self):
 
@@ -314,6 +319,42 @@ class AgilepyUtilsUT(unittest.TestCase):
         mjd = AstroUtils.time_utc_to_mjd("2020-01-23T10:56:53")
 
         self.assertEqual(True, abs(58871.45616898 - mjd) <= sec_tol)
+
+
+    def test_get_first_and_last_line_in_file(self):
+
+        line1 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004151750_2004151850.EVT__FM.gz 514057762.000000 514061362.000000 EVT\n'
+        line2 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004152249_2004160008.EVT__FM.gz 514075704.000000 514080437.000000 EVT\n'
+        line3 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004160008_2004160045.EVT__FM.gz 514080437.000000 514082644.000000 EVT\n'
+
+        # I test: 1 line
+        test_file = self.tmpDir.joinpath("test_file1.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line1)
+
+        # II test: 2 lines
+        test_file = self.tmpDir.joinpath("test_file2.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+            f.write(line2)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line2)
+
+        # III test: 3 lines
+        test_file = self.tmpDir.joinpath("test_file3.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+            f.write(line2)
+            f.write(line3)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line3)
+
+
 
 if __name__ == '__main__':
     unittest.main()
