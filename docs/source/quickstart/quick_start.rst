@@ -97,11 +97,4 @@ You can generate a light curve data file with...
 
 
 
-.. hint:: Try out the **tutorial notebooks** and the **analysis notebooks**:
-
-   ::
-
-      start_agilepy_notebooks.sh
-
-
 .. hint:: Check out the API documentation!
