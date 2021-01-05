@@ -1,5 +1,9 @@
 # Changelog
-
+## Release 1.3.0
+* (\#196) Notebooks have their own documentation section
+* (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.
+* (\#202) A new dataset (for testing/validation purposes) has been included.
+* (\#203) The "INDEX file with one line crash" bug has been fixed.
 ## Release 1.2.0
 * (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True.
 * (\#152) The setOptions() call to increment the number of energy bins while galcoeff and isocoeff are equal = null  won't throw an error anymore.
