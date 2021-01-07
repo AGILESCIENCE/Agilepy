@@ -1,6 +1,6 @@
 input:
-  evtfile: $AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index
-  logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
+  evtfile: $AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index
+  logfile: $AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index
 
 output:
   outdir: $AGILE/agilepy-test-data/unittesting-output/api
@@ -13,8 +13,8 @@ output:
 selection:
   emin: 100
   emax: 10000
-  tmin: 456361778 #58287
-  tmax: 456537945 #58297
+  tmin: 433900000
+  tmax: 433957532
   timetype: TT
   glon: 80
   glat: 0
@@ -32,7 +32,7 @@ selection:
 
 maps:
   mapsize: 40
-  useEDPmatrixforEXP: yes
+  useEDPmatrixforEXP: True
   expstep: null
   spectralindex: 2.1
   timestep: 160
@@ -63,7 +63,7 @@ mle:
   ulcl: 2
   loccl: 95
   # Parameters for exp ratio evaluation
-  expratioevaluation: yes
+  expratioevaluation: True
   expratio_minthr: 0
   expratio_maxthr: 15
   expratio_size: 10
