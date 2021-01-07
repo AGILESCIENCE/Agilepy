@@ -66,7 +66,7 @@ The method above will create the following configuration file:
 
   maps:
     mapsize: 40
-    useEDPmatrixforEXP: yes
+    useEDPmatrixforEXP: no
     expstep: null
     spectralindex: 2.1
     timestep: 160
@@ -271,7 +271,7 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
    :widths: 20, 100, 20, 20, 20
 
    "mapsize", "Width of the ROI in degrees","float", 40, "no"
-   "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map. Possible values = [*yes*, *no*]", "boolean", "yes", "no"
+   "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map.", "boolean", "False", "no"
    "expstep", "| Step size of the exposure map, if 'None' it depends by
    | round(1 / binsize, 2) (e.g. 0.3->3, 0.25->4, 0.1->10)", "int", "None", "no"
    "spectralindex", "Spectral index of the exposure map", "float", 2.1, "no"
@@ -407,4 +407,4 @@ This section defines the plotting configuration.
     :header: "Option", "Description", "Type", "Required", "Default"
     :widths: 20, 100, 20, 20, 20
 
-    twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, no, False
+    twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, False, no
