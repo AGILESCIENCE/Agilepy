@@ -165,7 +165,7 @@ selection:
 
 maps:
   mapsize: 40
-  useEDPmatrixforEXP: yes
+  useEDPmatrixforEXP: false
   expstep: null
   spectralindex: 2.1
   timestep: 160
@@ -194,7 +194,7 @@ mle:
   ranal: 10
   ulcl: 2
   loccl: 95
-  expratioevaluation: yes
+  expratioevaluation: true
   expratio_minthr: 0
   expratio_maxthr: 15
   expratio_size: 10
