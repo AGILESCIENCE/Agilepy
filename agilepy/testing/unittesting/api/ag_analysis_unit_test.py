@@ -277,7 +277,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.setOptions(glon=78.2375, glat=2.12298)
 
-        ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
+        ag.setOptions(timetype="TT")
 
         ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
 
@@ -297,7 +297,7 @@ class AGAnalysisUT(unittest.TestCase):
     def test_simple_lc(self):
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
         ag.setOptions(glon=78.2375, glat=2.12298)
-        ag.setOptions(tmin=456400000.000000, tmax=456500000.000000, timetype="TT")
+        ag.setOptions(timetype="TT")
         lightCurveData = ag.aperturePhotometry()[0]
         self.assertEqual(True, os.path.isfile(lightCurveData))
         lightCurvePlot = ag.displayLightCurve("ap", saveImage=True)
@@ -329,11 +329,9 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
 
-        ag.setOptions(   tmin=456461778.0,
-                         tmax=456537945.0,
-                         timetype="TT",
-                         galcoeff=[-1, -1, -1, -1],
-                         isocoeff=[10, 12, 10, 12]
+        ag.setOptions(  timetype="TT",
+                        galcoeff=[-1, -1, -1, -1],
+                        isocoeff=[10, 12, 10, 12]
                      )
 
         """
