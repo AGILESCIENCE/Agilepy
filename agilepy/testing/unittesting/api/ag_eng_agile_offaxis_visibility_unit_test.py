@@ -51,7 +51,7 @@ class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
         # file = "/data/AGILE/LOG_INDEX/LOG.log.index"
         zmax = 60
         step = 10
-        logfilesIndex = "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+        logfilesIndex = "$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
 
         logfilesIndex = Utils._expandEnvVar(logfilesIndex)
 
@@ -73,9 +73,9 @@ class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
         fileFormat="png"
         title="Visibility plot 184075134 - 184275134"
 
-        logfilesIndex = "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+        logfilesIndex = "$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
 
-        visplot, histoplot = self.ageng.visibilityPlot(logfilesIndex, 456384273, 456426294, src_x, src_y, ref, zmax, step, histogram, writeFiles, saveImage, fileFormat, title)
+        visplot, histoplot = self.ageng.visibilityPlot(logfilesIndex, 433900000, 433957532, src_x, src_y, ref, zmax, step, histogram, writeFiles, saveImage, fileFormat, title)
 
         self.assertEqual(True, os.path.isfile(visplot))
         self.assertEqual(True, os.path.isfile(histoplot))
