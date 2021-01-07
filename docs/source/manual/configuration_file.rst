@@ -371,6 +371,7 @@ The maximum likelihood estimation analysis is configured by the following option
    "ranal", "Radius of analysis", float, 10, No
    "ulcl", "Upper limit confidence level, expressed as sqrt(TS)", float, 2, No
    "loccl", "Source location contour confidence level (default 95 (%)confidence level) Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
+   "fluxcorrection", "fluxcorrection", float, 0, no
 
 Exp-ratio evaluation options
 ----------------------------

@@ -86,14 +86,14 @@ You can generate a light curve data file with...
 
 ::
 
-    lightCurveData = ag.lightCurve("CYGX3", tmin=58930 , tmax=58936, binsize=10800)
+    lightCurveData = ag.lightCurveMLE("CYGX3", tmin=58930 , tmax=58936, binsize=10800)
 
 
 ...and display the interactive light curve plot with:
 
 ::
 
-    ag.displayLightCurve()
+    ag.displayLightCurve("mle")
 
 
 
