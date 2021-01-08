@@ -413,7 +413,6 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertRaises(AttributeError, source.spectrum.get, "index2")
         self.assertRaises(AttributeError, source.spectrum.set, "index2", 10)
 
-        source.spectrum.set("index2", 10)
 
 if __name__ == '__main__':
     unittest.main()
