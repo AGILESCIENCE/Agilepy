@@ -1105,6 +1105,7 @@ plotting:
         """
         return self.sourcesLibrary.updateSourcePosition(sourceName, useMulti, glon, glat)
 
+
     def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
         """It writes on file the list of sources loaded into the *SourceLibrary*.
         The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.

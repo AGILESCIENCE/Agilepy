@@ -395,5 +395,25 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
+
+    def test_update_source_parameter_value(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        sources = ag.selectSources('name == "2AGLJ2021+4029"')
+        
+        source = sources.pop()
+
+        indexVal = source.spectrum.get("index")
+
+        self.assertEqual(1.75, indexVal)
+
+        source.spectrum.set("index", 2)
+
+        self.assertRaises(AttributeError, source.spectrum.get, "index2")
+        self.assertRaises(AttributeError, source.spectrum.set, "index2", 10)
+
+        source.spectrum.set("index2", 10)
+
 if __name__ == '__main__':
     unittest.main()
