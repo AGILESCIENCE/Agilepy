@@ -324,6 +324,10 @@ class MultiOutput(SourceDescription):
         self.multib = OutputVal("multib", "float")
         self.multiphi = OutputVal("multiphi", "float")
 
+        self.multiIndex = OutputVal("multiIndex", "float")
+        self.multiPar2 = OutputVal("multiPar2", "float")
+        self.multiPar3 = OutputVal("multiPar3", "float")
+
         self.multiGalCoeff = OutputVal("multiGalCoeff", "List<float>")
         self.multiGalErr = OutputVal("multiGalErr", "List<float>")
 
@@ -366,12 +370,14 @@ class Source:
         self.spectrum = None
         self.multi = None
 
+    def getFreeParams(self):
+        return [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
+                    [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
 
     def __str__(self):
 
 
-        freeParams = [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
-                        [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
+        freeParams = self.getFreeParams()
 
         spectrumParams = [k+": "+v.get(strRepr=True) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter)]
 

@@ -1085,25 +1085,22 @@ plotting:
         """
         return self.sourcesLibrary.deleteSources(selection, show = show)
 
-    def updateSourcePosition(self, sourceName, useMulti=True, glon=None, glat=None):
-        """It updates a source (l,b) position parameters. You can explicity pass new values
-        or your can use the output of the last mle() analysis.
+    def updateSourcePosition(self, sourceName, glon, glat):
+        """It updates a source (l,b) position parameters. The 'dist' value will also be updated.
 
         Args:
             sourceName (str): the name of the source
-            useMulti (bool): set it to True if you want to use the last mle analysis output
-            glon (float): if useMulti is False this value is goint to be use.
-            glat (float): if useMulti is False this value is goint to be use.
+            glon (float): galactic longitude.
+            glat (float): galactic latitude.
 
         Raises:
             SourceNotFound: if the source has not been loaded into the SourcesLibrary.
-            MultiOutputNotFoundError: if useMulti is True but mle() has not been executed yet.
-            ValueError: if useMulti is False but one of glon or glat in None.
+            ValueError: if glon or glat values are out of range.
 
         Returns:
-            True if the position changes, False when the position don't change or the position is (-1, -1).
+            True if the position changes, False otherwise.
         """
-        return self.sourcesLibrary.updateSourcePosition(sourceName, useMulti, glon, glat)
+        return self.sourcesLibrary.updateSourcePosition(sourceName, glon, glat)
 
 
     def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):

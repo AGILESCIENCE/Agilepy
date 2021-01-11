@@ -132,22 +132,55 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
+
+    def test_source_dist_updated_after_source_position_update(self):
+        sc_file = os.path.join(self.currentDirPath,"conf/sourceconf_3.txt")
+        with open(sc_file, "w") as sc:
+            sc.write("""
+119.3e-08 78.2375 2.12298 1.75 1 2 2AGLJ2021+4029 0 1 3307.63 0 0.5 5 20 10000  -1 -1
+""")
+
+        ag = AGAnalysis(self.agilepyconfPath, sc_file)
+
+        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        dist_1 = source_1.spatialModel.get("dist")
+
+        ag.updateSourcePosition('2AGLJ2021+4029', glon=81, glat=1)
+
+        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        dist_2 = source_2.spatialModel.get("dist")
+
+        self.assertNotEqual(dist_1, dist_2)
+        ag.destroy()
+
     def test_source_dist_updated_after_mle(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        sc_file = os.path.join(self.currentDirPath,"conf/sourceconf_tmp.txt")
+        with open(sc_file, "w") as sc:
+            sc.write("""
+119.3e-08 78.2370 2.12290 1.75 1 2 2AGLJ2021+4029 0 1 3307.63 0 0.5 5 20 10000  -1 -1
+""")
+
+        ag = AGAnalysis(self.agilepyconfPath, sc_file)
+
+        ag.updateSourcePosition('2AGLJ2021+4029', glon=78, glat=2)
 
         maplistFilePath = ag.generateMaps()
 
-        ag.mle(maplistFilePath)
+        ag.freeSources(lambda name: name == '2AGLJ2021+4029', "pos", True)
+        ag.freeSources(lambda name: name == '2AGLJ2021+4029', "flux", False)
+
         source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
-        dist_1 = source_1.multi.get("multiDist")
-
-        ag.setOptions(glon=81, glat=1)
+        dist_before = source_1.spatialModel.get("dist")
 
         ag.mle(maplistFilePath)
-        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
-        dist_2 = source_2.multi.get("multiDist")
 
-        self.assertNotEqual(dist_1, dist_2)
+        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        dist_after = source_1.spatialModel.get("dist")
+        multiDist_after = source_1.multi.get("multiDist")
+
+        #self.assertNotEqual(dist_before, dist_after)
+        #self.assertEqual(multiDist_after, dist_after)
 
         ag.destroy()
 
@@ -243,39 +276,11 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-    def test_update_source_position(self):
-
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-
-        ag.generateMaps()
-
-
-        ag.freeSources('name == "2AGLJ2021+4029"', "pos", False)
-
-        ag.mle()
-
-
-        self.assertRaises(ValueError, ag.updateSourcePosition, "2AGLJ2021+4029", useMulti=False)
-
-        changed = ag.updateSourcePosition("2AGLJ2021+4029", useMulti=False, glon=78.2375, glat=2.12298)
-        self.assertEqual(False, changed)
-
-
-        ag.freeSources('name == "2AGLJ2021+4029"', "pos", True)
-
-        ag.mle()
-
-        changed = ag.updateSourcePosition("2AGLJ2021+4029", useMulti=True)
-        self.assertEqual(False, changed)
-
-        ag.destroy()
-
-
 
     def test_lc(self):
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        ag.setOptions(glon=78.2375, glat=2.12298)
+        ag.updateSourcePosition("2AGLJ2021+4029", glon=78.2375, glat=2.12298)
 
         ag.setOptions(timetype="TT")
 
@@ -293,37 +298,15 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
     def test_simple_lc(self):
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        ag.setOptions(glon=78.2375, glat=2.12298)
+        ag.updateSourcePosition("2AGLJ2021+4029", glon=78.2375, glat=2.12298)
         ag.setOptions(timetype="TT")
         lightCurveData = ag.aperturePhotometry()[0]
         self.assertEqual(True, os.path.isfile(lightCurveData))
         lightCurvePlot = ag.displayLightCurve("ap", saveImage=True)
         self.assertEqual(True, os.path.isfile(lightCurvePlot))
         ag.destroy()
-
-    """
-    def test_display_sky_maps_singlemode_show(self):
-
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        _ = ag.generateMaps()
-
-        maps = ag.displayCtsSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
-        for m in maps:
-            self.assertEqual(True, os.path.isfile(m))
-
-        maps = ag.displayExpSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
-        for m in maps:
-            self.assertEqual(True, os.path.isfile(m))
-
-        maps = ag.displayGasSkyMaps(saveImage=False, catalogRegions="2AGL", catalogRegionsColor="red")
-        for m in maps:
-            self.assertEqual(True, os.path.isfile(m))
-
-        ag.destroy()
-    """
 
     def test_calc_bkg(self):
 
@@ -354,7 +337,6 @@ class AGAnalysisUT(unittest.TestCase):
        
         ag.destroy()
 
-
     def test_extract_light_curve_data(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
@@ -378,7 +360,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
     def test_aperture_photometry(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -395,7 +376,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
     def test_update_source_parameter_value(self):
 
         ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
@@ -404,15 +384,48 @@ class AGAnalysisUT(unittest.TestCase):
         
         source = sources.pop()
 
-        indexVal = source.spectrum.get("index")
+        self.assertEqual(1.75, source.spectrum.get("index"))
+        source.spectrum.set("index", 1)
+        self.assertEqual(1, source.spectrum.get("index"))
 
-        self.assertEqual(1.75, indexVal)
+        self.assertEqual(119.3e-08, source.spectrum.get("flux"))
+        source.spectrum.set("flux", 1)
+        self.assertEqual(1, source.spectrum.get("flux"))
 
-        source.spectrum.set("index", 2)
+        self.assertEqual(3307.63, source.spectrum.get("cutoffEnergy"))
+        source.spectrum.set("cutoffEnergy", 1)
+        self.assertEqual(1, source.spectrum.get("cutoffEnergy"))
 
         self.assertRaises(AttributeError, source.spectrum.get, "index2")
         self.assertRaises(AttributeError, source.spectrum.set, "index2", 10)
 
+        ag.destroy()
+
+    def test_multi_update_free_parameters(self):
+
+        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        ag.generateMaps()
+
+        sources = ag.selectSources('name == "2AGLJ2021+4029"')
+        source = sources.pop()
+        index = source.spectrum.get("index")
+        flux = source.spectrum.get("flux")
+        cutoffEnergy = source.spectrum.get("cutoffEnergy") 
+
+        ag.freeSources('name == "2AGLJ2021+4029"', "pos", True)
+        ag.freeSources('name == "2AGLJ2021+4029"', "index", True)
+        ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
+        ag.freeSources('name == "2AGLJ2021+4029"', "cutoffEnergy", True)
+
+        ag.mle()
+
+        self.assertEqual(True, source.multi.get("multiFlux") == source.spectrum.get("flux"))
+        self.assertEqual(True, flux != source.spectrum.get("flux"))
+
+        #todo: validation test 
+
+        ag.destroy()
 
 if __name__ == '__main__':
     unittest.main()
