@@ -12,6 +12,12 @@ need to decide the name of the virtual environment that will be created by anaco
     conda config --add channels plotly
     conda create -n <virtualenv_name> -c agilescience agilepy
 
+.. note:: If you want to try agilepy's new features that are not officially released yet, 
+           a develpoment environment called agilepy-environment is available into Anaconda cloud. 
+           It contains all the dependencies unless agilepy, 
+           which must be installed by hand cloning the repository.
+           Check the installation instructions `here <../help/development.html#install-the-development-environment>`_
+
 Supported platforms:
 
   - linux-64

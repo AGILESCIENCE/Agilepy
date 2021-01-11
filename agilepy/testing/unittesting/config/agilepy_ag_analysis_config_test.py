@@ -58,7 +58,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=456361777, timetype="TT")
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, timetype="TT")
 
 
 
@@ -89,7 +89,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         # float instead of int is ok.
-        self.assertEqual(None, self.config.setOptions(tmin=456361779, timetype="TT"))
+        self.assertEqual(None, self.config.setOptions(tmin=433900000, timetype="TT"))
 
 
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
@@ -255,8 +255,8 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
 
         self.config.setOptions(
-                    evtfile="$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index",
-                    logfile="$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+                    evtfile="$AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index",
+                    logfile="$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
                 )
 
         self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))

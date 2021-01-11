@@ -999,6 +999,7 @@ plotting:
         - pivotEnergy
         - curvature
         - index2
+        - pos
 
 
         Args:
@@ -1103,6 +1104,7 @@ plotting:
             True if the position changes, False when the position don't change or the position is (-1, -1).
         """
         return self.sourcesLibrary.updateSourcePosition(sourceName, useMulti, glon, glat)
+
 
     def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
         """It writes on file the list of sources loaded into the *SourceLibrary*.

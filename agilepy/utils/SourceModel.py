@@ -131,17 +131,11 @@ class Parameter(Value):
 class SourceDescription:
 
     def set(self, attributeName, attributeVal):
-        try:
-            parameter = getattr(self, attributeName)
-        except AttributeError:
-            return False
+        parameter = getattr(self, attributeName)
         parameter.set(attributeVal)
 
     def get(self, attributeName, strRepr = False):
-        try:
-            parameter = getattr(self, attributeName)
-        except AttributeError:
-            return False
+        parameter = getattr(self, attributeName)
         return parameter.get(strRepr) # calling Value's get()
 
     def setFree(self, attributeName, freeVal):
@@ -434,7 +428,6 @@ class Source:
         strRepr += '\n-----------------------------------------------------------'
         return strRepr
 
-
     def getSpectralIndex(self):
         return self.spectrum.getSpectralIndex()
 
@@ -666,7 +659,7 @@ class Source:
     self.fovmax: float = List[float]
     self.albedo: float = None
     self.binsize: float = None
-    self.expstep: float = None
+    self.expstep: int = None
     self.phasecode: float = None
     self.ExpRatio: float = None
 
