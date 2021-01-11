@@ -87,10 +87,7 @@ class AGAnalysisConfig():
 
     def isHidden(self, optionName):
 
-        if optionName in [ "lonpole", "lpointing", "bpointing", "maplistgen", "offaxisangle", \
-                           "galmode2", "galmode2fit", "isomode2", "isomode2fit", "minimizertype", \
-                           "minimizeralg", "minimizerdefstrategy", "mindefaulttolerance", "integratortype", \
-                           "contourpoints", "edpcorrection", "fluxcorrection"]:
+        if optionName in []:
             return True
 
         return False
@@ -110,21 +107,27 @@ class AGAnalysisConfig():
             if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                                 "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                                "emax_sources", "loccl", "timeslot"]:
+                                "emax_sources", "loccl", "timeslot", "fluxcorrection", \
+                                "minimizerdefstrategy", "integratortype", "contourpoints",
+                                "galmode2", "galmode2fit", "isomode2", "isomode2fit", "lonpole" \
+                                ]:
                 
                 validType = (int, 0)
 
             # Number (int and float)
             elif optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
                                 "timestep", "binsize", "ranal", "ulcl", \
-                                "expratio_minthr", "expratio_maxthr", "expratio_size", "radius"]:
+                                "expratio_minthr", "expratio_maxthr", "expratio_size", "radius", \
+                                "edpcorrection", "mindefaulttolerance", "offaxisangle", "lpointing", \
+                                "bpointing"]:
 
                 validType = (Number, 0)
 
 
             # String
             elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
-                                "timetype", "timelist", "projtype", "proj", "modelfile"]:
+                                "timetype", "timelist", "projtype", "proj", "modelfile", "minimizertype", \
+                                "minimizeralg", "maplistgen"]:
 
                 validType = (str, 0)
 

@@ -6,8 +6,8 @@ Selection
 =========
 
  .. csv-table::
-    :header: "Option", "Type", "Default", "Required", "Description"
-    :widths: 20, 20, 20, 20, 100
+   :header: "Option", "Type", "Default", "Required", "Description"
+   :widths: 20, 20, 20, 20, 100
 
    "lonpole", "int", 180, "no", " "
    "lpointing", "float", "TBD", "no", "l in Galactic coordinates of the center of the pointing during the 'pointing period'"
