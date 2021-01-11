@@ -249,8 +249,6 @@ class PlottingUtils(metaclass=Singleton):
         hist, bins = np.histogram(separations, bins=bins, density=False)
         hist2, bins2 = np.histogram(separations, bins=bins2, density=False)
 
-        print(hist)
-
         width = 1. * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
         width2 = 1. * (bins2[1] - bins2[0])
@@ -444,7 +442,7 @@ class PlottingUtils(metaclass=Singleton):
         bins = 0.5 * (bins[:-1] + bins[1:])
 
         mu, sigma = scipy.stats.norm.fit(data["exp"])
-        print(mu, sigma)
+        # print(mu, sigma)
         best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
 
         fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)

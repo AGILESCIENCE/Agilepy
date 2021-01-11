@@ -227,7 +227,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
         self.assertEqual(2, len(self.sl.sources))
 
-        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0')
+        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
 
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
@@ -236,7 +236,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.sl.updateMulti(source)
 
-        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0')
+        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
 
         """
@@ -256,9 +256,10 @@ class SourcesLibraryUT(unittest.TestCase):
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
 
         source = self.sl.parseSourceFile(sourceFile)
+
         self.sl.updateMulti(source)
 
-        sources = self.sl.selectSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0)
+        sources = self.sl.selectSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0)
         self.assertEqual(1, len(sources))
 
     def test_free_sources_with_selection_string(self):
@@ -268,24 +269,24 @@ class SourcesLibraryUT(unittest.TestCase):
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "flux", False)
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", False)
 
         self.assertEqual(1, len(sources))
         self.assertEqual(0, sources[0].spectrum.getFree("flux"))
         self.assertEqual("0", sources[0].spectrum.getFree("flux", strRepr=True))
 
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "flux", True)
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", True)
         self.assertEqual(1, sources[0].spectrum.getFree("flux"))
         self.assertEqual("1", sources[0].spectrum.getFree("flux", strRepr=True))
 
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "index", True)
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", True)
         self.assertEqual(1, sources[0].spectrum.getFree("index"))
         self.assertEqual("1", sources[0].spectrum.getFree("index", strRepr=True))
 
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND dist > 0 AND flux > 0', "index", False)
+        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", False)
         self.assertEqual(0, sources[0].spectrum.getFree("index"))
         self.assertEqual("0", sources[0].spectrum.getFree("index", strRepr=True))
 
@@ -296,17 +297,17 @@ class SourcesLibraryUT(unittest.TestCase):
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
 
-        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "flux", False)
+        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", False)
         self.assertEqual(1, len(sources))
         self.assertEqual(0, sources[0].spectrum.getFree("flux"))
 
-        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "flux", True)
+        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", True)
         self.assertEqual(1, sources[0].spectrum.getFree("flux"))
 
-        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "index", True)
+        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", True)
         self.assertEqual(1, sources[0].spectrum.getFree("index"))
 
-        sources = self.sl.freeSources(lambda name, dist, flux : name == "2AGLJ2021+3654" and dist > 0 and flux > 0, "index", False)
+        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", False)
         self.assertEqual(0, sources[0].spectrum.getFree("index"))
 
     def test_write_to_file_xml(self):

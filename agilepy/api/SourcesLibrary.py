@@ -109,8 +109,6 @@ class SourcesLibrary:
 
         return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux = scaleFlux, show = show)
 
-
-
     def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False, show=False):
 
         filePath = Utils._expandEnvVar(filePath)
@@ -152,7 +150,6 @@ class SourcesLibrary:
         self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
 
         return addedSources
-
 
     def convertCatalogToXml(self, catalogFilepath):
 
@@ -287,8 +284,9 @@ class SourcesLibrary:
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
-    def updateSourcePosition(self, sourceName, useMulti, glon, glat):
-
+    """
+    def updateSourceParameter(self, sourceName, parameterName, parameterValue):
+    
         sources = self.selectSources(lambda name : name == sourceName, show=False)
 
         if len(sources) == 0:
@@ -296,43 +294,33 @@ class SourcesLibrary:
 
         source = sources.pop()
 
-        if useMulti and source.multi is None:
-            self.logger.critical(self, "You cannot use multi output because mle() it has not been called yet.")
-            raise MultiOutputNotFoundError("You cannot use multi output because mle() it has not been called yet.")
+        # it will update 'position' and 'distance'
+        if parameterName == "pos":
 
-        currentPosParameter = source.spatialModel.pos
+            if type(parameterValue) != tuple:
+                raise ValueError(f"In order to update the 'pos' parameter you must pass a tuple (glan, glon).")
 
-        if useMulti:
+            oldPos = source.spatialModel.pos
 
-            if source.multi.multiL.value == -1:
-                self.logger.warning(self, "(multiL,multiB)=(-1,-1)")
+            glon = parameterValue[0]
+            glat = parameterValue[1]
+
+            newPos = Parameter("pos", "tuple<float,float>")
+            newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
+
+            source.spatialModel.pos = newPos
+
+            if oldPos.value != newPos.value:
+                newDistance = self.getSourceDistance(source)
+                source.spatialModel.dist.setAttributes(value = newDistance)
+                self.logger.info(self, f"Old position is {oldPos.value}, new position is {source.spatialModel.pos.value}, new distance is {source.spatialModel.dist}")
+                return True
+            else:
+                self.logger.info(self, f"Position is not changed: {source.spatialModel.pos.value}")
                 return False
-            else:
-                newPos = Parameter("pos", "tuple<float,float>")
-                newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
+    """
+    
 
-        else:
-
-            if glon is None or glat is None:
-
-                self.logger.critical(self, f"useMulti is False, but glon or glat is None. glon: {glon} glat: {glat}")
-                raise ValueError(f"useMulti is False, but glon or glat is None. glon: {glon} glat: {glat}")
-
-            else:
-                newPos = Parameter("pos", "tuple<float,float>")
-                newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
-
-
-        source.spatialModel.pos = newPos
-
-        if currentPosParameter.value != newPos.value:
-            newDistance = self.getSourceDistance(source)
-            source.spatialModel.dist.setAttributes(value = newDistance)
-            self.logger.info(self, f"Old position is {currentPosParameter.value}, new position is {source.spatialModel.pos.value}, new distance is {source.spatialModel.dist}")
-            return True
-        else:
-            self.logger.info(self, f"Position is not changed: {source.spatialModel.pos.value}")
-            return False
 
     def parseSourceFile(self, sourceFilePath):
         """
@@ -411,6 +399,9 @@ class SourcesLibrary:
 
         multiOutput.name.setAttributes(value = allValues[0])
 
+        multiOutput.multiStartL.setAttributes(value = allValues[5])
+        multiOutput.multiStartB.setAttributes(value = allValues[6])
+
         multiOutput.multiSqrtTS.setAttributes(value = allValues[37])
 
         multiOutput.multiFlux.setAttributes(value = allValues[53])
@@ -438,9 +429,9 @@ class SourcesLibrary:
         multiOutput.multib.setAttributes(value = allValues[46])
         multiOutput.multiphi.setAttributes(value = allValues[47])
 
-
-        multiOutput.multiStartL.setAttributes(value = allValues[5])
-        multiOutput.multiStartB.setAttributes(value = allValues[6])
+        multiOutput.multiIndex.setAttributes(value = allValues[69])
+        multiOutput.multiPar2.setAttributes(value = allValues[71])
+        multiOutput.multiPar3.setAttributes(value = allValues[73])
 
         multiOutput.multiGalCoeff.setAttributes(value = allValues[89])
         multiOutput.multiGalErr.setAttributes(value = allValues[90])
@@ -455,22 +446,93 @@ class SourcesLibrary:
 
         return multiOutput
 
+    def updateSourcePosition(self, sourceName, glon, glat):
+        
+        sources = self.selectSources(lambda name : name == sourceName, show=False)
+
+        if len(sources) == 0:
+            raise SourceNotFound(f"Source '{sourceName}' has not been found in the sources library")
+        
+        if len(sources) > 1:
+            self.logger.warning(self, f"Found more than one source:{sources}")
+
+        source = sources.pop()
+
+        if glat < -90 or glat > 90:
+            raise ValueError(f"glat={glat}")
+        
+        if glon < 0 or glon > 360:
+            raise ValueError(f"glon={glon}")
+
+        newPos = Parameter("pos", "tuple<float,float>")
+        newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
+        source.spatialModel.pos = newPos
+
+        newDistance = self.getSourceDistance(source)
+        source.spatialModel.set("dist", newDistance)
+
+
+
     def updateMulti(self, multiOutputData):
 
-        sourcesFound = self.selectSources(lambda name : name == multiOutputData.get("name"), show=False)
+        sources = self.selectSources(lambda name : name == multiOutputData.get("name"), show=False)
 
-        if len(sourcesFound) == 0:
-            raise SourceNotFound("Source '%s' has not been found in the sources library"%(multiOutputData.get("name")))
+        if len(sources) == 0:
+            raise SourceNotFound(f"Source '{multiOutputData.get('name')}' has not been found in the sources library")
+        
+        if len(sources) > 1:
+            self.logger.warning(self, f"Found more than one source:{sources}")
 
-        for sourceFound in sourcesFound:
+        for source in sources:
 
-            sourceFound.multi = multiOutputData
+            source.multi = multiOutputData
 
-            distance = self.getSourceDistance(sourceFound)
+            freeParams = source.getFreeParams()
 
-            sourceFound.multi.set("multiDist", distance)
+            self.logger.info(self, f"{multiOutputData.get('name')} parameters update after mle: {freeParams}")
 
-            self.logger.debug(self, "'multiDist' parameter of '%s' has been updated: %f", sourceFound.multi.get("name"), sourceFound.multi.get("multiDist"))
+            if "pos" in freeParams:
+                freeParams.remove("pos")
+
+            # updating 'spectrum' params
+            mapping = {
+                "flux" : "multiFlux",
+                "index" : "multiIndex",
+                "cutoffEnergy" : "multiPar2",
+                "pivotEnergy" : "multiPar2",
+                "index2" : "multiPar3",
+                "curvature" : "multiPar3",
+            }
+
+            for paramName in freeParams:
+                newVal = source.multi.get(mapping[paramName])
+                oldVal = source.spectrum.get(paramName)
+                if newVal != oldVal:
+                    source.spectrum.set(paramName, newVal)
+                    self.logger.info(self, f"'{paramName}' parameter has been updated: {oldVal}==>{newVal}")
+                else:
+                    self.logger.info(self, f"'{paramName}' parameter has not changed: {oldVal}==>{newVal}")
+
+
+            if source.multi.multiL.value != -1 and source.multi.multiB.value != -1:
+                oldPos = source.spatialModel.pos
+                newPos = Parameter("pos", "tuple<float,float>")
+                newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
+                source.spatialModel.pos = newPos
+
+                if oldPos.value != newPos.value:
+                    oldDistance = source.spatialModel.dist
+                    newDistance = self.getSourceDistance(source)
+                    source.spatialModel.dist.setAttributes(value = newDistance)
+                    source.multi.set("multiDist", newDistance)
+                    self.logger.info(self, f"'pos' parameter has been updated {oldPos.value}==>{source.spatialModel.pos.value}")
+                    self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.dist}")
+                else:
+                    self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.pos.value}")
+
+            else:
+                self.logger.info(self, f"multiL,multiB=({source.multi.multiL.value},{source.multi.multiB.value}). 'pos' parameter has not changed: {source.spatialModel.pos.value}")
+
 
     def getSourceDistance(self, source):
 
