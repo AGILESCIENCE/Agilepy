@@ -5,14 +5,14 @@ Advanced  configuration
 Selection
 =========
 
-.. csv-table::
-  :header: "Option", "Description", "Default", "Required"
-  :widths: 20, 20, 20, 150
+ .. csv-table::
+    :header: "Option", "Type", "Default", "Required", "Description"
+    :widths: 20, 20, 20, 20, 100
 
-  "lonpole", " --------------completare--------- ", 180, "no"
-  "lpointing", " --------------completare--------- ", "null", "no"
-  "bpointing", " --------------completare--------- ", "null", "no"
-  "maplistgen", "filename of a file for expmapgen with  mapspec.fovradmin >> mapspec.fovradmax >> mapspec.emin >> mapspec.emax >> mapspec.index", "null", "no"
+   "lonpole", "int", 180, "no", " "
+   "lpointing", "float", "TBD", "no", "l in Galactic coordinates of the center of the pointing during the 'pointing period'"
+   "bpointing", "float", "TBD", "no", "b in Galactic coordinates of the center of the pointing during the 'pointing period'"
+   "maplistgen", "string", "TBD", "no", "filename of a file for expmapgen with  mapspec.fovradmin >> mapspec.fovradmax >> mapspec.emin >> mapspec.emax >> mapspec.index"
 
 
 Maps
@@ -22,7 +22,7 @@ Maps
     :header: "Option", "Type", "Default", "Required", "Description"
     :widths: 20, 20, 20, 20, 100
 
-    "offaxisangle", "float", 30, "no", "off axis pointing for mle analysis. Values are between 0 and 60 deg. Agilepy into .maplist"
+    "offaxisangle", "float", 30, "No", "Off axis pointing for mle analysis. Values are between 0 and 60 deg. Agilepy into .maplist"
 
 
 
@@ -33,7 +33,7 @@ Model
    :header: "Option", "Type", "Default", "Required", "Description"
    :widths: 20, 20, 20, 20, 100
 
-   galmode2, int, 0, No, "Fix the gal parameters using the internal analysis of the MLE.
+   galmode2, int, 0, No, "| Fix the gal parameters using the internal analysis of the MLE.
    | 0) gal0 and gal1 are kept free
    | 1) set gal0 for L0 and gal1 for L1
    | 2) set gal0 for L0 and L1
@@ -41,12 +41,12 @@ Model
    | 4) set gal1 - gal1err for L0 and L1
    | 5) set gal1 + gal1err for L0 and L1"
 
-   galmode2fit, int, 0, No, "Fix the gal parameters for different energy bins performing a linear fit of gal values evaluated using the internal analysis of the MLE.
+   galmode2fit, int, 0, No, "| Fix the gal parameters for different energy bins performing a linear fit of gal values evaluated using the internal analysis of the MLE.
    | 0) do not fit
    | 1) pol0 fit
    | 2) powerlaw fit"
 
-   isomode2, int, 0, No, "Fix the iso parameters using the internal analysis of the MLE.
+   isomode2, int, 0, No, "| Fix the iso parameters using the internal analysis of the MLE.
    | 0) none
    | 1) set iso0 for L0 and gal1 for L1
    | 2) set iso0 for L0 and L1
@@ -54,7 +54,7 @@ Model
    | 4) set iso1 - iso1err for L0 and L1
    | 5) set iso1 + iso1err for L0 and L1 "
 
-   isomode2fit, int, 0, No, "Fix the iso parameters for different energy bins performing a linear fit of iso values evaluated using the internal analysis of the MLE.
+   isomode2fit, int, 0, No, "| Fix the iso parameters for different energy bins performing a linear fit of iso values evaluated using the internal analysis of the MLE.
    | 0) do not fit
    | 1) pol0 fit
    | 2) powerlaw fit"
@@ -71,16 +71,17 @@ Advanced options for optimizer
     :header: "Option", "Type", "Default", "Required", "Description"
     :widths: 20, 20, 20, 20, 100
 
-    minimizertype, string, Minuit, No, "Use Minuit if position is free"
-    minimizeralg, string, Migrad, No, ""
-    minimizerdefstrategy, int, 2, No, "Default 2 for Minuit"
-    mindefaulttolerance, float, 0.01, No, ""
-    integratortype, int, 1, No, "| 1 gauss
+    minimizertype, string, Minuit, No, "Use Minuit if position is free. For other values see below."
+    minimizeralg, string, Migrad, No, "For other values see below."
+    minimizerdefstrategy, int, 2, No, "Default 2 for Minuit. For other values see below."
+    mindefaulttolerance, float, 0.01, No, "See below."
+    integratortype, int, 1, No, "
+    | 1 gauss
     | 2 gaussht
     | 3 gausslefevre
     | 4 gausslefevreht"
 
-    contourpoints, int, 40, No, "Number of points to determine the contour (0-400)"
+    contourpoints, int, 40, No, "Number of points to determine the contour (0-400)."
 
 
  | **minimizertype** = Minuit (library libMinuit). Old version of Minuit, based on the TMinuit class. The list of possible algorithms (**minimizeralg**) are:
@@ -138,8 +139,8 @@ Advanced options for internal corrections
    :header: "Option", "Type", "Default", "Required", "Description"
    :widths: 20, 20, 20, 20, 100
 
-   edpcorrection, float, 0.75, No, "Perform a flux correction based on EDP evaluation for highest energy channels. Default 0.75, otherwise any value between 0 and 1. EDP correction is enabled only for E>1000 MeV and if fluxcorrection=1, and only for point sources. flux = flux * edpcorrection"
-   fluxcorrection, int, 0, No, "Perform a flux correction of the flux using the source spectral model and considering that the exposure is calculated with a Power Law with spectral index of 2.1.
+   edpcorrection, float, 0.75, No, "| Perform a flux correction based on EDP evaluation for highest energy channels. Default 0.75, otherwise any value between 0 and 1. EDP correction is enabled only for E>1000 MeV and if fluxcorrection=1, and only for point sources. flux = flux * edpcorrection"
+   fluxcorrection, int, 0, No, "| Perform a flux correction of the flux using the source spectral model and considering that the exposure is calculated with a Power Law with spectral index of 2.1.
    | 0) no correction
    | 1)  Flux calculation correction for spectral shape in output
    | 2) correction in input and output"
