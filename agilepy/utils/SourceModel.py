@@ -82,6 +82,9 @@ class OutputVal(Value):
     def __str__(self):
         return f'\t- {self.name}: {self.value}'
 
+    def get(self, strRepr=False):
+        return super().get(strRepr=False)
+
     def setAttributes(self, name=None, value=None):
         if value is not None:
             self.value = self.castTo(value)
@@ -98,6 +101,9 @@ class Parameter(Value):
     def __str__(self):
         return f'\t- {self.name}: {self.value} free: {self.free}'
 
+    def get(self,strRepr=False):
+        return super().get(strRepr=False)
+        
     def setFree(self, freeVal):
         if self.free == freeVal:
             return False

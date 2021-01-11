@@ -44,12 +44,16 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-        self.xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
-        self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
+
+        self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
+        self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
+        self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+
+        #self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
+        #self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
         self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadBaseConfigurations(self.agilepyConf)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.logger = AgilepyLogger()
@@ -74,8 +78,6 @@ class SourcesLibraryUT(unittest.TestCase):
                }
 
 
-
-
     def test_load_file_with_wrong_extension(self):
 
         xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.wrongext")
@@ -96,28 +98,26 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertRaises(FileNotFoundError, self.sl.loadSourcesFromCatalog, "paperino")
 
-
-
     def test_load_catalog_from_catalog_filtering_on_distances(self):
 
         added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(70, 80))
 
-        self.assertEqual(15, len(added))
-        self.assertEqual(15, len(self.sl.sources))
+        self.assertEqual(13, len(added))
+        self.assertEqual(13, len(self.sl.sources))
 
         self.sl.sources = []
         added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 10))
-        self.assertEqual(9, len(added))
-        self.assertEqual(9, len(self.sl.sources))
+        self.assertEqual(1, len(added))
+        self.assertEqual(1, len(self.sl.sources))
 
         self.sl.sources = []
-        added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 20))
-        self.assertEqual(14, len(added))
-        self.assertEqual(14, len(self.sl.sources))
+        added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 50))
+        self.assertEqual(30, len(added))
+        self.assertEqual(30, len(self.sl.sources))
 
     def test_load_sources_from_xml_file(self):
 
-        added = self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        added = self.sl.loadSourcesFromFile(self.sourcesConfXml)
 
         self.assertEqual(2, len(added))
         self.assertEqual(2, len(self.sl.sources))
@@ -184,24 +184,16 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_source_file_parsing(self):
 
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+4029.source")
+        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ0835-4514.source")
 
         res = self.sl.parseSourceFile(sourceFile)
 
         self.assertEqual(True, bool(res))
 
         self.assertEqual(True, isinstance(res.multiFlux.value, float))
-        self.assertEqual(0, res.multiFlux.value)
+        self.assertEqual(9.07364e-06, res.multiFlux.value)
         self.assertEqual(True, isinstance(res.multiSqrtTS.value, float))
-        self.assertEqual(0, res.multiSqrtTS.value)
-        self.assertEqual(None, res.multiDist.value)
-
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
-
-        res = self.sl.parseSourceFile(sourceFile)
-        self.assertEqual(True, bool(res))
-        self.assertEqual(True, isinstance(res.multiFlux.value, float))
-        self.assertEqual(6.69108e-15, res.multiFlux.value)
+        self.assertEqual(2.17268, res.multiSqrtTS.value)
         self.assertEqual(None, res.multiDist.value)
 
     def load_source_from_catalog_without_scaling(self):
@@ -224,7 +216,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_select_sources_with_selection_string(self):
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
@@ -247,8 +239,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
-
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
 
         sources = self.sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
         self.assertEqual(1, len(sources))
@@ -264,7 +255,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_free_sources_with_selection_string(self):
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -292,7 +283,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_free_sources_with_selection_lambda(self):
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
         sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
         source = self.sl.parseSourceFile(sourceFile)
         self.sl.updateMulti(source)
@@ -314,9 +305,9 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
 
         outfileName = "write_to_file_testcase"
 
@@ -332,7 +323,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadBaseConfigurations(self.agilepyConf)
 
         sourcesFile = os.path.join(self.currentDirPath,"conf/sourcesconf_for_write_to_file_txt.txt")
 
@@ -355,9 +346,9 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config = AgilepyConfig()
 
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
 
         newSourceDict = {
             "a" : 10
@@ -388,7 +379,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(0, newSource.spectrum.get("flux"))
         self.assertEqual(0, newSource.spectrum.get("curvature"))
         self.assertEqual("newsource", newSource.name)
-        self.assertEqual(148.52505082279242, newSource.spatialModel.get("dist"))
+        self.assertEqual(35.2462913047547, newSource.spatialModel.get("dist"))
 
         newSourceDict = {
             "glon" : 250,
@@ -428,14 +419,12 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertEqual(175, len(self.sl.sources))
 
-
-
     def test_backup_restore(self):
         self.config = AgilepyConfig()
 
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.xmlsourcesconfPath)
+        self.sl.loadSourcesFromFile(self.sourcesConfXml)
 
         """
         for s in self.sl.getSources():

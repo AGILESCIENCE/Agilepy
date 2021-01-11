@@ -5,7 +5,7 @@
 * (\#202) A new dataset (for testing/validation purposes) has been included.
 * (\#203) The "INDEX file with one line crash" bug has been fixed.
 * (\#208) useEDPmatrixforEXP default value is now: False.
-* (\#215) After calling mle(), each free parameter will be updated (if they need to). setOptions() for glon e glat is deprecated. You are forced to use updateSourcePosition().
+* (\#215) After calling mle(), each free parameter will be updated (if they need to).
 * (\#217) The quickstart guide and the tutorial notebooks show how to change the value of a spectrum parameter of a source
 
 ## Release 1.2.0

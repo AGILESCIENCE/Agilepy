@@ -489,7 +489,7 @@ class SourcesLibrary:
 
             freeParams = source.getFreeParams()
 
-            self.logger.info(self, f"{multiOutputData.get('name')} parameters update after mle: {freeParams}")
+            self.logger.info(self, f"{multiOutputData.get('name')} (free) parameters update after mle: {freeParams}")
 
             if "pos" in freeParams:
                 freeParams.remove("pos")
@@ -514,24 +514,24 @@ class SourcesLibrary:
                     self.logger.info(self, f"'{paramName}' parameter has not changed: {oldVal}==>{newVal}")
 
 
-            if source.multi.multiL.value != -1 and source.multi.multiB.value != -1:
-                oldPos = source.spatialModel.pos
+            if source.multi.get("multiL") != -1 and source.multi.get("multiB") != -1:
+                oldPos = source.spatialModel.get("pos")
                 newPos = Parameter("pos", "tuple<float,float>")
                 newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
                 source.spatialModel.pos = newPos
 
-                if oldPos.value != newPos.value:
-                    oldDistance = source.spatialModel.dist
+                if oldPos != newPos.get():
+                    oldDistance = source.spatialModel.get("dist")
                     newDistance = self.getSourceDistance(source)
                     source.spatialModel.dist.setAttributes(value = newDistance)
                     source.multi.set("multiDist", newDistance)
-                    self.logger.info(self, f"'pos' parameter has been updated {oldPos.value}==>{source.spatialModel.pos.value}")
-                    self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.dist}")
+                    self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
+                    self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
                 else:
-                    self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.pos.value}")
+                    self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
 
             else:
-                self.logger.info(self, f"multiL,multiB=({source.multi.multiL.value},{source.multi.multiB.value}). 'pos' parameter has not changed: {source.spatialModel.pos.value}")
+                self.logger.info(self, f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
 
 
     def getSourceDistance(self, source):
@@ -739,7 +739,7 @@ class SourcesLibrary:
                  index = float(elements[3])
                  fixflag = int(elements[4])
                  name = elements[6]
-                 locationLimit = int(elements[7])
+                 locationLimit = int(float(elements[7]))
                  spectrumType = int(elements[8])
 
 
