@@ -114,6 +114,12 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.617196])
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[0.617196])
 
+        self.assertRaises(ConfigFileOptionTypeError,
+                          self.config.setOptions, fluxcorrection=3.14)
+
+        self.assertRaises(ConfigurationsNotValidError,
+                          self.config.setOptions, fluxcorrection=25)
+
 
     def test_energybins(self):
 

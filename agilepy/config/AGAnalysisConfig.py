@@ -65,6 +65,7 @@ class AGAnalysisConfig():
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
         errors.update( ValidationStrategies._validateTimetype(confDict))
+        errors.update( ValidationStrategies._validateFluxcorrection(confDict) )
 
         if errors:
             raise ConfigurationsNotValidError("Errors: {}".format(errors))

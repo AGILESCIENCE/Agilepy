@@ -175,6 +175,18 @@ class ValidationStrategies:
             errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
 
         return errors
+    
+    @staticmethod
+    def _validateFluxcorrection(confdict):
+        
+        errors = {}
+
+        fluxcorrection = confdict["mle"]["fluxcorrection"]
+
+        if fluxcorrection not in [0, 1, 2]:
+            errors["mle/fluxcorrection"] = "fluxcorrection is not compatible.. Possible values = [1, 2, 3]"
+        
+        return errors
 
 
     @staticmethod
