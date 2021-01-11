@@ -6,18 +6,18 @@ output:
   outdir: $AGILE/agilepy-test-data/unittesting-output/api
   filenameprefix: testcase
   logfilenameprefix: logtestcase
-  sourcename: source-test
-  username: user-test
-  verboselvl: 0
+  sourcename: vela-unittesting
+  username: unittesting
+  verboselvl: 1
 
 selection:
   emin: 100
   emax: 10000
-  tmin: 433900000
-  tmax: 433957532
+  tmin: 433857532
+  tmax: 434289532
   timetype: TT
-  glon: 80
-  glat: 0
+  glon: 263.55
+  glat: -2.78
   timelist: None
   filtercode: 5
   fovradmin: 0

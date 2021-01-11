@@ -37,17 +37,19 @@ class AGAnalysisUT(unittest.TestCase):
 
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-        self.sourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
-        self.sourcesconfPathcalcBkg = os.path.join(self.currentDirPath,"conf/sourceconf_for_calcBkg.txt")
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
 
+        self.VELA = "2AGLJ0835-4514"
+        self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
+        self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
+        self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+
+        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
     def test_delete_output_directory(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         outDir = Path(ag.getOption("outdir"))
 
@@ -59,7 +61,7 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_generate_maps(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         outDir = ag.getOption("outdir")
 
@@ -79,8 +81,7 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_update_gal_iso(self):
 
-
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         outDir = Path(ag.getOption("outdir"))
 
@@ -96,7 +97,6 @@ class AGAnalysisUT(unittest.TestCase):
         for idx, row in enumerate(matrix):
             self.assertEqual(str(galcoeffs[idx]), row[4])
             self.assertEqual(str(isocoeffs[idx]), row[5])
-
 
         if outDir.joinpath("maps").exists() and outDir.joinpath("maps").is_dir():
             shutil.rmtree(outDir.joinpath("maps"))
@@ -117,7 +117,7 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_analysis_pipeline(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
@@ -132,22 +132,16 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
     def test_source_dist_updated_after_source_position_update(self):
-        sc_file = os.path.join(self.currentDirPath,"conf/sourceconf_3.txt")
-        with open(sc_file, "w") as sc:
-            sc.write("""
-119.3e-08 78.2375 2.12298 1.75 1 2 2AGLJ2021+4029 0 1 3307.63 0 0.5 5 20 10000  -1 -1
-""")
 
-        ag = AGAnalysis(self.agilepyconfPath, sc_file)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
-        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
         dist_1 = source_1.spatialModel.get("dist")
 
-        ag.updateSourcePosition('2AGLJ2021+4029', glon=81, glat=1)
+        ag.updateSourcePosition(self.VELA, glon=264, glat=-3)
 
-        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
+        source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
         dist_2 = source_2.spatialModel.get("dist")
 
         self.assertNotEqual(dist_1, dist_2)
@@ -155,45 +149,42 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_source_dist_updated_after_mle(self):
 
-        sc_file = os.path.join(self.currentDirPath,"conf/sourceconf_tmp.txt")
-        with open(sc_file, "w") as sc:
-            sc.write("""
-119.3e-08 78.2370 2.12290 1.75 1 2 2AGLJ2021+4029 0 1 3307.63 0 0.5 5 20 10000  -1 -1
-""")
-
-        ag = AGAnalysis(self.agilepyconfPath, sc_file)
-
-        ag.updateSourcePosition('2AGLJ2021+4029', glon=78, glat=2)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         maplistFilePath = ag.generateMaps()
 
-        ag.freeSources(lambda name: name == '2AGLJ2021+4029', "pos", True)
-        ag.freeSources(lambda name: name == '2AGLJ2021+4029', "flux", False)
+        ag.freeSources(lambda name: name == self.VELA, "pos", True)
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
 
-        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
-        dist_before = source_1.spatialModel.get("dist")
+        source = ag.selectSources(lambda name: name == self.VELA).pop()
+        dist_before = source.spatialModel.get("dist")
 
         ag.mle(maplistFilePath)
 
-        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+4029').pop()
-        dist_after = source_1.spatialModel.get("dist")
-        multiDist_after = source_1.multi.get("multiDist")
+        source = ag.selectSources(lambda name: name == self.VELA).pop()
+        dist_after = source.spatialModel.get("dist")
+        multiDist_after = source.multi.get("multiDist")
 
-        #self.assertNotEqual(dist_before, dist_after)
-        #self.assertEqual(multiDist_after, dist_after)
+        self.assertNotEqual(dist_before, dist_after)
+        self.assertEqual(multiDist_after, dist_after)
 
         ag.destroy()
 
-    def test_source_Flux_updated_after_mle(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+    def test_source_flux_updated_after_mle(self):
+
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         maplistFilePath = ag.generateMaps()
 
-        source_1 = ag.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
+
+        source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
+        
         flux_1 = source_1.spectrum.get("flux")
 
         ag.mle(maplistFilePath)
-        source_2 = ag.selectSources(lambda name: name == '2AGLJ2021+3654').pop()
+
+        source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
         flux_2 = source_2.multi.get("multiFlux")
 
         self.assertNotEqual(flux_1, flux_2)
@@ -201,7 +192,8 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_parse_maplistfile(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.setOptions(energybins=[[100,300],[300,1000]], fovbinnumber=2)
         maplistFilePath = ag.generateMaps()
@@ -222,25 +214,9 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-    def test_print_source(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+    def test_saving_sky_maps(self):
 
-        maplistFilePath = ag.generateMaps()
-
-        ag.freeSources('name == "2AGLJ2021+3654"', "pos", True)
-
-        ag.mle(maplistFilePath)
-
-        #for s in ag.sourcesLibrary.sources:
-        #    print(s)
-
-        self.assertEqual(True, True)
-
-        ag.destroy()
-
-    def test_display_sky_maps(self):
-
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(singleMode=False, saveImage=True)
@@ -257,9 +233,9 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-    def test_display_sky_maps_singlemode(self):
+    def test_saving_sky_maps_singlemode(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(saveImage=True)
@@ -276,41 +252,45 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
     def test_lc(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
 
-        ag.updateSourcePosition("2AGLJ2021+4029", glon=78.2375, glat=2.12298)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
-        ag.setOptions(timetype="TT")
+        ag.setOptions(energybins=[[100, 300]], fovbinnumber=1) # to reduce the computational time
 
-        ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
 
-        lightCurveData = ag.lightCurveMLE("2AGLJ2021+4029", binsize=20000)
+        lightCurveData = ag.lightCurveMLE(self.VELA, tmin=433857532, tmax=433900000, timetype="TT", binsize=20000)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
-
-        print("lightCurveData: ", lightCurveData)
 
         lightCurvePlot = ag.displayLightCurve("mle", saveImage=True)
 
         self.assertEqual(True, os.path.isfile(lightCurvePlot))
 
-        ag.destroy()
+        # ag.destroy()
 
     def test_simple_lc(self):
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
-        ag.updateSourcePosition("2AGLJ2021+4029", glon=78.2375, glat=2.12298)
-        ag.setOptions(timetype="TT")
+
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
+
+        ag.setOptions(energybins=[[100, 300]], fovbinnumber=1) # to reduce the computational time
+
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
+
         lightCurveData = ag.aperturePhotometry()[0]
+
         self.assertEqual(True, os.path.isfile(lightCurveData))
+
         lightCurvePlot = ag.displayLightCurve("ap", saveImage=True)
+
         self.assertEqual(True, os.path.isfile(lightCurvePlot))
+
         ag.destroy()
 
     def test_calc_bkg(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.setOptions(  timetype="TT",
                         galcoeff=[-1, -1, -1, -1],
@@ -332,24 +312,31 @@ class AGAnalysisUT(unittest.TestCase):
         print("isoBkg:",isoBkg)
         """
 
-        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
        
-       
+        self.assertEqual([10, 12, 10, 12], isoCoeff)
+        self.assertEqual([0.8, 0.6, 0.8, 0.6], galCoeff)
+
         ag.destroy()
 
     def test_extract_light_curve_data(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
-        sourceFile = Path(self.currentDirPath).joinpath("data/testcase0.source")
+        sourceFile = Path(self.currentDirPath).joinpath("data/testcase_2AGLJ0835-4514.source")
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
-        
+
+        lcdataKeys = ['sqrt(ts)', 'flux', 'flux_err', 'flux_ul', 'gal', 'iso', 'l_peak', 'b_peak', 'dist_peak', 'l', 'b', 'r', 'dist', 'time_start_tt', 'time_end_tt']
+
+        for key in lcdataKeys:
+            self.assertEqual(True, key in lcdata)
+
         ag.destroy()
 
     def test_fix_exponent(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPathcalcBkg)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         self.assertEqual('894.587e-08', ag._fixToNegativeExponent(8.94587e-06, fixedExponent=-8))
         self.assertEqual('309.757e-08', ag._fixToNegativeExponent(3.09757e-06, fixedExponent=-8))
@@ -362,12 +349,11 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_aperture_photometry(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         outDir = ag.getOption("outdir")
 
         ap_file, ap_ph_file = ag.aperturePhotometry()
-        
         
         self.assertEqual(True, os.path.isfile(ap_file))
 
@@ -378,45 +364,47 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_update_source_parameter_value(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
-        sources = ag.selectSources('name == "2AGLJ2021+4029"')
+        sources = ag.selectSources(lambda name: name == self.VELA)
         
         source = sources.pop()
 
-        self.assertEqual(1.75, source.spectrum.get("index"))
-        source.spectrum.set("index", 1)
-        self.assertEqual(1, source.spectrum.get("index"))
+        self.assertEqual(1.34774, source.spectrum.get("index2"))
+        source.spectrum.set("index2", 1)
+        self.assertEqual(1, source.spectrum.get("index2"))
 
-        self.assertEqual(119.3e-08, source.spectrum.get("flux"))
+        self.assertEqual(969.539e-08, source.spectrum.get("flux"))
         source.spectrum.set("flux", 1)
         self.assertEqual(1, source.spectrum.get("flux"))
 
-        self.assertEqual(3307.63, source.spectrum.get("cutoffEnergy"))
+        self.assertEqual(3913.06, source.spectrum.get("cutoffEnergy"))
         source.spectrum.set("cutoffEnergy", 1)
         self.assertEqual(1, source.spectrum.get("cutoffEnergy"))
 
-        self.assertRaises(AttributeError, source.spectrum.get, "index2")
-        self.assertRaises(AttributeError, source.spectrum.set, "index2", 10)
+        self.assertRaises(AttributeError, source.spectrum.get, "index")
+        self.assertRaises(AttributeError, source.spectrum.set, "index", 10)
 
         ag.destroy()
 
     def test_multi_update_free_parameters(self):
 
-        ag = AGAnalysis(self.agilepyconfPath, self.sourcesconfPath)
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.generateMaps()
 
-        sources = ag.selectSources('name == "2AGLJ2021+4029"')
-        source = sources.pop()
-        index = source.spectrum.get("index")
-        flux = source.spectrum.get("flux")
-        cutoffEnergy = source.spectrum.get("cutoffEnergy") 
+        sources = ag.selectSources(lambda name: name == self.VELA)
 
-        ag.freeSources('name == "2AGLJ2021+4029"', "pos", True)
-        ag.freeSources('name == "2AGLJ2021+4029"', "index", True)
-        ag.freeSources('name == "2AGLJ2021+4029"', "flux", True)
-        ag.freeSources('name == "2AGLJ2021+4029"', "cutoffEnergy", True)
+        source = sources.pop()
+
+        #index2 = source.spectrum.get("index2")
+        flux = source.spectrum.get("flux")
+        #cutoffEnergy = source.spectrum.get("cutoffEnergy") 
+
+        ag.freeSources(lambda name: name == self.VELA, "pos", True)
+        # ag.freeSources(lambda name: name == self.VELA, "index2", True)
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
+        # ag.freeSources(lambda name: name == self.VELA, "cutoffEnergy", True)
 
         ag.mle()
 

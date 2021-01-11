@@ -95,9 +95,6 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")
 
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, glon=81)
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, glat=1)
-
         self.assertRaises(OptionNotFoundInConfigFileError, self.config.setOptions(), pdor="kmer")
 
         self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), minimizertype=666)
