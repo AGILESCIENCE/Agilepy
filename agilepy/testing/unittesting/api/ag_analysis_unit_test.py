@@ -415,5 +415,16 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
+    def test_print_source(self):
+
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
+
+        sources = ag.selectSources(lambda name: name == self.VELA)
+
+        for s in sources:
+            self.assertEqual(True, len(str(s))>370)
+            print(s)
+
+
 if __name__ == '__main__':
     unittest.main()
