@@ -38,7 +38,7 @@ The you have to load the models of the sources (you can filter them by their dis
 
 ::
 
-    ag = loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
+    sources = ag.loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
 
 
 Keyword arguments can be passed via setOptions() to override configuration parameters:

@@ -28,12 +28,12 @@
 
 import os
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Utils
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.api.ScienceTools import Cwt2, Met, Ccl
+from agilepy.core.ScienceTools import Cwt2, Met, Ccl
 
 from os.path import join, expandvars
 from astropy.wcs import WCS

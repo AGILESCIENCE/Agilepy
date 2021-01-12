@@ -34,17 +34,17 @@ from shutil import rmtree
 import re
 pattern = re.compile('e([+\-]\d+)')
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
-from agilepy.api.SourcesLibrary import SourcesLibrary
-from agilepy.api.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi, AP
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.SourcesLibrary import SourcesLibrary
+from agilepy.core.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi, AP
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.Parameters import Parameters
-from agilepy.utils.MapList import MapList
+from agilepy.core.Parameters import Parameters
+from agilepy.core.MapList import MapList
 from agilepy.utils.Utils import Utils
-from agilepy.utils.CustomExceptions import  AGILENotFoundError, \
+from agilepy.core.CustomExceptions import  AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \

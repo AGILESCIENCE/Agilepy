@@ -32,13 +32,13 @@ from astropy.io import fits
 from os.path import join, expandvars
 from pathlib import Path
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.utils.Utils import Utils, expandvars
 
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.utils.AgilepyLogger import AgilepyLogger
+from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import WrongCoordinateSystemError
+from agilepy.core.CustomExceptions import WrongCoordinateSystemError
 
 class AGEngAgileOffaxisVisibility(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run engineering analysis.

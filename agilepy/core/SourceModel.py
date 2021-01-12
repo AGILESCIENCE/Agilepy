@@ -29,11 +29,11 @@
 from typing import List
 from abc import ABC, abstractmethod
 
-from agilepy.utils.CustomExceptions import  SpectrumTypeNotFoundError, \
-                                            AttributeValueDatatypeNotSupportedError, \
-                                            SelectionParamNotSupported, \
-                                            NotFreeableParamsError, \
-                                            WrongSpatialModelTypeError
+from agilepy.core.CustomExceptions import  SpectrumTypeNotFoundError, \
+                              AttributeValueDatatypeNotSupportedError, \
+                              SelectionParamNotSupported, \
+                              NotFreeableParamsError, \
+                              WrongSpatialModelTypeError
 
 class Value:
     def __init__(self, name, datatype=None):
@@ -45,11 +45,10 @@ class Value:
         self.value = self.castTo(val)
         return True
 
-    def get(self, strRepr=True):
+    def get(self, strRepr=False):
         if strRepr:
             return str(self.value)
-        else:
-            return self.value
+        return self.value
 
     def castTo(self, val):
 
@@ -82,9 +81,6 @@ class OutputVal(Value):
     def __str__(self):
         return f'\t- {self.name}: {self.value}'
 
-    def get(self, strRepr=False):
-        return super().get(strRepr=False)
-
     def setAttributes(self, name=None, value=None):
         if value is not None:
             self.value = self.castTo(value)
@@ -100,9 +96,6 @@ class Parameter(Value):
 
     def __str__(self):
         return f'\t- {self.name}: {self.value} free: {self.free}'
-
-    def get(self,strRepr=False):
-        return super().get(strRepr=False)
         
     def setFree(self, freeVal):
         if self.free == freeVal:
@@ -140,9 +133,9 @@ class SourceDescription:
         parameter = getattr(self, attributeName)
         parameter.set(attributeVal)
 
-    def get(self, attributeName, strRepr = False):
+    def get(self, attributeName, strRepr=False):
         parameter = getattr(self, attributeName)
-        return parameter.get(strRepr) # calling Value's get()
+        return parameter.get(strRepr=strRepr) # calling Value's get()
 
     def setFree(self, attributeName, freeVal):
         try:
@@ -385,7 +378,7 @@ class Source:
 
         freeParams = self.getFreeParams()
 
-        spectrumParams = [k+": "+v.get(strRepr=True) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter)]
+        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter)]
 
         strRepr = '\n-----------------------------------------------------------'
         strRepr += f'\nSource name: {self.name} ({self.type})'

@@ -31,12 +31,12 @@ from shutil import rmtree
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.Utils import Utils
-from agilepy.utils.AgilepyLogger import AgilepyLogger
+from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 
-from agilepy.utils.CustomExceptions import AGILENotFoundError, PFILESNotFoundError, ConfigurationsNotValidError
+from agilepy.core.CustomExceptions import AGILENotFoundError, PFILESNotFoundError, ConfigurationsNotValidError
 
 
 

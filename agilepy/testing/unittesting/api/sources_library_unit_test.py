@@ -32,13 +32,14 @@ import unittest
 from pathlib import Path
 from xml.etree.ElementTree import parse
 
-from agilepy.api.SourcesLibrary import SourcesLibrary
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.AgilepyLogger import AgilepyLogger
-from agilepy.utils.SourceModel import Source
+from agilepy.core.SourcesLibrary import SourcesLibrary
+from agilepy.core.AgilepyLogger import AgilepyLogger
+from agilepy.core.SourceModel import Source
 
-from agilepy.utils.CustomExceptions import SourceParamNotFoundError, SpectrumTypeNotFoundError,  \
-                                           SourceModelFormatNotSupported
+from agilepy.core.CustomExceptions import SourceParamNotFoundError, \
+                                          SpectrumTypeNotFoundError,  \
+                                          SourceModelFormatNotSupported
 
 class SourcesLibraryUT(unittest.TestCase):
 

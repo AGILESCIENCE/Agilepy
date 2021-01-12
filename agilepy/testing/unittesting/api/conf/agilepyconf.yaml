@@ -8,7 +8,7 @@ output:
   logfilenameprefix: logtestcase
   sourcename: vela-unittesting
   username: unittesting
-  verboselvl: 1
+  verboselvl: 0
 
 selection:
   emin: 100

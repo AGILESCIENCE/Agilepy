@@ -3,7 +3,7 @@
 ************
 
 Data structure
-==============
+**************
 There're two types of data files: events and log data. They both are compressed fits files. Each file
 refers to a specific time interval.
 
@@ -38,22 +38,14 @@ Example:
 
 
 
-How to get the data
-===================
-TODO..
-
-
 Agilepy test data
-=================
-The Agilepy conda package gets shipped with a little subset of the AGILE data archive for the purpose of unit testing and executing the tutorial notebooks.
+*****************
+The Agilepy conda package gets shipped with two subsets of the AGILE data archive for the purpose of unit testing and to show how to run scientific analysis with the tutorial notebooks.
 
-The data has been generated using the following commands:
+test_dataset_6.0
+================
+<todo>
 
-::
-    ./AG_genselectedevtlist ./agilepy_test_dataset_55513_55520.evt /AGILE_PROC3/FM3.119_ASDCSTDk/INDEX/EVT.index None 40 0.2 86.11 -38.18 180 80 6 5 ARC 216691200 217296000 100 10000 0.0 60.0
-    ./AG_genselectedloglist ./agilepy_test_dataset_55513_55520.log /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index /data01/AGILE-containers/tmp_download/AGILE-GRID-CAT2-Setup/AGILE-GRID-ScienceTools-Setup/AG_IRF/H0025/AG_GRID_G0017_SFMG_H0025.sar.gz /data01/AGILE-containers/tmp_download/AGILE-GRID-CAT2-Setup/AGILE-GRID-ScienceTools-Setup/AG_IRF/H0025/AG_GRID_G0017_SFMG_H0025.edp.gz None None 40 0.2 86.11 -38.18 180 80 0.5 360 5.0 6 ARC 5.0 160 2.1 456361778 456537945 100 10000 0.0 60.0
-
-The index files are located here:
-
-  * $AGILE/agilepy-test-data/evt_index/agilepy_test_dataset_EVT.index
-  * $AGILE/agilepy-test-data/log_index/agilepy_test_dataset_LOG.log.index
+test_dataset_agn
+================
+<todo>

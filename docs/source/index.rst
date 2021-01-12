@@ -20,6 +20,7 @@ Agilepy's documentation
 
   manual/configuration_file
   manual/source_file
+  manual/work_with_sources
   manual/products
   manual/advanced_configuration
   manual/agile_data

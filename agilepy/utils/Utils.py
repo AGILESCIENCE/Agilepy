@@ -29,7 +29,7 @@ import os
 from os.path import expandvars
 
 
-from agilepy.utils.CustomExceptions import EnvironmentVariableNotExpanded
+from agilepy.core.CustomExceptions import EnvironmentVariableNotExpanded
 
 class Singleton(type):
     _instances = {}

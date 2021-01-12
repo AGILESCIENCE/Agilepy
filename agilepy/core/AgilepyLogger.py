@@ -29,7 +29,7 @@ import sys
 import logging
 from pathlib import Path
 
-from agilepy.utils.CustomExceptions import LoggerTypeNotFound
+from agilepy.core.CustomExceptions import LoggerTypeNotFound
 
 class AgilepyLogger():
 

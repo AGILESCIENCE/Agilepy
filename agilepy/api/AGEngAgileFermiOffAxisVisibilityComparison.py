@@ -25,7 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 
 from agilepy.external_packages.offaxis.create_offaxis_plot import Create_offaxis_plot
 from agilepy.external_packages.offaxis import create_offaxis_plot, agilecheck, fermicheck
