@@ -4,6 +4,9 @@
 Configuration file
 ******************
 
+General
+*******
+
 A `yaml <https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html>`_ configuration file is required in order to run Agilepy.
 
 It is composed by several sections and each section holds several configuration options, some of which are optional (having a default value), some others are required.
@@ -120,7 +123,26 @@ The method above will create the following configuration file:
   plotting:
     twocolumns: False
 
-The next paragraphs describe the configuration options.
+Updating the configuration options
+**********************************
+The user should not directly manipulate the configuration file, because the configuration file is read only once, when the 
+AGBaseAnalysis constructor is called. Hence, the configuration file modification will not affect the internal configuration object.
+Also, updating the values held by this object will not affect the original values written on disk.
+
+In order to update the internal configuration object, the user can rely on the following methods:
+
+* `getOption(optionName) <../api/analysis_api.html#api.AGBaseAnalysis-AGBaseAnalysis-getOption>`_
+* `setOption(**kwargs) <../api/analysis_api.html#api.AGBaseAnalysis-AGBaseAnalysis-setOptions>`_
+
+For example:
+::
+
+    ag.setOptions(binsize=0.50, energybins=[[100, 300], [500, 1000]])
+    print(ag.getOption("energybins"))
+
+Configuration options
+*********************
+This section describes the configuration options.
 
 Section: *'input'*
 ==================
@@ -211,7 +233,7 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | the *'phasecode'* rule", "int", "null", "no"
 
 Phasecode rule
---------------
+^^^^^^^^^^^^^^
 
   - phasecode = 2 -> spinning mode, SAA excluded with AC counts method.
   - phasecode = 6 -> spinning mode, SAA excluded according to the magnetic field intensity (old definition of SAA, defined by TPZ)
@@ -348,7 +370,7 @@ following example show which iso/gal coefficients are assigned to which map.
    "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
 galmode and isomode
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *'galmode'* and *'isomode'* are integer values describing how the corresponding
 coefficients *'galcoeff'* or *'isocoeff'* found in all the lines of the maplist will be used:
@@ -374,7 +396,7 @@ The maximum likelihood estimation analysis is configured by the following option
    "fluxcorrection", "Correction of the flux taking into account the spectral model", float, 0, no
 
 Exp-ratio evaluation options
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"

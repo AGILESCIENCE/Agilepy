@@ -3,7 +3,7 @@ Advanced  configuration
 ***********************
 
 Selection
-=========
+*********
 
  .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
@@ -16,7 +16,7 @@ Selection
 
 
 Maps
-====
+****
 
  .. csv-table::
     :header: "Option", "Type", "Default", "Required", "Description"
@@ -27,7 +27,7 @@ Maps
 
 
 Model
-=====
+*****
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
@@ -62,10 +62,10 @@ Model
 
 
 mle
-===
+***
 
 Advanced options for optimizer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==============================
 
  .. csv-table::
     :header: "Option", "Type", "Default", "Required", "Description"
@@ -132,7 +132,7 @@ Advanced options for optimizer
 
 
 Advanced options for internal corrections
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================================
 
 
 .. csv-table::
