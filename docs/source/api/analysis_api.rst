@@ -1,7 +1,7 @@
 Analysis API
 ============
 
-.. autoclass:: api.AGBaseAnalysis.AGBaseAnalysis
+.. autoclass:: core.AGBaseAnalysis.AGBaseAnalysis
     :members: __init__, deleteAnalysisDir, setOptions, getOption, printOptions
 
 

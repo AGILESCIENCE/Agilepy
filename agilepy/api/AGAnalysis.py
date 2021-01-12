@@ -34,7 +34,7 @@ from shutil import rmtree
 import re
 pattern = re.compile('e([+\-]\d+)')
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.core.SourcesLibrary import SourcesLibrary
 from agilepy.core.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi, AP
 
