@@ -30,7 +30,7 @@ from typing import List
 from numbers import Number
 
 from agilepy.utils.Utils import Utils
-from agilepy.utils.CustomExceptions import ConfigFileOptionTypeError
+from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
     

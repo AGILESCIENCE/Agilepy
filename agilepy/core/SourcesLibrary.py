@@ -35,20 +35,18 @@ from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
 
-from agilepy.utils.Utils import Utils
-
-from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.Parameters import Parameters
-
+from agilepy.core.Parameters import Parameters
+from agilepy.core.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
+from agilepy.core.CustomExceptions import   SourceModelFormatNotSupported, \
+                                            FileSourceParsingError, \
+                                            SourceNotFound, \
+                                            SourcesFileLoadingError, \
+                                            SourcesAgileFormatParsingError, \
+                                            SourceParamNotFoundError, \
+                                            MultiOutputNotFoundError
 from agilepy.utils.BooleanExpressionParser import BooleanParser
-from agilepy.utils.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
-from agilepy.utils.CustomExceptions import SourceModelFormatNotSupported, \
-                                           FileSourceParsingError, \
-                                           SourceNotFound, \
-                                           SourcesFileLoadingError, \
-                                           SourcesAgileFormatParsingError, \
-                                           SourceParamNotFoundError, \
-                                           MultiOutputNotFoundError
+from agilepy.utils.Utils import Utils
+from agilepy.utils.AstroUtils import AstroUtils
 
 class SourcesLibrary:
 

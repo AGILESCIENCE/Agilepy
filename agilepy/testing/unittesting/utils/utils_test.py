@@ -32,12 +32,11 @@ from pathlib import Path
 from time import sleep
 from datetime import datetime
 
-
+from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class AgilepyUtilsUT(unittest.TestCase):
 

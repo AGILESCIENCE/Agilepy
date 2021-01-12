@@ -27,7 +27,7 @@
 
 import os
 
-from agilepy.utils.Parameters import Parameters
+from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
 
 class CtsMapGenerator(ProcessWrapper):

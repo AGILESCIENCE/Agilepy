@@ -32,12 +32,12 @@ import os
 import shutil
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
-                                           ConfigFileOptionTypeError, \
-                                           CannotSetHiddenOptionError, \
-                                           CannotSetNotUpdatableOptionError, \
-                                           ConfigurationsNotValidError, \
-                                           OptionNameNotSupportedError
+from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, \
+                                          ConfigFileOptionTypeError, \
+                                          CannotSetHiddenOptionError, \
+                                          CannotSetNotUpdatableOptionError, \
+                                          ConfigurationsNotValidError, \
+                                          OptionNameNotSupportedError
 
 
 class AgilepyConfigUT(unittest.TestCase):

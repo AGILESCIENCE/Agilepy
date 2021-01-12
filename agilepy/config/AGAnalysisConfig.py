@@ -2,10 +2,10 @@ from numbers import Number
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
-from agilepy.utils.CustomExceptions import  CannotSetNotUpdatableOptionError, \
-                                            ConfigurationsNotValidError, \
-                                            OptionNameNotSupportedError, \
-                                            CannotSetHiddenOptionError
+from agilepy.core.CustomExceptions import  CannotSetNotUpdatableOptionError, \
+                                           ConfigurationsNotValidError, \
+                                           OptionNameNotSupportedError, \
+                                           CannotSetHiddenOptionError
 
 class AGAnalysisConfig():
 
