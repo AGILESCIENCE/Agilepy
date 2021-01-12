@@ -28,7 +28,7 @@
 
 import os
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Utils

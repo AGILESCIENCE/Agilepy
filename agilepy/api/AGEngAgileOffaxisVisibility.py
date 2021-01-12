@@ -32,7 +32,7 @@ from astropy.io import fits
 from os.path import join, expandvars
 from pathlib import Path
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.utils.Utils import Utils, expandvars
 
 from agilepy.utils.PlottingUtils import PlottingUtils
