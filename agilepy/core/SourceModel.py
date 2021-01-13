@@ -149,7 +149,6 @@ class SourceDescription:
         #print("freeval: ",freeval)
         #print("attributeName: ",attributeName)
         #print("self",self)
-        #input(".")
         if strRepr and freeval is None:
             return "None"
         elif not strRepr and freeval is None:

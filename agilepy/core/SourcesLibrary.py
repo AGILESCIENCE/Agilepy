@@ -165,21 +165,29 @@ class SourcesLibrary:
 
     def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=None):
 
-        if fileformat not in ["txt", "xml"]:
-            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml".format(format))
+        if fileformat not in ["txt", "xml", "reg"]:
+            raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml, reg".format(format))
 
         outputFilePath = self.outdirPath.joinpath(outfileNamePrefix)
 
         if sources is None:
             sources = self.sources
 
+        if len(sources) == 0:
+            self.logger.info(self,"No sources have been loaded yet. No file has been produced.")
+            return ""
+
         if fileformat == "txt":
-            sourceLibraryToWrite = SourcesLibrary._convertToAgileFormat(sources)
+            sourceLibraryToWrite = self._convertToAgileFormat(sources)
             outputFilePath = outputFilePath.with_suffix('.txt')
 
-        else:
-            sourceLibraryToWrite = SourcesLibrary._convertToXmlFormat(sources)
+        elif fileformat == "xml":
+            sourceLibraryToWrite = self._convertToXmlFormat(sources)
             outputFilePath = outputFilePath.with_suffix('.xml')
+
+        elif fileformat == "reg":
+            sourceLibraryToWrite = self._convertToRegFormat(sources)
+            outputFilePath = outputFilePath.with_suffix('.reg')
 
         with open(outputFilePath, "w") as sourceLibraryFile:
 
@@ -836,8 +844,7 @@ class SourcesLibrary:
     def _fail(msg):
         raise FileSourceParsingError("File source parsing failed: {}".format(msg))
 
-    @staticmethod
-    def _convertToAgileFormat(sources):
+    def _convertToAgileFormat(self, sources):
 
         sourceStr = ""
 
@@ -927,8 +934,7 @@ class SourcesLibrary:
 
         return sourceStr
 
-    @staticmethod
-    def _convertToXmlFormat(sources):
+    def _convertToXmlFormat(self, sources):
         """
         https://pymotw.com/2/xml/etree/ElementTree/create.html
         """
@@ -966,6 +972,35 @@ class SourcesLibrary:
         reparsed = minidom.parseString(rough_string)
 
         return reparsed.toprettyxml(indent="  ")
+
+
+    def _convertToRegFormat(self, sources):
+        sourceStr = "galactic\n"
+
+        for source in sources:
+
+            if source.multi == None:
+                self.logger.warning(self, f"Multi attribute is None for {source.name}, skipping source..")
+                continue
+
+            L = source.multi.get("multiL") 
+            B = source.multi.get("multiB") 
+            a = source.multi.get("multia") 
+            b = source.multi.get("multib") 
+            phi = source.multi.get("multiphi")
+
+            if L == -1 and B == -1 and a == -1 and b == -1 and phi == -1:   
+                self.logger.info(self, f"L=B=a=b=phi={L} for {source.name}, using LPeak and BPeak..")
+                LPeak = source.multi.get("multiLPeak")
+                BPeak = source.multi.get("multiBPeak")
+                sourceStr += f"ellipse({LPeak}, {BPeak}, 0.5, 0.5, 0) #color=green width=2 text={source.name}"            
+            else:
+                sourceStr += f"ellipse({L}, {B}, {a}, {b}, {phi}) #color=green width=2 text={source.name}"
+
+
+            sourceStr += "\n"
+        
+        return sourceStr
 
     @staticmethod
     def _computeFixFlag(source, spectrumType):

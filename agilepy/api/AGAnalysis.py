@@ -26,20 +26,18 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from os.path import join, splitext, expandvars
-from pathlib import Path
-from ntpath import basename
-from time import time
-from shutil import rmtree
 import re
+from time import time
+from pathlib import Path
+from shutil import rmtree
+from ntpath import basename
+from os.path import join, splitext, expandvars
 pattern = re.compile('e([+\-]\d+)')
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.core.SourcesLibrary import SourcesLibrary
 from agilepy.core.ScienceTools import CtsMapGenerator, ExpMapGenerator, GasMapGenerator, IntMapGenerator, Multi, AP
-
 from agilepy.config.AgilepyConfig import AgilepyConfig
-
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.Parameters import Parameters
 from agilepy.core.MapList import MapList
@@ -51,9 +49,9 @@ from agilepy.core.CustomExceptions import  AGILENotFoundError, \
                                             SourceNotFound
                                             
 class AGAnalysis(AGBaseAnalysis):
-    """This class contains the high-level API methods you can use to run scientific analysis.
+    """This class contains the high-level API to run scientific analysis, data visualization and some utility methods.
 
-    This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
+    This constructor of this class requires a ``yaml configuration file``.
 
     """
 
@@ -63,7 +61,7 @@ class AGAnalysis(AGBaseAnalysis):
         Args:
             configurationFilePath (str): a relative or absolute path to the yaml configuration file.
             sourcesFilePath (str, optional): a relative or absolute path to a file containing the description of the sources. Defaults to None. \
-            Three different types of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
+            Three different types of formats are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
 
         Raises:
             AGILENotFoundError: if the AGILE environment variable is not set.
@@ -94,8 +92,9 @@ class AGAnalysis(AGBaseAnalysis):
             "ap" : None
         }
 
-
     def destroy(self):
+        """ It clears the list of sources and the current maplist file.
+        """
         self.sourcesLibrary.destroy()
         self.logger.reset()
         self.config.detach(self.currentMapList, "galcoeff")
@@ -222,182 +221,222 @@ plotting:
 
 
 
+    ############################################################################
+    # sources management                                                       #
+    ############################################################################
 
+    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
+        """It loads the sources from a catalog.
 
+        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
 
-
-
-    def parseMaplistFile(self, maplistFilePath=None):
-        """It parses the maplistfile in order to return sky map files paths.
+        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file is different from the catalog's energy range,
+        the flux of every source will be scaled.
 
         Args:
-            maplistFilePath (str): if you don't specify the maplistfile path, the
-            last generated one (if it exists) will be used.
+            catalogName (str): the catalog name (2AGL, 4FGL).
+            rangeDist (tuple, optional): a interval (min, max) of distances (degree). It defaults to (0, +inf).
+        Raises:
+            FileNotFoundError: if the catalog is not supported.
+            SourceModelFormatNotSupported: if the input file format is not supported.
+            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
 
         Returns:
-            A matrix where each row contains a cts, ext and gas map.
+            The List of sources that have been succesfully loaded into the SourcesLibrary.
+        """
+        return self.sourcesLibrary.loadSourcesFromCatalog(catalogName, rangeDist, show = show)
+
+    def loadSourcesFromFile(self, sourcesFilepath, rangeDist = (0, float("inf")), show=False):
+        """It loads the sources, reading them from a file. Three different types \
+        of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
+
+        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
+
+        Args:
+            sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
+            rangeDist (tuple): a interval (min, max) of distances (degree)
+        Raises:
+            SourceModelFormatNotSupported: if the input file format is not supported.
+            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
+
+        Returns:
+            The List of sources that have been succesfully loaded into the SourcesLibrary.
+        """
+        return self.sourcesLibrary.loadSourcesFromFile(sourcesFilepath, rangeDist, show = show)
+
+    def selectSources(self, selection, show=False):
+        """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
+
+        The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
+        ``boolean expression strings``.
+
+        The selection criteria can be expressed using the following ``Source`` class's parameters:
+
+        - name: the unique code identifying the source.
+        - dist: the distance of the source from the center of the maps.
+        - flux: the flux value.
+        - sqrtTS: the radix square of the ts.
+
+        Warning:
+
+            The sqrtTS parameter is available only after the maximum likelihood estimation analysis is performed.
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+            quiet (boolean) (optional default=False): if quiet is True, the method will not console log the selected sources.
+
+        Returns:
+            List of sources.
+        """
+        return self.sourcesLibrary.selectSources(selection, show =show)
+
+    def freeSources(self, selection, parameterName, free, show=False):
+        """It can set to True or False a parameter's ``free`` attribute of one or more source.
+
+        Example of source model:
+        ::
+
+            <source name="2AGLJ2021+4029" type="PointSource">
+                <spectrum type="PLExpCutoff">
+                  <parameter name="flux" free="1"  value="119.3e-08"/>
+                  <parameter name="index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
+                  <parameter name="cutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
+                </spectrum>
+                <spatialModel type="PointSource" location_limit="0">
+                  <parameter name="pos" value="(78.2375, 2.12298)" free="0" />
+                </spatialModel>
+            </source>
+
+
+        The supported ``parameterName`` are:
+
+        - flux
+        - index
+        - index1
+        - index2
+        - cutoffEnergy
+        - pivotEnergy
+        - curvature
+        - index2
+        - pos
+
+
+        Args:
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
+            parameterName (str): the ``free`` attribute of this parameter will be updated.
+            free (bool): the boolean value used.
+
+        Returns:
+            The list of the sources matching the selection criteria.
+
+        Note:
+            The ``sourcesLibrary`` attribute is initialized by reading the corresponding
+            xml descriptor file, loading its contents in memory. Updating the values
+            held by this object will not affect the original values written on disk.
+
+        Example:
+
+            The following calls are equivalent and they set to True the ``free`` attribute of the "Flux" parameter for all the sources
+            named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
+            is greater than zero.
+
+            >>> aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
+            [..]
+
+            >>> aganalysis.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
+            [..]
+
+
+
+        """
+        return self.sourcesLibrary.freeSources(selection, parameterName, free, show)
+
+    def fixSource(self, source):
+        """Set to False all freeable params of a source.
+
+        Args:
+            sourceName (Source): the source object.
+
+        Returns:
+            True if at least one parameter of the source changes, False otherwise.
+
+        """
+        return self.sourcesLibrary.fixSource(source)
+
+    def addSource(self, sourceName, sourceDict):
+        """It adds a new source in the ``Sources Library``. You can add a source, passing \
+        a dictionary containing the source's data. Some keys are required, other are optional.
+        Here's an example:
+
+        ::
+
+            newSourceDict = {
+                "glon" : 6.16978,
+                "glat": -0.0676943,
+                "spectrumType" : "LogParabola",
+                "flux": 35.79e-08,
+                "curvature": 0.682363
+            }
+            newSource = aganalysis.addSource("2AGLJ1801-2334", newSourceDict)
+
+        Args:
+            sourceName (str): the name of the source
+            sourceDict (dict): a dictionary containing the source's data.
 
         Raises:
-            MaplistIsNone: if no maplist file is passed and no maplist file have been generated yet.
-        """
-        if not maplistFilePath and self.currentMapList.getFile() is None:
-
-            raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
-                                 file as argument or call generateMaps(). ")
-
-        if not maplistFilePath:
-
-            maplistFilePath = self.currentMapList.getFile()
-
-        with open(maplistFilePath, "r") as mlf:
-
-            mlf_content = mlf.readlines()
-
-        maps = []
-
-        for line in mlf_content:
-            elements = line.split(" ")
-            cts_map = elements[0]
-            exp_map = elements[1]
-            gas_map = elements[2]
-            bin_center = elements[3]
-            gas_coeff = elements[4]
-            iso_coeff = elements[5].strip()
-            maps.append( [cts_map, exp_map, gas_map, bin_center, gas_coeff, iso_coeff] )
-
-        return maps
-
-    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
-        """It displays the last generated cts skymaps.
-
-        Args:
-            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
-            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
-            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
-            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
-            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
-            title (str, optional): the title of the image. It defaults to None.
-            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
-            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
-            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
-            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            SourceParamNotFoundError: if ``sourceName`` is None or empty, OR the \
+            ``sourceDict`` input dictionary does not contain at least one of the \
+            following keys: ["glon", "glat","spectrumType"].
 
         Returns:
-            It returns the paths to the image files written on disk.
+            The source object if it is been loaded. None, otherwise.
         """
-        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+        return self.sourcesLibrary.addSource(sourceName, sourceDict)
 
-    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
-        """It displays the last generated exp skymaps.
+    def deleteSources(self, selection, show = False):
+        """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
 
         Args:
-            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
-            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
-            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
-            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
-            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
-            title (str, optional): the title of the image. It defaults to None.
-            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
-            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
-            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
-            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
 
         Returns:
-            It returns the paths to the image files written on disk.
+            The list containing the deleted sources.
         """
-        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+        return self.sourcesLibrary.deleteSources(selection, show = show)
 
-    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
-        """It displays the last generated gas skymaps.
+    def updateSourcePosition(self, sourceName, glon, glat):
+        """It updates a source (l,b) position parameters. The 'dist' value will also be updated.
 
         Args:
-            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
-            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
-            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
-            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
-            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
-            title (str, optional): the title of the image. It defaults to None.
-            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
-            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
-            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
-            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            sourceName (str): the name of the source
+            glon (float): galactic longitude.
+            glat (float): galactic latitude.
+
+        Raises:
+            SourceNotFound: if the source has not been loaded into the SourcesLibrary.
+            ValueError: if glon or glat values are out of range.
 
         Returns:
-            It returns the paths to the image files written on disk.
+            True if the position changes, False otherwise.
         """
-        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+        return self.sourcesLibrary.updateSourcePosition(sourceName, glon, glat)
 
-
-    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
-        """It displays the last generated int skymaps.
+    def writeSourcesOnFile(self, outfileNamePrefix, fileFormat, sources=None):
+        """It writes on file the list of sources loaded into the *SourceLibrary*.
+        The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.
 
         Args:
-            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
-            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
-            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
-            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
-            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
-            title (str, optional): the title of the image. It defaults to None.
-            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
-            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
-            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
-            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            outfileNamePrefix (str): the name of the output file (without the extension).
+            fileFormat (str): Possible values: ['txt', 'xml', 'reg'].
+            sources (List<Source>): a list of Source objects. If is is None, every loaded source will be written on file.
+
+        Raises:
+            SourceModelFormatNotSupported: if the file format is not supported.
 
         Returns:
-            It returns the paths to the image files written on disk.
+            Path to the file
         """
-        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
-
-
-    def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
-        """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
-        If you pass a filename containing the light curve data, this file will be used instead of using the data generated 
-        by the mentioned methods. 
-
-        Args:
-            analysisName (str, required): the analysis used to generate the light curve data: choose between 'mle' or 'ap'.
-            filename (str, optional): the path of the Lightcurve text data file. It defaults to None. If None the last generated file will be used.
-            lineValue (int, optional): mean flux value. It defaults to None.
-            lineError (int, optional): mean flux error lines. It defaults to None.
-            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
-
-        Returns:
-            It returns the lightcurve plot
-
-        """
-        if analysisName is None:
-            self.logger.warning(self, "analysisName cannot be null.")
-            return False
-
-        if analysisName not in ["mle", "ap"]:
-            self.logger.warning(self, "The analysisName={} is not supported. You can choose between 'mle' and 'ap'.")
-            return False
-
-        if (filename is None) and (self.lightCurveData["mle"] is None) and (self.lightCurveData["ap"] is None):
-            self.logger.warning(self, "The light curve has not been generated yet and the filename is None. Please, call lightCurveMLE() or aperturePhotometry() or pass a valid filename")
-            return False
-
-
-        if filename is not None and analysisName == "mle":
-            return self.plottingUtils.plotLc(filename, lineValue, lineError)
-
-        if filename is not None and analysisName == "ap":
-            return self.plottingUtils.plotSimpleLc(filename, lineValue, lineError)
-
-
-        if analysisName == "mle" and self.lightCurveData["mle"] is None:
-            self.logger.warning(self, "The light curve has not been generated yet. Please, lightCurveMLE().")
-            return False
-
-        if analysisName == "ap" and self.lightCurveData["ap"] is None:
-            self.logger.warning(self, "The light curve has not been generated yet. Please, aperturePhotometry().")
-            return False
-
-        if self.lightCurveData[analysisName] is not None and analysisName=="mle":
-            return self.plottingUtils.plotLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
-
-        if self.lightCurveData[analysisName] is not None and analysisName=="ap":
-            return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
+        return self.sourcesLibrary.writeToFile(outfileNamePrefix, fileformat=fileFormat, sources=sources)
 
 
     ############################################################################
@@ -605,7 +644,7 @@ plotting:
 
 
         #################################### fixflag = 0 except for input source
-        for s in self.getSources():
+        for s in self.sourcesLibrary.sources:
             self.fixSource(s)
 
         # "sourceName" must have flux = 1
@@ -807,7 +846,7 @@ plotting:
             p.join()
         """
 
-        lcData = self.getLightCurveData(sourceName, lcAnalysisDataDir, binsize)
+        lcData = self._getLightCurveData(sourceName, lcAnalysisDataDir, binsize)
 
         lcOutputFilePath = Path(lcAnalysisDataDir).joinpath(f"light_curve_{tstart}_{tstop}.txt")
 
@@ -822,7 +861,234 @@ plotting:
 
         return str(lcOutputFilePath)
 
-    def getLightCurveData(self, sourceName, lcAnalysisDataDir, binsize):
+    def aperturePhotometry(self):
+        """It generates a cvs file containing the data for a light curve plot.
+        The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
+
+        Returns:
+            The absolute path to the light curve data output file.
+
+        Raises:
+            ScienceToolInputArgMissing: if not all the required configuration options have been set.
+        """
+        apTool = AP("AG_ap", self.logger)
+
+        apTool.configureTool(self.config)
+
+        if not apTool.allRequiredOptionsSet(self.config):
+
+            raise ScienceToolInputArgMissing("Some options have not been set.")
+
+        products = apTool.call()
+        self.logger.info(self, f"Science tool AP produced:\n {products}")
+
+        self.lightCurveData["ap"] = products[0]
+
+        return products[0], products[1] 
+
+
+    ############################################################################
+    # visualization                                                            #
+    ############################################################################
+
+
+    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated cts skymaps.
+
+        Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated exp skymaps.
+
+        Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated gas skymaps.
+
+        Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFilePath=None, catalogRegions=None, catalogRegionsColor="red"):
+        """It displays the last generated int skymaps.
+
+        Args:
+            maplistFile (str, optional): the path to the .maplist file. If not specified, the last generated maplist file will be used. It defaults to None.
+            singleMode (bool, optional): if set to true, all maps will be displayed as subplots on a single figure. It defaults to True.
+            smooth (float, optional): the sigma value of the gaussian smoothing. It defaults to 4.0.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
+            title (str, optional): the title of the image. It defaults to None.
+            cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
+            regFilePath (str, optional): the relative or absolute path to a region file. It defaults to None.
+            catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
+            catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+
+        Returns:
+            It returns the paths to the image files written on disk.
+        """
+        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor)
+
+    def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
+        """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
+        If you pass a filename containing the light curve data, this file will be used instead of using the data generated 
+        by the mentioned methods. 
+
+        Args:
+            analysisName (str, required): the analysis used to generate the light curve data: choose between 'mle' or 'ap'.
+            filename (str, optional): the path of the Lightcurve text data file. It defaults to None. If None the last generated file will be used.
+            lineValue (int, optional): mean flux value. It defaults to None.
+            lineError (int, optional): mean flux error lines. It defaults to None.
+            saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+
+        Returns:
+            It returns the lightcurve plot
+
+        """
+        if analysisName is None:
+            self.logger.warning(self, "analysisName cannot be null.")
+            return False
+
+        if analysisName not in ["mle", "ap"]:
+            self.logger.warning(self, "The analysisName={} is not supported. You can choose between 'mle' and 'ap'.")
+            return False
+
+        if (filename is None) and (self.lightCurveData["mle"] is None) and (self.lightCurveData["ap"] is None):
+            self.logger.warning(self, "The light curve has not been generated yet and the filename is None. Please, call lightCurveMLE() or aperturePhotometry() or pass a valid filename")
+            return False
+
+
+        if filename is not None and analysisName == "mle":
+            return self.plottingUtils.plotLc(filename, lineValue, lineError)
+
+        if filename is not None and analysisName == "ap":
+            return self.plottingUtils.plotSimpleLc(filename, lineValue, lineError)
+
+
+        if analysisName == "mle" and self.lightCurveData["mle"] is None:
+            self.logger.warning(self, "The light curve has not been generated yet. Please, lightCurveMLE().")
+            return False
+
+        if analysisName == "ap" and self.lightCurveData["ap"] is None:
+            self.logger.warning(self, "The light curve has not been generated yet. Please, aperturePhotometry().")
+            return False
+
+        if self.lightCurveData[analysisName] is not None and analysisName=="mle":
+            return self.plottingUtils.plotLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
+
+        if self.lightCurveData[analysisName] is not None and analysisName=="ap":
+            return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
+
+
+    ############################################################################
+    # utility                                                                  #
+    ############################################################################
+
+    def convertCatalogToXml(self, catalogFilepath):
+        """It takes a catalog file in AGILE (.txt) format as input and converts
+        it in the xml format.
+
+        Args:
+            catalogFilepath (str): a relative or absolute path to the catalog file in AGILE (.txt) format.
+
+        Raises:
+            SourceModelFormatNotSupported: if the input file format is not supported.
+
+        Returns:
+            A string rapresenting the path to the output file.
+
+        """
+        return self.sourcesLibrary.convertCatalogToXml(catalogFilepath)
+
+    def parseMaplistFile(self, maplistFilePath=None):
+        """It parses the maplistfile in order to return sky map files paths.
+
+        Args:
+            maplistFilePath (str): if you don't specify the maplistfile path, the
+            last generated one (if it exists) will be used.
+
+        Returns:
+            A matrix where each row contains a cts, ext and gas map.
+
+        Raises:
+            MaplistIsNone: if no maplist file is passed and no maplist file have been generated yet.
+        """
+        if not maplistFilePath and self.currentMapList.getFile() is None:
+
+            raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
+                                 file as argument or call generateMaps(). ")
+
+        if not maplistFilePath:
+
+            maplistFilePath = self.currentMapList.getFile()
+
+        with open(maplistFilePath, "r") as mlf:
+
+            mlf_content = mlf.readlines()
+
+        maps = []
+
+        for line in mlf_content:
+            elements = line.split(" ")
+            cts_map = elements[0]
+            exp_map = elements[1]
+            gas_map = elements[2]
+            bin_center = elements[3]
+            gas_coeff = elements[4]
+            iso_coeff = elements[5].strip()
+            maps.append( [cts_map, exp_map, gas_map, bin_center, gas_coeff, iso_coeff] )
+
+        return maps
+
+
+    ############################################################################
+    # private methods                                                          #
+    ############################################################################
+
+    def _getLightCurveData(self, sourceName, lcAnalysisDataDir, binsize):
 
         binDirectories = sorted(os.listdir(lcAnalysisDataDir))
 
@@ -867,278 +1133,6 @@ plotting:
 
         return lcData
 
-    def aperturePhotometry(self):
-        """It generates a cvs file containing the data for a light curve plot.
-        The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
-
-        Returns:
-            The absolute path to the light curve data output file.
-
-        Raises:
-            ScienceToolInputArgMissing: if not all the required configuration options have been set.
-        """
-        apTool = AP("AG_ap", self.logger)
-
-        apTool.configureTool(self.config)
-
-        if not apTool.allRequiredOptionsSet(self.config):
-
-            raise ScienceToolInputArgMissing("Some options have not been set.")
-
-        products = apTool.call()
-        self.logger.info(self, f"Science tool AP produced:\n {products}")
-
-        self.lightCurveData["ap"] = products[0]
-
-        return products[0], products[1] 
-
-
-
-    ############################################################################
-    # sources management                                                       #
-    ############################################################################
-
-    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
-        """It loads the sources from a catalog.
-
-        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
-
-        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file is different from the catalog's energy range,
-        the flux of every source will be scaled.
-
-        Args:
-            catalogName (str): the catalog name (2AGL, 4FGL).
-            rangeDist (tuple, optional): a interval (min, max) of distances (degree). It defaults to (0, +inf).
-        Raises:
-            FileNotFoundError: if the catalog is not supported.
-            SourceModelFormatNotSupported: if the input file format is not supported.
-            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
-
-        Returns:
-            The List of sources that have been succesfully loaded into the SourcesLibrary.
-        """
-        return self.sourcesLibrary.loadSourcesFromCatalog(catalogName, rangeDist, show = show)
-
-    def loadSourcesFromFile(self, sourcesFilepath, rangeDist = (0, float("inf")), show=False):
-        """It loads the sources, reading them from a file. Three different types \
-        of format are supported: AGILE format (.txt), XML format (.xml) and AGILE catalog files (.multi).
-
-        You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
-
-        Args:
-            sourcesFilePath (str): a relative or absolute path to a file containing the description of the sources. \
-            rangeDist (tuple): a interval (min, max) of distances (degree)
-        Raises:
-            SourceModelFormatNotSupported: if the input file format is not supported.
-            SourcesFileLoadingError: if any error occurs during the parsing of the sources file.
-
-        Returns:
-            The List of sources that have been succesfully loaded into the SourcesLibrary.
-        """
-        return self.sourcesLibrary.loadSourcesFromFile(sourcesFilepath, rangeDist, show = show)
-
-    def selectSources(self, selection, show=False):
-        """It returns the sources matching the selection criteria from the ``sourcesLibrary``.
-
-        The sources can be selected with the ``selection`` argument, supporting either ``lambda functions`` and
-        ``boolean expression strings``.
-
-        The selection criteria can be expressed using the following ``Source`` class's parameters:
-
-        - name: the unique code identifying the source.
-        - dist: the distance of the source from the center of the maps.
-        - flux: the flux value.
-        - sqrtTS: the radix square of the ts.
-
-        Warning:
-
-            The sqrtTS parameter is available only after the maximum likelihood estimation analysis is performed.
-
-        Args:
-            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
-            quiet (boolean) (optional default=False): if quiet is True, the method will not console log the selected sources.
-
-        Returns:
-            List of sources.
-        """
-        return self.sourcesLibrary.selectSources(selection, show =show)
-
-    def getSources(self):
-        """It returns all the sources.
-
-            Returns:
-                List of sources.
-        """
-        return self.sourcesLibrary.sources
-
-    def freeSources(self, selection, parameterName, free, show=False):
-        """It can set to True or False a parameter's ``free`` attribute of one or more source.
-
-        Example of source model:
-        ::
-
-            <source name="2AGLJ2021+4029" type="PointSource">
-                <spectrum type="PLExpCutoff">
-                  <parameter name="flux" free="1"  value="119.3e-08"/>
-                  <parameter name="index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
-                  <parameter name="cutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
-                </spectrum>
-                <spatialModel type="PointSource" location_limit="0">
-                  <parameter name="pos" value="(78.2375, 2.12298)" free="0" />
-                </spatialModel>
-            </source>
-
-
-        The supported ``parameterName`` are:
-
-        - flux
-        - index
-        - index1
-        - index2
-        - cutoffEnergy
-        - pivotEnergy
-        - curvature
-        - index2
-        - pos
-
-
-        Args:
-            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
-            parameterName (str): the ``free`` attribute of this parameter will be updated.
-            free (bool): the boolean value used.
-
-        Returns:
-            The list of the sources matching the selection criteria.
-
-        Note:
-            The ``sourcesLibrary`` attribute is initialized by reading the corresponding
-            xml descriptor file, loading its contents in memory. Updating the values
-            held by this object will not affect the original values written on disk.
-
-        Example:
-
-            The following calls are equivalent and they set to True the ``free`` attribute of the "Flux" parameter for all the sources
-            named "2AGLJ2021+4029" which distance from the map center is greater than zero and which flux value
-            is greater than zero.
-
-            >>> aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
-            [..]
-
-            >>> aganalysis.freeSources('name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0', "flux", True)
-            [..]
-
-
-
-        """
-        return self.sourcesLibrary.freeSources(selection, parameterName, free, show)
-
-    def fixSource(self, source):
-        """Set to False all freeable params of a source.
-
-        Args:
-            sourceName (Source): the source object.
-
-        Returns:
-            True if at least one parameter of the source changes, False otherwise.
-
-        """
-        return self.sourcesLibrary.fixSource(source)
-
-    def addSource(self, sourceName, sourceDict):
-        """It adds a new source in the ``Sources Library``. You can add a source, passing \
-        a dictionary containing the source's data. Some keys are required, other are optional.
-        Here's an example:
-
-        ::
-
-            newSourceDict = {
-                "glon" : 6.16978,
-                "glat": -0.0676943,
-                "spectrumType" : "LogParabola",
-                "flux": 35.79e-08,
-                "curvature": 0.682363
-            }
-            newSource = aganalysis.addSource("2AGLJ1801-2334", newSourceDict)
-
-        Args:
-            sourceName (str): the name of the source
-            sourceDict (dict): a dictionary containing the source's data.
-
-        Raises:
-            SourceParamNotFoundError: if ``sourceName`` is None or empty, OR the \
-            ``sourceDict`` input dictionary does not contain at least one of the \
-            following keys: ["glon", "glat","spectrumType"].
-
-        Returns:
-            The source object if it is been loaded. None, otherwise.
-        """
-        return self.sourcesLibrary.addSource(sourceName, sourceDict)
-
-    def deleteSources(self, selection, show = False):
-        """It deletes the sources matching the selection criteria from the ``sourcesLibrary``.
-
-        Args:
-            selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
-
-        Returns:
-            The list containing the deleted sources.
-        """
-        return self.sourcesLibrary.deleteSources(selection, show = show)
-
-    def updateSourcePosition(self, sourceName, glon, glat):
-        """It updates a source (l,b) position parameters. The 'dist' value will also be updated.
-
-        Args:
-            sourceName (str): the name of the source
-            glon (float): galactic longitude.
-            glat (float): galactic latitude.
-
-        Raises:
-            SourceNotFound: if the source has not been loaded into the SourcesLibrary.
-            ValueError: if glon or glat values are out of range.
-
-        Returns:
-            True if the position changes, False otherwise.
-        """
-        return self.sourcesLibrary.updateSourcePosition(sourceName, glon, glat)
-
-
-    def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
-        """It writes on file the list of sources loaded into the *SourceLibrary*.
-        The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.
-
-        Args:
-            outfileNamePrefix (str): the relative or absolute path to the input fits file.
-            fileFormat (str): Possible values: ['txt', 'xml'].
-
-        Returns:
-            Path to the file
-        """
-        self.sourcesLibrary.writeToFile(outfileNamePrefix, fileFormat)
-
-    def convertCatalogToXml(self, catalogFilepath):
-        """It takes a catalog file in AGILE (.txt) format as input and converts
-        it in the xml format.
-
-        Args:
-            catalogFilepath (str): a relative or absolute path to the catalog file in AGILE (.txt) format.
-
-        Raises:
-            SourceModelFormatNotSupported: if the input file format is not supported.
-
-        Returns:
-            A string rapresenting the path to the output file.
-
-        """
-        return self.sourcesLibrary.convertCatalogToXml(catalogFilepath)
-
-
-
-    ############################################################################
-    # private methods                                                          #
-    ############################################################################
-
-
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):
         # print("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
@@ -1158,6 +1152,7 @@ plotting:
 
 
     """
+    The light curve data generation could be parallalezed..
     def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
 
         logger = AgilepyLogger()

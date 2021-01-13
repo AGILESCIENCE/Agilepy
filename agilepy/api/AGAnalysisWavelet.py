@@ -171,7 +171,7 @@ wavelet:
       data = hdu.data
       
       if not multiImage:
-        fig, ax = plt.subplots(nrows=8, ncols=6, subplot_kw={'projection': wcs, "slices":("x", "y",21)}, figsize=(20, 20))
+        fig, ax = plt.subplots(nrows=8, ncols=6, subplot_kw={'projection': wcs, "slices":("x", "y",21)}, figsize=(20, 35))
 
         ax = ax.flatten()
         for i in range(hdu.header["NAXIS3"]):
