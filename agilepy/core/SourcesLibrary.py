@@ -173,6 +173,10 @@ class SourcesLibrary:
         if sources is None:
             sources = self.sources
 
+        if len(sources) == 0:
+            self.logger.info(self,"No sources have been loaded yet. No file has been produced.")
+            return ""
+
         if fileformat == "txt":
             sourceLibraryToWrite = self._convertToAgileFormat(sources)
             outputFilePath = outputFilePath.with_suffix('.txt')
