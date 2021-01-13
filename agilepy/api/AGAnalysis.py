@@ -404,6 +404,13 @@ plotting:
         """
         return self.sourcesLibrary.deleteSources(selection, show = show)
 
+    def getSources(self):
+        """It returns all the sources.
+            Returns:
+                List of sources.
+        """
+        return self.sourcesLibrary.sources
+
     def updateSourcePosition(self, sourceName, glon, glat):
         """It updates a source (l,b) position parameters. The 'dist' value will also be updated.
 
