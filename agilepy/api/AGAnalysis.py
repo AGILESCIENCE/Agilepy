@@ -421,18 +421,22 @@ plotting:
         """
         return self.sourcesLibrary.updateSourcePosition(sourceName, glon, glat)
 
-    def writeSourcesOnFile(self, outfileNamePrefix, fileFormat):
+    def writeSourcesOnFile(self, outfileNamePrefix, fileFormat, sources=None):
         """It writes on file the list of sources loaded into the *SourceLibrary*.
         The supported formats ('txt' AND 'xml') are described here: :ref:`sources-file`.
 
         Args:
-            outfileNamePrefix (str): the relative or absolute path to the input fits file.
-            fileFormat (str): Possible values: ['txt', 'xml'].
+            outfileNamePrefix (str): the name of the output file (without the extension).
+            fileFormat (str): Possible values: ['txt', 'xml', 'reg'].
+            sources (List<Source>): a list of Source objects. If is is None, every loaded source will be written on file.
+
+        Raises:
+            SourceModelFormatNotSupported: if the file format is not supported.
 
         Returns:
             Path to the file
         """
-        self.sourcesLibrary.writeToFile(outfileNamePrefix, fileFormat)
+        return self.sourcesLibrary.writeToFile(outfileNamePrefix, fileformat=fileFormat, sources=sources)
 
 
     ############################################################################
@@ -640,7 +644,7 @@ plotting:
 
 
         #################################### fixflag = 0 except for input source
-        for s in self.getSources():
+        for s in self.sourcesLibrary.sources:
             self.fixSource(s)
 
         # "sourceName" must have flux = 1

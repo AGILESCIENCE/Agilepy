@@ -32,6 +32,7 @@ from pathlib import Path
 from time import sleep
 
 from agilepy.api.AGAnalysis import AGAnalysis
+from agilepy.core.CustomExceptions import SourceModelFormatNotSupported
 
 class AGAnalysisUT(unittest.TestCase):
 
@@ -424,6 +425,39 @@ class AGAnalysisUT(unittest.TestCase):
         for s in sources:
             self.assertEqual(True, len(str(s))>370)
             print(s)
+
+    def test_write_sources_on_file(self):
+
+        ag = AGAnalysis(self.agilepyConf)
+
+        sources_subset = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 30))
+
+        print("sources_subset: ",len(sources_subset))
+
+        self.assertRaises(SourceModelFormatNotSupported, ag.writeSourcesOnFile, "regfile", "notsupportedformat", None)
+
+        #reg
+        regfile = ag.writeSourcesOnFile("regfile", "reg", sources_subset)    
+        with open(regfile) as f:
+            linesNum = sum(1 for line in f)
+        self.assertEqual(1, linesNum)
+        
+        """
+        ag.generateMaps()
+        ag.mle()
+        regfile = ag.writeSourcesOnFile("regfile", "reg", sources_subset)    
+        with open(regfile) as f:
+            linesNum = sum(1 for line in f)
+        self.assertEqual(len(sources_subset)+1, linesNum)
+        """
+
+        ag.generateMaps()
+        ag.freeSources(lambda name: name == self.VELA, "pos", True)
+        ag.mle()
+        regfile = ag.writeSourcesOnFile("regfile", "reg", sources_subset)    
+        with open(regfile) as f:
+            linesNum = sum(1 for line in f)
+        self.assertEqual(len(sources_subset)+1, linesNum)
 
 
 if __name__ == '__main__':
