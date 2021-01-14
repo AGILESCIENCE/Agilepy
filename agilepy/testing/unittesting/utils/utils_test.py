@@ -74,7 +74,8 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
 
 
         file = pu.displaySkyMap(
@@ -83,8 +84,9 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     title = title,
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
                     saveImage=True)
 
@@ -99,7 +101,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar(
+            "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
@@ -108,8 +112,9 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
                     saveImage=True)
 
@@ -123,7 +128,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar(
+            "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
@@ -132,8 +139,9 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
                     saveImage=True)
 
@@ -311,7 +319,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
 
 
-    def test_astro_utils_time_utc_to_mjd(self):
+    def test_astro_utils_time_utc_to_mjd_2(self):
 
         sec_tol = 0.00000001
 

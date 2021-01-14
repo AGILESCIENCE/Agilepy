@@ -46,6 +46,7 @@ import plotly.figure_factory as ff
 import pandas as pd
 from math import ceil
 from agilepy.utils.Utils import Utils
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError
 
 from agilepy.utils.Utils import Singleton
 
@@ -73,10 +74,10 @@ class PlottingUtils(metaclass=Singleton):
         fig5   fig6
         ..     ..
     """
-    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
+    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor):
         # self._updateRC()
-        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
-        regionsColors = ["green", catalogRegionsColor]
+        regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
+        regionsColors = [*regFileColors, catalogRegionsColor]
 
         numberOfSubplots = len(fitsFilepaths)
 
@@ -134,12 +135,11 @@ class PlottingUtils(metaclass=Singleton):
             plt.show()
             return None
 
-    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor):
+    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor):
         # self._updateRC()
 
-        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
-        regionsColors = ["green", catalogRegionsColor]
-
+        regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
+        regionsColors = [*regFileColors ,catalogRegionsColor]
 
         hdu = fits.open(fitsFilepath)[0]
         wcs = WCS(hdu.header)
@@ -286,15 +286,16 @@ class PlottingUtils(metaclass=Singleton):
 
         return filePath
 
-    def _getRegionsFiles(self, regFilePath, catalogRegions):
+    def _getRegionsFiles(self, regFiles, catalogRegions):
 
         regionsFiles = []
+        if regFiles:
+            for regionFile in regFiles:
+                if regionFile:
+                    regionFile = Utils._expandEnvVar(regionFile)
+                    self.logger.info(self, "The region catalog %s will be loaded.", regionFile)
 
-        if regFilePath:
-            regFilePath = Utils._expandEnvVar(regFilePath)
-            self.logger.info(self, "The region catalog %s will be loaded.", regFilePath)
-
-        regionsFiles.append(regFilePath)
+                regionsFiles.append(regionFile)
 
         regionsFilesDict = self.getSupportedRegionsCatalogs()
         if catalogRegions in regionsFilesDict.keys():
@@ -349,6 +350,9 @@ class PlottingUtils(metaclass=Singleton):
         if title:
             ax.set_title(title, fontsize='large')
 
+        if len(regionFiles) != len(regionsColors):
+            raise ConfigurationsNotValidError(
+                "lenght of regFiles does not match with length of regFileColors\n")
 
         # interpolation = "gaussian",
         for idx, regionFile in enumerate(regionFiles):
