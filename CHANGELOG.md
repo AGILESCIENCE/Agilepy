@@ -1,5 +1,6 @@
 # Changelog
 ## Release 1.3.0
+* (\#133) New normalization functions in displaymaps
 * (\#196) Notebooks have their own documentation section
 * (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.
 * (\#202) A new dataset (for testing/validation purposes) has been included.

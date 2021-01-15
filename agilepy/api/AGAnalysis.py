@@ -899,7 +899,7 @@ plotting:
     ############################################################################
 
 
-    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red"):
+    def displayCtsSkyMaps(self, maplistFile=None, singleMode=True, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
         """It displays the last generated cts skymaps.
 
         Args:
@@ -910,17 +910,18 @@ plotting:
             fileFormat (str, optional): the extension of the output image. It defaults to '.png' .
             title (str, optional): the title of the image. It defaults to None.
             cmap (str, optional): Matplotlib colormap. It defaults to 'CMRmap'. Colormaps: https://matplotlib.org/tutorials/colors/colormaps.html
-            regFiles (list, optional): A list containing region file(s) absolute path
-            regFileColors(list, optional): A list with a color for each region file, the length must be the same of regFiles
+            regFiles (list, optional): A list containing region file(s) absolute path.
+            regFileColors(list, optional): A list with a color for each region file, the length must be the same of regFiles.
             catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
             catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            normType (str, optional): It selects a normalization function for the data, possible valuses {‘linear’, ‘sqrt’, ‘power’, log’, ‘asinh’}, default 'linear'.
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor)
+        return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
-    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red"):
+    def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
         """It displays the last generated exp skymaps.
 
         Args:
@@ -935,13 +936,15 @@ plotting:
             regFileColors(list, optional): A list with a color for each region file, the length must be the same of regFiles
             catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
             catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            normType (str, optional): It selects a normalization function for the data, possible valuses {‘linear’, ‘sqrt’, ‘power’, log’, ‘asinh’}, default 'linear'.
+
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor)
+        return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
-    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red"):
+    def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
         """It displays the last generated gas skymaps.
 
         Args:
@@ -956,13 +959,15 @@ plotting:
             regFileColors(list, optional): A list with a color for each region file, the length must be the same of regFiles
             catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
             catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            normType (str, optional): It selects a normalization function for the data, possible valuses {‘linear’, ‘sqrt’, ‘power’, log’, ‘asinh’}, default 'linear'.
+
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor)
+        return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
-    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red"):
+    def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
         """It displays the last generated int skymaps.
 
         Args:
@@ -977,11 +982,13 @@ plotting:
             regFileColors(list, optional): A list with a color for each region file, the length must be the same of regFiles
             catalogRegions(str, optional): a catalog name. The regions that belongs to the catalog will be loaded. It defaults to None.
             catalogRegionsColor(str, optional): the color of the regions loaded from the catalog.
+            normType (str, optional): It selects a normalization function for the data, possible valuses {‘linear’, ‘sqrt’, ‘power’, log’, ‘asinh’}, default 'linear'.
+
 
         Returns:
             It returns the paths to the image files written on disk.
         """
-        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor)
+        return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
     def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
         """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
@@ -1298,7 +1305,7 @@ plotting:
 
         return isoCoeff, galCoeff
 
-    def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor=None):
+    def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor=None, normType="linear"):
 
         if self.currentMapList.getFile() is None and maplistFile is None:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
@@ -1348,7 +1355,7 @@ plotting:
 
         if singleMode:
 
-            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFiles=regFiles, regFileColors=regFileColors, catalogRegions=catalogRegions, catalogRegionsColor=catalogRegionsColor)
+            outputfile = self.plottingUtils.displaySkyMapsSingleMode(files, smooth=smooth, saveImage=saveImage, fileFormat=fileFormat, titles=titles, cmap=cmap, regFiles=regFiles, regFileColors=regFileColors, catalogRegions=catalogRegions, catalogRegionsColor=catalogRegionsColor, normType=normType)
 
             outputs.append(outputfile)
 
@@ -1356,7 +1363,7 @@ plotting:
 
             for idx,title in enumerate(titles):
 
-                outputfile = self.plottingUtils.displaySkyMap(files[idx], smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor)
+                outputfile = self.plottingUtils.displaySkyMap(files[idx], smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
                 outputs.append(outputfile)
 

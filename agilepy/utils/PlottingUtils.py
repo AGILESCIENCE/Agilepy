@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
+from astropy.visualization import simple_norm
 from regions import read_ds9
 import scipy.ndimage as ndimage
 import scipy
@@ -74,7 +75,7 @@ class PlottingUtils(metaclass=Singleton):
         fig5   fig6
         ..     ..
     """
-    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor):
+    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType):
         # self._updateRC()
         regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
         regionsColors = [*regFileColors, catalogRegionsColor]
@@ -104,8 +105,10 @@ class PlottingUtils(metaclass=Singleton):
                 data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
             else:
                 data = hdu.data
+            
+            norm = simple_norm(data, normType)
 
-            im = axs[row][col].imshow(data, origin='lower', norm=None, cmap=cmap)
+            im = axs[row][col].imshow(data, origin='lower', norm=norm, cmap=cmap)
 
             fig.colorbar(im, ax=axs[row][col],fraction=0.046, pad=0.04)
 
@@ -135,7 +138,7 @@ class PlottingUtils(metaclass=Singleton):
             plt.show()
             return None
 
-    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor):
+    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType):
         # self._updateRC()
 
         regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
@@ -150,8 +153,10 @@ class PlottingUtils(metaclass=Singleton):
             data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
         else:
             data = hdu.data
+        
+        norm = simple_norm(data, normType)
 
-        plt.imshow(data, origin='lower', norm=None, cmap=cmap)
+        plt.imshow(data, origin='lower', norm=norm, cmap=cmap)
 
         ax = self._configAxes(ax, title, regionsFiles, regionsColors, wcs)
 
