@@ -12,6 +12,7 @@ Agilepy's documentation
   quickstart/installation
   quickstart/quick_start
   quickstart/jupyter_notebooks
+  quickstart/agile_grid_data
 
 
 .. toctree::

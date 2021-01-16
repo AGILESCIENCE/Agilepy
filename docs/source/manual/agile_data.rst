@@ -1,10 +1,10 @@
 ************
- Agile data
+ AGILE data
 ************
 
 Data structure
 **************
-There're two types of data files: events and log data. They both are compressed fits files. Each file
+There're two types of data files: events list (EVT) and log data (LOG). They both are compressed fits files. Each file
 refers to a specific time interval.
 
 Example:
@@ -18,10 +18,14 @@ In order to use Agilepy (or the Agile science tools) a special file, called "ind
 This file is used by Agilepy to know the position of the data files and which file refers to which interval.
 Two index files are needed: one for the event data and one for the log data.
 
-Those index files are automatically provided to you by the Agilepy distribution but if you want to customize them,
-here's their structure:
+Those index files have four column:
 
-Example:
+  - file name
+  - time start of the file in Terrestrial Time (TT)
+  - time end of  the file in Terrestial time  (TT)
+  - LOG or EVT marker to identify the fole types
+
+Here some examples of LOG and EVT indexes:
 
 ::
 
@@ -44,8 +48,22 @@ The Agilepy conda package gets shipped with two subsets of the AGILE data archiv
 
 test_dataset_6.0
 ================
-<todo>
+A test data to analyse Vela region. The provided period is MJD 58026.50-58031.50.
+
+The index files are the following:
+
+::
+
+    evtfile="$AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index"
+    logfile="$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
+
 
 test_dataset_agn
 ================
-<todo>
+A test data to analyse the November's 2010 flare of 3C454.3 source. The provided period is MJD 55513.00-55520.00.
+
+The index files are the following:
+::
+
+    evtfile="$AGILE/agilepy-test-data/test_dataset_agn/EVT/EVT.index"
+    logfile="$AGILE/agilepy-test-data/test_dataset_agn/LOG/LOG.index"
