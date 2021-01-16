@@ -66,7 +66,11 @@ class PlottingUtils(metaclass=Singleton):
 
     def getSupportedRegionsCatalogs(self):
         return {
-            "2AGL":"$AGILE/catalogs/2AGL_2.reg"
+            "2AGL":"$AGILE/catalogs/2AGL_2.reg",
+            "3EG":"$AGILE/catalogs/3EG_1.reg",
+            "1AGL":"$AGILE/catalogs/1AGL_agl-allcat.reg",
+            "3FGL":"$AGILE/catalogs/3FGL/3FGL_gll_psc_v14_ell.reg",
+            "4FGL":"$AGILE/catalogs/4FGL/gll_psc_v17_ell.reg"
         }
 
     """
