@@ -9,11 +9,11 @@ Agilepy's documentation
   :maxdepth: 2
   :caption: Quickstart
 
+  quickstart/main
   quickstart/installation
+  quickstart/agile_grid_data
   quickstart/quick_start
   quickstart/jupyter_notebooks
-  quickstart/agile_grid_data
-
 
 .. toctree::
   :maxdepth: 2
@@ -24,7 +24,6 @@ Agilepy's documentation
   manual/work_with_sources
   manual/products
   manual/advanced_configuration
-  manual/agile_data
 
 .. toctree::
   :caption: API

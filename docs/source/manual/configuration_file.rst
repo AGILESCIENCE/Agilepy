@@ -253,6 +253,17 @@ It is suggested to use phasecode = 2 for data taken in spinning mode.
        end
     end
 
+filtercode rule
+^^^^^^^^^^^^^^^^
+
+A set of different on-board triggers enables the discrimination of background events (mainly cosmic rays in the AGILE Low Earth Orbit) from gamma-ray events. The data processing of the GRID events use an additional on-ground filters and provides a classification of each event:
+
+- P : events classified as a charged particle and rejected
+- G : events classified as gamma-ray photons. This is the most useful class for the analysis
+- S : events classified as single-track: this is a special class of events with no separation between the electron and positron tracks
+- L : limbo events, not clearly classified.
+
+The events provided in the EVT files are of type G, S, and L. The AGILE team recommends to use the G class for scientific analysis. Only for gamma-ray bursts or other short transient events, and for pulsar timing analysis the G, S and L classes should be used together.
 
 
 Section: *'maps'*
@@ -369,6 +380,13 @@ following example show which iso/gal coefficients are assigned to which map.
    "emin_sources", "energy min of the modelfile", "int", 100, "no"
    "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
+galcoeff and isocoeff
+^^^^^^^^^^^^^^^^^^^^^^
+
+galcoeff and isocoeff are the coefficients for the Galactic and isotropic diffuse emission components respectively. The values may be fixed during the fitting process or some or all of them may be optimized by allowing them to vary. Agilepy allows to evaluate these coefficient and fix them or to keep these coefficient free. 
+
+Positive values are considered fixed, while negative values are free to vary starting from their absolute values. These coefficients are affected by the galmode and isomode coefficients described in the following section.
+
 galmode and isomode
 ^^^^^^^^^^^^^^^^^^^
 
@@ -392,8 +410,8 @@ The maximum likelihood estimation analysis is configured by the following option
 
    "ranal", "Radius of analysis", float, 10, No
    "ulcl", "Upper limit confidence level, expressed as sqrt(TS)", float, 2, No
-   "loccl", "Source location contour confidence level (default 95 (%)confidence level) Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
-   "fluxcorrection", "Correction of the flux taking into account the spectral model", float, 0, no
+   "loccl", "Source location contour confidence level (default 95 (%)confidence level). Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
+   "fluxcorrection", "Correction of the flux taking into account the spectral model. Possible values: [0 (no correction), 1 (enable correction)]. ", int, 0, No
 
 Exp-ratio evaluation options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

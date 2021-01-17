@@ -119,24 +119,39 @@ Furthermode, when the "pos" parameter is free to vary, the multi values section 
 :: 
 
   * Multi analysis:
-	- flux(ph/cm2s): 1.0155e-05 +- 1.0248e-06
-	- upper limit(ph/cm2s): 1.23073e-05
-	- ergLog(erg/cm2s): 1.64122e-09 +- 1.65624e-10
-	- galCoeff: [0.819911]
-	- isoCoeff: [10.1463]
-	- exposure(cm2s): 18630100.0
-	- exp-ratio: 0.0
-	- L_peak: 263.585
-	- B_peak: -2.84083
-	- distFromStartPos: 8.53774e-07
-	- ellipse:
-	    - L: -1.0
-	    - B: -1.0
-	    - distFromStartPos: -1.0
-	    - r: -1.0
-	    - a: -1.0
-	    - b: -1.0
-	    - phi: -1.0
+        Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 17.0229
+        * Position:
+            - start_pos: (263.647, -2.8547)
+            - dist from (l,b): 0.1223
+        * Spectrum: (PLSuperExpCutoff)
+            - flux: 8.98066e-06
+            - index1: 1.71345
+            - cutoffEnergy: 3913.06
+            - index2: 1.34774
+        * Free params: flux pos
+        * Multi analysis:
+            - flux(ph/cm2s): 8.98066e-06 +- 9.15265e-07
+            - upper limit(ph/cm2s): 1.09073e-05
+            - ergLog(erg/cm2s): 1.59656e-09 +- 1.62714e-10
+            - galCoeff: [0.7, 0.7]
+            - isoCoeff: [4.08416, 3.84041]
+            - exposure(cm2s): 18945200.0
+            - exp-ratio: 0.0
+            - L_peak: 263.638
+            - B_peak: -2.85605
+            - distFromStartPos: 0.0548425
+            - ellipse:
+                - L: 263.647
+                - B: -2.8547
+                - distFromStartPos: 0.0637012
+                - r: 0.199311
+                - a: 0.196811
+                - b: 0.202633
+                - phi: 42.9398
+
+The values L_peak and B_peak set to the initial values in the source location is fixed. If it is allowed to vary then they are set to the position for which the TS is maximized. If a confidence contour was found, the parameters of the "ellipse" section describe the best-fit ellipse of the contour, described in detail below. The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, or the other spectral parameters, if applicable, are provided.
+
+
 
 How to manually change the spectrum parameters' values of a source
 ******************************************************************

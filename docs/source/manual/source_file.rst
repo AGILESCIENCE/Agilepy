@@ -10,6 +10,37 @@ The flux parameter estimates are relevant in the fitting process, as the sources
 are considered one by one starting with the one with the brightest initial flux
 value, regardless of the order they are given in the source file.
 
+Spectral models
+========================
+A full energy band spectral fit of the data is performed with different spectral model. The spectral representations used in the BUILD25 are PL, exponential cut-off PL, super-exponential cut-off PL, and log parabola (LP). More details are reported in https://arxiv.org/abs/1903.06957
+
+The PL spectral model is used for all sources that are not significantly curved and have low exposure, 
+
+.. image:: ../static/pl.png
+
+where N0 is the prefactor and alpha is the index explicitly evaluated by the MLE method. Our MLE spectral fitting does not explicitly output the prefactor value, which is internally calculated by the numerical procedure.
+The majority of the AGILE sources are described by a PL.
+
+The exponential cut-off PL spectral model (PC) is
+
+.. image:: ../static/pc.png
+
+where N0 is the prefactor, α is the index, and Ec is the cut-off energy. The values Ec and α are explicitly provided by the MLE method.
+
+The super exponential cut-off PL spectral model (PS) is
+
+.. image:: ../static/ps.png
+
+where N0 is the prefactor, α is the first index, β the second index, and Ec is the cut-off energy. The parameters α, Ec, and β are explicitly provided by the MLE method.
+
+The LP spectral model is
+
+.. image:: ../static/lp.png
+
+where N0 is the prefactor, Ec is the pivot energy, α is the first index, β the curvature. The parameters α, Ec, and β are explicitly provided by the MLE method.
+
+The selection of curved spectra followed the acceptance criteria described in bulgarelli19. Briefly, a source is considered significantly curved if T Scurved > 16, where T Scurved = 2 × (log L(curved spectrum)−log L(power law), where L is the likelihood function obtained changing only the spectral representation of that source and refitting all free parameters.
+
 Source library format (xml document)
 ====================================
 
@@ -70,6 +101,7 @@ Source library format (xml document)
 
 AGILE format (text file)
 ========================
+The source list is a text file listing at least one source. Each line of text describes one source and it is possible to include empty lines or comment lines. The comment lines begin with an exclamation mark. 
 
 Each source is described by a line containing space separated values, in the following order:
 
@@ -79,7 +111,13 @@ Each source is described by a line containing space separated values, in the fol
 
 The '*flux*' parameter is expressed in cm^-2 s^-1, galactic longitude '*l* 'and latitude '*b*' are expressed in degrees.
 
-The spectral index of each source represents the initial estimates of the values for that source (a positive number).
+The spectral index of each source represents the initial estimates of the values for that source (a positive number). The other spectral parameters depends by the spectral shape of the source.
+
+minSqrt(TS) is the minimum acceptable value for the square root of TS: if the optimized significance of a source lies below this value, the source is considered undetected and will be ignored (set to flux = 0) when considering the other sources.
+
+After the name of the source (which should not contain a space), an optional value for the location limitation in degrees may be provided. If this value is present and not zero, the longitude and latitude of the source will not be allowed to vary by more than this value from its initial position.
+
+According to the fixflag some or all of those values will be optimized by being allowed to vary. 
 
 The fixflag parameter
 ---------------------
@@ -118,7 +156,18 @@ The user may combine these values, but the flux will always be allowed to vary i
 The funtype parameter
 ---------------------
 
-| 0) "PL", "x^(-[index])"
-| 1) "PLExpCutoff", "x^(-[index]) * e^(- x / [par2])"
-| 2) "PLSuperExpCutoff", "x^(-[index]) * e^(- pow(x / [par2], [par3]))"
-| 3) "LogParabola", "( x / [par2] ) ^ ( -( [index] + [par3] * log ( x / [par2] ) ) )"
+SM: Spectral model. PL indicates power-law fit to the energy spectrum; PC indicates power-law with exponential cutoff fit to the energy spectrum; PS indicates power-law with su- per exponential cut-off fit to the energy spectrum; LP indicates log-parabola fit to the energy spectrum
+
+| 0) "PL", "PowerLaw", "x^(-[index])"
+| 1) "PC", "PLExpCutoff", "x^(-[index]) * e^(- x / [par2])"
+| 2) "PS", "PLSuperExpCutoff", "x^(-[index]) * e^(- pow(x / [par2], [par3]))"
+| 3) "LP", "LogParabola", "( x / [par2] ) ^ ( -( [index] + [par3] * log ( x / [par2] ) ) )"
+
+The match of the parameteres is:
+
+- Index=α: Spectral index for PL, PC, and PS spectral models, first index for LP spectral model, in the energy range 100 MeV – 10 GeV;
+- ∆α: Statistical 1σ uncertainty of α, in the energy range 100 MeV – 10 GeV
+- par2 = Ec (MeV): Cut-off energy for PC and PS spectral models, pivot energy for LP spectral model, in the energy range 100 MeV – 10 GeV;
+- ∆Ec (MeV): Statistical 1σ uncertainty of Ec, in the energy range 100 MeV – 10 GeV
+- par3 = β: Second index for PS spectral models, curvature for LP spectral model, in the energy range 100 MeV – 10 GeV
+- ∆β: Statistical 1σ uncertainty of β, in the energy range 100 MeV – 10 GeV

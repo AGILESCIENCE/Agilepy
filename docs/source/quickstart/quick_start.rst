@@ -103,4 +103,4 @@ If you want to manually update the value of a source's spectrum parameter, you c
     source = sources.pop()
     source.spectrum.set("index", 1.8)
 
-.. hint:: Check out the API documentation!
+.. hint:: Check out the API documentation and the `Jupiter notebooks <jupyter_notebooks.html>`_  section!
