@@ -1,3 +1,4 @@
+# Dependencies required to build the docs
 name: condaEnv
 channels:
  - conda-forge
