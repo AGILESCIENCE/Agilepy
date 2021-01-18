@@ -42,6 +42,20 @@ class MapList(Observer):
         self.isocoeff = []
         self.isEmpty = True
 
+    def reset(self):
+        self.ctsMap = []
+        self.expMap = []
+        self.gasMap = []
+        self.bincenter = []
+        self.galcoeff = []
+        self.isocoeff = []
+        self.isEmpty = True      
+        outputFilePath = self.getFile()
+        if outputFilePath is not None:
+            with open(outputFilePath, "w") as mlf:
+                mlf.write("")
+
+
     def addRow(self, ctsMap, expMap, gasMap, bincenter, galcoeff, isocoeff):
         self.ctsMap.append(ctsMap)
         self.expMap.append(expMap)

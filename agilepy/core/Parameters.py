@@ -33,7 +33,7 @@ class Parameters:
     datapath = os.path.join(os.environ["AGILE"], "model/scientific_analysis/data")
 
     _skymap = os.path.join(datapath, "{}_{}.SKY002.SFMG_H0025.disp.conv.sky.gz")
-    _mapNamePrefix = "EMIN{}_EMAX{}_{}"
+    _mapNamePrefix = "TMIN{}_TMAX{}_EMIN{}_EMAX{}_{}"
 
     # constants
     sarmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.sar.gz")
@@ -89,5 +89,5 @@ class Parameters:
         return Parameters._skymap.format(emin, emax)
 
     @staticmethod
-    def getMapNamePrefix(emin, emax, stepi):
-        return Parameters._mapNamePrefix.format(str(emin).zfill(5), str(emax).zfill(5), str(stepi).zfill(2))
+    def getMapNamePrefix(tmin, tmax, emin, emax, stepi):
+        return Parameters._mapNamePrefix.format(str(tmin),str(tmax),str(emin).zfill(5), str(emax).zfill(5), str(stepi).zfill(2))
