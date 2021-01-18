@@ -58,6 +58,7 @@ jobs:
         sttag=`cat sciencetools_version.txt`
         source ~/.bashrc
         conda config --add channels conda-forge
+        conda config --set channel_priority strict
         conda config --add channels plotly
         conda create -y -n agilepydevops -c agilescience agilepy-environment==$sttag
 
@@ -76,14 +77,14 @@ jobs:
 
         bash $agilepy_path/scripts/start_coverage.sh
 
-    - name: Uploading coverage report to Codacy	
-      env:	
-        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}	
-        CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}	
-        CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}	
-        CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}	
+    - name: Uploading coverage report to Codacy
+      env:
+        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
+        CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
 
-      run: |	
+      run:
         LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"	
         curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"	
         chmod +x codacy-coverage-reporter	
