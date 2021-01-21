@@ -1,19 +1,53 @@
-name: Continuos integration workflow
+name: Continuous integration workflow
 
 on:
   push:
     branches:
       - develop
       - master
-      - bugfix-*
-  pull_request:
-    branches:
-      - develop
+
 jobs:
 
-  build:
+  building-testing-on-os-matrix:
+    name: Build+Test ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04", "ubuntu-18.04", "macos-10.15"] #, "macos-11.0"]
+        python-version: ["3.7"]
+    runs-on: ${{matrix.os}}
 
-    name: Running in Docker container (centos:7.7.1908)
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: .github/environment.yml
+          activate-environment: agilepydevops
+
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: python setup.py develop
+
+      - name: Conda info
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+
+      - name: Running unit tests and code coverage
+        shell: bash -l {0}
+        run: |
+          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+          agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+          bash $agilepy_path/scripts/start_coverage.sh
+
+
+  building-testing-on-os-centos7:
+
+    name: Build+Test centos:7.7.1908 + Codacy
 
     runs-on: ubuntu-18.04
 
@@ -43,16 +77,6 @@ jobs:
         source ~/.bashrc
         conda update -y -n base -c defaults conda
 
-    - name: Anaconda info
-      run: |
-        source ~/.bashrc
-        which conda
-        conda --version
-        which python
-        python --version
-
-
-
     - name: Download the Agilepy environment
       run: |
         sttag=`cat sciencetools_version.txt`
@@ -67,13 +91,9 @@ jobs:
       run: |
         source ~/.bashrc
         conda activate agilepydevops
-
         python setup.py develop
-
         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-
         bash $agilepy_path/scripts/start_coverage.sh
 
     - name: Uploading coverage report to Codacy
@@ -82,7 +102,6 @@ jobs:
         CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
         CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
         CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
-
       run: |
         LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"	
         curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"	
