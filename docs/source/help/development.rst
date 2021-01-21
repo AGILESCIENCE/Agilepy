@@ -10,11 +10,14 @@ a develpoment environment called agilepy-environment is available into Anaconda 
 It contains all the dependencies unless agilepy, which must be installed by hand cloning the repository.
 ::
 
+    
     conda config --add channels conda-forge
-    conda create -n agilepyenv -c agilescience agilepy-environment
-    conda activate agilepyenv
+    conda config --add channels plotly
+    conda create -n agilepydev -c agilescience agiletools agilepy-dataset
+    conda activate agilepydev
     git clone https://github.com/AGILESCIENCE/Agilepy.git
     cd Agilepy && git checkout develop
+    conda env update -f environment.yml
     python setup.py develop
 
 Now you have the agilepy's latest version installed in your environment.
