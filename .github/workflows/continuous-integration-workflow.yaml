@@ -6,14 +6,14 @@ on:
       - ci_test_setup_miniconda
 
 jobs:
-  building:
+
+  building-testing-on-os-matrix:
     name: Building on (${{ matrix.python-version }}, ${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        os: ["ubuntu-20.04", "ubuntu-18.04", "ubuntu-16.04", "macos-10.15", "macos-11.0"]
         python-version: ["3.7"]
-        
     runs-on: ${{matrix.os}}
 
     steps:
@@ -54,3 +54,60 @@ jobs:
           conda activate agilepydevops	
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)	
           ./codacy-coverage-reporter report -l Python -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
+
+  building-testing-on-os-centos7:
+
+    name: Building and testing in centos:7.7.1908 Docker container
+
+    runs-on: ubuntu-18.04
+
+    container: centos:7.7.1908
+
+    steps:
+
+    - name: Checking out code
+      uses: actions/checkout@v2
+
+    - name: Installing dependencies
+      run: |
+        yum -y install epel-release rsync unzip mailx bzip2
+        yum -y install git make gcc gcc-c++ binutils libX11-devel libXpm-devel libXft-devel libXext-devel
+        yum -y install curl less vim wget bc which
+        yum -y install libXcomposite libXcursor libXi libXtst libXrandr alsa-lib mesa-libEGL libXdamage mesa-libGL libXScrnSaver
+        yum -y install jq
+
+          - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: .github/environment.yml
+          activate-environment: agilepydevops
+
+    - name: Conda info
+      shell: bash -l {0}
+      run: |
+        conda info
+        conda list
+
+    - name: Running unit tests and code coverage
+      run: |
+        conda activate agilepydevops
+        python setup.py develop
+        printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+        agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+        bash $agilepy_path/scripts/start_coverage.sh
+
+    - name: Uploading coverage report to Codacy
+      env:
+        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
+        CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
+      run: |
+        LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"	
+        curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"	
+        chmod +x codacy-coverage-reporter	
+        source ~/.bashrc	
+        conda activate agilepydevops	
+        agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)	
+        ./codacy-coverage-reporter report -l Python -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
