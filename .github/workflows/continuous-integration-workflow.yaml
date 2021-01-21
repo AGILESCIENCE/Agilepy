@@ -6,7 +6,6 @@ on:
       - ci_test_setup_miniconda
 
 jobs:
-
   building:
     name: Building on (${{ matrix.python-version }}, ${{ matrix.os }})
     strategy:
@@ -18,13 +17,11 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Checking out code
       - uses: actions/checkout@v2
 
       - name: Adding dependencies
         run: sed -i 's/dependencies:/dependencies:\n  - agiletools\n  - agilepy-dataset/g' environment.yml
 
-      - name: Setup miniconda
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
@@ -40,15 +37,10 @@ jobs:
 
       - name: Running unit tests and code coverage
         run: |
-
           conda activate agilepydevops
-
           python setup.py develop
-
           printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-
           bash $agilepy_path/scripts/start_coverage.sh
 
       - name: Uploading coverage report to Codacy
