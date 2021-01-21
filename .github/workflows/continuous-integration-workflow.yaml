@@ -19,14 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Adding dependencies
-        run: sed -i 's/dependencies:/dependencies:\n  - agiletools\n  - agilepy-dataset/g' environment.yml
-
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          environment-file: environment.yml
+          environment-file: .github/environment.yml
           activate-environment: agilepydevops
 
       - name: Conda info
