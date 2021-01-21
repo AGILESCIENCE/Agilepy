@@ -58,11 +58,10 @@ jobs:
         sttag=`cat sciencetools_version.txt`
         source ~/.bashrc
         conda config --add channels conda-forge
-        conda config --set channel_priority strict
         conda config --add channels plotly
-        conda create -y -n agilepydevops -c agilescience agilepy-environment==$sttag
-
-
+        conda create -y -n agilepydevops -c agilescience agiletools==$sttag agilepy-dataset
+        conda activate agilepydevops
+        conda env update -f environment.yml
 
     - name: Running unit tests and code coverage
       run: |
