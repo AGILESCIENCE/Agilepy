@@ -26,6 +26,9 @@ jobs:
           environment-file: .github/environment.yml
           activate-environment: agilepydevops
 
+      - name: Installing Agilepy
+        run: python setup.py develop
+
       - name: Conda info
         shell: bash -l {0}
         run: |
@@ -34,8 +37,6 @@ jobs:
 
       - name: Running unit tests and code coverage
         run: |
-          conda activate agilepydevops
-          python setup.py develop
           printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
           bash $agilepy_path/scripts/start_coverage.sh
@@ -83,6 +84,9 @@ jobs:
         environment-file: .github/environment.yml
         activate-environment: agilepydevops
 
+    - name: Installing Agilepy
+      run: python setup.py develop
+
     - name: Conda info
       shell: bash -l {0}
       run: |
@@ -91,8 +95,6 @@ jobs:
 
     - name: Running unit tests and code coverage
       run: |
-        conda activate agilepydevops
-        python setup.py develop
         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
         bash $agilepy_path/scripts/start_coverage.sh
