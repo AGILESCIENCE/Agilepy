@@ -1,5 +1,4 @@
 # Dependencies required to build the docs
-name: condaEnv
 channels:
  - conda-forge
  - plotly
@@ -8,11 +7,11 @@ dependencies:
   - plotly==4.12.0
   - psutil==5.7.0
   - matplotlib==3.1.3
-  - pandas==1.0.1
+  - pandas==1.*
   - ipympl==0.5.7
-  - numpy==1.18.1
-  - scipy==1.4.1
-  - sphinx==2.3.1
+  - numpy==1.*
+  - scipy==1.*
+  - sphinx==2.*
   - sphinx_rtd_theme==0.4.3
   - pyyaml==5.3
   - regions==0.4
