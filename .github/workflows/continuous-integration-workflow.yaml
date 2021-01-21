@@ -84,7 +84,7 @@ jobs:
         CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
         CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
 
-      run:
+      run: |
         LATEST_VERSION="$(curl -Ls https://api.bintray.com/packages/codacy/Binaries/codacy-coverage-reporter/versions/_latest | jq -r .name)"	
         curl -Ls -o codacy-coverage-reporter "https://dl.bintray.com/codacy/Binaries/${LATEST_VERSION}/codacy-coverage-reporter-linux"	
         chmod +x codacy-coverage-reporter	
