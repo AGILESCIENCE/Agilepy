@@ -1,5 +1,5 @@
 # Changelog
-## Release 1.3.0
+## Next release (1.3.0)
 * (\#133) New normalization functions in displaymaps
 * (\#196) Notebooks have their own documentation section
 * (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.
@@ -10,7 +10,7 @@
 * (\#217) The quickstart guide and the tutorial notebooks show how to change the value of a spectrum parameter of a source
 * (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
-## Release 1.2.0
+## Release 1.2.0 - 10/12/20
 * (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True.
 * (\#152) The setOptions() call to increment the number of energy bins while galcoeff and isocoeff are equal = null  won't throw an error anymore.
 * (\#161, \#165, \#166) Documentation updated.
