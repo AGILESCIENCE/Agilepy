@@ -1,7 +1,7 @@
 # Agilepy
-Master: ![Continuos integration workflow](https://github.com/AGILESCIENCE/Agilepy/workflows/Continuos%20integration%20workflow/badge.svg?branch=master)
+Master: ![Continuous integration workflow](https://github.com/AGILESCIENCE/Agilepy/workflows/Continuos%20integration%20workflow/badge.svg?branch=master)
 
-Develop: ![Continuos integration workflow](https://github.com/AGILESCIENCE/Agilepy/workflows/Continuos%20integration%20workflow/badge.svg?branch=develop)
+Develop: ![Continuous integration workflow](https://github.com/AGILESCIENCE/Agilepy/workflows/Continuous%20integration%20workflow/badge.svg?branch=develop)
 
 [![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Grade)
