@@ -479,7 +479,9 @@ plotting:
         if maplistObj:
             maplistObjBKP = maplistObj
         else:
+            self.currentMapList.reset()
             maplistObjBKP = self.currentMapList
+
 
         fovbinnumber = configBKP.getOptionValue("fovbinnumber")
         energybins = configBKP.getOptionValue("energybins")
@@ -487,6 +489,9 @@ plotting:
         initialFovmin = configBKP.getOptionValue("fovradmin")
         initialFovmax = configBKP.getOptionValue("fovradmax")
         initialFileNamePrefix = configBKP.getOptionValue("filenameprefix")
+
+        tmin = configBKP.getOptionValue("tmin")
+        tmax = configBKP.getOptionValue("tmax")
 
 
         for stepi in range(0, fovbinnumber):
@@ -508,7 +513,7 @@ plotting:
 
                     skymapL = Parameters.getSkyMap(emin, emax)
                     skymapH = Parameters.getSkyMap(emin, emax)
-                    fileNamePrefix = Parameters.getMapNamePrefix(emin, emax, stepi+1)
+                    fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, stepi+1)
 
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
@@ -539,16 +544,12 @@ plotting:
                         raise ScienceToolInputArgMissing("Some options have not been set.")
 
                     f1 = ctsMapGenerator.call()
-                    self.logger.info(self, "Science tool ctsMapGenerator produced:\n %s", f1)
 
                     f2 = expMapGenerator.call()
-                    self.logger.info(self, "Science tool expMapGenerator produced:\n %s", f2)
 
                     f3 = gasMapGenerator.call()
-                    self.logger.info(self, "Science tool gasMapGenerator produced:\n %s", f3)
 
                     f4 = intMapGenerator.call()
-                    self.logger.info(self, "Science tool intMapGenerator produced:\n %s", f4)
 
                     maplistObjBKP.addRow(  next(iter(ctsMapGenerator.products.items()))[0], \
                                                 next(iter(expMapGenerator.products.items()))[0], \

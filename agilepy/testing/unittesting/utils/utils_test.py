@@ -88,7 +88,8 @@ class AgilepyUtilsUT(unittest.TestCase):
                     regFileColors=regFileColors,
                     catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 
@@ -116,7 +117,8 @@ class AgilepyUtilsUT(unittest.TestCase):
                     regFileColors=regFileColors,
                     catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 
@@ -143,7 +145,8 @@ class AgilepyUtilsUT(unittest.TestCase):
                     regFileColors=regFileColors,
                     catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 

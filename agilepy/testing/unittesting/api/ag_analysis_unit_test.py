@@ -30,6 +30,7 @@ import os
 import shutil
 from pathlib import Path
 from time import sleep
+from filecmp import cmp 
 
 from agilepy.api.AGAnalysis import AGAnalysis
 from agilepy.core.CustomExceptions import SourceModelFormatNotSupported
@@ -60,23 +61,59 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(False, outDir.exists())
 
+
+    ########################################################################
+    # test_generate_maps
+    ########################################################################
+    def assert_maplistfile_lines_number(self, maplistFilePath, numberOfLines):
+        self.assertEqual(True, os.path.isfile(maplistFilePath))
+        with open(maplistFilePath) as mfp:
+            lines = mfp.readlines()
+            self.assertEqual(numberOfLines, len(lines))
+
+    def assert_generated_maps_number(self, outDir, numberOfMaps):
+        maps = os.listdir(Path(outDir).joinpath("maps"))
+        self.assertEqual(numberOfMaps, len(maps))
+
+    def assert_generated_maps_exist(self, skyMapMatrix):
+        for skyMapRow in skyMapMatrix:
+            self.assertEqual(True, os.path.isfile(skyMapRow[0])) #cts
+            self.assertEqual(True, os.path.isfile(skyMapRow[1])) #exp
+            self.assertEqual(True, os.path.isfile(skyMapRow[2])) #gas
+            
     def test_generate_maps(self):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
+        ag.setOptions(tmin=433857532, tmax=433858532)
+
         outDir = ag.getOption("outdir")
 
         maplistFilePath = ag.generateMaps()
-        self.assertEqual(True, os.path.isfile(maplistFilePath))
+        shutil.copy(maplistFilePath, maplistFilePath+"_1.bkp")
+        self.assert_maplistfile_lines_number(maplistFilePath, 4)
+        self.assert_generated_maps_number(outDir, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
 
-        maps = os.listdir(Path(outDir).joinpath("maps"))
-        self.assertEqual(16, len(maps))
 
-        lines = None
-        with open(maplistFilePath) as mfp:
-            lines = mfp.readlines()
+        # second generation (same parameters)
+        maplistFilePath = ag.generateMaps()
+        shutil.copy(maplistFilePath, maplistFilePath+"_2.bkp")
+        self.assert_maplistfile_lines_number(maplistFilePath, 4)
+        self.assert_generated_maps_number(outDir, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
+        self.assertTrue(cmp(maplistFilePath, maplistFilePath+"_1.bkp", shallow=False), f'The files {maplistFilePath} and {maplistFilePath+"_1.bkp"} are different!')
 
-        self.assertEqual(4, len(lines))
+
+        # third generation with different time interval
+        ag.setOptions(tmin=433957532, tmax=433958532)
+        maplistFilePath = ag.generateMaps()
+
+        self.assert_maplistfile_lines_number(maplistFilePath, 4)
+        self.assert_generated_maps_number(outDir, 16+16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
+        self.assertFalse(cmp(maplistFilePath, maplistFilePath+"_2.bkp", shallow=False), f'The files {maplistFilePath} and {maplistFilePath+"_2.bkp"} are not different!')
+
 
         ag.destroy()
 
