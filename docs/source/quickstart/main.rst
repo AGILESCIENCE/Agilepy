@@ -1,6 +1,16 @@
 Agilepy
 ===============
 
+Agilepy is an open-source Python package developed at `INAF/OAS Bologna <https://www.oas.inaf.it>`_  to analyse AGILE/GRID data built on top of the command-line version of the AGILE/GRID Science Tools.   
+
+The main purpose of the package is to provide an easy to use high-level Python interface to analyse AGILE/GRID data by simplifying the configuration of the tasks and ensuring straightforward access to the data.  The current features are the generation and display of sky maps and light curves, the access to gamma-ray sources catalogues, the analysis to perform spectral model and position fitting including the background evaluation, the aperture photometry analysis, and the wavelet analysis.   In addition, Agilepy provides an engineering interface to analyse the time evolution of the AGILE off-axis viewing angle for a chosen sky region, comparing them with Fermi/LAT off-axis evolution.  
+
+Agilepy is similar to Fermipy (https://fermipy.readthedocs.io/)  and gammapy  (https://docs.gammapy.org/) tools, providing a common way to analyse gamma-ray data.  
+
+Agilepy provides the last version of the available Science Tools (BUILD25), the H0025 instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
+
+Agilepy (and its dependencies) can be easily installed using Anaconda (https://www.anaconda.com/).
+
 AGILE
 ^^^^^^
 
@@ -30,16 +40,9 @@ The result of the MLE is an evaluation of the presence of one or more point-like
 
 A full description and characterisation of the last release of the Science Tools is available in https://arxiv.org/abs/1903.06957. Science Tools, IRFs and Galactic emission model are publicly available from the AGILE website at SSDC: https://agile.ssdc.asi.it. 
 
-Agilepy
-^^^^^^^^^
 
-Agilepy is an open-source Python package to analyse AGILE/GRID data built on top of the command-line version of the AGILE/GRID Science Tools. Agilepy is similar to Fermipy (https://fermipy.readthedocs.io/)  and gammapy  (https://docs.gammapy.org/) tools, providing a common way to analyse gamma-ray data.   
 
-The main purpose of the package is to provide an easy to use high-level Python interface to analyse AGILE-GRID data by simplifying the configuration of the tasks and ensuring straightforward access to the data.  The current features are the generation and display of sky maps and light curves, the access to gamma-ray sources catalogues, the analysis to perform spectral model and position fitting including the background evaluation, the aperture photometry analysis, and the wavelet analysis.   In addition, Agilepy provides an engineering interface to analyse the time evolution of the AGILE off-axis viewing angle for a chosen sky region, comparing them with Fermi/LAT off-axis evolution.  
 
-Agilepy provides the last version of the available Science Tools (BUILD25), the H0025 instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
-
-Agilepy (and its dependencies) can be easily installed using Anaconda (https://www.anaconda.com/).
 
 Agilepy analysis
 ^^^^^^^^^^^^^^^^^^
