@@ -493,6 +493,8 @@ plotting:
         tmin = configBKP.getOptionValue("tmin")
         tmax = configBKP.getOptionValue("tmax")
 
+        glon = configBKP.getOptionValue("glon")
+        glat = configBKP.getOptionValue("glat")
 
         for stepi in range(0, fovbinnumber):
 
@@ -513,7 +515,7 @@ plotting:
 
                     skymapL = Parameters.getSkyMap(emin, emax)
                     skymapH = Parameters.getSkyMap(emin, emax)
-                    fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, stepi+1)
+                    fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
 
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
