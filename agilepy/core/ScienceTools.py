@@ -184,7 +184,20 @@ class IntMapGenerator(ProcessWrapper):
 
 
 class Multi(ProcessWrapper):
+    """
+    This class will call the AG_multi tool. The tool will generate several files, for example:
+    
+    > ls /agilepy_analysis/vela-xxx_user-xxx_20210217-123618/mle/0/
+        analysis_product
+        analysis_product.html
+        analysis_product.log
+        analysis_product_2AGLJ1015-5852.source (optional)
+        analysis_product_2AGLJ0835-4514.source (optional)
+        analysis_product_2AGLJ1020-5752.source (optional)
 
+    If the sources listed in the sourceLibrary file in AGILE format (e.g. sourceLibrary00001.txt) contains None as first parameter,
+    then the corresponding analysis_product_<sourcename>.source will not be produced.
+    """
     def __init__(self, exeName, agilepyLogger):
         super().__init__(exeName, agilepyLogger)
 
@@ -192,15 +205,20 @@ class Multi(ProcessWrapper):
         return ["outdir", "filenameprefix"]
 
     def configureTool(self, config, extraParams=None):
-
-        self.outputDir = os.path.join(config.getOptionValue("outdir"), "mle")
-        outputName = config.getOptionValue("filenameprefix")+(str(self.callCounter).zfill(4))
-        outfilePath = os.path.join(self.outputDir, outputName)
+        self.products = {}
+    
+        self.outputDir = config.getOptionValue("outdir")
+        
+        outfilePath = os.path.join(self.outputDir, config.getOptionValue("filenameprefix"))
 
         for sourceName in config.getOptionValue("multisources"):
-            prodName = os.path.join(self.outputDir, outputName+"_"+sourceName+".source")
-            self.products[prodName] = ProcessWrapper.REQUIRED_PRODUCT
-
+            prodName = outfilePath+"_"+sourceName+".source"
+            self.products[prodName] = ProcessWrapper.OPTIONAL_PRODUCT # AG_multi not always produces .source files... (check description)
+        
+        self.products[outfilePath]         = ProcessWrapper.REQUIRED_PRODUCT
+        self.products[outfilePath+".html"] = ProcessWrapper.REQUIRED_PRODUCT
+        self.products[outfilePath+".log" ] = ProcessWrapper.REQUIRED_PRODUCT
+        
         expratioevaluation = 0
         if config.getOptionValue("expratioevaluation"):
             expratioevaluation = 1
@@ -213,6 +231,7 @@ class Multi(ProcessWrapper):
             config.getOptionValue("galmode"), \
             config.getOptionValue("isomode"), \
             config.getOptionValue("sourcelist"), \
+            # AG_multi tool will add _<sourceName>.source to the outfilePath prefix (for each source)
             outfilePath, \
             config.getOptionValue("ulcl"), \
             config.getOptionValue("loccl"), \

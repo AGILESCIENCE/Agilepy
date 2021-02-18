@@ -92,6 +92,9 @@ class AGAnalysis(AGBaseAnalysis):
             "ap" : None
         }
 
+        self.multiTool = Multi("AG_multi", self.logger)
+
+
     def destroy(self):
         """ It clears the list of sources and the current maplist file.
         """
@@ -605,14 +608,12 @@ plotting:
             self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
             raise SourceNotFound(f"The source {sourceName} has not been loaded yet")
 
-        analysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("calcBkg")
-
-        if analysisDataDir.exists():
-            rmtree(analysisDataDir)
-
 
 
         ######################################################## configurations
+
+        analysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("calcBkg")
+
         configBKP = AgilepyConfig.getCopy(self.config)
         configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
 
@@ -667,6 +668,10 @@ plotting:
         #configBKP.setOptions(filenameprefix = "calcBkg", outdir = str(analysisDataDir))
         #configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+
+
+
+
 
         # extract iso e gal coeff of "sourceName"
         isoCoeff, galCoeff = self._extractBkgCoeff(sourceFiles, sourceName)
@@ -724,20 +729,38 @@ plotting:
 
             maplistFilePath = self.currentMapList.getFile()
 
-        multi = Multi("AG_multi", self.logger)
+        # Creating the output directory if it does not exist
+        mleOutputDir = Path(configBKP.getConf("output","outdir")).joinpath("mle")
+        mleOutputDir.mkdir(exist_ok=True)
+        
+        # Each time mle() is called, a new directory for the output is created.
+        subDirectories = next(os.walk(mleOutputDir))[1]
 
-        sourceListFilename = "sourceLibrary"+(str(multi.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=join(self.config.getConf("output","outdir"), sourceListFilename), fileformat="txt")
+        currentOutputDirectories = sorted([int(name) for name in subDirectories if mleOutputDir.joinpath(name).is_dir()]) # [0, 1, 2, ]
+        if not currentOutputDirectories: currentOutputDirectories = [-1] 
+        mleOutputDir.joinpath(str(currentOutputDirectories[-1] + 1)).mkdir(exist_ok=True) # 2+1
 
-        configBKP.addOptions("selection", maplist=maplistFilePath, sourcelist=sourceListAgileFormatFilePath)
+        configBKP.setOptions(outdir=str(mleOutputDir))
 
+        # The multi tools needs to know which maps (maplistfile) it will consider during the analysis.
+        configBKP.addOptions("selection", maplist=maplistFilePath)
+
+        # The multi tools needs to know which which sources (in AGILE format) it will consider during the analysis.
+        sourceListFilename = "sourceLibrary"+(str(self.multiTool.callCounter).zfill(5))
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=mleOutputDir.joinpath(sourceListFilename), fileformat="txt")
+        configBKP.addOptions("selection", sourcelist=sourceListAgileFormatFilePath)
+
+        # The multi tools needs to know the name of the sources it will consider during the analysis.
         multisources = self.sourcesLibrary.getSourcesNames()
         configBKP.addOptions("selection", multisources=multisources)
 
 
-        multi.configureTool(configBKP)
+        self.multiTool.configureTool(configBKP)
 
-        sourceFiles = multi.call()
+        products = self.multiTool.call()
+
+        # filter .source files
+        sourceFiles = [product for product in products if product and ".source" in product]
 
         if len(sourceFiles) == 0:
             self.logger.warning(self, "The number of .source files is 0.")
@@ -752,9 +775,7 @@ plotting:
 
                 self.sourcesLibrary.updateMulti(multiOutputData)
 
-
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
-
 
         return sourceFiles
 
