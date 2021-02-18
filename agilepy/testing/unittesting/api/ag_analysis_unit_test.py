@@ -40,6 +40,11 @@ class AGAnalysisUT(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
 
+        self.test_logs_dir = os.path.join(self.currentDirPath, "test_logs/AGAnalysisUT")
+        if not os.path.isdir(self.test_logs_dir):
+            os.mkdir(self.test_logs_dir)
+        os.environ["TEST_LOGS_DIR"] = self.test_logs_dir
+
         self.VELA = "2AGLJ0835-4514"
         self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
         self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
@@ -157,18 +162,33 @@ class AGAnalysisUT(unittest.TestCase):
     def test_analysis_pipeline(self):
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
+        ag.setOptions(tmin = 433857532, tmax = 434289532, timetype = "TT", glon = 263.55, glat = -2.78)
         maplistFilePath = ag.generateMaps()
         self.assertEqual(True, os.path.isfile(maplistFilePath))
 
-        products_1 = ag.mle(maplistFilePath)
+        sources = ag.loadSourcesFromCatalog("2AGL", rangeDist = (0, 21))
+        sources = ag.freeSources('name == "2AGLJ0835-4514"', "flux", True, show=True)
+
+        products_1 = ag.mle()
+
         for p in products_1:
             self.assertEqual(True, os.path.isfile(p))
 
-        products_2 = ag.mle(maplistFilePath)
+        products_2 = ag.mle()
         for p in products_2:
             self.assertEqual(True, os.path.isfile(p))
 
+        ag.setOptions(tmin = 433857532, tmax = 433907532, timetype = "TT", glon = 263.55, glat = -2.78)
+
+        maplistfile = ag.generateMaps()
+        
+        products_3 = ag.mle()
+        for p in products_3:
+            self.assertEqual(True, os.path.isfile(p))
+        
         ag.destroy()
+
+
 
     def test_source_dist_updated_after_source_position_update(self):
 
@@ -228,6 +248,7 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertNotEqual(flux_1, flux_2)
 
         ag.destroy()
+
 
     def test_parse_maplistfile(self):
 

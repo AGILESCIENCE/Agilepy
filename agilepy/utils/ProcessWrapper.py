@@ -110,7 +110,7 @@ class ProcessWrapper(ABC):
             command = "cp "+pfile+" ./"
             self.executeCommand(command, printStdout=False)
 
-        
+
         # starting the tool
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
@@ -130,6 +130,7 @@ class ProcessWrapper(ABC):
                 products.append(None)
             else:
                 products.append(product)
+
 
         self.logger.info(self, f"Science tool {self.exeName} produced:\n {products}")
 

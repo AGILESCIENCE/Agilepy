@@ -3,7 +3,7 @@ input:
   logfile: $AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index
 
 output:
-  outdir: $AGILE/agilepy-test-data/unittesting-output/api
+  outdir: $TEST_LOGS_DIR
   filenameprefix: testcase
   logfilenameprefix: logtestcase
   sourcename: vela-unittesting
