@@ -46,10 +46,10 @@ class SourcesLibraryUT(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
 
-        self.test_logs_dir = os.path.join(self.currentDirPath, "test_logs/SourcesLibraryUT")
-        if not os.path.isdir(self.test_logs_dir):
-            os.mkdir(self.test_logs_dir)
-        os.environ["TEST_LOGS_DIR"] = self.test_logs_dir
+        self.test_logs_dir = Path(self.currentDirPath).joinpath("test_logs", "SourcesLibraryUT")
+        self.test_logs_dir.mkdir(parents=True, exist_ok=True)
+        os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
+
 
         self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
         self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
