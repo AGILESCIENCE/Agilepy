@@ -89,10 +89,17 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         # float instead of int is ok.
-        self.assertEqual(None, self.config.setOptions(tmin=433900000, timetype="TT"))
+        self.assertEqual(None, self.config.setOptions(tmin=433857532., tmax=435153532., timetype="TT"))
 
-        self.assertEqual(None, self.config.setOptions(tmin=58026.5, tmax=58027.1, timetype="MJD"))
+        self.assertEqual("TT", self.config.getOptionValue("timetype"))
 
+        self.assertEqual(None, self.config.setOptions(tmin=58026.5, tmax=58027.5, timetype="MJD"))
+
+        self.assertEqual("MJD", self.config.getOptionValue("timetype"))
+
+
+
+        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, tmin=58026.5) # we must pass also timetype
 
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")

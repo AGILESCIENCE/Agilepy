@@ -33,7 +33,7 @@ from time import sleep
 from filecmp import cmp 
 
 from agilepy.api.AGAnalysis import AGAnalysis
-from agilepy.core.CustomExceptions import SourceModelFormatNotSupported
+from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty
 
 class AGAnalysisUT(unittest.TestCase):
 
@@ -159,6 +159,15 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(str(isocoeffs[idx]), row[5])
 
         ag.destroy()
+
+    def test_mle(self):
+        ag = AGAnalysis(self.agilepyConf)
+        ag.setOptions(tmin = 433857532, tmax = 433858532, timetype = "TT", glon = 263.55, glat = -2.78)
+        self.assertRaises(MaplistIsNone, ag.mle)
+        ag.generateMaps()
+        self.assertRaises(SourcesLibraryIsEmpty, ag.mle)
+
+        
 
     def test_analysis_pipeline(self):
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)

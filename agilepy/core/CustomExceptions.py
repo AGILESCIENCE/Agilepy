@@ -114,4 +114,8 @@ class OptionNameNotSupportedError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class SourcesLibraryIsEmpty(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 

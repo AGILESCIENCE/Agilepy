@@ -46,7 +46,8 @@ from agilepy.core.CustomExceptions import  AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \
-                                            SourceNotFound
+                                            SourceNotFound, \
+                                            SourcesLibraryIsEmpty
                                             
 class AGAnalysis(AGBaseAnalysis):
     """This class contains the high-level API to run scientific analysis, data visualization and some utility methods.
@@ -495,6 +496,13 @@ plotting:
 
         tmin = configBKP.getOptionValue("tmin")
         tmax = configBKP.getOptionValue("tmax")
+        timetype = configBKP.getOptionValue("timetype")
+        
+        if timetype == "MJD":
+            tmin =  AstroUtils.time_mjd_to_tt(tmin)
+            tmax =  AstroUtils.time_mjd_to_tt(tmax)    
+            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")         
+
 
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")
@@ -724,6 +732,11 @@ plotting:
 
             raise MaplistIsNone("No 'maplist' files found. Please, pass a valid path to a maplist \
                                  file as argument or call generateMaps(). ")
+
+        if len(self.sourcesLibrary.sources) == 0:
+
+            raise SourcesLibraryIsEmpty("No sources have been laoded yet.")
+            
 
         if not maplistFilePath:
 

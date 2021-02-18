@@ -188,6 +188,8 @@ class AgilepyConfig(Observable):
             if AgilepyConfig._notUpdatable(optionName):
                 raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
 
+        self.analysisConfig.checkOptions(**kwargs)
+
         # Analysis class config checks
         self.analysisConfig.checkOptionsType(**kwargs)
 
@@ -197,7 +199,7 @@ class AgilepyConfig(Observable):
             optionSection = self.getSectionOfOption(optionName)
 
             self.conf[optionSection][optionName] = optionValue
-
+            
             # Completion strategies
             self.analysisConfig.completeUpdate(optionName, self.conf)
 

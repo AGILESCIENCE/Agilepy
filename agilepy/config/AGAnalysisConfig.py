@@ -73,25 +73,13 @@ class AGAnalysisConfig():
 
     def checkOptions(self, **kwargs):
 
-        
         for optionName in kwargs.keys():
 
-            if optionName == "tmin" and "timetype" not in kwargs:
-                raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+            if optionName == "tmin" and ("timetype" not in kwargs or "tmax" not in kwargs):
+                raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' and 'tmax' options.")
 
-            if optionName == "tmax" and "timetype" not in kwargs:
-                raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
-
-            if self.isHidden(optionName):
-                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionName))
-
-
-    def isHidden(self, optionName):
-
-        if optionName in []:
-            return True
-
-        return False
+            if optionName == "tmax" and ("timetype" not in kwargs or "tmin" not in kwargs):
+                raise CannotSetNotUpdatableOptionError("The option 'tmax' can be updated if and only if you also specify the 'timetype' and 'tmax' options options.")
 
 
     def checkOptionsType(self, **kwargs):
@@ -175,3 +163,5 @@ class AGAnalysisConfig():
         if optionName == "evtfile" or optionName == "logfile":
 
             CompletionStrategies._expandFileEnvVars(confDict, optionName)
+
+

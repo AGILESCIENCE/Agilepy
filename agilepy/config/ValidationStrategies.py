@@ -124,20 +124,20 @@ class ValidationStrategies:
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmin, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmin) > float(idxTmax):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmin, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
 
         if float(userTmax) > float(idxTmax):
             errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmax, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmax) < float(idxTmin):
             errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmax, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         return errors
 
