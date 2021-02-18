@@ -58,7 +58,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, timetype="TT")
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
 
 
 
@@ -68,7 +68,8 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmax=456537946, timetype="TT")
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
+                          tmin=433900000, tmax=456537946, timetype="TT")
 
  
     def test_validation_min_max(self):
