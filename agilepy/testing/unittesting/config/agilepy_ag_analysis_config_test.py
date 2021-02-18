@@ -91,6 +91,8 @@ class AgilepyConfigUT(unittest.TestCase):
         # float instead of int is ok.
         self.assertEqual(None, self.config.setOptions(tmin=433900000, timetype="TT"))
 
+        self.assertEqual(None, self.config.setOptions(tmin=58026.5, tmax=58027.1, timetype="MJD"))
+
 
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")

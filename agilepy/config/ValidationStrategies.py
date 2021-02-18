@@ -30,6 +30,7 @@ from typing import List
 from numbers import Number
 
 from agilepy.utils.Utils import Utils
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
@@ -115,8 +116,11 @@ class ValidationStrategies:
 
         userTmin = confDict["selection"]["tmin"]
         userTmax = confDict["selection"]["tmax"]
+        timetype = confDict["selection"]["timetype"]
 
-
+        if timetype == "MJD":
+            userTmin = AstroUtils.time_mjd_to_tt(userTmin)
+            userTmax = AstroUtils.time_mjd_to_tt(userTmax)
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
