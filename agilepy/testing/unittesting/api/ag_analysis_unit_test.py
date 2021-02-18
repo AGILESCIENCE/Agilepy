@@ -91,7 +91,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
-        ag.setOptions(tmin=433857532, tmax=433858532)
+        ag.setOptions(tmin=433857532, tmax=433858532, timetype="TT")
 
         outDir = ag.getOption("outdir")
 
@@ -112,7 +112,7 @@ class AGAnalysisUT(unittest.TestCase):
 
 
         # third generation with different time interval
-        ag.setOptions(tmin=433957532, tmax=433958532)
+        ag.setOptions(tmin=433957532, tmax=433958532, timetype="TT")
         maplistFilePath = ag.generateMaps()
 
         self.assert_maplistfile_lines_number(maplistFilePath, 4)
