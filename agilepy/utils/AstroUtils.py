@@ -27,6 +27,7 @@
 
 import math
 import numpy as np
+import pandas as pd
 from datetime import datetime
 
 class AstroUtils:
@@ -67,6 +68,32 @@ class AstroUtils:
                 print("\nException in AstroUtils.distance (error in acos() ): ", e)
 
                 return math.sqrt(d1 * d1 + d2 * d2)
+    
+    @staticmethod
+    def filter(filename, threshold, tstart, tstop, outpath):
+
+        data = pd.read_csv(filename,  index_col=False, names=["tmin_tt", "tmax_tt", "exp", "cts"], sep=" ")
+
+        data = data[data["exp"] > threshold]
+        data.sort_values("tmin_tt", inplace=True)
+        data["group"] = (data["tmin_tt"] > data["tmax_tt"].shift()).cumsum()
+        results = data.groupby("group").agg({"tmin_tt":"min", "tmax_tt":"max"})
+        results.to_csv(str(outpath)+"/result.txt", sep=" ", index=False)
+
+        data = pd.read_csv(str(outpath)+"/result.txt", sep=" ", header=0)
+
+        data = data[data["tmin_tt"] > tstart]
+        data = data[data["tmax_tt"] < tstop]
+
+        product = str(outpath)+"/result"+"_"+str(tstart) + "_" + str(tstop)+".txt"
+        data.to_csv(product, sep=" ", index=False)
+
+        print(product)
+
+        return product
+
+
+
 
     # BASIC CONVERSIONS
     @staticmethod
