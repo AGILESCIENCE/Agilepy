@@ -8,6 +8,7 @@
 * (\#208) useEDPmatrixforEXP default value is now: False.
 * (\#215) After calling mle(), each free parameter will be updated (if they need to).
 * (\#217) The quickstart guide and the tutorial notebooks show how to change the value of a spectrum parameter of a source
+* (\#231) New utility for filtering ap in Astroutils
 * (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
 ## Release 1.2.0 - 10/12/20
