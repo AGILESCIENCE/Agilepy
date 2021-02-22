@@ -70,7 +70,7 @@ class AstroUtils:
                 return math.sqrt(d1 * d1 + d2 * d2)
     
     @staticmethod
-    def filter(filename, threshold, tstart, tstop, outpath):
+    def AP_filter(filename, threshold, tstart, tstop, outpath):
         """
         This function filters an aperture photometry file using a threshold value for exposure,
         it discards the rows lower than threshold and returns a new file merging the continous rows.

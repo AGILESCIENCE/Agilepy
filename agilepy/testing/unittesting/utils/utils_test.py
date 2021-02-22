@@ -228,7 +228,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         
         print(self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap")
         print(self.currentDirPath)
-        product = AstroUtils.filter(
+        product = AstroUtils.AP_filter(
             self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap", 1, 174142800, 447490800, self.currentDirPath)
         with open(product, "r") as f:
             linesNumber = len(f.readlines())
