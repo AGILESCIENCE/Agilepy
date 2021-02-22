@@ -71,6 +71,19 @@ class AstroUtils:
     
     @staticmethod
     def filter(filename, threshold, tstart, tstop, outpath):
+        """
+        This function filters an aperture photometry file using a threshold value for exposure,
+        it discards the rows lower than threshold and returns a new file merging the continous rows.
+
+        Args:
+            filename (str): path of the aperture photometry file
+            threshold (float): exposure threshold
+            tstart (float): time start in UTC
+            tstop (float): time stop in UTC
+        
+        Returns:
+            A filtered file result.txt
+        """
 
         data = pd.read_csv(filename,  index_col=False, names=["tmin_tt", "tmax_tt", "exp", "cts"], sep=" ")
 
