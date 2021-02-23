@@ -78,7 +78,7 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(numberOfLines, len(lines))
 
     def assert_generated_maps_number(self, outDir, numberOfMaps):
-        maps = os.listdir(Path(outDir).joinpath("maps"))
+        maps = [map for map in os.listdir(outDir) if ".gz" in map]
         self.assertEqual(numberOfMaps, len(maps))
 
     def assert_generated_maps_exist(self, skyMapMatrix):
@@ -95,34 +95,52 @@ class AGAnalysisUT(unittest.TestCase):
 
         outDir = ag.getOption("outdir")
 
-        maplistFilePath = ag.generateMaps()
-        shutil.copy(maplistFilePath, maplistFilePath+"_1.bkp")
-        self.assert_maplistfile_lines_number(maplistFilePath, 4)
-        self.assert_generated_maps_number(outDir, 16)
-        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
-
+        maplistFilePath0 = ag.generateMaps()
+        self.assert_maplistfile_lines_number(maplistFilePath0, 4)
+        outDir0 = Path(outDir).joinpath("maps", "0")
+        self.assertEqual(True, outDir0.is_dir())
+        self.assert_generated_maps_number(outDir0, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath0))
 
         # second generation (same parameters)
-        maplistFilePath = ag.generateMaps()
-        shutil.copy(maplistFilePath, maplistFilePath+"_2.bkp")
-        self.assert_maplistfile_lines_number(maplistFilePath, 4)
-        self.assert_generated_maps_number(outDir, 16)
-        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
-        self.assertTrue(cmp(maplistFilePath, maplistFilePath+"_1.bkp", shallow=False), f'The files {maplistFilePath} and {maplistFilePath+"_1.bkp"} are different!')
+        maplistFilePath1 = ag.generateMaps()
+        self.assert_maplistfile_lines_number(maplistFilePath1, 4)
+        outDir1 = Path(outDir).joinpath("maps", "1")
+        self.assertEqual(True, outDir1.is_dir())
+        self.assert_generated_maps_number(outDir1, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath1))
 
-
+        
         # third generation with different time interval
-        ag.setOptions(tmin=433957532, tmax=433958532, timetype="TT")
-        maplistFilePath = ag.generateMaps()
+        ag.setOptions(tmin=433957532, tmax=433957632, timetype="TT")
+        maplistFilePath2 = ag.generateMaps()
+        self.assert_maplistfile_lines_number(maplistFilePath2, 4)
+        outDir2 = Path(outDir).joinpath("maps", "2")
+        self.assertEqual(True, outDir2.is_dir())        
+        self.assert_generated_maps_number(outDir2, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath2))
 
-        self.assert_maplistfile_lines_number(maplistFilePath, 4)
-        self.assert_generated_maps_number(outDir, 16+16)
-        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath))
-        self.assertFalse(cmp(maplistFilePath, maplistFilePath+"_2.bkp", shallow=False), f'The files {maplistFilePath} and {maplistFilePath+"_2.bkp"} are not different!')
+        # fourth generation with different glon and glat
+        ag.setOptions(glon=265, glat=-3, timetype="TT")
+        maplistFilePath3 = ag.generateMaps()
+        self.assert_maplistfile_lines_number(maplistFilePath3, 4)
+        outDir3 = Path(outDir).joinpath("maps", "3")
+        self.assertEqual(True, outDir3.is_dir())        
+        self.assert_generated_maps_number(outDir3, 16)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath3))
 
+
+        # fifth generation with different fovbinnumber, and energy range
+        ag.setOptions(fovbinnumber=1, energybins=[[100,300]])
+        maplistFilePath4 = ag.generateMaps()
+        self.assert_maplistfile_lines_number(maplistFilePath4, 1)
+        outDir3 = Path(outDir).joinpath("maps", "4")
+        self.assertEqual(True, outDir3.is_dir())        
+        self.assert_generated_maps_number(outDir3, 4)
+        self.assert_generated_maps_exist(ag.parseMaplistFile(maplistFilePath4))
 
         ag.destroy()
-
+        
     def test_update_gal_iso(self):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
@@ -286,6 +304,7 @@ class AGAnalysisUT(unittest.TestCase):
     def test_saving_sky_maps(self):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
+        ag.setOptions(tmin = 433857532, tmax = 433857732, timetype = "TT")
         _ = ag.generateMaps()
 
         maps = ag.displayCtsSkyMaps(singleMode=False, saveImage=True)
