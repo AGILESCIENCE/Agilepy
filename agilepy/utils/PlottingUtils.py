@@ -173,7 +173,6 @@ class PlottingUtils(metaclass=Singleton):
             filename = self.outdir.joinpath(filename+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(filename)
             self.logger.info(self, "Produced: %s", filename)
-            print("filename: ",filename)
             return str(filename)
         else:
             plt.show()

@@ -75,3 +75,11 @@ class Utils:
         elements = indexFileLine.split(" ")
         return (elements[1], elements[2])
     
+    @staticmethod
+    def _createNextSubDir(path):
+        subDirectories = next(os.walk(path))[1]
+        currentOutputDirectories = sorted([int(name) for name in subDirectories if path.joinpath(name).is_dir()]) # [0, 1, 2, ]
+        if not currentOutputDirectories: currentOutputDirectories = [-1] 
+        path = path.joinpath(str(currentOutputDirectories[-1] + 1)) # 2+1
+        path.mkdir(exist_ok=True)
+        return path

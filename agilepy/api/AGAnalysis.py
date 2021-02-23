@@ -503,9 +503,17 @@ plotting:
             tmax =  AstroUtils.time_mjd_to_tt(tmax)    
             configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")         
 
-
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")
+
+        # Creating the output directory if it does not exist
+        outputDir = Path(configBKP.getConf("output","outdir")).joinpath("maps")
+        outputDir.mkdir(exist_ok=True, parents=True)
+        outputDir = Utils._createNextSubDir(outputDir)
+        configBKP.setOptions(outdir=str(outputDir))
+
+        # Change the maplist file path
+        maplistObjBKP.setFile(outputDir)
 
         for stepi in range(0, fovbinnumber):
 
@@ -564,13 +572,13 @@ plotting:
 
                     f4 = intMapGenerator.call()
 
-                    maplistObjBKP.addRow(  next(iter(ctsMapGenerator.products.items()))[0], \
-                                                next(iter(expMapGenerator.products.items()))[0], \
-                                                next(iter(gasMapGenerator.products.items()))[0], \
-                                                str(bincenter), \
-                                                str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
-                                                str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
-                                              )
+                    maplistObjBKP.addRow(   next(iter(ctsMapGenerator.products.items()))[0], \
+                                            next(iter(expMapGenerator.products.items()))[0], \
+                                            next(iter(gasMapGenerator.products.items()))[0], \
+                                            str(bincenter), \
+                                            str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
+                                            str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
+                                        )
                 else:
                     self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", stepe[0], stepe[1])
 
@@ -743,24 +751,17 @@ plotting:
             maplistFilePath = self.currentMapList.getFile()
 
         # Creating the output directory if it does not exist
-        mleOutputDir = Path(configBKP.getConf("output","outdir")).joinpath("mle")
-        mleOutputDir.mkdir(exist_ok=True)
-        
-        # Each time mle() is called, a new directory for the output is created.
-        subDirectories = next(os.walk(mleOutputDir))[1]
-
-        currentOutputDirectories = sorted([int(name) for name in subDirectories if mleOutputDir.joinpath(name).is_dir()]) # [0, 1, 2, ]
-        if not currentOutputDirectories: currentOutputDirectories = [-1] 
-        mleOutputDir.joinpath(str(currentOutputDirectories[-1] + 1)).mkdir(exist_ok=True) # 2+1
-
-        configBKP.setOptions(outdir=str(mleOutputDir))
+        outputDir = Path(configBKP.getConf("output","outdir")).joinpath("mle")
+        outputDir.mkdir(exist_ok=True, parents=True)
+        outputDir = Utils._createNextSubDir(outputDir)
+        configBKP.setOptions(outdir=str(outputDir))
 
         # The multi tools needs to know which maps (maplistfile) it will consider during the analysis.
         configBKP.addOptions("selection", maplist=maplistFilePath)
 
         # The multi tools needs to know which which sources (in AGILE format) it will consider during the analysis.
         sourceListFilename = "sourceLibrary"+(str(self.multiTool.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=mleOutputDir.joinpath(sourceListFilename), fileformat="txt")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=outputDir.joinpath(sourceListFilename), fileformat="txt")
         configBKP.addOptions("selection", sourcelist=sourceListAgileFormatFilePath)
 
         # The multi tools needs to know the name of the sources it will consider during the analysis.
@@ -863,12 +864,12 @@ plotting:
             binOutDir = str(lcAnalysisDataDir.joinpath(f"{idx}_bin_{t1}_{t2}"))
 
 
-            configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
+            configBKP.setOptions(filenameprefix="lc_analysis", outdir=binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
 
             maplistObj = MapList(self.logger)
 
-            maplistFilePath = self.generateMaps(config = configBKP, maplistObj=maplistObj)
+            maplistFilePath = self.generateMaps(config=configBKP, maplistObj=maplistObj)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
@@ -1348,7 +1349,7 @@ plotting:
             self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
             return False
 
-        if self.currentMapList.getFile() is None:
+        elif self.currentMapList.getFile() is None and maplistFile is not None:
             maplistRows = self.parseMaplistFile(maplistFile)
         else:
             maplistRows = self.parseMaplistFile()
@@ -1361,8 +1362,10 @@ plotting:
         for maplistRow in maplistRows:
 
             skymapFilename = basename(maplistRow[0])
-            emin = skymapFilename.split("EMIN")[1].split("_")[0]
-            emax = skymapFilename.split("EMAX")[1].split("_")[0]
+
+            # This data should be read from the FITS header
+            emin = skymapFilename.split("EN")[1].split("_")[0]
+            emax = skymapFilename.split("EX")[1].split("_")[0]
 
             title = f"{skyMapType}\nemin: {emin} emax: {emax} bincenter: {maplistRow[3]}\ngalcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
 

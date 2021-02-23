@@ -40,7 +40,9 @@ class CtsMapGenerator(ProcessWrapper):
 
     def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        # self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        self.outputDir = config.getOptionValue("outdir")
+        
         outputName = config.getOptionValue("filenameprefix")+".cts.gz"
 
         outfilePath = os.path.join(self.outputDir, outputName)
@@ -83,7 +85,9 @@ class ExpMapGenerator(ProcessWrapper):
 
     def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        # self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        self.outputDir = config.getOptionValue("outdir")
+
         outputName = config.getOptionValue("filenameprefix")+".exp.gz"
 
         edpmatrix = "None"
@@ -137,7 +141,8 @@ class GasMapGenerator(ProcessWrapper):
 
     def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        self.outputDir = config.getOptionValue("outdir")
+
         outputName = config.getOptionValue("filenameprefix")+".gas.gz"
 
         outfilePath = os.path.join(self.outputDir, outputName)
@@ -165,8 +170,10 @@ class IntMapGenerator(ProcessWrapper):
 
     def configureTool(self, config, extraParams=None):
 
-        self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
+        self.outputDir = config.getOptionValue("outdir")
+
         outputName = config.getOptionValue("filenameprefix")+".int.gz"
+
         outfilePath = os.path.join(self.outputDir, outputName)
 
         self.products = {
