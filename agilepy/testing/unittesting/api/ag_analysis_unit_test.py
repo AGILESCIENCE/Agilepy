@@ -145,6 +145,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
+        ag.setOptions(tmin=433857532, tmax=433858532, timetype="TT")
+
         outDir = Path(ag.getOption("outdir"))
 
         ag.config.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8])
@@ -153,17 +155,13 @@ class AGAnalysisUT(unittest.TestCase):
         galcoeffs = ag.config.getOptionValue("galcoeff")
         isocoeffs = ag.config.getOptionValue("isocoeff")
 
-        maplistFilePath = ag.generateMaps()
+        _ = ag.generateMaps()
 
         matrix = ag.parseMaplistFile()
         for idx, row in enumerate(matrix):
             self.assertEqual(str(galcoeffs[idx]), row[4])
             self.assertEqual(str(isocoeffs[idx]), row[5])
 
-        if outDir.joinpath("maps").exists() and outDir.joinpath("maps").is_dir():
-            shutil.rmtree(outDir.joinpath("maps"))
-
-        outDir.joinpath("maps").mkdir(parents=False, exist_ok=True)
 
         ag.config.setOptions(galcoeff=[0,0,0,0])
         ag.config.setOptions(isocoeff=[0,0,0,0])
@@ -176,7 +174,7 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(str(galcoeffs[idx]), row[4])
             self.assertEqual(str(isocoeffs[idx]), row[5])
 
-        ag.destroy()
+        # ag.destroy()
 
     def test_mle(self):
         ag = AGAnalysis(self.agilepyConf)
