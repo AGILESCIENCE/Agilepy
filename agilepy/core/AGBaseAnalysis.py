@@ -85,8 +85,9 @@ class AGBaseAnalysis:
         outDir = Path(self.config.getConf("output", "outdir"))
 
         if outDir.exists() and outDir.is_dir():
+            self.logger.info(self, "Removing directory %s", str(outDir))
+            self.logger.reset()
             rmtree(outDir)
-            self.logger.info(self,"Analysis directory %s deleted.", str(outDir))
         else:
             self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
             return False

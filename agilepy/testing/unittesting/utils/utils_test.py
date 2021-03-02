@@ -56,6 +56,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         self.outDir = Path(self.config.getOptionValue("outdir"))
 
         if self.outDir.exists() and self.outDir.is_dir():
+            self.agilepyLogger.reset()
             shutil.rmtree(self.outDir)
 
         self.tmpDir = Path("./tmp")
