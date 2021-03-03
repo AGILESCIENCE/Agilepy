@@ -44,10 +44,6 @@ class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
 
 
         self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf_ageng.yaml")
-        self.outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
-
-        if self.outDir.exists() and self.outDir.is_dir():
-            shutil.rmtree(self.outDir)
 
         self.ageng = AGEngAgileOffaxisVisibility(self.agilepyconfPath)
 
