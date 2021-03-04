@@ -23,6 +23,10 @@ Supported platforms:
   - linux-64
   - osx-64
 
+.. note:: An experimental package for IBM POWER architecture(ppc64le) is available on Anaconda cloud. Due to some incompability this package does not contain
+          ROOT and AGILE science tools that need to be installed by source. Check the instructions to install AGILE science tools
+          `here <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup>`_
+
 Tested on:
 
   - CentOs 7.6
