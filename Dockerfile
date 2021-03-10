@@ -1,9 +1,9 @@
 FROM agilescience/agilepy-recipe:latest
-RUN ls && pwd
-RUN cd && ls -alt && pwd
 
-RUN conda activate agilepydev 
-RUN cd && pwd && ls -alt 
-RUN python setup.py develop
+RUN conda activate agilepydev && \
+    git clone https://github.com/AGILESCIENCE/Agilepy.git && \
+    cd Agilepy && \
+    git checkout develop && \
+    python setup.py develop
 
 

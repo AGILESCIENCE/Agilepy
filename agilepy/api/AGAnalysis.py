@@ -1154,7 +1154,7 @@ plotting:
 
         for bd in binDirectories:
 
-            mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd).joinpath("mle")
+            mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd,"mle","0")
 
             mleOutputFiles = os.listdir(mleOutputDirectories)
 
