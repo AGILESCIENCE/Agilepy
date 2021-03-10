@@ -2,8 +2,12 @@ FROM agilescience/agilepy-recipe:latest
 RUN ls && pwd
 RUN cd && ls -alt && pwd
 
-RUN conda activate agilepydev 
 RUN cd && pwd && ls -alt 
+RUN cd /home
+RUN git clone --branch "$DOCKER_TAG" https://github.com/AGILESCIENCE/Agilepy.git && pwd && ls -alt
+RUN pwd && ls -alt
+RUN cd Agilepy
+RUN conda activate agilepydev
 RUN python setup.py develop
 
 
