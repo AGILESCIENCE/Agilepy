@@ -8,7 +8,6 @@ RUN echo "$SOURCE_BRANCH"
 RUN git clone https://github.com/AGILESCIENCE/Agilepy.git && pwd && ls -alt
 RUN cd Agilepy
 RUN pwd && ls -alt
-RUN git branch -a
 RUN git checkout develop
 RUN pwd && ls -alt && env
 RUN conda activate agilepydev
