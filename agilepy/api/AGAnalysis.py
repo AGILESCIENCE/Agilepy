@@ -893,6 +893,9 @@ plotting:
 
         lcData = self._getLightCurveData(sourceName, lcAnalysisDataDir, binsize)
 
+        print("data are")
+        print(lcData)
+
         lcOutputFilePath = Path(lcAnalysisDataDir).joinpath(f"light_curve_{tstart}_{tstop}.txt")
 
         with open(lcOutputFilePath, "w") as lco:
@@ -1154,7 +1157,7 @@ plotting:
 
         for bd in binDirectories:
 
-            mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd).joinpath("mle")
+            mleOutputDirectories = Path(lcAnalysisDataDir).joinpath(bd,"mle","0")
 
             mleOutputFiles = os.listdir(mleOutputDirectories)
 

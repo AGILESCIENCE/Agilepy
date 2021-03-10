@@ -354,7 +354,7 @@ class AGAnalysisUT(unittest.TestCase):
 
         self.assertEqual(True, os.path.isfile(lightCurvePlot))
 
-        # ag.destroy()
+        ag.destroy()
 
     """def test_simple_lc(self):
 
