@@ -1,6 +1,8 @@
 FROM agilescience/agilepy-recipe:latest
 
-RUN echo $(env) 
+RUN echo $(env)
+
+RUN echo $ciao
 
 RUN conda activate agilepydev && \
     git clone https://github.com/AGILESCIENCE/Agilepy.git && \
