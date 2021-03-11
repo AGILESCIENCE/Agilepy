@@ -143,7 +143,8 @@ class SourcesLibrary:
 
         if show:
             for s in addedSources:
-                self.logger.info(self, f"{s}")
+                print(f"{s}")
+                # self.logger.info(self, f"{s}")
 
         self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
 
@@ -229,7 +230,8 @@ class SourcesLibrary:
 
         if show:
             for s in selected:
-                self.logger.info(self, f"{s}")
+                print(f"{s}")
+                # self.logger.info(self, f"{s}")
 
         return selected
 
@@ -269,7 +271,8 @@ class SourcesLibrary:
                 affected.append(s)
 
                 if show:
-                    self.logger.info(self, f"{s}")
+                    print(f"{s}")
+                    # self.logger.info(self, f"{s}")
 
         return affected
 
@@ -285,7 +288,8 @@ class SourcesLibrary:
 
         if show:
             for s in deletedSources:
-                self.logger.info(self, f"{s}")
+                print(f"{s}")
+                # self.logger.info(self, f"{s}")
 
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
