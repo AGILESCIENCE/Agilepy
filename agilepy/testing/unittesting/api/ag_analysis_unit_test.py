@@ -346,12 +346,25 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.freeSources(lambda name: name == self.VELA, "flux", True)
 
-        lightCurveData = ag.lightCurveMLE(self.VELA, tmin=433857532, tmax=433900000, timetype="TT", binsize=20000)
+        lightCurveData = ag.lightCurveMLE(self.VELA, tmin=433860000, tmax=433880000, timetype="TT", binsize=20000)
 
         self.assertEqual(True, os.path.isfile(lightCurveData))
 
-        lightCurvePlot = ag.displayLightCurve("mle", saveImage=True)
+        with open(lightCurveData, "r") as lcd:
+            lines = lcd.readlines()
+            # print("readlines: ", lines)
+        self.assertEqual(True,len(lines) == 1+1) # 1 header + 2 temporal bins
 
+        lightCurveData = ag.lightCurveMLE(self.VELA, tmin=433900000, tmax=433940000, timetype="TT", binsize=20000)
+
+        self.assertEqual(True, os.path.isfile(lightCurveData))
+
+        with open(lightCurveData, "r") as lcd:
+            lines = lcd.readlines()
+            # print("readlines: ", lines)
+        self.assertEqual(True, len(lines) == 1+2) # 1 header + 3 temporal bins
+
+        lightCurvePlot = ag.displayLightCurve("mle", saveImage=True)
         self.assertEqual(True, os.path.isfile(lightCurvePlot))
 
         ag.destroy()
