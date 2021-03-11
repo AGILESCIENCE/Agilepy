@@ -58,6 +58,7 @@ class AGAnalysis(AGBaseAnalysis):
     This constructor of this class requires a ``yaml configuration file``.
 
     """
+    INSTANCE_COUNT = 0
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
         """AGAnalysis constructor.
@@ -77,7 +78,11 @@ class AGAnalysis(AGBaseAnalysis):
 
         """
         super().__init__(configurationFilePath)
-
+        
+        if AGAnalysis.INSTANCE_COUNT > 0:
+            print("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[WARNING] Each notebook should instantiate only one AGAnalysis object, otherwise the logger will be duplicated. Duplicate logs can be tricky. If you want to make another analysis, create a new notebook or restart the Kernel and update this one.")
+        AGAnalysis.INSTANCE_COUNT += 1
+    
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
