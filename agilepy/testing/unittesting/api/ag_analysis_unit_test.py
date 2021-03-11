@@ -33,7 +33,8 @@ from time import sleep
 from filecmp import cmp 
 
 from agilepy.api.AGAnalysis import AGAnalysis
-from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty
+from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty, ValueOutOfRange
 
 class AGAnalysisUT(unittest.TestCase):
 
@@ -561,6 +562,59 @@ class AGAnalysisUT(unittest.TestCase):
             linesNum = sum(1 for line in f)
         self.assertEqual(len(sources_subset)+1, linesNum)
 
+    def test_setOptionTimeMJD(self):
+        
+        ag = AGAnalysis(self.agilepyConf)
+
+        tmin1 = 58030.0
+        tmax1 = 58035.0
+
+        tmintt = AstroUtils.time_mjd_to_tt(tmin1)
+        tmaxtt = AstroUtils.time_mjd_to_tt(tmax1)
+
+        ag.setOptionTimeMJD(tmin=tmin1, tmax=tmax1)
+
+        tmin2 = ag.getOption("tmin")
+
+        tmax2 = ag.getOption("tmax")
+
+        self.assertEqual(tmintt, tmin2)
+        self.assertEqual(tmaxtt, tmax2)
+
+        ag.destroy()
+
+    def test_setOptionEnergybin(self):
+
+        energybin0 = [[100, 10000]]
+        energybin1 = [[100, 50000]]
+        energybin2 = [[100, 300], [300, 1000], [1000, 3000], [3000, 10000]]
+        energybin3 = [[100, 300], [300, 1000], [1000, 3000], [3000, 10000], [10000, 50000]]
+        energybin4 = [[50, 100], [100, 300], [300, 1000], [1000, 3000], [3000, 10000]]
+        energybin5 = [[50, 100], [100, 300], [300, 1000], [1000, 3000], [3000, 10000], [10000, 50000]]
+
+        ag = AGAnalysis(self.agilepyConf)
+
+        self.assertRaises(ValueOutOfRange, ag.setOptionEnergybin, 42)
+
+        ag.setOptionEnergybin(0)
+        self.assertEqual(ag.getOption("energybins"), energybin0)
+
+        ag.setOptionEnergybin(1)
+        self.assertEqual(ag.getOption("energybins"), energybin1)
+
+        ag.setOptionEnergybin(2)
+        self.assertEqual(ag.getOption("energybins"), energybin2)
+
+        ag.setOptionEnergybin(3)
+        self.assertEqual(ag.getOption("energybins"), energybin3)
+
+        ag.setOptionEnergybin(4)
+        self.assertEqual(ag.getOption("energybins"), energybin4)
+
+        ag.setOptionEnergybin(5)
+        self.assertEqual(ag.getOption("energybins"), energybin5)
+
+        ag.destroy()
 
 if __name__ == '__main__':
     unittest.main()

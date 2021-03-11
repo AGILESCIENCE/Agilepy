@@ -9,6 +9,7 @@
 * (\#215) After calling mle(), each free parameter will be updated (if they need to).
 * (\#217) The quickstart guide and the tutorial notebooks show how to change the value of a spectrum parameter of a source
 * (\#231) New utility for filtering ap in Astroutils
+* (\#238) New methods setOptionTimeMJD setOptionEnergybin
 * (\#242) tdms progress bars 
 * (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
