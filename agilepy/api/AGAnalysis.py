@@ -49,7 +49,8 @@ from agilepy.core.CustomExceptions import  AGILENotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \
                                             SourceNotFound, \
-                                            SourcesLibraryIsEmpty
+                                            SourcesLibraryIsEmpty, \
+                                            ValueOutOfRange
                                             
 class AGAnalysis(AGBaseAnalysis):
     """This class contains the high-level API to run scientific analysis, data visualization and some utility methods.
@@ -451,6 +452,58 @@ plotting:
         """
         return self.sourcesLibrary.writeToFile(outfileNamePrefix, fileformat=fileFormat, sources=sources)
 
+    def setOptionTimeMJD(self, tmin, tmax):
+        """It performs a time conversion MJD -> TT and set new values using setOptions functions
+        
+        Args:
+            tmin(float): tmin in MJD 
+            tmax(float): tmax in MJD
+
+        """
+
+        self.config.setOptions(tmin=AstroUtils.time_mjd_to_tt(tmin), tmax=AstroUtils.time_mjd_to_tt(tmax), timetype="TT")
+
+    def setOptionEnergybin(self, value):
+        """An useful utility method that maps a value in a specific energybin and it calls the setOptions function.
+
+        Args:
+            Value (int): A value between 0 and 5:
+                0 -> [[100, 10000]]
+                1 -> [[100, 50000]]
+                2 -> [[100, 300], [300, 1000], [1000, 3000], [3000, 10000]]
+                3 -> [[100, 300], [300, 1000], [1000, 3000], [3000, 10000], [10000, 50000]]
+                4 -> [[50, 100], [100, 300], [300, 1000], [1000, 3000], [3000, 10000]]
+                5 -> [[50, 100], [100, 300], [300, 1000], [1000, 3000], [3000, 10000], [10000, 50000]]
+        
+        Raises:
+            ValueOutOfRange exception if the value is not between 0 and 5
+        """
+
+        if value < 0 or value > 5:
+            self.logger.critical(self, "Value out of range, possible values [0, 1, 2, 3, 4, 5]")
+            raise ValueOutOfRange("Value out of range, possible values[0, 1, 2, 3, 4, 5]")
+
+        elif value == 0:
+            self.config.setOptions(energybins=[[100, 10000]])
+        
+        elif value == 1:
+            self.config.setOptions(energybins=[[100, 50000]])
+
+        elif value == 2:
+            self.config.setOptions(
+                energybins=[[100, 300], [300, 1000], [1000, 3000], [3000, 10000]])
+
+        elif value == 3:
+            self.config.setOptions(energybins=[[100, 300], [300, 1000], [
+                                   1000, 3000], [3000, 10000], [10000, 50000]])
+        
+        elif value == 4:
+            self.config.setOptions(energybins=[[50, 100], [100, 300], [
+                                   300, 1000], [1000, 3000], [3000, 10000]])
+
+        elif value == 5:
+            self.config.setOptions(energybins=[[50, 100], [100, 300], [300, 1000], [
+                                   1000, 3000], [3000, 10000], [10000, 50000]])
 
     ############################################################################
     # analysis                                                                 #

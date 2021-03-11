@@ -11,7 +11,7 @@ AGBaseAnalysis
 AGAnalysis
 **********
 .. autoclass:: api.AGAnalysis.AGAnalysis
-    :members: __init__, destroy, getConfiguration, loadSourcesFromCatalog, loadSourcesFromFile, selectSources, freeSources, fixSource, addSource, deleteSources, getSources, updateSourcePosition, writeSourcesOnFile, generateMaps, calcBkg, mle, lightCurveMLE, aperturePhotometry, displayCtsSkyMaps, displayExpSkyMaps, displayGasSkyMaps, displayIntSkyMaps, displayLightCurve, convertCatalogToXml, parseMaplistFile 
+    :members: __init__, destroy, getConfiguration, loadSourcesFromCatalog, loadSourcesFromFile, selectSources, freeSources, fixSource, addSource, deleteSources, getSources, updateSourcePosition, writeSourcesOnFile, generateMaps, calcBkg, mle, lightCurveMLE, aperturePhotometry, displayCtsSkyMaps, displayExpSkyMaps, displayGasSkyMaps, displayIntSkyMaps, displayLightCurve, convertCatalogToXml, parseMaplistFile, setOptionTimeMJD, setOptionEnergybin 
 
 AGAnalysisWavelet
 *****************
