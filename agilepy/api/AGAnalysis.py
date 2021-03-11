@@ -27,6 +27,7 @@
 
 import os
 import re
+from tqdm import tqdm  
 from time import time
 from pathlib import Path
 from shutil import rmtree
@@ -847,7 +848,8 @@ plotting:
 
         self.logger.info(self, "[LC] Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
 
-        for idx, bin in enumerate(bins):
+
+        for idx, bin in tqdm(enumerate(bins)):
 
             t1 = bin[0]
             t2 = bin[1]

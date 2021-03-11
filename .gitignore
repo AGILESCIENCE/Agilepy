@@ -13,6 +13,7 @@ cov_html_report/
 .codacy-coverage
 upload_coverage_report.sh
 .vscode
+test_logs
 
 load_env.sh
 /tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out
