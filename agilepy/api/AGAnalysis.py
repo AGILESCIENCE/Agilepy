@@ -27,7 +27,8 @@
 
 import os
 import re
-from tqdm import tqdm  
+# from tqdm import tqdm, trange  
+from tqdm.notebook import trange, tqdm
 from time import time
 from pathlib import Path
 from shutil import rmtree
@@ -455,7 +456,7 @@ plotting:
     # analysis                                                                 #
     ############################################################################
 
-    def generateMaps(self, config = None, maplistObj = None):
+    def generateMaps(self, config = None, maplistObj = None, dqdmOff = False):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -516,7 +517,7 @@ plotting:
         # Change the maplist file path
         maplistObjBKP.setFile(outputDir)
 
-        for stepi in range(0, fovbinnumber):
+        for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=dqdmOff, leave=dqdmOff):
 
             if fovbinnumber == 1:
                 bincenter = 30
@@ -526,7 +527,7 @@ plotting:
                 bincenter, fovmin, fovmax = AGAnalysis._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
-            for bgCoeffIdx, stepe in enumerate(energybins):
+            for bgCoeffIdx, stepe in tqdm(enumerate(energybins), desc=f"Energy bins loop", disable=dqdmOff, leave=dqdmOff):
 
                 if Parameters.checkEnergyBin(stepe):
 
@@ -540,6 +541,10 @@ plotting:
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
+
+                    """
+                    REFACTOR FROM NOW ON TO A FUNCTION..
+                    """
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     configBKP.setOptions(fovradmin=int(fovmin), fovradmax=int(fovmax))
                     configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
@@ -848,8 +853,8 @@ plotting:
 
         self.logger.info(self, "[LC] Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
 
-
-        for idx, bin in tqdm(enumerate(bins)):
+        idx = 0
+        for bin in tqdm(bins, desc="Temporal bin loop"):
 
             t1 = bin[0]
             t2 = bin[1]
@@ -871,12 +876,13 @@ plotting:
 
             maplistObj = MapList(self.logger)
 
-            maplistFilePath = self.generateMaps(config=configBKP, maplistObj=maplistObj)
+            maplistFilePath = self.generateMaps(config=configBKP, maplistObj=maplistObj, dqdmOff=False)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
             _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
 
+            idx += 1
         """
         processes = []
         for pID, pInputs in enumerate(binsForProcesses):
