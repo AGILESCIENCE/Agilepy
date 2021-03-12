@@ -629,6 +629,7 @@ class AGAnalysisUT(unittest.TestCase):
         
         source = ag.selectSources(
             'name == "2AGLJ0835-4514"')
+        flux0 = source[0].initialSpectrum.get("flux")
         flux1 = source[0].spectrum.get("flux")
         
         self.assertEqual(len(sources), 9)
@@ -639,9 +640,12 @@ class AGAnalysisUT(unittest.TestCase):
         _ = ag.generateMaps()
 
         _ = ag.mle()
+        
         flux2 = sources[0].spectrum.get("flux")
+        flux3 = source[0].initialSpectrum.get("flux")
 
-        self.assertEqual(flux1, flux2)
+        self.assertEqual(flux0, flux3)
+        self.assertNotEqual(flux1, flux2)
 
         ag.destroy()
 
