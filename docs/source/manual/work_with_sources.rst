@@ -112,9 +112,6 @@ is performed, the user can print out the Source object and it will show the mult
       - index2: 1.34774
     * Spectrum after last MLE analysis: (PLSuperExpCutoff)
       - flux: 9.35543e-06
-      - index1: 1.71345
-      - cutoffEnergy: 3913.06
-      - index2: 1.34774
     -----------------------------------------------------------
 
 Furthermode, when the "pos" parameter is free to vary, the multi values section will show additional values:
@@ -138,9 +135,6 @@ Furthermode, when the "pos" parameter is free to vary, the multi values section 
        - Dist from map center (l,b): 0.1173
      * Spectrum after last MLE analysis: (PLSuperExpCutoff)
        - flux: 9.35002e-06
-       - index1: 1.71345
-       - cutoffEnergy: 3913.06
-       - index2: 1.34774
      * Last MLE analysis:
        - flux(ph/cm2s): 9.35002e-06 +- 1.00423e-06
        - upper limit(ph/cm2s): 1.14637e-05
