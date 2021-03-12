@@ -394,10 +394,10 @@ class Source:
         return Color.BOLD + ss + Color.END
 
     def colorRed(self, ss):
-        return Color.RED + ss + color.END
+        return Color.RED + ss + Color.END
 
     def colorBlue(self, ss):
-        return Color.BLUE + ss + color.END
+        return Color.BLUE + ss + Color.END
 
     
     def __str__(self):
@@ -418,7 +418,7 @@ class Source:
             strRepr += f'\n  * {self.bold("Free params")}: '+' '.join(freeParams)
         
         ## Initial Source Position
-        strRepr += f'\n  * {self.bold("Initial Source Position")}:\n\t- start_pos: {self.initialSpatialModel.get("pos")}\n\t- dist from (l,b): {round(self.initialSpatialModel.get("dist"), 4)}'
+        strRepr += f'\n  * {self.bold("Initial Source Position")}:\n\t- Source position: {self.initialSpatialModel.get("pos")}\n\t- Dist from map center (l,b): {round(self.initialSpatialModel.get("dist"), 4)}'
 
         ## Initial Source Spectrum 
         strRepr += f'\n  * {self.bold("Initial Source Spectrum")}: ({self.initialSpectrum.stype})'
@@ -435,7 +435,7 @@ class Source:
 
             if "pos" in freeParams:
                 ## Source Position
-                strRepr += f'\n  * {self.bold("Position after last MLE analysis")}:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {round(self.spatialModel.get("dist"), 4)}'
+                strRepr += f'\n  * {self.bold("Position after last MLE analysis")}:\n\t- Source position: {self.spatialModel.get("pos")}\n\t- Dist from map center (l,b): {round(self.spatialModel.get("dist"), 4)}'
 
             if "flux" in freeParams:
                 ## Source Spectrum 
