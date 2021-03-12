@@ -1,4 +1,5 @@
 # DESCRIPTION
+# DESCRIPTION
 #       Agilepy software
 #
 # NOTICE
@@ -575,7 +576,9 @@ plotting:
         # Change the maplist file path
         maplistObjBKP.setFile(outputDir)
 
-        print("Generating maps..please wait.")
+        if not dqdmOff:
+            print("Generating maps..please wait.")
+    
         for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=dqdmOff, leave=dqdmOff):
 
             if fovbinnumber == 1:
@@ -1028,7 +1031,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating map..please wait.")
+        print("Generating plot..please wait.")
 
         return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1053,7 +1056,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating map..please wait.")
+        print("Generating plot..please wait.")
 
         return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1078,7 +1081,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating map..please wait.")
+        print("Generating plot..please wait.")
 
         return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1103,7 +1106,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating map..please wait.")
+        print("Generating plot..please wait.")
 
         return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1123,6 +1126,8 @@ plotting:
             It returns the lightcurve plot
 
         """
+        print("Generating plot..please wait.")
+
         if analysisName is None:
             self.logger.warning(self, "analysisName cannot be null.")
             return False
