@@ -28,8 +28,13 @@ The parameters' values of a source object can be inspected easily:
        - index: 2.0414
    -----------------------------------------------------------
 
-The 'Initial Source Position' ad 'Initial Source Spectrum' fields will not change.
+Fields:
 
+* Initial Source Position: the initial condition of the source position and the source's distance from the center of the map (l,b). These values will not be changed.
+* Initial Source Spectrum: same as before, but now spectral parameters are considered.
+* Position after last MLE analysis: this field will be shown after calling the mle() method, only if "pos"==free. These values are changed by the mle() routine.
+* Spectrum after last MLE analysis: this field will be shown after calling the mle() method, only if at least one spectral parameter is free. These values are changed by the mle() routine.
+* Last MLE analysis: this field will be shown after calling the mle() method. These are the results of the last mle() routine call. If "pos"==free, you can see here additional results.
 
 
 The SourceLibrary object contains all the sources loaded by the user for its 

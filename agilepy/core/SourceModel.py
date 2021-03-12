@@ -437,23 +437,31 @@ class Source:
                 ## Source Position
                 strRepr += f'\n  * {self.bold("Position after last MLE analysis")}:\n\t- Source position: {self.spatialModel.get("pos")}\n\t- Dist from map center (l,b): {round(self.spatialModel.get("dist"), 4)}'
 
-            if "flux" in freeParams:
-                ## Source Spectrum 
-                strRepr += f'\n  * {self.bold("Spectrum after last MLE analysis")}: ({self.spectrum.stype})'
-                spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and k in self.freeParams["spectrum"]]
-                for sp in spectrumParams:
-                    strRepr += f'\n\t- {sp}'
+            ## Source Spectrum 
+            strRepr += f'\n  * {self.bold("Spectrum after last MLE analysis")}: ({self.spectrum.stype})'
 
+            spectrumParamsFiltered = {}
+            for k,v in vars(self.spectrum).items():
+                if isinstance(v, Parameter) and k in freeParams:
+                    spectrumParamsFiltered[k] = str(v.get())
+
+            for key, val in spectrumParamsFiltered.items():
+                if key == "flux":
+                    strRepr += f'\n\t- {key}: {val} +- {self.multi.get("multiFluxErr")}' 
+                else:
+                    strRepr += f'\n\t- {key}: {val}'
 
 
         ## Multi
         if self.multi:
             strRepr += f'\n  * {self.bold("Last MLE analysis")}:'
-            strRepr += f'\n\t- flux(ph/cm2s): {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
+            # strRepr += f'\n\t- flux(ph/cm2s): {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
             strRepr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
             strRepr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
             strRepr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
+            strRepr += f'\n\t- galErr: {self.multi.get("multiGalErr")}'
             strRepr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
+            strRepr += f'\n\t- isoErr: {self.multi.get("multiIsoErr")}'
             strRepr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
             strRepr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
 
@@ -461,14 +469,15 @@ class Source:
                 strRepr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
                 strRepr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
                 strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
-                strRepr += f'\n\t- ellipse:'
+                strRepr += f'\n\t- position:'
                 strRepr += f'\n\t    - L: {self.multi.get("multiL")}'
                 strRepr += f'\n\t    - B: {self.multi.get("multiB")}'
-                strRepr += f'\n\t    - distFromStartPos: {self.multi.get("multiDistFromStartPosition")}'
-                strRepr += f'\n\t    - r: {self.multi.get("multir")}'
-                strRepr += f'\n\t    - a: {self.multi.get("multia")}'
-                strRepr += f'\n\t    - b: {self.multi.get("multib")}'
-                strRepr += f'\n\t    - phi: {self.multi.get("multiphi")}'
+                strRepr += f'\n\t    - dist from start pos: {self.multi.get("multiDistFromStartPosition")}'
+                strRepr += f'\n\t    - radius of circle: {self.multi.get("multir")}'
+                strRepr += f'\n\t    - ellipse:'
+                strRepr += f'\n\t\t  - a: {self.multi.get("multia")}'
+                strRepr += f'\n\t\t  - b: {self.multi.get("multib")}'
+                strRepr += f'\n\t\t  - phi: {self.multi.get("multiphi")}'
 
 
         strRepr += '\n-----------------------------------------------------------'
