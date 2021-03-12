@@ -615,6 +615,35 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertEqual(ag.getOption("energybins"), energybin5)
 
         ag.destroy()
+    
+    def test_fixed_parameters(self):
+
+        ag = AGAnalysis(self.agilepyConf)
+
+        ag.setOptions(
+            energybins=[[100, 1000]], tmin=434279000,
+            tmax=434289532,
+            timetype="TT")
+
+        sources = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 25))
+        
+        source = ag.selectSources(
+            'name == "2AGLJ0835-4514"')
+        flux1 = source[0].spectrum.get("flux")
+        
+        self.assertEqual(len(sources), 9)
+
+        sources = ag.freeSources(
+            'name == "2AGLJ0835-4514"', "flux", True, show=True)
+
+        _ = ag.generateMaps()
+
+        _ = ag.mle()
+        flux2 = sources[0].spectrum.get("flux")
+
+        self.assertEqual(flux1, flux2)
+
+        ag.destroy()
 
 if __name__ == '__main__':
     unittest.main()
