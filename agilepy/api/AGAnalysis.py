@@ -681,7 +681,7 @@ plotting:
 
 
         """
-        print("Computing background coefficents..please wait.")
+        print("Computing background coefficients..please wait.")
 
         timeStart = time()
 
