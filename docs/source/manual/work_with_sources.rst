@@ -4,8 +4,8 @@ Working with sources
 
 The Source abstraction
 **********************
-The main abstraction of Agilepy is the Source object. It is described by several parameters, some of which can be free to vary, updated by 
-the mle() analysis.
+The main abstraction of Agilepy is the Source object. It is described by several parameters, some of which can be free to vary, and they are 
+changed by the mle() analysis.
 
 The set of the parameters describing the source can vary, depending on the spectrum and spatial model types of the source. 
 
@@ -19,18 +19,22 @@ The parameters' values of a source object can be inspected easily:
     print(source)
     -----------------------------------------------------------
     Source name: 2AGLJ1045-5954 (PointSource)
-    * Position:
-        - start_pos: (287.697, -0.788886)
-        - dist from (l,b): 24.2159
-    * Spectrum: (PowerLaw)
-        - flux: 1.80893e-07
-        - index: 2.0414
-    * Free params: none
-    -----------------------------------------------------------
+     * Free params: none
+     * Initial Source Position:
+       - Source position: (287.697, -0.788886)
+       - Dist from map center (l,b): 24.2159
+     * Initial Source Spectrum: (PowerLaw)
+       - flux: 1.80893e-07
+       - index: 2.0414
+   -----------------------------------------------------------
 
-Most of the time the user will rely on the `AGAnalysis <../api/analysis_api.html#api-AGAnalysis-AGAnalysis>`_ class methods in order to 
-interact with the sources within the SourceLibrary object. The SourceLibrary object contains all the sources loaded by the user for its 
-current analysis. 
+The 'Initial Source Position' ad 'Initial Source Spectrum' fields will not change.
+
+
+
+The SourceLibrary object contains all the sources loaded by the user for its 
+current analysis. Most of the time the user will rely on the `AGAnalysis <../api/analysis_api.html#api-AGAnalysis-AGAnalysis>`_ class methods in order to 
+interact with the sources within the SourceLibrary object. 
 
 How to load or add new sources
 ******************************
@@ -72,15 +76,17 @@ The user can obtain this information by printing out the Source object or callin
 
     print(source)
     -----------------------------------------------------------
-    Source name: 2AGLJ1045-5954 (PointSource)
-    * Position:
-        - start_pos: (287.697, -0.788886)
-        - dist from (l,b): 24.2159
-    * Spectrum: (PowerLaw)
-        - flux: 1.80893e-07
-        - index: 2.0414
-    * Free params: flux
-    -----------------------------------------------------------
+    Source name: 2AGLJ0835-4514 (PointSource)
+     * Free params: flux
+     * Initial Source Position:
+       - Source position: (263.585, -2.84083)
+       - Dist from map center (l,b): 0.0702
+     * Initial Source Spectrum: (PLSuperExpCutoff)
+       - flux: 9.69539e-06
+       - index1: 1.71345
+       - cutoffEnergy: 3913.06
+       - index2: 1.34774
+   -----------------------------------------------------------
     
     print(source.getFreeParams())
     ['flux']
@@ -94,61 +100,69 @@ is performed, the user can print out the Source object and it will show the mult
 
     print(source)
     -----------------------------------------------------------
-    Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 16.4703
-    * Position:
-        - start_pos: (263.585, -2.84083)
-        - dist from (l,b): 0.0702
-    * Spectrum: (PLSuperExpCutoff)
-        - flux: 1.0155e-05
-        - index1: 1.71345
-        - cutoffEnergy: 3913.06
-        - index2: 1.34774
+    Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 15.0971
     * Free params: flux
-    * Multi analysis:
-        - flux(ph/cm2s): 1.0155e-05 +- 1.0248e-06
-        - upper limit(ph/cm2s): 1.23073e-05
-        - ergLog(erg/cm2s): 1.64122e-09 +- 1.65624e-10
-        - galCoeff: [0.819911]
-        - isoCoeff: [10.1463]
-        - exposure(cm2s): 18630100.0
-        - exp-ratio: 0.0
+    * Initial Source Position:
+      - Source position: (263.585, -2.84083)
+      - Dist from map center (l,b): 0.0702
+    * Initial Source Spectrum: (PLSuperExpCutoff)
+      - flux: 9.69539e-06
+      - index1: 1.71345
+      - cutoffEnergy: 3913.06
+      - index2: 1.34774
+    * Spectrum after last MLE analysis: (PLSuperExpCutoff)
+      - flux: 9.35543e-06
+      - index1: 1.71345
+      - cutoffEnergy: 3913.06
+      - index2: 1.34774
     -----------------------------------------------------------
 
 Furthermode, when the "pos" parameter is free to vary, the multi values section will show additional values:
 
 :: 
 
-  * Multi analysis:
-        Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 17.0229
-        * Position:
-            - start_pos: (263.647, -2.8547)
-            - dist from (l,b): 0.1223
-        * Spectrum: (PLSuperExpCutoff)
-            - flux: 8.98066e-06
-            - index1: 1.71345
-            - cutoffEnergy: 3913.06
-            - index2: 1.34774
-        * Free params: flux pos
-        * Multi analysis:
-            - flux(ph/cm2s): 8.98066e-06 +- 9.15265e-07
-            - upper limit(ph/cm2s): 1.09073e-05
-            - ergLog(erg/cm2s): 1.59656e-09 +- 1.62714e-10
-            - galCoeff: [0.7, 0.7]
-            - isoCoeff: [4.08416, 3.84041]
-            - exposure(cm2s): 18945200.0
-            - exp-ratio: 0.0
-            - L_peak: 263.638
-            - B_peak: -2.85605
-            - distFromStartPos: 0.0548425
-            - ellipse:
-                - L: 263.647
-                - B: -2.8547
-                - distFromStartPos: 0.0637012
-                - r: 0.199311
-                - a: 0.196811
-                - b: 0.202633
-                - phi: 42.9398
+    print(source)
+    -----------------------------------------------------------
+    Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 15.1553
+     * Free params: flux pos
+     * Initial Source Position:
+       - Source position: (263.585, -2.84083)
+       - Dist from map center (l,b): 0.0702
+     * Initial Source Spectrum: (PLSuperExpCutoff)
+       - flux: 9.69539e-06
+       - index1: 1.71345
+       - cutoffEnergy: 3913.06
+       - index2: 1.34774
+     * Position after last MLE analysis:
+       - Source position: (263.648, -2.8447)
+       - Dist from map center (l,b): 0.1173
+     * Spectrum after last MLE analysis: (PLSuperExpCutoff)
+       - flux: 9.35002e-06
+       - index1: 1.71345
+       - cutoffEnergy: 3913.06
+       - index2: 1.34774
+     * Last MLE analysis:
+       - flux(ph/cm2s): 9.35002e-06 +- 1.00423e-06
+       - upper limit(ph/cm2s): 1.14637e-05
+       - ergLog(erg/cm2s): 1.66223e-09 +- 1.7853e-10
+       - galCoeff: [0.377185, 0.720361]
+       - isoCoeff: [6.92077, 3.72294]
+       - exposure(cm2s): 18945200.0
+       - exp-ratio: 0.0
+       - L_peak: 263.638
+       - B_peak: -2.84874
+       - distFromStartPos: 0.053207
+       - ellipse:
+           - L: 263.648
+           - B: -2.8447
+           - distFromStartPos: 0.0627392
+           - r: 0.196026
+           - a: 0.194086
+           - b: 0.198718
+           - phi: 39.6624
+   -----------------------------------------------------------
 
+   
 The values L_peak and B_peak set to the initial values in the source location is fixed. If it is allowed to vary then they are set to the position for which the TS is maximized. If a confidence contour was found, the parameters of the "ellipse" section describe the best-fit ellipse of the contour, described in detail below. The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, or the other spectral parameters, if applicable, are provided.
 
 
