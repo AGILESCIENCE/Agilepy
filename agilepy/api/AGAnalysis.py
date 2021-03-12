@@ -575,6 +575,7 @@ plotting:
         # Change the maplist file path
         maplistObjBKP.setFile(outputDir)
 
+        print("Generating maps..please wait.")
         for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=dqdmOff, leave=dqdmOff):
 
             if fovbinnumber == 1:
@@ -676,6 +677,8 @@ plotting:
 
 
         """
+        print("Computing background coefficents..please wait.")
+
         timeStart = time()
 
 
@@ -870,6 +873,8 @@ plotting:
         Returns:
             The absolute path to the light curve data output file.
         """
+        print("Computing light curve bins..please wait.")
+
         timeStart = time()
 
         if not tmin or not tmax or not timetype:
@@ -1023,6 +1028,8 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
+        print("Generating map..please wait.")
+
         return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
     def displayExpSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
@@ -1046,6 +1053,8 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
+        print("Generating map..please wait.")
+
         return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
     def displayGasSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
@@ -1069,6 +1078,8 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
+        print("Generating map..please wait.")
+
         return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
     def displayIntSkyMaps(self, maplistFile=None, singleMode=True, smooth=False, sigma=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor="red", normType="linear"):
@@ -1092,6 +1103,8 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
+        print("Generating map..please wait.")
+
         return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
     def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
