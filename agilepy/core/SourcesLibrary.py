@@ -141,6 +141,10 @@ class SourcesLibrary:
 
             addedSources = [source for source in self._scaleSourcesFlux(addedSources)]
 
+        # Set source Initial Attrubyrs
+        for source in addedSources:
+            source.setInitialAttributes()
+
         if show:
             for s in addedSources:
                 print(f"{s}")
@@ -725,6 +729,7 @@ class SourcesLibrary:
             sources.append(sourceDC)
 
         return sources
+
 
     def _loadFromSourcesTxt(self, txtFilePath):
 

@@ -25,7 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+from copy import deepcopy
 from typing import List
 from abc import ABC, abstractmethod
 
@@ -34,6 +34,11 @@ from agilepy.core.CustomExceptions import  SpectrumTypeNotFoundError, \
                               SelectionParamNotSupported, \
                               NotFreeableParamsError, \
                               WrongSpatialModelTypeError
+
+
+from agilepy.core.AgilepyLogger import Color 
+
+
 
 class Value:
     def __init__(self, name, datatype=None):
@@ -364,40 +369,86 @@ class Source:
     def __init__(self, name, type):
         self.name = name
         self.type = type
+
+        self.initialSpatialModel = None
+        self.initialSpectrum = None
+
         self.spatialModel = None
         self.spectrum = None
         self.multi = None
+
+        self.intitialized = False
+
+    def setInitialAttributes(self):
+        if not self.intitialized:
+            self.initialSpatialModel = deepcopy(self.spatialModel)
+            self.initialSpectrum = deepcopy(self.spectrum)
+        self.intitialized = True
 
     def getFreeParams(self):
         return [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
                     [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
 
+
+    def bold(self, ss):
+        return Color.BOLD + ss + Color.END
+
+    def colorRed(self, ss):
+        return Color.RED + ss + color.END
+
+    def colorBlue(self, ss):
+        return Color.BLUE + ss + color.END
+
+    
     def __str__(self):
 
 
         freeParams = self.getFreeParams()
 
-        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter)]
-
-        strRepr = '\n-----------------------------------------------------------'
-        strRepr += f'\nSource name: {self.name} ({self.type})'
-
+        strRepr = ''
+        strRepr += '\n-----------------------------------------------------------'
+        strRepr += self.bold(f'\n Source name: {self.name} ({self.type})')
         if self.multi:
-            strRepr += " => sqrt(ts): "+str(self.multi.get("multiSqrtTS"))
+            strRepr += self.bold(" => sqrt(ts): "+str(self.multi.get("multiSqrtTS")))
+        
+        ## Free Params
+        if len(freeParams) == 0:
+            strRepr += f'\n  * {self.bold("Free params")}: none'
+        else:
+            strRepr += f'\n  * {self.bold("Free params")}: '+' '.join(freeParams)
+        
+        ## Initial Source Position
+        strRepr += f'\n  * {self.bold("Initial Source Position")}:\n\t- start_pos: {self.initialSpatialModel.get("pos")}\n\t- dist from (l,b): {round(self.initialSpatialModel.get("dist"), 4)}'
 
-        strRepr += f'\n  * Position:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {round(self.spatialModel.get("dist"), 4)}'
-
-        strRepr += f'\n  * Spectrum: ({self.spectrum.stype})'
+        ## Initial Source Spectrum 
+        strRepr += f'\n  * {self.bold("Initial Source Spectrum")}: ({self.initialSpectrum.stype})'
+        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.initialSpectrum).items() if isinstance(v, Parameter)]
         for sp in spectrumParams:
             strRepr += f'\n\t- {sp}'
 
-        if len(freeParams) == 0:
-            strRepr += f'\n  * Free params: none'
-        else:
-            strRepr += f'\n  * Free params: '+' '.join(freeParams)
+
+
 
         if self.multi:
-            strRepr += f'\n  * Multi analysis:'
+
+
+
+            if "pos" in freeParams:
+                ## Source Position
+                strRepr += f'\n  * {self.bold("Position after last MLE analysis")}:\n\t- start_pos: {self.spatialModel.get("pos")}\n\t- dist from (l,b): {round(self.spatialModel.get("dist"), 4)}'
+
+            if "flux" in freeParams:
+                ## Source Spectrum 
+                strRepr += f'\n  * {self.bold("Spectrum after last MLE analysis")}: ({self.spectrum.stype})'
+                spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and k in self.freeParams["spectrum"]]
+                for sp in spectrumParams:
+                    strRepr += f'\n\t- {sp}'
+
+
+
+        ## Multi
+        if self.multi:
+            strRepr += f'\n  * {self.bold("Last MLE analysis")}:'
             strRepr += f'\n\t- flux(ph/cm2s): {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
             strRepr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
             strRepr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
@@ -419,15 +470,6 @@ class Source:
                 strRepr += f'\n\t    - b: {self.multi.get("multib")}'
                 strRepr += f'\n\t    - phi: {self.multi.get("multiphi")}'
 
-
-        """
-        if self.spectrum:
-            strRepr += f'{self.spectrum}'
-        if self.spatialModel:
-            strRepr += f'{self.spatialModel}'
-        if self.multi:
-            strRepr += f'{self.multi}'
-        """
 
         strRepr += '\n-----------------------------------------------------------'
         return strRepr
