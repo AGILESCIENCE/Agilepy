@@ -13,5 +13,5 @@ Develop: ![Continuous integration workflow](https://github.com/AGILESCIENCE/Agil
 [![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/platforms.svg)](https://anaconda.org/agilescience/agilepy)
 
 AGILE Python Analysis Framework
-  * Documentation: [https://agilepy.readthedocs.io/en/latest](https://agilepy.readthedocs.io/en/develop/)
+  * Documentation: [https://agilepy.readthedocs.io/en/develop](https://agilepy.readthedocs.io/en/develop/)
   * Licensed under the the [GNU General Public License v3.0](https://github.com/AGILESCIENCE/Agilepy/blob/master/LICENSE)
