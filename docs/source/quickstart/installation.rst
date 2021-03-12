@@ -30,6 +30,9 @@ Supported platforms:
 Tested on:
 
   - CentOs 7.6
+  - Ubuntu 18.04
+  - Ubuntu 19.10
+  - Ubuntu 20.04
   - macOs 10.14
   - macOs 10.15
 
