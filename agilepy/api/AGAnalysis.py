@@ -901,16 +901,17 @@ plotting:
 
         self.logger.info(self,"[LC] Number of temporal bins: %d. tstart=%f tstop=%f", len(bins), tstart, tstop)
 
-        lcAnalysisDataDir = Path(self.config.getOptionValue("outdir")).joinpath("lc")
-
-        if lcAnalysisDataDir.exists() and lcAnalysisDataDir.is_dir():
-            self.logger.info(self, "The directory %s already exists. Removing it..", str(lcAnalysisDataDir))
-            rmtree(lcAnalysisDataDir)
 
         processes = 1
         binsForProcesses = AGAnalysis._chunkList(bins, processes)
 
         configBKP = AgilepyConfig.getCopy(self.config)
+
+        # Creating the output directory if it does not exist
+        lcAnalysisDataDir = Path(configBKP.getConf("output","outdir")).joinpath("lc")
+        lcAnalysisDataDir.mkdir(exist_ok=True, parents=True)
+        lcAnalysisDataDir = Utils._createNextSubDir(lcAnalysisDataDir)
+        configBKP.setOptions(outdir=str(lcAnalysisDataDir))
 
         (_, last) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
         idxTmax = float(Utils._extractTimes(last)[1])
