@@ -54,6 +54,7 @@ allows to load a source catalog, while filtering the sources by their distance (
     sources = ag.loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
 
 
+
 The `loadSourcesFromFile(sourcesFilepath, rangeDist=0, inf, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-loadSourcesFromFile>`_
 loads the sources, reading their model from a file. 
 
@@ -70,6 +71,10 @@ the `selectSources(selection, show=False) <../api/analysis_api.html#api-AGAnalys
 ::
     
     aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
+
+::
+
+    ag.freeSources('name == "2AGLJ1513-0905"', "index", True, show=True)
 
 Check the api documentation or the tutorial notebooks for additional examples. 
 
@@ -164,6 +169,19 @@ Furthermode, when the "pos" parameter is free to vary, the multi values section 
    
 The values L_peak and B_peak set to the initial values in the source location is fixed. If it is allowed to vary then they are set to the position for which the TS is maximized. If a confidence contour was found, the parameters of the "ellipse" section describe the best-fit ellipse of the contour, described in detail below. The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, or the other spectral parameters, if applicable, are provided.
 
+The user can call selectSources to show the source description
+
+::
+
+    ag.selectSources('name == "PKS1510-089"', show=True)
+
+::
+
+    ag.selectSources('flux > 0', show=True)
+
+::
+
+    ag.selectSources(lambda name, sqrtTS: name == "2AGLJ2021+4029" AND sqrtTS> 0, show=True)
 
 
 How to manually change the spectrum parameters' values of a source
@@ -178,6 +196,8 @@ How to manually change the position parameters' values of a source
 ******************************************************************
 The user can rely on the `updateSourcePosition(sourceName, glon, glat) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-updateSourcePosition>`_ 
 method.
+
+
 
 
 
