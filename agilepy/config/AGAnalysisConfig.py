@@ -49,6 +49,7 @@ class AGAnalysisConfig():
         CompletionStrategies._setPhaseCode(confDict)
         CompletionStrategies._setExpStep(confDict)
         CompletionStrategies._transformLoccl(confDict)
+        CompletionStrategies._dqCompletion(confDict)
         return confDict
 
 
@@ -66,20 +67,36 @@ class AGAnalysisConfig():
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
         errors.update( ValidationStrategies._validateTimetype(confDict))
         errors.update( ValidationStrategies._validateFluxcorrection(confDict) )
+        #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
+        #errors.update( ValidationStrategies._validateFovradmax(confDict) )
+        errors.update( ValidationStrategies._validateDQ(confDict) )
 
-        if errors:
-            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
+        return errors
 
 
     def checkOptions(self, **kwargs):
 
-        for optionName in kwargs.keys():
+        for optionName, optionVal in kwargs.items():
 
             if optionName == "tmin" and ("timetype" not in kwargs or "tmax" not in kwargs):
                 raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' and 'tmax' options.")
 
             if optionName == "tmax" and ("timetype" not in kwargs or "tmin" not in kwargs):
-                raise CannotSetNotUpdatableOptionError("The option 'tmax' can be updated if and only if you also specify the 'timetype' and 'tmax' options options.")
+                raise CannotSetNotUpdatableOptionError("The option 'tmax' can be updated if and only if you also specify the 'timetype' and 'tmax' options.")
+
+            if (optionName == "albedorad" or optionName == "fovradmax") and "dq" not in kwargs:
+                raise CannotSetNotUpdatableOptionError(
+                    "You cannot set albedorad or fovradmax without setting dq = 0")
+            elif (optionName == "albedorad" or optionName == "fovradmax") and kwargs["dq"] != 0:
+                raise CannotSetNotUpdatableOptionError(
+                    "The options 'albedorad' and 'fovradmax' can be updated if and only when dq = 0.")
+
+            if optionName == "dq" and optionVal == 0 and ("albedorad" not in kwargs or "fovradmax" not in kwargs):
+                raise CannotSetNotUpdatableOptionError("The option 'dq' can be 0 if and only if you also specify the 'albedorad' and 'fovradmax' options.")
+            
+            
+
 
 
     def checkOptionsType(self, **kwargs):
@@ -163,5 +180,11 @@ class AGAnalysisConfig():
         if optionName == "evtfile" or optionName == "logfile":
 
             CompletionStrategies._expandFileEnvVars(confDict, optionName)
+        
+        if optionName == "dq":
+
+            CompletionStrategies._dqCompletion(confDict)
+
+        
 
 

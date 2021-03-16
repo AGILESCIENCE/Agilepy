@@ -34,7 +34,7 @@ from filecmp import cmp
 
 from agilepy.api.AGAnalysis import AGAnalysis
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty, ValueOutOfRange
+from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty, ValueOutOfRange, ConfigurationsNotValidError, CannotSetNotUpdatableOptionError
 
 class AGAnalysisUT(unittest.TestCase):
 
@@ -616,6 +616,32 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
     
+
+    def test_setDQ(self):
+
+        ag = AGAnalysis(self.agilepyConf)
+
+        # dq out of range
+        self.assertRaises(ConfigurationsNotValidError, ag.setOptions, dq=42)
+
+        # dq = 0
+        ag.setOptions(dq=0, albedorad=101, fovradmax=102)
+        self.assertEqual(ag.getOption("albedorad"), 101)
+        self.assertEqual(ag.getOption("fovradmax"), 102)
+
+        # dq == 5 
+        ag.setOptions(dq=5)
+        self.assertEqual(ag.getOption("albedorad"), 100)
+        self.assertEqual(ag.getOption("fovradmax"), 50)
+        
+        # Try to change albedorad or fovradmax with dq == 5
+        self.assertRaises(CannotSetNotUpdatableOptionError,
+                          ag.setOptions, albedorad=42, fovradmax=42)
+
+        ag.destroy()
+
+
+
     def test_fixed_parameters(self):
 
         ag = AGAnalysis(self.agilepyConf)

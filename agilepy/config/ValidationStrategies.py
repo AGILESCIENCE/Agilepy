@@ -167,6 +167,7 @@ class ValidationStrategies:
 
         return errors
 
+    
     @staticmethod
     def _validateLOCCL(confDict):
 
@@ -192,6 +193,42 @@ class ValidationStrategies:
         
         return errors
 
+
+    @staticmethod
+    def _validateDQ(confdict):
+        
+        errors = {}
+        
+        dq = confdict["selection"]["dq"]
+
+        if dq < 0 or dq > 9:
+            errors["selection/dq"] = f"dq = {confdict['selection']['dq']} -> invalid value. Possible values [0,1,2,3,4,5,6,7,8,9]"
+        
+        return errors
+
+
+    """@staticmethod
+    def _validateAlbedorad(confdict):
+        
+        errors = {}
+
+        dq = confdict["selection"]["dq"]
+
+        if dq != 0:
+            errors["selection/albedorad"] = f"dq = {confdict['selection']['dq']} -> you can't change albedorad (nor fovradmax). Set dq to 0 if you want to use custom values for albedorad or fovradmax"
+        
+        return errors
+    
+    @staticmethod
+    def _validateFovradmax(confDict):
+        
+        errors = {}
+        
+        dq = confDict["selection"]["dq"]
+        if dq != 0:
+             errors["selection/fovradmax"] = f"dq = {confDict['selection']['dq']} -> you can't change fovradmax (nor albedorad). Set dq to 0 if you want to use custom values for albedorad or fovradmax"
+
+        return errors"""
 
     @staticmethod
     def _validateOptionType(optionName, optionValue, validType):

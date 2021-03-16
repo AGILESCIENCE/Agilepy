@@ -177,7 +177,7 @@ class AgilepyConfig(Observable):
 
     def setOptions(self, validate=True, **kwargs):
         
-        # Base checks
+        # Base checks   
         for optionName, optionValue in kwargs.items():
 
             optionSection = self.getSectionOfOption(optionName)
@@ -193,20 +193,28 @@ class AgilepyConfig(Observable):
         # Analysis class config checks
         self.analysisConfig.checkOptionsType(**kwargs)
 
+        confBKP = self.conf.copy()
+
         # Update the values!
         for optionName, optionValue in kwargs.items():
             
             optionSection = self.getSectionOfOption(optionName)
 
-            self.conf[optionSection][optionName] = optionValue
+            confBKP[optionSection][optionName] = optionValue
             
             # Completion strategies
-            self.analysisConfig.completeUpdate(optionName, self.conf)
-
-
+            self.analysisConfig.completeUpdate(optionName, confBKP)
 
         # Validation strategies
-        self.analysisConfig.validateConfiguration(self.conf)
+        errors = self.analysisConfig.validateConfiguration(confBKP)
+
+        if errors:
+            confBKP = None
+            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
+        # Use confBKP 
+        self.conf = confBKP.copy()
+
 
         # Notify the observables
         for optionName, optionValue in kwargs.items():

@@ -212,12 +212,12 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
    "filtercode", "filtercode = 5 select G filtercode = 0 select G+L+S", "int", 5, "no"
    "fovradmin", "fovradmin < fovradmax", "int", 0, "no"
-   "fovradmax", "fovradmax > fovradmin", "int", 60, "no"
-   "albedorad", "albedo selection cut", "int", 80, "no"
+   "fovradmax", "fovradmax > fovradmin (dq = 0 is necessary for setting)", "int", 60, "no"
+   "albedorad", "albedo selection cut (dq = 0 is necessary for setting)", "int", 80, "no"
    "dq", "| Data quality selection filter.
    | A combination of fovradmax and albedorad.
-   | dq = 0 use specified or default
-   | albedorad and fovradmax. Possible values are:
+   | Possible values are [0,1,2,3,4,5,6,7,8,9]
+   | dq = 0 -> albedorad and fovradmax are free and they must always be specified in setOption
    | dq = 1 -> albedorad=80, fovradmax=60
    | dq = 2 -> albedorad=80, fovradmax=50
    | dq = 3 -> albedorad=90, fovradmax=60
