@@ -71,6 +71,18 @@ class AGBaseAnalysis:
         if "PFILES" not in os.environ:
             raise PFILESNotFoundError("$PFILES is not set.")
 
+    def getAnalysisDir(self):
+        """It returns the path of the output directory
+        """
+        
+        if self.outdir.exists() and self.outdir.is_dir():
+            return str(self.outdir)
+        
+        else:
+            self.logger.warning(self, "OutputDirectory not found")
+    
+
+
 
     def deleteAnalysisDir(self):
 

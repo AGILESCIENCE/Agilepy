@@ -675,6 +675,15 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertNotEqual(flux1, flux2)
 
         ag.destroy()
+    
+    def test_get_analysis_dir(self):
+
+        ag = AGAnalysis(self.agilepyConf)
+
+        outdir = ag.getAnalysisDir()
+
+        self.assertTrue(outdir.is_dir(), outdir.exists())
+
 
 if __name__ == '__main__':
     unittest.main()
