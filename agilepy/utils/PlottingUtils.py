@@ -406,10 +406,11 @@ class PlottingUtils(metaclass=Singleton):
                                   error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
                                                arrayminus=sel1["x_minus"]),
                                   error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
-                                  name="sqrts >=3"))
+                                  hovertemplate="Time: %{x:.1f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="sqrts >=3"))
         fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
                                   error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
                                                arrayminus=sel2["x_minus"]), mode='markers',
+                                  hovertemplate="Time: %{x:.1f}, flux_ul: %{y:.2f}",
                                   marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
 
         if lineValue is not None and lineError is not None:
