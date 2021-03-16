@@ -270,22 +270,22 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.assertEqual(1, len(sources))
         self.assertEqual(0, sources[0].spectrum.getFree("flux"))
-        self.assertEqual("0", sources[0].spectrum.getFree("flux", strRepr=True))
+        self.assertEqual("0", sources[0].spectrum.getFree("flux", strr=True))
 
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", True)
         self.assertEqual(1, sources[0].spectrum.getFree("flux"))
-        self.assertEqual("1", sources[0].spectrum.getFree("flux", strRepr=True))
+        self.assertEqual("1", sources[0].spectrum.getFree("flux", strr=True))
 
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", True)
         self.assertEqual(1, sources[0].spectrum.getFree("index"))
-        self.assertEqual("1", sources[0].spectrum.getFree("index", strRepr=True))
+        self.assertEqual("1", sources[0].spectrum.getFree("index", strr=True))
 
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", False)
         self.assertEqual(0, sources[0].spectrum.getFree("index"))
-        self.assertEqual("0", sources[0].spectrum.getFree("index", strRepr=True))
+        self.assertEqual("0", sources[0].spectrum.getFree("index", strr=True))
 
     def test_free_sources_with_selection_lambda(self):
 

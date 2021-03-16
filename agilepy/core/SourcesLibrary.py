@@ -444,8 +444,13 @@ class SourcesLibrary:
         multiOutput.multiphi.setAttributes(value = allValues[47])
 
         multiOutput.multiIndex.setAttributes(value = allValues[69])
+        multiOutput.multiIndexErr.setAttributes(value = allValues[70])
+        
         multiOutput.multiPar2.setAttributes(value = allValues[71])
+        multiOutput.multiPar2Err.setAttributes(value = allValues[72])
+
         multiOutput.multiPar3.setAttributes(value = allValues[73])
+        multiOutput.multiPar3Err.setAttributes(value = allValues[74])
 
         multiOutput.multiGalCoeff.setAttributes(value = allValues[89])
         multiOutput.multiGalErr.setAttributes(value = allValues[90])
@@ -486,6 +491,75 @@ class SourcesLibrary:
         source.spatialModel.set("dist", newDistance)
 
 
+    def updatePositionAndDistance(self, source):
+        if source.multi.get("multiL") != -1 and source.multi.get("multiB") != -1:
+            oldPos = source.spatialModel.get("pos")
+            newPos = Parameter("pos", "tuple<float,float>")
+            newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
+            source.spatialModel.pos = newPos
+
+            if oldPos != newPos.get():
+                oldDistance = source.spatialModel.get("dist")
+                newDistance = self.getSourceDistance(source)
+                source.spatialModel.dist.setAttributes(value = newDistance)
+                source.multi.set("multiDist", newDistance)
+                self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
+                self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
+            else:
+                self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
+
+        else:
+            self.logger.info(self, f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
+
+
+    def updateSpectrumParam(self,source, multiParamName, spectrumParamName):
+
+        if hasattr(source.spectrum, spectrumParamName):
+
+            newVal = source.multi.get(multiParamName)
+            oldVal = source.spectrum.get(spectrumParamName)
+
+            # print(f"{multiParamName} {spectrumParamName} newVal: '{newVal}' parameter")
+            # print(f"{multiParamName} {spectrumParamName} oldVal: '{oldVal}' parameter")
+
+            if oldVal is None or newVal != oldVal:
+                source.spectrum.set(spectrumParamName, newVal)
+                self.logger.info(self, f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
+                # print(f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
+            else:
+                self.logger.info(self, f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
+                # print(f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
+
+
+    def updateSpectrumParameters(self, source, freeParams):
+
+            mapping = {
+                "flux" : "multiFlux",
+                "fluxErr" : "multiFluxErr",
+                "index" : "multiIndex",
+                "indexErr" : "multiIndexErr",
+                "index1" : "multiIndex",
+                "index1Err" : "multiIndexErr",
+                "cutoffEnergy" : "multiPar2",
+                "cutoffEnergyErr" : "multiPar2Err",
+                "pivotEnergy" : "multiPar2",
+                "pivotEnergyErr" : "multiPar2Err",
+                "index2" : "multiPar3",
+                "index2Err" : "multiPar3Err",
+                "curvature" : "multiPar3",
+                "curvatureErr" : "multiPar3Err"
+            }
+
+            for paramName in freeParams:
+
+                self.updateSpectrumParam(source, mapping[paramName], paramName)
+
+            for paramName in ["fluxErr", "indexErr", "index1Err", "cutoffEnergyErr", "pivotEnergyErr", "index2Err", "curvatureErr"]:
+                
+                self.updateSpectrumParam(source, mapping[paramName], paramName)
+
+
+
 
     def updateMulti(self, multiOutputData):
 
@@ -505,47 +579,13 @@ class SourcesLibrary:
 
             self.logger.info(self, f"{multiOutputData.get('name')} (free) parameters update after mle: {freeParams}")
 
-            if "pos" in freeParams:
-                freeParams.remove("pos")
+            self.updatePositionAndDistance(source)
 
-            # updating 'spectrum' params
-            mapping = {
-                "flux" : "multiFlux",
-                "index" : "multiIndex",
-                "cutoffEnergy" : "multiPar2",
-                "pivotEnergy" : "multiPar2",
-                "index2" : "multiPar3",
-                "curvature" : "multiPar3",
-            }
+            if "pos" in freeParams: freeParams.remove("pos")
 
-            for paramName in freeParams:
-                newVal = source.multi.get(mapping[paramName])
-                oldVal = source.spectrum.get(paramName)
-                if newVal != oldVal:
-                    source.spectrum.set(paramName, newVal)
-                    self.logger.info(self, f"'{paramName}' parameter has been updated: {oldVal}==>{newVal}")
-                else:
-                    self.logger.info(self, f"'{paramName}' parameter has not changed: {oldVal}==>{newVal}")
+            self.updateSpectrumParameters(source, freeParams)
 
 
-            if source.multi.get("multiL") != -1 and source.multi.get("multiB") != -1:
-                oldPos = source.spatialModel.get("pos")
-                newPos = Parameter("pos", "tuple<float,float>")
-                newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
-                source.spatialModel.pos = newPos
-
-                if oldPos != newPos.get():
-                    oldDistance = source.spatialModel.get("dist")
-                    newDistance = self.getSourceDistance(source)
-                    source.spatialModel.dist.setAttributes(value = newDistance)
-                    source.multi.set("multiDist", newDistance)
-                    self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
-                    self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
-                else:
-                    self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
-
-            else:
-                self.logger.info(self, f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
 
 
     def getSourceDistance(self, source):
@@ -895,17 +935,17 @@ class SourcesLibrary:
                 sourceStr += "0 0 0 "
 
             elif source.spectrum.stype == "PLExpCutoff":
-                cutoffenergy = source.spectrum.get("cutoffEnergy", strRepr=True)
+                cutoffenergy = source.spectrum.get("cutoffEnergy", strr=True)
                 sourceStr += "1 "+str(cutoffenergy)+" 0 "
 
             elif source.spectrum.stype == "PLSuperExpCutoff":
-                cutoffenergy = source.spectrum.get("cutoffEnergy", strRepr=True)
-                index2 = source.spectrum.get("index2", strRepr=True)
+                cutoffenergy = source.spectrum.get("cutoffEnergy", strr=True)
+                index2 = source.spectrum.get("index2", strr=True)
                 sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
 
             else:
-                pivotenergy = source.spectrum.get("pivotEnergy", strRepr=True)
-                curvature = source.spectrum.get("curvature", strRepr=True)
+                pivotenergy = source.spectrum.get("pivotEnergy", strr=True)
+                curvature = source.spectrum.get("curvature", strr=True)
                 sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
 
 
@@ -1022,27 +1062,27 @@ class SourcesLibrary:
         pivotEnergyFree = ""
         posFree = ""
 
-        posFree = source.spatialModel.getFree("pos", strRepr=True)
-        fluxFree = source.spectrum.getFree("flux", strRepr=True)
+        posFree = source.spatialModel.getFree("pos", strr=True)
+        fluxFree = source.spectrum.getFree("flux", strr=True)
 
 
         if spectrumType == "PowerLaw":
-            indexFree = source.spectrum.getFree("index", strRepr=True)
+            indexFree = source.spectrum.getFree("index", strr=True)
 
         elif spectrumType == "PLExpCutoff":
-            indexFree = source.spectrum.getFree("index", strRepr=True)
+            indexFree = source.spectrum.getFree("index", strr=True)
 
-            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strRepr=True)
+            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strr=True)
 
         elif spectrumType == "PLSuperExpCutoff":
-            index1Free = source.spectrum.getFree("index1", strRepr=True)
-            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strRepr=True)
-            index2Free = source.spectrum.getFree("index2", strRepr=True)
+            index1Free = source.spectrum.getFree("index1", strr=True)
+            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strr=True)
+            index2Free = source.spectrum.getFree("index2", strr=True)
 
         else:
-            indexFree = source.spectrum.getFree("index", strRepr=True)
-            pivotEnergyFree = source.spectrum.getFree("pivotEnergy", strRepr=True)
-            curvatureFree = source.spectrum.getFree("curvature", strRepr=True)
+            indexFree = source.spectrum.getFree("index", strr=True)
+            pivotEnergyFree = source.spectrum.getFree("pivotEnergy", strr=True)
+            curvatureFree = source.spectrum.getFree("curvature", strr=True)
 
         if source.spectrum.getFree("flux") == 0:
             return "0"
