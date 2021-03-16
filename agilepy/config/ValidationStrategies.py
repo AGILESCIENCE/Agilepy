@@ -175,9 +175,9 @@ class ValidationStrategies:
 
         loccl = confDict["mle"]["loccl"]
 
-        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629]:
+        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629, 0]:
 
-            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
+            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629, 0.0]".format(loccl)
 
         return errors
     

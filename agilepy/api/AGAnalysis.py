@@ -1387,7 +1387,7 @@ plotting:
 
 
         lcDataDict = {
-            "sqrt(ts)" : multiOutput.get("multiSqrtTS", strRepr=True),
+            "sqrt(ts)" : multiOutput.get("multiSqrtTS", strr=True),
             "flux"     : flux,
             "flux_err" : flux_err,
             "flux_ul"  : flux_ul,
@@ -1395,17 +1395,17 @@ plotting:
             "gal" : ','.join(map(str, multiOutput.get("multiGalCoeff"))),
             "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
 
-            "l_peak"    : multiOutput.get("multiLPeak", strRepr=True),
-            "b_peak"    : multiOutput.get("multiBPeak", strRepr=True),
-            "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strRepr=True),
+            "l_peak"    : multiOutput.get("multiLPeak", strr=True),
+            "b_peak"    : multiOutput.get("multiBPeak", strr=True),
+            "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strr=True),
 
-            "l"    : multiOutput.get("multiL", strRepr=True),
-            "b"    : multiOutput.get("multiB", strRepr=True),
-            "r"    : multiOutput.get("multir", strRepr=True),
-            "dist" : multiOutput.get("multiDistFromStartPosition", strRepr=True),
+            "l"    : multiOutput.get("multiL", strr=True),
+            "b"    : multiOutput.get("multiB", strr=True),
+            "r"    : multiOutput.get("multir", strr=True),
+            "dist" : multiOutput.get("multiDistFromStartPosition", strr=True),
 
-            "time_start_tt" : float(multiOutput.get("startDataTT", strRepr=True)),
-            "time_end_tt"   : float(multiOutput.get("endDataTT", strRepr=True))
+            "time_start_tt" : float(multiOutput.get("startDataTT", strr=True)),
+            "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True))
         }
 
         return lcDataDict

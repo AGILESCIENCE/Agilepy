@@ -50,8 +50,8 @@ class Value:
         self.value = self.castTo(val)
         return True
 
-    def get(self, strRepr=False):
-        if strRepr:
+    def get(self, strr=False):
+        if strr:
             return str(self.value)
         return self.value
 
@@ -135,12 +135,18 @@ class Parameter(Value):
 class SourceDescription:
 
     def set(self, attributeName, attributeVal):
-        parameter = getattr(self, attributeName)
-        parameter.set(attributeVal)
+        try:
+            parameter = getattr(self, attributeName)
+        except AttributeError:
+            return False
+        return parameter.set(attributeVal)
 
-    def get(self, attributeName, strRepr=False):
-        parameter = getattr(self, attributeName)
-        return parameter.get(strRepr=strRepr) # calling Value's get()
+    def get(self, attributeName, strr=False):
+        try:
+            parameter = getattr(self, attributeName)
+        except AttributeError:
+            return None
+        return parameter.get(strr=strr) # calling Value's get()
 
     def setFree(self, attributeName, freeVal):
         try:
@@ -149,22 +155,22 @@ class SourceDescription:
             return False
         return parameter.setFree(freeVal)
 
-    def getFree(self, attributeName, strRepr=False):
+    def getFree(self, attributeName, strr=False):
         freeval = getattr(self, attributeName).free
         #print("freeval: ",freeval)
         #print("attributeName: ",attributeName)
         #print("self",self)
-        if strRepr and freeval is None:
+        if strr and freeval is None:
             return "None"
-        elif not strRepr and freeval is None:
+        elif not strr and freeval is None:
             return None
-        elif strRepr and freeval:
+        elif strr and freeval:
             return "1"
-        elif strRepr and not freeval:
+        elif strr and not freeval:
             return "0"
-        elif not strRepr and freeval:
+        elif not strr and freeval:
             return 1
-        elif not strRepr and not freeval:
+        elif not strr and not freeval:
             return 0
         else:
             print("Something wrong in getFree()")
@@ -198,11 +204,13 @@ class Spectrum(ABC, SourceDescription):
     def __init__(self, stype):
         self.stype = stype
         self.flux = Parameter("flux", "float", free = 0)
+        self.fluxErr = OutputVal("flux", "float")
 
 class PowerLawSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
+        self.indexErr = OutputVal("indexErr", "float")
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}'
@@ -213,11 +221,18 @@ class PowerLawSpectrum(Spectrum):
     def getSpectralIndex(self):
         return self.index.value
 
+    def getParameters(self):
+        return {
+            "flux(ph/cm2s)" : (self.flux.value, self.fluxErr.value),
+            "index" : (self.index.value,self.indexErr.value)
+        }
+
 class PLExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
         self.cutoffEnergy = Parameter("cutoffEnergy", "float", free=0, scale=-1.0, min=20, max=10000)
+        self.cutoffEnergyErr = OutputVal("cutoffEnergyErr", "float")
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}\n{self.cutoffEnergy}'
@@ -228,12 +243,22 @@ class PLExpCutoffSpectrum(Spectrum):
     def getSpectralIndex(self):
         return self.index.value
 
+    def getParameters(self):
+        return {
+            "flux(ph/cm2s)" : (self.flux.value, self.fluxErr.value),
+            "cutoffEnergy" : (self.cutoffEnergy.value, self.cutoffEnergyErr.value)
+        }
+
+
 class PLSuperExpCutoffSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index1 = Parameter("index1", "float", free=0, scale=-1.0, min=0.5, max=5)
+        self.index1Err = OutputVal("index1Err", "float")
         self.cutoffEnergy = Parameter("cutoffEnergy", "float", free=0, scale=-1.0, min=20, max=10000)
+        self.cutoffEnergyErr = OutputVal("cutoffEnergyErr", "float")
         self.index2 = Parameter("index2", "float", free=0, scale=-1.0, min=0, max=100)
+        self.index2Err = OutputVal("index2Err", "float")
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index1}\n{self.cutoffEnergy}\n{self.index2}'
@@ -244,13 +269,23 @@ class PLSuperExpCutoffSpectrum(Spectrum):
     def getSpectralIndex(self):
         return self.index1.value
 
+    def getParameters(self):
+        return {
+            "flux(ph/cm2s)" : (self.flux.value, self.fluxErr.value),
+            "cutoffEnergy" : (self.cutoffEnergy.value, self.cutoffEnergyErr.value),
+            "index1" : (self.index1.value, self.index1Err.value),
+            "index2" : (self.index2.value, self.index2Err.value)
+        }
+
 class LogParabolaSpectrum(Spectrum):
     def __init__(self, type):
         super().__init__(type)
-        self.flux = Parameter("flux", "float")
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=1, max=4)
+        self.indexErr = OutputVal("indexErr", "float")
         self.pivotEnergy = Parameter("pivotEnergy", "float", free=0, scale=-1.0, min=500, max=3000)
+        self.pivotEnergyErr = OutputVal("pivotEnergyErr", "float")
         self.curvature = Parameter("curvature", "float", free=0, scale=-1.0, min=0.1, max=3)
+        self.curvatureErr = OutputVal("curvatureErr", "float")
 
     def __str__(self):
         return f'\n - Spectrum type: {self.stype}\n{self.flux}\n{self.index}\n{self.pivotEnergy}\n{self.curvature}'
@@ -260,6 +295,14 @@ class LogParabolaSpectrum(Spectrum):
 
     def getSpectralIndex(self):
         return self.index.value
+
+    def getParameters(self):
+        return {
+            "flux(ph/cm2s)" : (self.flux.value, self.fluxErr.value),
+            "index" : (self.index.value, self.indexErr.value),
+            "pivotEnergy" : (self.pivotEnergy.value, self.pivotEnergyErr.value),
+            "curvature" : (self.curvature.value, self.curvatureErr.value)
+        }
 
 class SpatialModel(SourceDescription):
 
@@ -328,8 +371,13 @@ class MultiOutput(SourceDescription):
         self.multiphi = OutputVal("multiphi", "float")
 
         self.multiIndex = OutputVal("multiIndex", "float")
+        self.multiIndexErr = OutputVal("multiIndexErr", "float")
+
         self.multiPar2 = OutputVal("multiPar2", "float")
+        self.multiPar2Err = OutputVal("multiPar2Err", "float")
+
         self.multiPar3 = OutputVal("multiPar3", "float")
+        self.multiPar3Err = OutputVal("multiPar3Err", "float")
 
         self.multiGalCoeff = OutputVal("multiGalCoeff", "List<float>")
         self.multiGalErr = OutputVal("multiGalErr", "List<float>")
@@ -375,7 +423,9 @@ class Source:
 
         self.spatialModel = None
         self.spectrum = None
+        
         self.multi = None
+        self.multi_pre = None
 
         self.intitialized = False
 
@@ -400,88 +450,84 @@ class Source:
         return Color.BLUE + ss + Color.END
 
     
-    def __str__(self):
+    def __str__title(self):
+        strr = '\n-----------------------------------------------------------'
+        strr += self.bold(f'\n Source name: {self.name} ({self.type})')
+        if self.multi:
+            strr += self.bold(" => sqrt(ts): "+str(self.multi.get("multiSqrtTS")))
+        return strr        
 
+    def __str__freeParams(self):
+        freeParams = self.getFreeParams()
+        if len(freeParams) == 0:
+            return f'\n  * {self.bold("Free parameters")}: none'
+        else:
+            return f'\n  * {self.bold("Free parameters")}: '+' '.join(freeParams)
+
+    def __str__sourcePos(self):
+        return f'\n  * {self.bold("Initial source position")}:\n\t- Source position: {self.initialSpatialModel.get("pos")} (l,b) \n\t- Distance from map center: {round(self.initialSpatialModel.get("dist"), 4)} deg'
+
+    def __str__sourceParams(self):
+        strR = ''
+        strR += f'\n  * {self.bold("Initial source parameters")}: ({self.initialSpectrum.stype})'
+        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.initialSpectrum).items() if isinstance(v, Parameter)]
+        for sp in spectrumParams:
+            strR += f'\n\t- {sp}'
+        return strR
+
+    def __str__multiAnal(self):
+        strr = ''
+        if self.multi is None:
+            return strr
 
         freeParams = self.getFreeParams()
 
-        strRepr = ''
-        strRepr += '\n-----------------------------------------------------------'
-        strRepr += self.bold(f'\n Source name: {self.name} ({self.type})')
-        if self.multi:
-            strRepr += self.bold(" => sqrt(ts): "+str(self.multi.get("multiSqrtTS")))
-        
-        ## Free Params
-        if len(freeParams) == 0:
-            strRepr += f'\n  * {self.bold("Free params")}: none'
-        else:
-            strRepr += f'\n  * {self.bold("Free params")}: '+' '.join(freeParams)
-        
-        ## Initial Source Position
-        strRepr += f'\n  * {self.bold("Initial Source Position")}:\n\t- Source position: {self.initialSpatialModel.get("pos")}\n\t- Dist from map center (l,b): {round(self.initialSpatialModel.get("dist"), 4)}'
-
-        ## Initial Source Spectrum 
-        strRepr += f'\n  * {self.bold("Initial Source Spectrum")}: ({self.initialSpectrum.stype})'
-        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.initialSpectrum).items() if isinstance(v, Parameter)]
-        for sp in spectrumParams:
-            strRepr += f'\n\t- {sp}'
-
-
-
-
-        if self.multi:
-
-
-
-            if "pos" in freeParams:
-                ## Source Position
-                strRepr += f'\n  * {self.bold("Position after last MLE analysis")}:\n\t- Source position: {self.spatialModel.get("pos")}\n\t- Dist from map center (l,b): {round(self.spatialModel.get("dist"), 4)}'
-
-            ## Source Spectrum 
-            strRepr += f'\n  * {self.bold("Spectrum after last MLE analysis")}: ({self.spectrum.stype})'
-
-            spectrumParamsFiltered = {}
-            for k,v in vars(self.spectrum).items():
-                if isinstance(v, Parameter) and k in freeParams:
-                    spectrumParamsFiltered[k] = str(v.get())
-
-            for key, val in spectrumParamsFiltered.items():
-                if key == "flux":
-                    strRepr += f'\n\t- {key}: {val} +- {self.multi.get("multiFluxErr")}' 
-                else:
-                    strRepr += f'\n\t- {key}: {val}'
-
-
         ## Multi
         if self.multi:
-            strRepr += f'\n  * {self.bold("Last MLE analysis")}:'
-            # strRepr += f'\n\t- flux(ph/cm2s): {self.multi.get("multiFlux")} +- {self.multi.get("multiFluxErr")}'
-            strRepr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
-            strRepr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
-            strRepr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
-            strRepr += f'\n\t- galErr: {self.multi.get("multiGalErr")}'
-            strRepr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
-            strRepr += f'\n\t- isoErr: {self.multi.get("multiIsoErr")}'
-            strRepr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
-            strRepr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
+
+            strr = f'\n  * {self.bold("Last MLE analysis")}:'
+            
+            # spectrum parameters
+            for key,val in self.spectrum.getParameters().items():
+                strr += f'\n\t- {key}: {val[0]} +- {val[1]}'
+            
+            # ag_multi parameters
+            strr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
+            strr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
+            strr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
+            strr += f'\n\t- galErr: {self.multi.get("multiGalErr")}'
+            strr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
+            strr += f'\n\t- isoErr: {self.multi.get("multiIsoErr")}'
+            strr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
+            strr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
 
             if "pos" in freeParams:
-                strRepr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
-                strRepr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
-                strRepr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
-                strRepr += f'\n\t- position:'
-                strRepr += f'\n\t    - L: {self.multi.get("multiL")}'
-                strRepr += f'\n\t    - B: {self.multi.get("multiB")}'
-                strRepr += f'\n\t    - dist from start pos: {self.multi.get("multiDistFromStartPosition")}'
-                strRepr += f'\n\t    - radius of circle: {self.multi.get("multir")}'
-                strRepr += f'\n\t    - ellipse:'
-                strRepr += f'\n\t\t  - a: {self.multi.get("multia")}'
-                strRepr += f'\n\t\t  - b: {self.multi.get("multib")}'
-                strRepr += f'\n\t\t  - phi: {self.multi.get("multiphi")}'
+                strr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
+                strr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
+                strr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
+                strr += f'\n\t- position:'
+                strr += f'\n\t    - L: {self.multi.get("multiL")}'
+                strr += f'\n\t    - B: {self.multi.get("multiB")}'
+                strr += f'\n\t    - dist from start pos: {self.multi.get("multiDistFromStartPosition")}'
+                strr += f'\n\t    - radius of circle: {self.multi.get("multir")}'
+                strr += f'\n\t    - ellipse:'
+                strr += f'\n\t\t  - a: {self.multi.get("multia")}'
+                strr += f'\n\t\t  - b: {self.multi.get("multib")}'
+                strr += f'\n\t\t  - phi: {self.multi.get("multiphi")}'
 
 
-        strRepr += '\n-----------------------------------------------------------'
-        return strRepr
+        strr += '\n-----------------------------------------------------------'
+        return strr
+        
+    
+    def __str__(self):
+        strr = ''
+        strr += self.__str__title()
+        strr += self.__str__freeParams()
+        strr += self.__str__sourcePos()
+        strr += self.__str__sourceParams()
+        strr += self.__str__multiAnal()
+        return strr
 
     def getSpectralIndex(self):
         return self.spectrum.getSpectralIndex()
@@ -586,156 +632,3 @@ class Source:
             isChanged = self.spatialModel.setFree(parameterName, freeval)
 
         return isChanged
-
-    """
-    self.label = Parameter("label", str)
-    self.Fix = Parameter("Fix", int)
-    self.index: float = None
-    self.ULConfidenceLevel: float = None
-    self.SrcLocConfLevel: float = None
-    self.start_l: float = None
-    self.start_b: float = None
-    self.start_flux: float = None
-    self.lmin: float = None
-    self.lmax: float = None
-    self.bmin: float = None
-    self.bmax: float = None
-    self.typefun: float = None
-    self.par2: float = None
-    self.par3: float = None
-    self.galmode2: float = None
-    self.galmode2fit: float = None
-    self.isomode2: float = None
-    self.isomode2fit: float = None
-    self.edpcor: float = None
-    self.fluxcor: float = None
-    self.integratortype: float = None
-    self.expratioEval: float = None
-    self.expratio_minthr: float = None
-    self.expratio_maxthr: float = None
-    self.expratio_size: float = None
-    self.index_min: float = None
-    self.index_max: float = None
-    self.par2_min: float = None
-    self.par2_max: float = None
-    self.par3_min: float = None
-    self.par3_max: float = None
-    self.contourpoints: float = None
-    self.minimizertype: str = None
-    self.minimizeralg: str = None
-    self.minimizerdefstrategy: float = None
-    self.minimizerdeftol: float = None
-
-    self.SqrtTS: float = None
-
-    self.L_peak: float = None
-    self.B_peak: float = None
-    self.Dist_from_start_position_peak: float = None
-
-    self.L: float = None
-    self.B: float = None
-    self.Dist_from_start_position: float = None
-    self.r: float = None
-    self.a: float = None
-    self.b: float = None
-    self.phi: float = None
-
-    self.Counts: float = None
-    self.CountsErr: float = None
-    self.CountsPosErr: float = None
-    self.CountsNegErr: float = None
-    self.CountsUL: float = None
-
-    self.Flux: float = None
-    self.FluxErr: float = None
-    self.FluxPosErr: float = None
-    self.FluxNegErr: float = None
-    self.FluxUL: float = None
-    self.FluxULbayes: float = None
-
-    self.Exp: float = None
-    self.ExpSpectraCorFactor: float = None
-
-    self.Erg: float = None
-    self.Erg_Err: float = None
-    self.Erg_UL: float = None
-    self.Erglog: float = None
-    self.Erglog_Err: float = None
-    self.Erglog_UL: float = None
-
-    self.Sensitivity: float = None
-
-    self.FluxPerChannel: List[float] = None
-
-    self.Index: float = None
-    self.Index_Err: float = None
-    self.Par2: float = None
-    self.Par2_Err: float = None
-    self.Par3: float = None
-    self.Par3_Err: float = None
-
-    self.cts: float = None
-    self.fitstatus0: float = None
-    self.fcn0: float = None
-    self.edm0: float = None
-    self.nvpar0: float = None
-    self.nparx0: float = None
-    self.iter0: float = None
-    self.fitstatus1: float = None
-    self.fcn1: float = None
-    self.edm1: float = None
-    self.nvpar1: float = None
-    self.nparx1: float = None
-    self.iter1: float = None
-    self.Likelihood1: float = None
-
-    self.GalCoeff: List[float] = None
-    self.GalErrs: List[float] = None
-
-    self.GalZeroCoeff: List[float] = None
-    self.GalZeroErrs: List[float] = None
-
-    self.IsoCoeffs: List[float] = None
-    self.IsoErrs: List[float] = None
-
-    self.IsoZeroCoeffs: List[float] = None
-    self.IsoZeroErrs: List[float] = None
-
-    self.Start_date_UTC: datetime.datetime = None # 2018-06-03T12:01:07
-    self.End_date_UTC: datetime.datetime = None   # 2018-06-04T00:01:07
-    self.Start_data_TT: float = None
-    self.End_data_TT: float = None
-    self.Start_date_MJD: float = None
-    self.End_date_MJD: float = None
-
-    self.emin: float = List[float]
-    self.emax: float = List[float]
-    self.fovmin: float = List[float]
-    self.fovmax: float = List[float]
-    self.albedo: float = None
-    self.binsize: float = None
-    self.expstep: int = None
-    self.phasecode: float = None
-    self.ExpRatio: float = None
-
-    self.ext1FitStatus: float = None
-    self.step1FitStatus: float = None
-    self.ext2FitStatus: float = None
-    self.step2FitStatus: float = None
-    self.contourFitStatus: float = None
-    self.indexFitStatus: float = None
-    self.ulFitStatus: float = None
-
-    self.ext1Counts: float = None
-    self.step1Counts: float = None
-    self.ext2Counts: float = None
-    self.step2Counts: float = None
-    self.contourCounts: float = None
-    self.indexCounts: float = None
-    self.ulCounts: float = None
-
-    self.SkytypeLFilterIrf: str = None
-    self.SkytypeHFilterIrf: str = None
-
-    self.Dist: float = None
-    """
