@@ -139,5 +139,9 @@ class CompletionStrategies:
             confDict["mle"]["loccl"] = 5.99147
         elif userLoccl == 68:
             confDict["mle"]["loccl"] = 2.29575
-        else:
+        elif userLoccl == 50:
             confDict["mle"]["loccl"] = 1.38629
+        elif userLoccl == 0:
+            confDict["mle"]["loccl"] = 0.0
+        else:
+            confDict["mle"]["loccl"] = 5.99147
