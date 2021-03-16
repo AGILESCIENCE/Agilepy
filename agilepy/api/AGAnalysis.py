@@ -609,7 +609,7 @@ plotting:
                     REFACTOR FROM NOW ON TO A FUNCTION..
                     """
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
-                    configBKP.setOptions(fovradmin=int(fovmin), fovradmax=int(fovmax))
+                    configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
                     configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
                     configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
