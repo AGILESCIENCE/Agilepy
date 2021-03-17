@@ -78,7 +78,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, fovradmin=10, fovradmax=0)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, dq=0, fovradmin=10, fovradmax=0)
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, emin=10, emax=0)
 
 

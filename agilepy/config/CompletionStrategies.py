@@ -121,6 +121,53 @@ class CompletionStrategies:
         confDict["output"]["outdir"] = Utils._expandEnvVar(confDict["output"]["outdir"])
 
     @staticmethod
+    def _dqCompletion(confDict):
+
+        if confDict["selection"]["dq"] == 0:
+            confDict["selection"]["albedorad"] = confDict["selection"]["albedorad"]
+            confDict["selection"]["fovradmax"] = confDict["selection"]["fovradmax"]
+        
+        elif confDict["selection"]["dq"] == 1:
+            confDict["selection"]["albedorad"] = 80
+            confDict["selection"]["fovradmax"] = 60
+        
+        elif confDict["selection"]["dq"] == 2:
+            confDict["selection"]["albedorad"] = 80
+            confDict["selection"]["fovradmax"] = 50
+        
+        elif confDict["selection"]["dq"] == 3:
+            confDict["selection"]["albedorad"] = 90
+            confDict["selection"]["fovradmax"] = 60
+        
+        elif confDict["selection"]["dq"] == 4:
+            confDict["selection"]["albedorad"] = 90
+            confDict["selection"]["fovradmax"] = 50
+
+        elif confDict["selection"]["dq"] == 5:
+            confDict["selection"]["albedorad"] = 100
+            confDict["selection"]["fovradmax"] = 50
+
+        elif confDict["selection"]["dq"] == 6:
+            confDict["selection"]["albedorad"] = 90
+            confDict["selection"]["fovradmax"] = 40
+
+        elif confDict["selection"]["dq"] == 7:
+            confDict["selection"]["albedorad"] = 100
+            confDict["selection"]["fovradmax"] = 40
+
+        elif confDict["selection"]["dq"] == 8:
+            confDict["selection"]["albedorad"] = 90
+            confDict["selection"]["fovradmax"] = 30
+        
+        elif confDict["selection"]["dq"] == 9:
+            confDict["selection"]["albedorad"] = 100
+            confDict["selection"]["fovradmax"] = 30
+        
+
+        
+
+
+    @staticmethod
     def _completeOutdirName(confDict):
         confDict["output"]["outdir"] = Path(confDict["output"]["outdir"]).joinpath(confDict["output"]["username"]+"_"+confDict["output"]["sourcename"]+"_"+strftime("%Y%m%d-%H%M%S"))
 

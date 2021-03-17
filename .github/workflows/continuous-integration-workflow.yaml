@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - master
-      - power_test
+      - feature-*
 
 jobs:
 
