@@ -656,19 +656,26 @@ class SourcesLibrary:
         newSource.spatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
         newSource.spatialModel.set("pos", f'({sourceObject["glon"]}, {sourceObject["glat"]})')
 
+        newSource.initialSpatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
+        newSource.initialSpatialModel.set("pos", f'({sourceObject["glon"]}, {sourceObject["glat"]})')
+
         newSource.spectrum = Spectrum.getSpectrumObject(sourceObject["spectrumType"])
+        newSource.initialSpectrum = Spectrum.getSpectrumObject(sourceObject["spectrumType"])
 
         spectrumKeys = ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature"]
 
         for sK in spectrumKeys:
             if sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(0)
+                getattr(newSource.initialSpectrum, sK).set(0)
             if sK in sourceObject and sK in vars(newSource.spectrum):
                 getattr(newSource.spectrum, sK).set(sourceObject[sK])
+                getattr(newSource.initialSpectrum, sK).set(sourceObject[sK])
 
         distance = self.getSourceDistance(newSource)
 
         newSource.spatialModel.set("dist", distance)
+        newSource.initialSpatialModel.set("dist", distance)
 
         self.sources.append(newSource)
 

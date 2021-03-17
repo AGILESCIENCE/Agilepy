@@ -465,6 +465,11 @@ class Source:
             return f'\n  * {self.bold("Free parameters")}: '+' '.join(freeParams)
 
     def __str__sourcePos(self):
+
+        print(self.initialSpatialModel.get("dist"))
+        print(self.initialSpatialModel.get("pos"))
+        
+
         return f'\n  * {self.bold("Initial source position")}:\n\t- Source position: {self.initialSpatialModel.get("pos")} (l,b) \n\t- Distance from map center: {round(self.initialSpatialModel.get("dist"), 4)} deg'
 
     def __str__sourceParams(self):
