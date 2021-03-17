@@ -682,6 +682,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         outdir = ag.getAnalysisDir()
 
+        outdir = Path(outdir)
+
         self.assertTrue(outdir.is_dir(), outdir.exists())
 
 
