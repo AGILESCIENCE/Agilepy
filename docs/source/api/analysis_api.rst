@@ -5,7 +5,7 @@ Analysis API
 AGBaseAnalysis
 **************
 .. autoclass:: core.AGBaseAnalysis.AGBaseAnalysis
-    :members: __init__, deleteAnalysisDir, setOptions, getOption, printOptions
+    :members: __init__, deleteAnalysisDir, setOptions, getOption, printOptions, getAnalysisDir
 
 
 AGAnalysis
