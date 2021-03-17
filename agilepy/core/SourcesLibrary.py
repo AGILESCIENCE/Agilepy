@@ -89,8 +89,8 @@ class SourcesLibrary:
                 catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.multi")
 
             cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-            uEmin = self.config.getOptionValue("emin")
-            uEmax = self.config.getOptionValue("emax")
+            uEmin = self.config.getOptionValue("emin_sources")
+            uEmax = self.config.getOptionValue("emax_sources")
 
             if cat2Emin != uEmin or cat2Emax != uEmax:
                 scaleFlux = True
@@ -1127,8 +1127,8 @@ class SourcesLibrary:
     def _scaleSourcesFlux(self, sources):
 
         cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-        uEmin = self.config.getOptionValue("emin")
-        uEmax = self.config.getOptionValue("emax")
+        uEmin = self.config.getOptionValue("emin_sources")
+        uEmax = self.config.getOptionValue("emax_sources")
 
         for source in sources:
 
