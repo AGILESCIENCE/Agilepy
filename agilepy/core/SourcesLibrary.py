@@ -133,7 +133,11 @@ class SourcesLibrary:
 
         addedSources = []
 
-        newSources = [source for source in self._filterByDistance(newSources, rangeDist)]
+
+        mapCenterL = float(self.config.getOptionValue("glon"))
+        mapCenterB = float(self.config.getOptionValue("glat"))
+
+        newSources = [source for source in self._filterByDistance(newSources, rangeDist, mapCenterL, mapCenterB)]
 
         addedSources = [source for source in self._addSourcesGenerator(newSources)]
 
@@ -298,43 +302,6 @@ class SourcesLibrary:
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
-    """
-    def updateSourceParameter(self, sourceName, parameterName, parameterValue):
-    
-        sources = self.selectSources(lambda name : name == sourceName, show=False)
-
-        if len(sources) == 0:
-            raise SourceNotFound(f"Source '{sourceName}' has not been found in the sources library")
-
-        source = sources.pop()
-
-        # it will update 'position' and 'distance'
-        if parameterName == "pos":
-
-            if type(parameterValue) != tuple:
-                raise ValueError(f"In order to update the 'pos' parameter you must pass a tuple (glan, glon).")
-
-            oldPos = source.spatialModel.pos
-
-            glon = parameterValue[0]
-            glat = parameterValue[1]
-
-            newPos = Parameter("pos", "tuple<float,float>")
-            newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
-
-            source.spatialModel.pos = newPos
-
-            if oldPos.value != newPos.value:
-                newDistance = self.getSourceDistance(source)
-                source.spatialModel.dist.setAttributes(value = newDistance)
-                self.logger.info(self, f"Old position is {oldPos.value}, new position is {source.spatialModel.pos.value}, new distance is {source.spatialModel.dist}")
-                return True
-            else:
-                self.logger.info(self, f"Position is not changed: {source.spatialModel.pos.value}")
-                return False
-    """
-    
-
 
     def parseSourceFile(self, sourceFilePath):
         """
@@ -487,7 +454,9 @@ class SourcesLibrary:
         newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
         source.spatialModel.pos = newPos
 
-        newDistance = self.getSourceDistance(source)
+        mapCenterL = float(self.config.getOptionValue("glon"))
+        mapCenterB = float(self.config.getOptionValue("glat"))
+        newDistance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
         source.spatialModel.set("dist", newDistance)
 
 
@@ -500,7 +469,10 @@ class SourcesLibrary:
 
             if oldPos != newPos.get():
                 oldDistance = source.spatialModel.get("dist")
-                newDistance = self.getSourceDistance(source)
+                
+                mapCenterL = float(self.config.getOptionValue("glon"))
+                mapCenterB = float(self.config.getOptionValue("glat"))
+                newDistance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
                 source.spatialModel.dist.setAttributes(value = newDistance)
                 source.multi.set("multiDist", newDistance)
                 self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
@@ -573,7 +545,12 @@ class SourcesLibrary:
 
         for source in sources:
 
-            source.multi = multiOutputData
+            mapCenterL = float(self.config.getOptionValue("glon"))
+            mapCenterB = float(self.config.getOptionValue("glat"))
+
+            source.saveMultiAnalysisResults(mapCenterL, mapCenterB) # save last multi output in "Initial" fields
+
+            source.multi = multiOutputData # overriding multi output
 
             freeParams = source.getFreeParams()
 
@@ -586,32 +563,6 @@ class SourcesLibrary:
             self.updateSpectrumParameters(source, freeParams)
 
 
-
-
-    def getSourceDistance(self, source):
-
-        mapCenterL = float(self.config.getOptionValue("glon"))
-        mapCenterB = float(self.config.getOptionValue("glat"))
-
-        if source.multi:
-            sourceL = source.multi.get("multiL")
-            sourceB = source.multi.get("multiB")
-
-            if sourceL == -1:
-                sourceL = source.multi.get("multiStartL")
-
-            if sourceB == -1:
-                sourceB = source.multi.get("multiStartB")
-
-        else:
-            pos = source.spatialModel.get("pos")
-            sourceL = pos[0]
-            sourceB = pos[1]
-
-
-        self.logger.debug(self, "sourceL %f, sourceB %f, mapCenterL %f, mapCenterB %f", sourceL, sourceB, mapCenterL, mapCenterB)
-
-        return AstroUtils.distance(sourceL, sourceB, mapCenterL, mapCenterB)
 
     def addSource(self, sourceName, sourceObject):
 
@@ -672,7 +623,10 @@ class SourcesLibrary:
                 getattr(newSource.spectrum, sK).set(sourceObject[sK])
                 getattr(newSource.initialSpectrum, sK).set(sourceObject[sK])
 
-        distance = self.getSourceDistance(newSource)
+        mapCenterL = float(self.config.getOptionValue("glon"))
+        mapCenterB = float(self.config.getOptionValue("glat"))
+
+        distance = newSource.getSourceDistanceFromLB(mapCenterL, mapCenterB)
 
         newSource.spatialModel.set("dist", distance)
         newSource.initialSpatialModel.set("dist", distance)
@@ -1124,9 +1078,9 @@ class SourcesLibrary:
             if added:
                 yield added
 
-    def _filterByDistance(self, sources, rangeDist):
+    def _filterByDistance(self, sources, rangeDist, mapCenterL, mapCenterB):
         for source in sources:
-            distance = self.getSourceDistance(source)
+            distance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
             if distance >= rangeDist[0] and distance <= rangeDist[1]:
                 source.spatialModel.set("dist", distance)
                 yield source
