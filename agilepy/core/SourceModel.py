@@ -37,6 +37,7 @@ from agilepy.core.CustomExceptions import  SpectrumTypeNotFoundError, \
 
 
 from agilepy.core.AgilepyLogger import Color 
+from agilepy.utils.AstroUtils import AstroUtils
 
 
 
@@ -180,19 +181,38 @@ class SourceDescription:
 class Spectrum(ABC, SourceDescription):
 
     @staticmethod
+    def getSpectrumParamsNames(stype):
+
+        if stype == "PowerLaw":
+            return ["flux", "fluxErr", "index", "indexErr"]
+
+        elif stype == "PLExpCutoff":
+            return ["flux", "fluxErr", "index", "indexErr", "cutoffEnergy", "cutoffEnergyErr"]
+
+        elif stype == "PLSuperExpCutoff":
+            return ["flux", "fluxErr", "index1", "index1Err", "cutoffEnergy", "cutoffEnergyErr", "index2", "index2Err"]
+
+        elif stype == "LogParabola":
+            return ["flux", "fluxErr", "index", "indexErr", "pivotEnergy", "pivotEnergyErr", "curvature", "curvatureErr"]
+
+        else:
+            raise SpectrumTypeNotFoundError("Spectrum type '{}' is not supported. Supported spectrum types: ['PowerLaw', 'PLExpCutoff', 'PLSuperExpCutoff', 'LogParabola']".format(stype))
+
+
+    @staticmethod
     def getSpectrumObject(stype):
 
         if stype == "PowerLaw":
-            return PowerLawSpectrum(stype)
+            return PowerLaw(stype)
 
         elif stype == "PLExpCutoff":
-            return PLExpCutoffSpectrum(stype)
+            return PLExpCutoff(stype)
 
         elif stype == "PLSuperExpCutoff":
-            return PLSuperExpCutoffSpectrum(stype)
+            return PLSuperExpCutoff(stype)
 
         elif stype == "LogParabola":
-            return LogParabolaSpectrum(stype)
+            return LogParabola(stype)
 
         else:
             raise SpectrumTypeNotFoundError("Spectrum type '{}' is not supported. Supported spectrum types: ['PowerLaw', 'PLExpCutoff', 'PLSuperExpCutoff', 'LogParabola']".format(stype))
@@ -206,7 +226,7 @@ class Spectrum(ABC, SourceDescription):
         self.flux = Parameter("flux", "float", free = 0)
         self.fluxErr = OutputVal("flux", "float")
 
-class PowerLawSpectrum(Spectrum):
+class PowerLaw(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
@@ -227,7 +247,7 @@ class PowerLawSpectrum(Spectrum):
             "index" : (self.index.value,self.indexErr.value)
         }
 
-class PLExpCutoffSpectrum(Spectrum):
+class PLExpCutoff(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
@@ -249,8 +269,7 @@ class PLExpCutoffSpectrum(Spectrum):
             "cutoffEnergy" : (self.cutoffEnergy.value, self.cutoffEnergyErr.value)
         }
 
-
-class PLSuperExpCutoffSpectrum(Spectrum):
+class PLSuperExpCutoff(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index1 = Parameter("index1", "float", free=0, scale=-1.0, min=0.5, max=5)
@@ -277,7 +296,7 @@ class PLSuperExpCutoffSpectrum(Spectrum):
             "index2" : (self.index2.value, self.index2Err.value)
         }
 
-class LogParabolaSpectrum(Spectrum):
+class LogParabola(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=1, max=4)
@@ -429,6 +448,9 @@ class MultiOutput(SourceDescription):
         return f'\n - SpatialModel\n{self.multiSqrtTS}\n{self.multiFlux}\n{self.multiFluxErr}\n{self.multiUL}\n{self.multiDist} \
                  \n{self.multiStartL}\n{self.multiStartB}\n{self.multiL}\n{self.multiB}\n{self.multiDist}'
 
+
+
+
 class Source:
 
     selectionParams = {
@@ -449,6 +471,72 @@ class Source:
 
     }
 
+
+    mapping = {
+        "flux" : "multiFlux",
+        "fluxErr" : "multiFluxErr",
+        "index" : "multiIndex",
+        "indexErr" : "multiIndexErr",
+        "index1" : "multiIndex",
+        "index1Err" : "multiIndexErr",
+        "cutoffEnergy" : "multiPar2",
+        "cutoffEnergyErr" : "multiPar2Err",
+        "pivotEnergy" : "multiPar2",
+        "pivotEnergyErr" : "multiPar2Err",
+        "index2" : "multiPar3",
+        "index2Err" : "multiPar3Err",
+        "curvature" : "multiPar3",
+        "curvatureErr" : "multiPar3Err"
+    }
+
+    def getSourceDistanceFromLB(self, l, b):
+
+        if self.multi:
+
+            sourceL = self.multi.get("multiL")
+            sourceB = self.multi.get("multiB")
+
+            if sourceL == -1:
+                sourceL = self.multi.get("multiStartL")
+
+            if sourceB == -1:
+                sourceB = self.multi.get("multiStartB")
+
+        else:
+            pos = self.spatialModel.get("pos")
+            sourceL = pos[0]
+            sourceB = pos[1]
+
+        return AstroUtils.distance(sourceL, sourceB, l, b)
+
+
+
+    def saveMultiAnalysisResults(self, mapCenterL, mapCenterB):
+        stype = type(self.spectrum).__name__
+        paramsToUpdate = Spectrum.getSpectrumParamsNames(stype)
+        
+        # spectrum
+        if self.multi:
+            for paramName in paramsToUpdate:
+                multiParamName = Source.mapping[paramName]
+                multiParamValue = self.multi.get(multiParamName)
+                if multiParamValue is not None:
+                    self.initialSpectrum.set(paramName, multiParamValue)
+
+        # position
+        if self.multi:
+            newPos = Parameter("pos", "tuple<float,float>")
+            newPos.setAttributes(value = f"({self.multi.multiLPeak.value}, {self.multi.multiBPeak.value})", free = self.spatialModel.pos.free)
+            self.initialSpatialModel.pos = newPos
+
+            newDistance = self.getSourceDistanceFromLB(mapCenterL, mapCenterB)
+            self.initialSpatialModel.dist.setAttributes(value = newDistance)
+
+
+
+
+
+
     def __init__(self, name, type):
         self.name = name
         self.type = type
@@ -460,7 +548,6 @@ class Source:
         self.spectrum = None
         
         self.multi = None
-        self.multi_pre = None
 
         self.intitialized = False
 
@@ -510,12 +597,27 @@ class Source:
     def __str__sourceParams(self):
         strR = ''
         strR += f'\n  * {self.bold("Initial source parameters")}: ({self.initialSpectrum.stype})'
-        spectrumParams = [k+": "+str(v.get()) for k,v in vars(self.initialSpectrum).items() if isinstance(v, Parameter)]
-        for sp in spectrumParams:
-            strR += f'\n\t- {sp}'
+
+        spectrumParams = Spectrum.getSpectrumParamsNames(self.initialSpectrum.stype)
+
+        for i, paramName in enumerate(spectrumParams):
+            
+            # end of the list
+            if i+1 == len(spectrumParams):
+                break
+            
+            # print only params not errors
+            if i % 2 == 0:
+                pn = paramName
+                if paramName == "flux":
+                    pn += "(ph/cm2s)"
+                strR += f"\n\t- {pn}: {str(self.initialSpectrum.get(paramName))}"
+                if self.initialSpectrum.get(spectrumParams[i+1]):
+                    strR += f" +/- {str(self.initialSpectrum.get(spectrumParams[i+1]))}"
+
         return strR
 
-    def __str__multiAnal(self):
+    def __str__multiAnalisys(self):
         strr = ''
         if self.multi is None:
             return strr
@@ -529,31 +631,31 @@ class Source:
             
             # spectrum parameters
             for key,val in self.spectrum.getParameters().items():
-                strr += f'\n\t- {key}: {val[0]} +- {val[1]}'
+                strr += f'\n\t- {key}: {val[0]}'
+                if val[1]:
+                    strr += f" +/- {val[1]}"
             
             # ag_multi parameters
             strr += f'\n\t- upper limit(ph/cm2s): {self.multi.get("multiUL")}'
-            strr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")} +- {self.multi.get("multiErgLogErr")}'
-            strr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
-            strr += f'\n\t- galErr: {self.multi.get("multiGalErr")}'
-            strr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}'
-            strr += f'\n\t- isoErr: {self.multi.get("multiIsoErr")}'
+            strr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")}'
+            if self.multi.get("multiErgLogErr"):
+                strr += f' +/- {self.multi.get("multiErgLogErr")}'
+            strr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")} +/- {self.multi.get("multiGalErr")}'
+            strr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")} +/- {self.multi.get("multiIsoErr")}'
             strr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
             strr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
-
-            if "pos" in freeParams:
-                strr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
-                strr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
-                strr += f'\n\t- distFromStartPos: {self.multi.get("multiDistFromStartPositionPeak")}'
-                strr += f'\n\t- position:'
-                strr += f'\n\t    - L: {self.multi.get("multiL")}'
-                strr += f'\n\t    - B: {self.multi.get("multiB")}'
-                strr += f'\n\t    - dist from start pos: {self.multi.get("multiDistFromStartPosition")}'
-                strr += f'\n\t    - radius of circle: {self.multi.get("multir")}'
-                strr += f'\n\t    - ellipse:'
-                strr += f'\n\t\t  - a: {self.multi.get("multia")}'
-                strr += f'\n\t\t  - b: {self.multi.get("multib")}'
-                strr += f'\n\t\t  - phi: {self.multi.get("multiphi")}'
+            strr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
+            strr += f'\n\t- B_peak: {self.multi.get("multiBPeak")}'
+            strr += f'\n\t- Distance from start pos: {self.multi.get("multiDistFromStartPositionPeak")}'
+            strr += f'\n\t- position:'
+            strr += f'\n\t    - L: {self.multi.get("multiL")}'
+            strr += f'\n\t    - B: {self.multi.get("multiB")}'
+            strr += f'\n\t    - Distance from start pos: {self.multi.get("multiDistFromStartPosition")}'
+            strr += f'\n\t    - radius of circle: {self.multi.get("multir")}'
+            strr += f'\n\t    - ellipse:'
+            strr += f'\n\t\t  - a: {self.multi.get("multia")}'
+            strr += f'\n\t\t  - b: {self.multi.get("multib")}'
+            strr += f'\n\t\t  - phi: {self.multi.get("multiphi")}'
 
 
         strr += '\n-----------------------------------------------------------'
@@ -566,7 +668,7 @@ class Source:
         strr += self.__str__freeParams()
         strr += self.__str__sourcePos()
         strr += self.__str__sourceParams()
-        strr += self.__str__multiAnal()
+        strr += self.__str__multiAnalisys()
         return strr
 
     def getSpectralIndex(self):
