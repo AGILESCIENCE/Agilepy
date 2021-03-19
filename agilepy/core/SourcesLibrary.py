@@ -407,14 +407,36 @@ class SourcesLibrary:
             self.logger.critical(self, "The values extracted from %s file are lesser then 128", sourceFilePath)
             raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
 
-        # print("values from .source: ", allValues)
-
         multiOutput = MultiOutput()
 
         multiOutput.name.setAttributes(value = allValues[0])
 
+        multiOutput.multiFix.setAttributes(value = allValues[1])
+        multiOutput.multiindex.setAttributes(value = allValues[2])
+        multiOutput.multiULConfidenceLevel.setAttributes(value= allValues[3])
+        multiOutput.multiSrcLocConfLevel.setAttributes(value = allValues[4])
+
         multiOutput.multiStartL.setAttributes(value = allValues[5])
         multiOutput.multiStartB.setAttributes(value = allValues[6])
+
+        multiOutput.multiStartFlux.setAttributes(value = allValues[7])
+        multiOutput.multiTypefun.setAttributes(value = allValues[12])
+        multiOutput.multipar2.setAttributes(value=allValues[13])
+        multiOutput.multipar3.setAttributes(value = allValues[14])
+        multiOutput.multiGalmode2.setAttributes(value=allValues[15])
+        multiOutput.multiGalmode2fit.setAttributes(value=allValues[16])
+        multiOutput.multiIsomode2.setAttributes(value = allValues[17])
+        multiOutput.multiIsomode2fit.setAttributes(value=allValues[18])
+        multiOutput.multiEdpcor.setAttributes(value = allValues[19])
+        multiOutput.multiFluxcor.setAttributes(value=allValues[20])
+        multiOutput.multiIntegratorType.setAttributes(value=allValues[21])
+        multiOutput.multiExpratioEval.setAttributes(value=allValues[22])
+        multiOutput.multiExpratioMinthr.setAttributes(value = allValues[23])
+        multiOutput.multiExpratioMaxthr.setAttributes(value=allValues[24])
+        multiOutput.multiExpratioSize.setAttributes(value=allValues[25])
+        
+
+
 
         multiOutput.multiSqrtTS.setAttributes(value = allValues[37])
 
@@ -430,6 +452,7 @@ class SourcesLibrary:
 
         multiOutput.multiErgLog.setAttributes(value = allValues[64])
         multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
+        multiOutput.multiErgLogUL.setAttributes(value = allValues[66])
 
         multiOutput.multiLPeak.setAttributes(value = allValues[38])
         multiOutput.multiBPeak.setAttributes(value = allValues[39])
@@ -442,6 +465,10 @@ class SourcesLibrary:
         multiOutput.multia.setAttributes(value = allValues[45])
         multiOutput.multib.setAttributes(value = allValues[46])
         multiOutput.multiphi.setAttributes(value = allValues[47])
+
+        multiOutput.multiCounts.setAttributes(value = allValues[48])
+        multiOutput.multiCountsErr.setAttributes(value=allValues[49])
+
 
         multiOutput.multiIndex.setAttributes(value = allValues[69])
         multiOutput.multiIndexErr.setAttributes(value = allValues[70])
@@ -460,7 +487,17 @@ class SourcesLibrary:
         multiOutput.startDataTT.setAttributes(value = allValues[99])
         multiOutput.endDataTT.setAttributes(value = allValues[100])
 
-        multiOutput.multiExpRatio.setAttributes(value = allValues[109])
+
+        multiOutput.multiEmin.setAttributes(value=allValues[103])
+        multiOutput.multiEmax.setAttributes(value = allValues[104])
+        multiOutput.multifovmin.setAttributes(value = allValues[105])
+        multiOutput.multifovmax.setAttributes(value=allValues[106])
+        multiOutput.multialbedo.setAttributes(value = allValues[107])
+        multiOutput.multibinsize.setAttributes(value=allValues[108])
+        multiOutput.multiexpstep.setAttributes(value=allValues[109])
+        multiOutput.multiphasecode.setAttributes(value=allValues[110])
+
+        multiOutput.multiExpRatio.setAttributes(value = allValues[111])
 
 
         return multiOutput

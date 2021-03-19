@@ -73,6 +73,9 @@ class AGBaseAnalysis:
 
     def getAnalysisDir(self):
         """It returns the path of the output directory
+
+        Returns:
+            path (str) : the path of the output directory
         """
         
         if self.outdir.exists() and self.outdir.is_dir():

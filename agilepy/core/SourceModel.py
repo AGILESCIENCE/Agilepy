@@ -339,10 +339,32 @@ class MultiOutput(SourceDescription):
 
         self.multiSqrtTS = OutputVal("multiSqrtTS", "float")
 
+        self.multiFix = OutputVal("multiFix", "float")
+        self.multiindex = OutputVal("multiindex", "float")
+        self.multiULConfidenceLevel = OutputVal("multiULConfidenceLevel", "float")
+        self.multiSrcLocConfLevel = OutputVal("multiSrcLocConfLevel", "float")
+
         self.multiFlux = OutputVal("multiFlux", "float")
         self.multiFluxErr = OutputVal("multiFluxErr", "float")
         self.multiFluxPosErr = OutputVal("multiFluxPosErr", "float")
         self.multiFluxNegErr = OutputVal("multiFluxNegErr", "float")
+
+        self.multiStartFlux = OutputVal("multiStartFlux", "float")
+        self.multiTypefun = OutputVal("multiTypefun", "float")
+        self.multipar2 = OutputVal("multipar2", "float")
+        self.multipar3 = OutputVal("multipar3", "float")
+        self.multiGalmode2 = OutputVal("multiGalmode2", "float")
+        self.multiGalmode2fit = OutputVal("multiGalmode2fit", "float")
+        self.multiIsomode2 = OutputVal("multiIsomode2", "float")
+        self.multiIsomode2fit = OutputVal("multiIsomode2fit", "float")
+        self.multiEdpcor = OutputVal("multiEdpcor", "float")
+        self.multiFluxcor = OutputVal("multiFluxcor", "float")
+        self.multiIntegratorType = OutputVal("multiIntegratorType", "float")
+        self.multiExpratioEval = OutputVal("multiExpratioEval", "float")
+        self.multiExpratioMinthr = OutputVal("multiExpratioMinthr", "float")
+        self.multiExpratioMaxthr = OutputVal("multiExpratioMaxthr", "float")
+        self.multiExpratioSize = OutputVal("multiExpratioSize", "float")
+
 
         self.multiUL = OutputVal("multiUL", "float")
 
@@ -351,6 +373,7 @@ class MultiOutput(SourceDescription):
 
         self.multiErgLog = OutputVal("multiErgLog", "float")
         self.multiErgLogErr = OutputVal("multiErgLogErr", "float")
+        self.multiErgLogUL = OutputVal("multiErgLogUL", "float")
 
 
         self.multiStartL = OutputVal("multiStartL", "float")
@@ -370,6 +393,9 @@ class MultiOutput(SourceDescription):
         self.multib = OutputVal("multib", "float")
         self.multiphi = OutputVal("multiphi", "float")
 
+        self.multiCounts = OutputVal("multiCounts", "float")
+        self.multiCountsErr = OutputVal("multiCountsErr", "float")
+
         self.multiIndex = OutputVal("multiIndex", "float")
         self.multiIndexErr = OutputVal("multiIndexErr", "float")
 
@@ -387,6 +413,15 @@ class MultiOutput(SourceDescription):
 
         self.startDataTT = OutputVal("startDataTT", "float")
         self.endDataTT = OutputVal("endDataTT", "float")
+
+        self.multiEmin = OutputVal("multiEmin", "List<float>")
+        self.multiEmax = OutputVal("multiEmax", "List<float>")
+        self.multifovmin = OutputVal("multifovmin", "List<float>")
+        self.multifovmax = OutputVal("multifovmax", "List<float>")
+        self.multialbedo = OutputVal("multialbedo", "float")
+        self.multibinsize = OutputVal("multibinsize", "float")
+        self.multiexpstep = OutputVal("multiexpstep", "float")
+        self.multiphasecode = OutputVal("multiphasecode", "float")
 
         self.multiExpRatio = OutputVal("multiExpRatio", "float")
 

@@ -428,7 +428,13 @@ class AGAnalysisUT(unittest.TestCase):
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
-        lcdataKeys = ['sqrt(ts)', 'flux', 'flux_err', 'flux_ul', 'gal', 'iso', 'l_peak', 'b_peak', 'dist_peak', 'l', 'b', 'r', 'dist', 'time_start_tt', 'time_end_tt']
+        lcdataKeys = ["sqrt(ts)", "flux","flux_err", "flux_ul","gal","gal_error","iso","iso_error",\
+            "l_peak","b_peak","dist_peak","l","b","r","ell_dist","a","b","phi","exp","ExpRatio","counts",\
+            "counts_err","Index","Index_Err","Par2","Par2_Err","Par3","Par3_Err","Erglog","Erglog_Err","Erglog_UL",\
+            "time_start_tt","time_end_tt","Fix","index","ULConfidenceLevel","SrcLocConfLevel","start_l","start_b",\
+            "start_flux","typefun","par2","par3","galmode2","isomode2","isomode2fit","edpcor","fluxcor",\
+            "integratortype","expratioEval","expratio_minthr","expratio_maxthr","expratio_size",\
+            "emin","emax","fovmin","fovmax","albedo","binsize","expstep","phasecode"]
 
         for key in lcdataKeys:
             self.assertEqual(True, key in lcdata)
