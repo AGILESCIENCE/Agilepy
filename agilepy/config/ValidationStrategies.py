@@ -74,7 +74,7 @@ class ValidationStrategies:
 
         if numberOfIsoCoeff < numberOfMaps:
 
-            error_str = f"The number of bg isotropic coefficients {isocoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
+            error_str = f"The number of isotropic coefficients (galcoeff={isocoeff}) must be equal to X = number of energy bins * fovbinnumber)"
 
             errors["model/isocoeff"] = error_str
 
@@ -82,7 +82,7 @@ class ValidationStrategies:
 
         if numberOfGalCoeff < numberOfMaps:
 
-            error_str = f"The number of bg galactic coefficients {galcoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
+            error_str = f"The number of galcoeff coefficients (galcoeff={galcoeff}) must be equal to X = number of energy bins * fovbinnumber)"
 
             errors["model/galcoeff"] = error_str
 
