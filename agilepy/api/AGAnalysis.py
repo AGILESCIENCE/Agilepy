@@ -1234,8 +1234,12 @@ plotting:
 
         binDirectories = sorted(os.listdir(lcAnalysisDataDir))
 
-        lcData = "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
-
+        lcData = "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist_peak " \
+        "l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err " \
+        "Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux " \
+        "typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr " \
+        "expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode\n"
+        
         timecounter = 0
 
         for bd in binDirectories:
@@ -1263,11 +1267,29 @@ plotting:
                     time_start_utc = AstroUtils.time_mjd_to_utc(time_start_mjd)
                     time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
 
-                    # "time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt\n"
+                    # time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist
+                    # l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err
+                    # Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux
+                    # typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr
+                    # expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode
+
                     if "nan" in lcDataDict['flux']:
-                        lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {0} {0} {0} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"                
-                    else:
-                        lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {lcDataDict['flux']} {lcDataDict['flux_err']} {lcDataDict['flux_ul']} {lcDataDict['gal']} {lcDataDict['iso']} {lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} {lcDataDict['dist']} {time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']}\n"
+                        lcDataDict['flux'] = 0
+                        lcDataDict['flux_err'] = 0
+                        lcDataDict['flux_ul'] = 0
+
+                    lcData += f"{time_start_mjd} {time_end_mjd} {lcDataDict['sqrt(ts)']} {lcDataDict['flux']} {lcDataDict['flux_err']} {lcDataDict['flux_ul']} " \
+                        f"{lcDataDict['gal']} {lcDataDict['gal_error']} {lcDataDict['iso']} {lcDataDict['iso_error']} "\
+                        f"{lcDataDict['l_peak']} {lcDataDict['b_peak']} {lcDataDict['dist_peak']} {lcDataDict['l']} {lcDataDict['b']} {lcDataDict['r']} "\
+                        f"{lcDataDict['ell_dist']} {lcDataDict['a']} {lcDataDict['b']} {lcDataDict['phi']} {lcDataDict['exp']} {lcDataDict['ExpRatio']} "\
+                        f"{lcDataDict['counts']} {lcDataDict['counts_err']} {lcDataDict['Index']} {lcDataDict['Index_Err']} {lcDataDict['Par2']} {lcDataDict['Par2_Err']} "\
+                        f"{lcDataDict['Par3']} {lcDataDict['Par3_Err']} {lcDataDict['Erglog']} {lcDataDict['Erglog_Err']} {lcDataDict['Erglog_UL']} "\
+                        f"{time_start_utc} {time_end_utc} {lcDataDict['time_start_tt']} {lcDataDict['time_end_tt']} "\
+                        f"{lcDataDict['Fix']} {lcDataDict['index']} {lcDataDict['ULConfidenceLevel']} {lcDataDict['SrcLocConfLevel']} {lcDataDict['start_l']} "\
+                        f"{lcDataDict['start_b']} {lcDataDict['start_flux']} {lcDataDict['typefun']} {lcDataDict['par2']} {lcDataDict['par3']} {lcDataDict['galmode2']} "\
+                        f"{lcDataDict['galmode2fit']} {lcDataDict['isomode2']} {lcDataDict['isomode2fit']} {lcDataDict['edpcor']} {lcDataDict['fluxcor']} {lcDataDict['integratortype']} "\
+                        f"{lcDataDict['expratioEval']} {lcDataDict['expratio_minthr']} {lcDataDict['expratio_maxthr']} {lcDataDict['expratio_size']} {lcDataDict['emin']} {lcDataDict['emax']} "\
+                        f"{lcDataDict['fovmin']} {lcDataDict['fovmax']} {lcDataDict['albedo']} {lcDataDict['binsize']} {lcDataDict['expstep']} {lcDataDict['phasecode']}\n"
 
                     timecounter += 1
 
@@ -1386,6 +1408,7 @@ plotting:
         flux_ul  = self._fixToNegativeExponent(multiOutput.get("multiUL"), fixedExponent=-8)
 
 
+
         lcDataDict = {
             "sqrt(ts)" : multiOutput.get("multiSqrtTS", strr=True),
             "flux"     : flux,
@@ -1393,8 +1416,11 @@ plotting:
             "flux_ul"  : flux_ul,
 
             "gal" : ','.join(map(str, multiOutput.get("multiGalCoeff"))),
-            "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
+            "gal_error": ','.join(map(str, multiOutput.get("multiGalErr"))),
 
+            "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
+            "iso_error": ','.join(map(str, multiOutput.get("multiIsoErr"))),
+            
             "l_peak"    : multiOutput.get("multiLPeak", strr=True),
             "b_peak"    : multiOutput.get("multiBPeak", strr=True),
             "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strr=True),
@@ -1402,10 +1428,61 @@ plotting:
             "l"    : multiOutput.get("multiL", strr=True),
             "b"    : multiOutput.get("multiB", strr=True),
             "r"    : multiOutput.get("multir", strr=True),
-            "dist" : multiOutput.get("multiDistFromStartPosition", strr=True),
+            "ell_dist": multiOutput.get("multiDistFromStartPosition", strr=True),
+
+            "a": multiOutput.get("multia", strr=True),
+            "b": multiOutput.get("multib", strr=True),
+            "phi": multiOutput.get("multiphi", strr=True),
+            "exp": multiOutput.get("multiExp", strr=True),
+            "ExpRatio": multiOutput.get("multiExpRatio", strr=True),
+            "counts": multiOutput.get("multiCounts", strr=True),
+            "counts_err": multiOutput.get("multiCountsErr", strr=True),
+            "Index": multiOutput.get("multiIndex", strr=True),
+            "Index_Err": multiOutput.get("multiIndexErr", strr=True),
+            "Par2": multiOutput.get("multiPar2", strr=True),
+            "Par2_Err": multiOutput.get("multiPar2Err", strr=True),
+            "Par3": multiOutput.get("multiPar2", strr=True),
+            "Par3_Err": multiOutput.get("multiPar3Err", strr=True),
+            "Erglog":  multiOutput.get("multiErgLog", strr=True),
+            "Erglog_Err": multiOutput.get("multiErgLogErr", strr=True),
+            "Erglog_UL": multiOutput.get("multiErgLogUL", strr=True),
+
 
             "time_start_tt" : float(multiOutput.get("startDataTT", strr=True)),
-            "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True))
+            "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True)),
+
+            "Fix": multiOutput.get("multiFix", strr=True),
+            "index": multiOutput.get("multiindex", strr=True),
+            "ULConfidenceLevel": multiOutput.get("multiULConfidenceLevel", strr=True),
+            "SrcLocConfLevel": multiOutput.get("multiSrcLocConfLevel", strr=True),
+            "start_l": multiOutput.get("multiStartL", strr=True),
+            "start_b": multiOutput.get("multiStartB", strr=True),
+            "start_flux": multiOutput.get("multiStartFlux", strr=True),
+            "typefun": multiOutput.get("multiTypefun", strr=True),
+            "par2": multiOutput.get("multipar2", strr=True),
+            "par3": multiOutput.get("multipar3", strr=True),
+            "galmode2":  multiOutput.get("multiGalmode2", strr=True),
+            "galmode2fit": multiOutput.get("multiGalmode2fit", strr=True),
+            "isomode2":  multiOutput.get("multiIsomode2", strr=True),
+            "isomode2fit": multiOutput.get("multiIsomode2fit", strr=True),
+            "edpcor": multiOutput.get("multiEdpcor", strr=True),
+            "fluxcor": multiOutput.get("multiFluxcor", strr=True),
+            "integratortype": multiOutput.get("multiIntegratorType", strr=True),
+            "expratioEval": multiOutput.get("multiExpratioEval", strr=True),
+            "expratio_minthr": multiOutput.get("multiExpratioMinthr", strr=True),
+            "expratio_maxthr":  multiOutput.get("multiExpratioMaxthr", strr=True),
+            "expratio_size": multiOutput.get("multiExpratioSize", strr=True),
+
+            "emin": ','.join(map(str, multiOutput.get("multiEmin"))),
+            "emax": ','.join(map(str, multiOutput.get("multiEmax"))),
+            "fovmin": ','.join(map(str, multiOutput.get("multifovmin"))),
+            "fovmax": ','.join(map(str, multiOutput.get("multifovmax"))),
+            
+            "albedo": multiOutput.get("multialbedo", strr=True),
+            "binsize": multiOutput.get("multibinsize", strr=True),
+            "expstep": multiOutput.get("multiexpstep", strr=True),
+            "phasecode": multiOutput.get("multiphasecode", strr=True)
+
         }
 
         return lcDataDict
