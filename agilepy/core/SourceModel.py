@@ -551,17 +551,18 @@ class Source:
         else:
             return f'\n  * {self.bold("Free parameters")}: '+' '.join(freeParams)
 
+
+
+
     def __str__sourcePos(self):
 
         print(self.initialSpatialModel.get("dist"))
         print(self.initialSpatialModel.get("pos"))
-        
-
-        return f'\n  * {self.bold("Initial source position")}:\n\t- Source position: {self.initialSpatialModel.get("pos")} (l,b) \n\t- Distance from map center: {round(self.initialSpatialModel.get("dist"), 4)} deg'
 
     def __str__sourceParams(self):
         strR = ''
         strR += f'\n  * {self.bold("Initial source parameters")}: ({self.initialSpectrum.stype})'
+
 
         spectrumParams = Spectrum.getSpectrumParamsNames(self.initialSpectrum.stype)
 
@@ -580,6 +581,9 @@ class Source:
                 if self.initialSpectrum.get(spectrumParams[i+1]):
                     strR += f" +/- {str(self.initialSpectrum.get(spectrumParams[i+1]))}"
 
+        strR += f"\n\t- Source position: {self.initialSpatialModel.get('pos')} (l,b)"
+        strR += f"\n\t- Distance from map center: {round(self.initialSpatialModel.get('dist'), 4)} deg"
+
         return strR
 
     def __str__multiAnalisys(self):
@@ -587,7 +591,7 @@ class Source:
         if self.multi is None:
             return strr
 
-        freeParams = self.getFreeParams()
+        # freeParams = self.getFreeParams()
 
         ## Multi
         if self.multi:
@@ -605,8 +609,12 @@ class Source:
             strr += f'\n\t- ergLog(erg/cm2s): {self.multi.get("multiErgLog")}'
             if self.multi.get("multiErgLogErr"):
                 strr += f' +/- {self.multi.get("multiErgLogErr")}'
-            strr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")} +/- {self.multi.get("multiGalErr")}'
-            strr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")} +/- {self.multi.get("multiIsoErr")}'
+            strr += f'\n\t- galCoeff: {self.multi.get("multiGalCoeff")}'
+            if self.multi.get("multiGalErr") and sum(self.multi.get("multiGalErr")) != 0:
+                strr += f' +/- {self.multi.get("multiGalErr")}'
+            strr += f'\n\t- isoCoeff: {self.multi.get("multiIsoCoeff")}' 
+            if self.multi.get("multiIsoErr") and sum(self.multi.get("multiIsoErr")) != 0:
+                strr += f' +/- {self.multi.get("multiIsoErr")}'
             strr += f'\n\t- exposure(cm2s): {self.multi.get("multiExp")}'
             strr += f'\n\t- exp-ratio: {self.multi.get("multiExpRatio")}'
             strr += f'\n\t- L_peak: {self.multi.get("multiLPeak")}'
@@ -631,7 +639,6 @@ class Source:
         strr = ''
         strr += self.__str__title()
         strr += self.__str__freeParams()
-        strr += self.__str__sourcePos()
         strr += self.__str__sourceParams()
         strr += self.__str__multiAnalisys()
         return strr
