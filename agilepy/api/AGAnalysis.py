@@ -1164,6 +1164,21 @@ plotting:
         if self.lightCurveData[analysisName] is not None and analysisName=="ap":
             return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
 
+    def displayGenericColumn(self, filename, column, um=None, saveImage=False):
+        """An utility method for viewing a generic column from the lightcurvedata
+
+        Args:
+            filename (str): the path of the Lightcurve text data file. It defaults to None. If None the last generated file will be used.
+            column (str): the name of the column to display
+            um (str): unit of measurement
+            saveImage (bool): if set to true, saves the image into the output directory. It defaults to False.
+
+        Returns:
+            If saveImage is true tha path of the image otherwise the plot
+        """
+
+        return self.plottingUtils.plotGenericColumn(filename, column, um, saveImage)
+
 
     ############################################################################
     # utility                                                                  #
