@@ -385,6 +385,31 @@ class PlottingUtils(metaclass=Singleton):
 
         return ax
 
+    def plotGenericColumn(self, filename, column, um=None, saveImage=False):
+
+        data = pd.read_csv(filename, header=0, sep=" ")
+        data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+
+        fig = go.Figure()
+
+        fig.add_traces(go.Scatter(x=data["tm"], y=data[column]))
+
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
+
+        fig.update_yaxes(showline=True, linecolor="black",
+                         title=um)
+        fig.update_layout(xaxis=dict(tickformat="g"))
+
+        if saveImage:
+            filePath = join(self.outdir, column+".png")
+            self.logger.info(self, column+" plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
+        
+
 
 
     def plotLc(self, filename, lineValue, lineError, saveImage=False):

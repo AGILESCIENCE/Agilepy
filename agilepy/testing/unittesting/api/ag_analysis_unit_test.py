@@ -389,6 +389,23 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()"""
 
+    def test_generic_column(self):
+        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
+
+        ag.setOptions(energybins=[[100, 300]], fovbinnumber=1)
+
+        ag.freeSources(lambda name: name == self.VELA, "flux", True)
+
+        lightCurveData = ag.lightCurveMLE(
+            self.VELA, tmin=433860000, tmax=433880000, timetype="TT", binsize=20000)
+
+        filename = ag.displayGenericColumn(
+            lightCurveData, column="l_peak", um="test_um", saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(filename))
+
+        ag.destroy()
+
     def test_calc_bkg(self):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
