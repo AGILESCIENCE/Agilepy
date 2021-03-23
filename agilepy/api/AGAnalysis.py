@@ -668,7 +668,6 @@ plotting:
         """It estimates the isotropic and galactic background coefficients.
            It automatically updates the configuration.
 
-
         Args:
             sourceName (str): the name of the source under analysis.
             galcoeff (List, optional): the galactic background coefficients (one for each map).
@@ -720,10 +719,11 @@ plotting:
             tmin = AstroUtils.time_mjd_to_tt(tmin)
             tmax = AstroUtils.time_mjd_to_tt(tmax)
 
-        if pastTimeWindow != 0:
-            tmax = tmin
-            tmin = tmin - pastTimeWindow*86400
-
+        if pastTimeWindow == 0:
+            tmin = tmin
+        else:
+            tmin = tmin - 86400*abs(pastTimeWindow)
+        
         self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
