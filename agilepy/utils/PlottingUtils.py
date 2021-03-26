@@ -389,6 +389,7 @@ class PlottingUtils(metaclass=Singleton):
 
         data = pd.read_csv(filename, header=0, sep=" ")
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data = data.sort_values(by="tm")
 
         fig = go.Figure()
 
