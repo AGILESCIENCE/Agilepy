@@ -1112,7 +1112,7 @@ plotting:
 
         return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
-    def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False):
+    def displayLightCurve(self, analysisName, filename=None, lineValue=None, lineError=None, saveImage=False, fermiLC = None):
         """It displays the light curve plot. You can call this method after lightCurveMLE() or aperturePhotometry().
         If you pass a filename containing the light curve data, this file will be used instead of using the data generated 
         by the mentioned methods. 
@@ -1123,6 +1123,7 @@ plotting:
             lineValue (int, optional): mean flux value. It defaults to None.
             lineError (int, optional): mean flux error lines. It defaults to None.
             saveImage (bool, optional): if set to true, saves the image into the output directory. It defaults to False.
+            fermiLC (str, optional): the path of FERMI lightcurve data
 
         Returns:
             It returns the lightcurve plot
@@ -1144,7 +1145,7 @@ plotting:
 
 
         if filename is not None and analysisName == "mle":
-            return self.plottingUtils.plotLc(filename, lineValue, lineError)
+            return self.plottingUtils.plotLc(filename, lineValue, lineError, saveImage, fermiLC)
 
         if filename is not None and analysisName == "ap":
             return self.plottingUtils.plotSimpleLc(filename, lineValue, lineError)
@@ -1159,12 +1160,12 @@ plotting:
             return False
 
         if self.lightCurveData[analysisName] is not None and analysisName=="mle":
-            return self.plottingUtils.plotLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
+            return self.plottingUtils.plotLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage, fermiLC=fermiLC)
 
         if self.lightCurveData[analysisName] is not None and analysisName=="ap":
             return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
 
-    def displayGenericColumn(self, filename, column, um=None, saveImage=False):
+    def displayGenericColumn(self, filename, column, um=None, saveImage=False, fermi=False):
         """An utility method for viewing a generic column from the lightcurvedata
 
         Args:
