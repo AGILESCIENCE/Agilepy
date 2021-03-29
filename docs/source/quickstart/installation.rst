@@ -12,14 +12,27 @@ need to decide the name of the virtual environment that will be created by anaco
     conda config --add channels plotly
     conda create -n <virtualenv_name> -c agilescience agilepy
 
+.. note:: If you want to try agilepy's new features that are not officially released yet, 
+           a develpoment environment called agilepy-environment is available into Anaconda cloud. 
+           It contains all the dependencies unless agilepy, 
+           which must be installed by hand cloning the repository.
+           Check the installation instructions `here <../help/development.html#install-the-development-environment>`_
+
 Supported platforms:
 
   - linux-64
   - osx-64
 
+.. note:: An experimental package for IBM POWER architecture(ppc64le) is available on Anaconda cloud. Due to some incompability this package does not contain
+          ROOT and AGILE science tools that need to be installed from source. Check the instructions to install AGILE science tools
+          `here <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup>`_
+
 Tested on:
 
   - CentOs 7.6
+  - Ubuntu 18.04
+  - Ubuntu 19.10
+  - Ubuntu 20.04
   - macOs 10.14
   - macOs 10.15
 
@@ -62,8 +75,3 @@ the root folder of your anaconda installation.
 
 It contains all the dependencies Agilepy requires. Here, there is the "agiletools"
 directory, containing AGILE's scientific software.
-
-
-How to get AGILE data
-^^^^^^^^^^^^^^^^^^^^^
-TODO

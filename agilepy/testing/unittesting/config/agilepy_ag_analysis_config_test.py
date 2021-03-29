@@ -32,12 +32,12 @@ import os
 import shutil
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.CustomExceptions import OptionNotFoundInConfigFileError, \
-                                           ConfigFileOptionTypeError, \
-                                           CannotSetHiddenOptionError, \
-                                           CannotSetNotUpdatableOptionError, \
-                                           ConfigurationsNotValidError, \
-                                           OptionNameNotSupportedError
+from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, \
+                                          ConfigFileOptionTypeError, \
+                                          CannotSetHiddenOptionError, \
+                                          CannotSetNotUpdatableOptionError, \
+                                          ConfigurationsNotValidError, \
+                                          OptionNameNotSupportedError
 
 
 class AgilepyConfigUT(unittest.TestCase):
@@ -58,7 +58,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=456361777, timetype="TT")
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
 
 
 
@@ -68,7 +68,8 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmax=456537946, timetype="TT")
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
+                          tmin=433900000, tmax=456537946, timetype="TT")
 
  
     def test_validation_min_max(self):
@@ -77,7 +78,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadBaseConfigurations(self.agilepyconfPath)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, fovradmin=10, fovradmax=0)
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, dq=0, fovradmin=10, fovradmax=0)
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, emin=10, emax=0)
 
 
@@ -89,8 +90,17 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         # float instead of int is ok.
-        self.assertEqual(None, self.config.setOptions(tmin=456361779, timetype="TT"))
+        self.assertEqual(None, self.config.setOptions(tmin=433857532., tmax=435153532., timetype="TT"))
 
+        self.assertEqual("TT", self.config.getOptionValue("timetype"))
+
+        self.assertEqual(None, self.config.setOptions(tmin=58026.5, tmax=58027.5, timetype="MJD"))
+
+        self.assertEqual("MJD", self.config.getOptionValue("timetype"))
+
+
+
+        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, tmin=58026.5) # we must pass also timetype
 
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")
@@ -110,6 +120,12 @@ class AgilepyConfigUT(unittest.TestCase):
         # len(energybins) = 2
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.617196])
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[0.617196])
+
+        self.assertRaises(ConfigFileOptionTypeError,
+                          self.config.setOptions, fluxcorrection=3.14)
+
+        self.assertRaises(ConfigurationsNotValidError,
+                          self.config.setOptions, fluxcorrection=25)
 
 
     def test_energybins(self):
@@ -255,8 +271,8 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
 
         self.config.setOptions(
-                    evtfile="$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index",
-                    logfile="$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+                    evtfile="$AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index",
+                    logfile="$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
                 )
 
         self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))

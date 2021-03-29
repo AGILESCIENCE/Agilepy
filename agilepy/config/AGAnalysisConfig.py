@@ -2,10 +2,10 @@ from numbers import Number
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
-from agilepy.utils.CustomExceptions import  CannotSetNotUpdatableOptionError, \
-                                            ConfigurationsNotValidError, \
-                                            OptionNameNotSupportedError, \
-                                            CannotSetHiddenOptionError
+from agilepy.core.CustomExceptions import  CannotSetNotUpdatableOptionError, \
+                                           ConfigurationsNotValidError, \
+                                           OptionNameNotSupportedError, \
+                                           CannotSetHiddenOptionError
 
 class AGAnalysisConfig():
 
@@ -49,6 +49,7 @@ class AGAnalysisConfig():
         CompletionStrategies._setPhaseCode(confDict)
         CompletionStrategies._setExpStep(confDict)
         CompletionStrategies._transformLoccl(confDict)
+        CompletionStrategies._dqCompletion(confDict)
         return confDict
 
 
@@ -65,35 +66,37 @@ class AGAnalysisConfig():
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
         errors.update( ValidationStrategies._validateTimetype(confDict))
+        errors.update( ValidationStrategies._validateFluxcorrection(confDict) )
+        #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
+        #errors.update( ValidationStrategies._validateFovradmax(confDict) )
+        errors.update( ValidationStrategies._validateDQ(confDict) )
 
-        if errors:
-            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
+        return errors
 
 
     def checkOptions(self, **kwargs):
 
-        
-        for optionName in kwargs.keys():
+        #for optionName, optionVal in kwargs.items():
 
-            if optionName == "tmin" and "timetype" not in kwargs:
-                raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+        if "tmin" in kwargs and ("timetype" not in kwargs or "tmax" not in kwargs):
+            raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' and 'tmax' options.")
 
-            if optionName == "tmax" and "timetype" not in kwargs:
-                raise CannotSetNotUpdatableOptionError("The option 'tmin' can be updated if and only if you also specify the 'timetype' option.")
+        if "tmax" in kwargs and ("timetype" not in kwargs or "tmin" not in kwargs):
+            raise CannotSetNotUpdatableOptionError("The option 'tmax' can be updated if and only if you also specify the 'timetype' and 'tmax' options.")
 
-            if self.isHidden(optionName):
-                raise CannotSetHiddenOptionError("Can't update the '{}' hidden option.".format(optionName))
+        if ("albedorad" in kwargs or "fovradmax" in kwargs) and "dq" not in kwargs:
+            raise CannotSetNotUpdatableOptionError(
+                    "You cannot set albedorad or fovradmax without setting dq = 0")
+        elif ("albedorad" in kwargs or "fovradmax" in kwargs) and kwargs["dq"] != 0:
+            raise CannotSetNotUpdatableOptionError(
+                "The options 'albedorad' and 'fovradmax' can be updated if and only when dq = 0.")
 
+        if "dq" in kwargs and kwargs["dq"] == 0 and ("albedorad" not in kwargs and "fovradmax" not in kwargs):
+            raise CannotSetNotUpdatableOptionError("The option 'dq' can be 0 if and only if you also specify the 'albedorad' and 'fovradmax' options.")
+            
+            
 
-    def isHidden(self, optionName):
-
-        if optionName in [ "lonpole", "lpointing", "bpointing", "maplistgen", "offaxisangle", \
-                           "galmode2", "galmode2fit", "isomode2", "isomode2fit", "minimizertype", \
-                           "minimizeralg", "minimizerdefstrategy", "mindefaulttolerance", "integratortype", \
-                           "contourpoints", "edpcorrection", "fluxcorrection"]:
-            return True
-
-        return False
 
 
     def checkOptionsType(self, **kwargs):
@@ -110,21 +113,27 @@ class AGAnalysisConfig():
             if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                                 "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                                "emax_sources", "loccl", "timeslot"]:
+                                "emax_sources", "loccl", "timeslot", "fluxcorrection", \
+                                "minimizerdefstrategy", "integratortype", "contourpoints",
+                                "galmode2", "galmode2fit", "isomode2", "isomode2fit", "lonpole" \
+                                ]:
                 
                 validType = (int, 0)
 
             # Number (int and float)
             elif optionName in ["glat", "glon", "tmin", "tmax", "mapsize", "spectralindex", \
                                 "timestep", "binsize", "ranal", "ulcl", \
-                                "expratio_minthr", "expratio_maxthr", "expratio_size", "radius"]:
+                                "expratio_minthr", "expratio_maxthr", "expratio_size", "radius", \
+                                "edpcorrection", "mindefaulttolerance", "offaxisangle", "lpointing", \
+                                "bpointing"]:
 
                 validType = (Number, 0)
 
 
             # String
             elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
-                                "timetype", "timelist", "projtype", "proj", "modelfile"]:
+                                "timetype", "timelist", "projtype", "proj", "modelfile", "minimizertype", \
+                                "minimizeralg", "maplistgen"]:
 
                 validType = (str, 0)
 
@@ -171,3 +180,11 @@ class AGAnalysisConfig():
         if optionName == "evtfile" or optionName == "logfile":
 
             CompletionStrategies._expandFileEnvVars(confDict, optionName)
+        
+        if optionName == "dq":
+
+            CompletionStrategies._dqCompletion(confDict)
+
+        
+
+

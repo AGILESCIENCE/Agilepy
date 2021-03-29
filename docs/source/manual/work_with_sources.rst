@@ -1,0 +1,203 @@
+********************
+Working with sources
+********************
+
+The Source abstraction
+**********************
+The main abstraction of Agilepy is the Source object. It is described by several parameters, some of which can be free to vary, and they are 
+changed by the mle() analysis.
+
+The set of the parameters describing the source can vary, depending on the spectrum and spatial model types of the source. 
+
+
+The different types of sources are described `here <../manual/source_file.html#source-library-format-xml-document>`_.
+
+The parameters' values of a source object can be inspected easily:
+
+::
+
+    print(source)
+    -----------------------------------------------------------
+    Source name: 2AGLJ1045-5954 (PointSource)
+     * Free params: none
+     * Initial Source Position:
+       - Source position: (287.697, -0.788886)
+       - Dist from map center (l,b): 24.2159
+     * Initial Source Spectrum: (PowerLaw)
+       - flux: 1.80893e-07
+       - index: 2.0414
+   -----------------------------------------------------------
+
+Fields:
+
+* Initial Source Position: the initial condition of the source position and the source's distance from the center of the map (l,b). These values will not be changed.
+* Initial Source Spectrum: same as before, but now spectral parameters are considered.
+* Position after last MLE analysis: this field will be shown after calling the mle() method, only if "pos"==free. These values are changed by the mle() routine.
+* Spectrum after last MLE analysis: this field will be shown after calling the mle() method, only if at least one spectral parameter is free. These values are changed by the mle() routine.
+* Last MLE analysis: this field will be shown after calling the mle() method. These are the results of the last mle() routine call. If "pos"==free, you can see here additional results.
+
+
+The SourceLibrary object contains all the sources loaded by the user for its 
+current analysis. Most of the time the user will rely on the `AGAnalysis <../api/analysis_api.html#api-AGAnalysis-AGAnalysis>`_ class methods in order to 
+interact with the sources within the SourceLibrary object. 
+
+How to load or add new sources
+******************************
+The first required step to perform scientific analysis, is to load the model of one or more sources within the SourceLibrary object. There 
+are several ways to do that.
+
+The `loadSourcesFromCatalog(catalogName, rangeDist=0, inf, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-loadSourcesFromCatalog>`_ 
+allows to load a source catalog, while filtering the sources by their distance (degree) from the l,b position provided within the configuration file.
+
+::
+
+    sources = ag.loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
+
+
+
+The `loadSourcesFromFile(sourcesFilepath, rangeDist=0, inf, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-loadSourcesFromFile>`_
+loads the sources, reading their model from a file. 
+
+The `addSource(sourceName, sourceDict) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-addSource>`_ method allows the user to define on the fly a 
+source model with a python dictionary. Check the tutorial notebooks for an example. 
+
+
+How to let the source's parameters to vary
+******************************************
+In order to free or fix a sources' parameter, the user can rely on the `freeSources(selection, parameterName, free, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-freeSources>`_
+method. The sources can be selected via the "selection" argument, supporting either lambda functions and boolean expression strings. Please, check
+the `selectSources(selection, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-selectSources>`_ method documentation for more informations.
+
+::
+    
+    aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
+
+::
+
+    ag.freeSources('name == "2AGLJ1513-0905"', "index", True, show=True)
+
+Check the api documentation or the tutorial notebooks for additional examples. 
+
+How to check which source's parameters are free to vary
+*******************************************************
+The user can obtain this information by printing out the Source object or calling the getFreeParams() method (not documented) of the Source object.
+
+::
+
+    print(source)
+    -----------------------------------------------------------
+    Source name: 2AGLJ0835-4514 (PointSource)
+     * Free params: flux
+     * Initial Source Position:
+       - Source position: (263.585, -2.84083)
+       - Dist from map center (l,b): 0.0702
+     * Initial Source Spectrum: (PLSuperExpCutoff)
+       - flux: 9.69539e-06
+       - index1: 1.71345
+       - cutoffEnergy: 3913.06
+       - index2: 1.34774
+   -----------------------------------------------------------
+    
+    print(source.getFreeParams())
+    ['flux']
+
+The "multi" description of a Source object
+******************************************
+A Source object is also described by a set of values (they can't vary) generated by the mle() analysis. Indeed, when the mle() analysis 
+is performed, the user can print out the Source object and it will show the multi values. 
+
+::
+
+    print(source)
+    -----------------------------------------------------------
+    Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 15.0971
+    * Free params: flux
+    * Initial Source Position:
+      - Source position: (263.585, -2.84083)
+      - Dist from map center (l,b): 0.0702
+    * Initial Source Spectrum: (PLSuperExpCutoff)
+      - flux: 9.69539e-06
+      - index1: 1.71345
+      - cutoffEnergy: 3913.06
+      - index2: 1.34774
+    * Spectrum after last MLE analysis: (PLSuperExpCutoff)
+      - flux: 9.35543e-06
+    -----------------------------------------------------------
+
+Furthermode, when the "pos" parameter is free to vary, the multi values section will show additional values:
+
+:: 
+
+    print(source)
+    -----------------------------------------------------------
+    Source name: 2AGLJ0835-4514 (PointSource) => sqrt(ts): 15.1553
+     * Free params: flux pos
+     * Initial Source Position:
+       - Source position: (263.585, -2.84083)
+       - Dist from map center (l,b): 0.0702
+     * Initial Source Spectrum: (PLSuperExpCutoff)
+       - flux: 9.69539e-06
+       - index1: 1.71345
+       - cutoffEnergy: 3913.06
+       - index2: 1.34774
+     * Position after last MLE analysis:
+       - Source position: (263.648, -2.8447)
+       - Dist from map center (l,b): 0.1173
+     * Spectrum after last MLE analysis: (PLSuperExpCutoff)
+       - flux: 9.35002e-06
+     * Last MLE analysis:
+       - flux(ph/cm2s): 9.35002e-06 +- 1.00423e-06
+       - upper limit(ph/cm2s): 1.14637e-05
+       - ergLog(erg/cm2s): 1.66223e-09 +- 1.7853e-10
+       - galCoeff: [0.377185, 0.720361]
+       - isoCoeff: [6.92077, 3.72294]
+       - exposure(cm2s): 18945200.0
+       - exp-ratio: 0.0
+       - L_peak: 263.638
+       - B_peak: -2.84874
+       - distFromStartPos: 0.053207
+       - ellipse:
+           - L: 263.648
+           - B: -2.8447
+           - distFromStartPos: 0.0627392
+           - r: 0.196026
+           - a: 0.194086
+           - b: 0.198718
+           - phi: 39.6624
+   -----------------------------------------------------------
+
+   
+The values L_peak and B_peak set to the initial values in the source location is fixed. If it is allowed to vary then they are set to the position for which the TS is maximized. If a confidence contour was found, the parameters of the "ellipse" section describe the best-fit ellipse of the contour, described in detail below. The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, or the other spectral parameters, if applicable, are provided.
+
+The user can call selectSources to show the source description
+
+::
+
+    ag.selectSources('name == "PKS1510-089"', show=True)
+
+::
+
+    ag.selectSources('flux > 0', show=True)
+
+::
+
+    ag.selectSources(lambda name, sqrtTS: name == "2AGLJ2021+4029" AND sqrtTS> 0, show=True)
+
+
+How to manually change the spectrum parameters' values of a source
+******************************************************************
+The user can call the set() method (not documented) of the Spectrum object within the Source object. 
+
+:: 
+
+    source.spectrum.set("index2", 1.34774)
+
+How to manually change the position parameters' values of a source
+******************************************************************
+The user can rely on the `updateSourcePosition(sourceName, glon, glat) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-updateSourcePosition>`_ 
+method.
+
+
+
+
+

@@ -38,7 +38,7 @@ The you have to load the models of the sources (you can filter them by their dis
 
 ::
 
-    ag = loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
+    sources = ag.loadSourcesFromCatalog('2AGL', rangeDist=(0, 10))
 
 
 Keyword arguments can be passed via setOptions() to override configuration parameters:
@@ -86,22 +86,21 @@ You can generate a light curve data file with...
 
 ::
 
-    lightCurveData = ag.lightCurve("CYGX3", tmin=58930 , tmax=58936, binsize=10800)
+    lightCurveData = ag.lightCurveMLE("CYGX3", tmin=58930 , tmax=58936, binsize=10800)
 
 
 ...and display the interactive light curve plot with:
 
 ::
 
-    ag.displayLightCurve()
+    ag.displayLightCurve("mle")
 
+If you want to manually update the value of a source's spectrum parameter, you can do it with:
 
+::
 
-.. hint:: Try out the **tutorial notebooks** and the **analysis notebooks**:
+    sources = ag.selectSources('name == "2AGLJ2021+4029"')
+    source = sources.pop()
+    source.spectrum.set("index", 1.8)
 
-   ::
-
-      start_agilepy_notebooks.sh
-
-
-.. hint:: Check out the API documentation!
+.. hint:: Check out the API documentation and the `Jupiter notebooks <jupyter_notebooks.html>`_  section!

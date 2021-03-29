@@ -28,14 +28,14 @@
 
 import os
 
-from agilepy.api.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Utils
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.api.ScienceTools import Cwt2, Met, Ccl
+from agilepy.core.ScienceTools import Cwt2, Met, Ccl
 
-from os.path import join
+from os.path import join, expandvars
 from astropy.wcs import WCS
 from astropy.io import fits
 import scipy.ndimage as ndimage
@@ -121,7 +121,7 @@ wavelet:
 
         """%(outputDir, userName, verboselvl, ctsmap, scaletype, scalemin, scalemax, scalenum, methistsize, cclsizemin, cclsizemax, cclradmin, cclradmax, cclscalemin, cclscalemax)
 
-        with open(confFilePath,"w") as cf:
+        with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
             cf.write(configuration)
     
@@ -171,7 +171,7 @@ wavelet:
       data = hdu.data
       
       if not multiImage:
-        fig, ax = plt.subplots(nrows=8, ncols=6, subplot_kw={'projection': wcs, "slices":("x", "y",21)}, figsize=(20, 20))
+        fig, ax = plt.subplots(nrows=8, ncols=6, subplot_kw={'projection': wcs, "slices":("x", "y",21)}, figsize=(20, 35))
 
         ax = ax.flatten()
         for i in range(hdu.header["NAXIS3"]):

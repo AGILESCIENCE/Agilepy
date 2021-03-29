@@ -4,6 +4,9 @@
 Configuration file
 ******************
 
+General
+*******
+
 A `yaml <https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html>`_ configuration file is required in order to run Agilepy.
 
 It is composed by several sections and each section holds several configuration options, some of which are optional (having a default value), some others are required.
@@ -66,7 +69,7 @@ The method above will create the following configuration file:
 
   maps:
     mapsize: 40
-    useEDPmatrixforEXP: yes
+    useEDPmatrixforEXP: no
     expstep: null
     spectralindex: 2.1
     timestep: 160
@@ -120,7 +123,26 @@ The method above will create the following configuration file:
   plotting:
     twocolumns: False
 
-The next paragraphs describe the configuration options.
+Updating the configuration options
+**********************************
+The user should not directly manipulate the configuration file, because the configuration file is read only once, when the 
+AGBaseAnalysis constructor is called. Hence, the configuration file modification will not affect the internal configuration object.
+Also, updating the values held by this object will not affect the original values written on disk.
+
+In order to update the internal configuration object, the user can rely on the following methods:
+
+* `getOption(optionName) <../api/analysis_api.html#api.AGBaseAnalysis-AGBaseAnalysis-getOption>`_
+* `setOption(**kwargs) <../api/analysis_api.html#api.AGBaseAnalysis-AGBaseAnalysis-setOptions>`_
+
+For example:
+::
+
+    ag.setOptions(binsize=0.50, energybins=[[100, 300], [500, 1000]])
+    print(ag.getOption("energybins"))
+
+Configuration options
+*********************
+This section describes the configuration options.
 
 Section: *'input'*
 ==================
@@ -190,12 +212,12 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
    "filtercode", "filtercode = 5 select G filtercode = 0 select G+L+S", "int", 5, "no"
    "fovradmin", "fovradmin < fovradmax", "int", 0, "no"
-   "fovradmax", "fovradmax > fovradmin", "int", 60, "no"
-   "albedorad", "albedo selection cut", "int", 80, "no"
+   "fovradmax", "fovradmax > fovradmin (dq = 0 is necessary for setting)", "int", 60, "no"
+   "albedorad", "albedo selection cut (dq = 0 is necessary for setting)", "int", 80, "no"
    "dq", "| Data quality selection filter.
    | A combination of fovradmax and albedorad.
-   | dq = 0 use specified or default
-   | albedorad and fovradmax. Possible values are:
+   | Possible values are [0,1,2,3,4,5,6,7,8,9]
+   | dq = 0 -> albedorad and fovradmax are free and they must always be specified in setOption
    | dq = 1 -> albedorad=80, fovradmax=60
    | dq = 2 -> albedorad=80, fovradmax=50
    | dq = 3 -> albedorad=90, fovradmax=60
@@ -211,7 +233,7 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | the *'phasecode'* rule", "int", "null", "no"
 
 Phasecode rule
---------------
+^^^^^^^^^^^^^^
 
   - phasecode = 2 -> spinning mode, SAA excluded with AC counts method.
   - phasecode = 6 -> spinning mode, SAA excluded according to the magnetic field intensity (old definition of SAA, defined by TPZ)
@@ -231,6 +253,17 @@ It is suggested to use phasecode = 2 for data taken in spinning mode.
        end
     end
 
+filtercode rule
+^^^^^^^^^^^^^^^^
+
+A set of different on-board triggers enables the discrimination of background events (mainly cosmic rays in the AGILE Low Earth Orbit) from gamma-ray events. The data processing of the GRID events use an additional on-ground filters and provides a classification of each event:
+
+- P : events classified as a charged particle and rejected
+- G : events classified as gamma-ray photons. This is the most useful class for the analysis
+- S : events classified as single-track: this is a special class of events with no separation between the electron and positron tracks
+- L : limbo events, not clearly classified.
+
+The events provided in the EVT files are of type G, S, and L. The AGILE team recommends to use the G class for scientific analysis. Only for gamma-ray bursts or other short transient events, and for pulsar timing analysis the G, S and L classes should be used together.
 
 
 Section: *'maps'*
@@ -271,7 +304,7 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
    :widths: 20, 100, 20, 20, 20
 
    "mapsize", "Width of the ROI in degrees","float", 40, "no"
-   "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map. Possible values = [*yes*, *no*]", "boolean", "yes", "no"
+   "useEDPmatrixforEXP", "Use the EDP matrix to generate the exposure map.", "boolean", "False", "no"
    "expstep", "| Step size of the exposure map, if 'None' it depends by
    | round(1 / binsize, 2) (e.g. 0.3->3, 0.25->4, 0.1->10)", "int", "None", "no"
    "spectralindex", "Spectral index of the exposure map", "float", 2.1, "no"
@@ -347,8 +380,15 @@ following example show which iso/gal coefficients are assigned to which map.
    "emin_sources", "energy min of the modelfile", "int", 100, "no"
    "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
+galcoeff and isocoeff
+^^^^^^^^^^^^^^^^^^^^^^
+
+galcoeff and isocoeff are the coefficients for the Galactic and isotropic diffuse emission components respectively. The values may be fixed during the fitting process or some or all of them may be optimized by allowing them to vary. Agilepy allows to evaluate these coefficient and fix them or to keep these coefficient free. 
+
+Positive values are considered fixed, while negative values are free to vary starting from their absolute values. These coefficients are affected by the galmode and isomode coefficients described in the following section.
+
 galmode and isomode
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *'galmode'* and *'isomode'* are integer values describing how the corresponding
 coefficients *'galcoeff'* or *'isocoeff'* found in all the lines of the maplist will be used:
@@ -370,10 +410,11 @@ The maximum likelihood estimation analysis is configured by the following option
 
    "ranal", "Radius of analysis", float, 10, No
    "ulcl", "Upper limit confidence level, expressed as sqrt(TS)", float, 2, No
-   "loccl", "Source location contour confidence level (default 95 (%)confidence level) Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
+   "loccl", "Source location contour confidence level (default 95 (%)confidence level). Possible values: [ *99*, *95*, *98*, *50*]", int, 95, No
+   "fluxcorrection", "Correction of the flux taking into account the spectral model. Possible values: [0 (no correction), 1 (enable correction)]. ", int, 0, No
 
 Exp-ratio evaluation options
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"
@@ -407,4 +448,4 @@ This section defines the plotting configuration.
     :header: "Option", "Description", "Type", "Required", "Default"
     :widths: 20, 100, 20, 20, 20
 
-    twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, no, False
+    twocolumns, "The plot is adjusted to the size of a two column journal publication", boolean, False, no

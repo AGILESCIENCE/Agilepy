@@ -43,11 +43,11 @@ from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.CustomExceptions import  ConfigurationsNotValidError, \
-                                            OptionNotFoundInConfigFileError, \
-                                            CannotSetHiddenOptionError, \
-                                            CannotSetNotUpdatableOptionError, \
-                                            AnalysisClassNotSupported
+from agilepy.core.CustomExceptions import  ConfigurationsNotValidError, \
+                                           OptionNotFoundInConfigFileError, \
+                                           CannotSetHiddenOptionError, \
+                                           CannotSetNotUpdatableOptionError, \
+                                           AnalysisClassNotSupported
 
 
 
@@ -177,7 +177,7 @@ class AgilepyConfig(Observable):
 
     def setOptions(self, validate=True, **kwargs):
         
-        # Base checks
+        # Base checks   
         for optionName, optionValue in kwargs.items():
 
             optionSection = self.getSectionOfOption(optionName)
@@ -188,23 +188,33 @@ class AgilepyConfig(Observable):
             if AgilepyConfig._notUpdatable(optionName):
                 raise CannotSetNotUpdatableOptionError("The option '{}' cannot be updated.".format(optionName))
 
+        self.analysisConfig.checkOptions(**kwargs)
+
         # Analysis class config checks
         self.analysisConfig.checkOptionsType(**kwargs)
+
+        confBKP = self.conf.copy()
 
         # Update the values!
         for optionName, optionValue in kwargs.items():
             
             optionSection = self.getSectionOfOption(optionName)
 
-            self.conf[optionSection][optionName] = optionValue
-
+            confBKP[optionSection][optionName] = optionValue
+            
             # Completion strategies
-            self.analysisConfig.completeUpdate(optionName, self.conf)
-
-
+            self.analysisConfig.completeUpdate(optionName, confBKP)
 
         # Validation strategies
-        self.analysisConfig.validateConfiguration(self.conf)
+        errors = self.analysisConfig.validateConfiguration(confBKP)
+
+        if errors:
+            confBKP = None
+            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+
+        # Use confBKP 
+        self.conf = confBKP.copy()
+
 
         # Notify the observables
         for optionName, optionValue in kwargs.items():

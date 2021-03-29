@@ -1,0 +1,23 @@
+# Dependencies required to build the docs
+channels:
+ - conda-forge
+ - plotly
+ - agilescience
+dependencies:
+  - agiletools
+  - agilepy-dataset
+  - astropy==4.0
+  - plotly==4.12.0
+  - psutil==5.7.0
+  - matplotlib==3.1.3
+  - pandas==1.*
+  - ipympl==0.5.7
+  - numpy==1.*
+  - scipy==1.*
+  - sphinx==2.*
+  - sphinx_rtd_theme==0.4.3
+  - pyyaml==5.3
+  - regions==0.4
+  - pytest-cov==2.8.1
+  - python-kaleido==0.0.3
+  - tqdm==4.59.0

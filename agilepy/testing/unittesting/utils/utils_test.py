@@ -32,12 +32,11 @@ from pathlib import Path
 from time import sleep
 from datetime import datetime
 
-
+from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class AgilepyUtilsUT(unittest.TestCase):
 
@@ -57,10 +56,16 @@ class AgilepyUtilsUT(unittest.TestCase):
         self.outDir = Path(self.config.getOptionValue("outdir"))
 
         if self.outDir.exists() and self.outDir.is_dir():
+            self.agilepyLogger.reset()
             shutil.rmtree(self.outDir)
+
+        self.tmpDir = Path("./tmp")
+        self.tmpDir.mkdir(exist_ok=True)
 
     def tearDown(self):
         self.agilepyLogger.reset()
+        if self.tmpDir.exists() and self.tmpDir.is_dir():
+            shutil.rmtree(self.tmpDir)
 
     def test_display_sky_map(self):
 
@@ -70,7 +75,8 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
 
 
         file = pu.displaySkyMap(
@@ -79,10 +85,12 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     title = title,
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 
@@ -95,7 +103,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar(
+            "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
@@ -104,10 +114,12 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 
@@ -119,7 +131,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         fileFormat = ".png"
         title = "testcase"
         cmap = "CMRmap"
-        regFilePath = Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")
+        regFiles = [Utils._expandEnvVar(
+            "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
+        regFileColors = ["yellow", "blue"]
         img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
@@ -128,10 +142,12 @@ class AgilepyUtilsUT(unittest.TestCase):
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
                     cmap = cmap,
-                    regFilePath = regFilePath,
-                    catalogRegions = None,
+                    regFiles = regFiles,
+                    regFileColors=regFileColors,
+                    catalogRegions = "2AGL",
                     catalogRegionsColor = "red",
-                    saveImage=True)
+                    saveImage=True,
+                    normType="linear")
 
         self.assertEqual(True, os.path.isfile(file))
 
@@ -207,7 +223,20 @@ class AgilepyUtilsUT(unittest.TestCase):
             linesNumber = len(f.readlines())
             self.assertEqual(5, linesNumber)
 
-
+    
+    def test_filterAP(self):
+        
+        
+        print(self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap")
+        print(self.currentDirPath)
+        product = AstroUtils.AP_filter(
+            self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap", 1, 174142800, 447490800, self.currentDirPath)
+        with open(product, "r") as f:
+            linesNumber = len(f.readlines())
+            self.assertEqual(4, linesNumber)
+        
+        os.remove(os.path.join(self.currentDirPath, "result.txt"))
+        os.remove(os.path.join(self.currentDirPath, product))
 
 
 
@@ -307,13 +336,49 @@ class AgilepyUtilsUT(unittest.TestCase):
 
 
 
-    def test_astro_utils_time_utc_to_mjd(self):
+    def test_astro_utils_time_utc_to_mjd_2(self):
 
         sec_tol = 0.00000001
 
         mjd = AstroUtils.time_utc_to_mjd("2020-01-23T10:56:53")
 
         self.assertEqual(True, abs(58871.45616898 - mjd) <= sec_tol)
+
+
+    def test_get_first_and_last_line_in_file(self):
+
+        line1 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004151750_2004151850.EVT__FM.gz 514057762.000000 514061362.000000 EVT\n'
+        line2 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004152249_2004160008.EVT__FM.gz 514075704.000000 514080437.000000 EVT\n'
+        line3 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004160008_2004160045.EVT__FM.gz 514080437.000000 514082644.000000 EVT\n'
+
+        # I test: 1 line
+        test_file = self.tmpDir.joinpath("test_file1.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line1)
+
+        # II test: 2 lines
+        test_file = self.tmpDir.joinpath("test_file2.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+            f.write(line2)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line2)
+
+        # III test: 3 lines
+        test_file = self.tmpDir.joinpath("test_file3.txt")
+        with open(test_file, "w") as f:
+            f.write(line1)
+            f.write(line2)
+            f.write(line3)
+        (first, last) = Utils._getFirstAndLastLineInFile(test_file)
+        self.assertEqual(first, line1)
+        self.assertEqual(last, line3)
+
+
 
 if __name__ == '__main__':
     unittest.main()

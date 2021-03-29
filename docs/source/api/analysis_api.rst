@@ -1,12 +1,19 @@
+************
 Analysis API
-============
+************
 
-.. autoclass:: api.AGBaseAnalysis.AGBaseAnalysis
-    :members: __init__, deleteAnalysisDir, setOptions, getOption, printOptions
+AGBaseAnalysis
+**************
+.. autoclass:: core.AGBaseAnalysis.AGBaseAnalysis
+    :members: __init__, deleteAnalysisDir, setOptions, getOption, printOptions, getAnalysisDir
 
 
+AGAnalysis
+**********
 .. autoclass:: api.AGAnalysis.AGAnalysis
-    :members: __init__, getConfiguration, loadSourcesFromCatalog, loadSourcesFromFile, convertCatalogToXml, parseMaplistFile, generateMaps, calcBkg, mle, updateSourcePosition, aperturePhotometry, lightCurveMLE, getSources, selectSources, freeSources, addSource, deleteSources, displayCtsSkyMaps, displayExpSkyMaps, displayGasSkyMaps, displayLightCurve
+    :members: __init__, destroy, getConfiguration, loadSourcesFromCatalog, loadSourcesFromFile, selectSources, freeSources, fixSource, addSource, deleteSources, getSources, updateSourcePosition, writeSourcesOnFile, generateMaps, calcBkg, mle, lightCurveMLE, aperturePhotometry, displayCtsSkyMaps, displayExpSkyMaps, displayGasSkyMaps, displayIntSkyMaps, displayLightCurve, convertCatalogToXml, parseMaplistFile, setOptionTimeMJD, setOptionEnergybin, displayGenericColumn 
 
+AGAnalysisWavelet
+*****************
 .. autoclass:: api.AGAnalysisWavelet.AGAnalysisWavelet
     :members: __init__, getConfiguration, waveletAnalysis, waveletDisplay

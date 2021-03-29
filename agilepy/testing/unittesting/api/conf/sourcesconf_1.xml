@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<source_library title="source library">
+
+  <source name="2AGLJ2021+4029" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter name="flux" free="1"  value="119.3e-08"/>
+      <parameter name="index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
+      <parameter name="cutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
+    </spectrum>
+    <spatialModel type="PointSource" locationLimit="0">
+      <parameter name="pos" value="(78.2375, 2.12298)" free="0" />
+    </spatialModel>
+  </source>
+
+  <source name="2AGLJ2021+3654" type="PointSource">
+    <spectrum type="PLExpCutoff">
+      <parameter name="flux" free="1"  value="70.89e-08"/>
+      <parameter name="index" free="0" scale="-1.0" value="1.38" min="0.5" max="5"/>
+      <parameter name="cutoffEnergy" free="0" value="960.59" min="20" max="10000"/>
+    </spectrum>
+    <spatialModel type="PointSource" locationLimit="0">
+      <parameter name="pos" value="(75.2562, 0.151831)" free="0"/>
+    </spatialModel>
+  </source>
+
+  <!-- Diffuse Sources
+  <source name="gal" type="DiffuseEmission">
+      <spatialModel type="ConstantValue">
+          <parameter free="0" name="gal" value="1.0"/>  galCoeff
+      </spatialModel>
+  </source>
+  <source name="iso" type="IsotropicEmission">
+      <spatialModel type="ConstantValue">
+          <parameter free="0" name="iso" value="7.0"/> isoCoeff
+      </spatialModel>
+  </source>
+  -->
+
+</source_library>

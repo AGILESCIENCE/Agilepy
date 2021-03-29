@@ -2,6 +2,27 @@
 Development
 ***********
 
+Install the development environment
+===================================
+
+If you want to try agilepy's new features that are not officially released yet, 
+a develpoment environment called agilepy-environment is available into Anaconda cloud. 
+It contains all the dependencies unless agilepy, which must be installed by hand cloning the repository.
+::
+
+    
+    conda config --add channels conda-forge
+    conda config --add channels plotly
+    conda create -n agilepydev -c agilescience agiletools agilepy-dataset
+    conda activate agilepydev
+    git clone https://github.com/AGILESCIENCE/Agilepy.git
+    cd Agilepy && git checkout develop
+    conda env update -f environment.yml
+    python setup.py develop
+
+Now you have the agilepy's latest version installed in your environment.
+
+
 Git flow
 ========
 
@@ -64,19 +85,10 @@ Getting started
 Development of a new feature
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you start from scratch:
-::
-    
-    conda config --add channels conda-forge
-    conda create -n agilepyenv -c agilescience agilepy-environment
-    conda activate agilepyenv
-    git clone https://github.com/AGILESCIENCE/Agilepy.git
-    cd Agilepy && python setup.py develop
-
 Create a new **feature** branch:
 ::
 
-    git checkout develop
+    git checkout develop 
     git pull origin develop
     git checkout -b feature-#61-new-cool-feature develop
 

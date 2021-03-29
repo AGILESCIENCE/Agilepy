@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
+from astropy.visualization import simple_norm
 from regions import read_ds9
 import scipy.ndimage as ndimage
 import scipy
@@ -46,6 +47,7 @@ import plotly.figure_factory as ff
 import pandas as pd
 from math import ceil
 from agilepy.utils.Utils import Utils
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError
 
 from agilepy.utils.Utils import Singleton
 
@@ -64,7 +66,11 @@ class PlottingUtils(metaclass=Singleton):
 
     def getSupportedRegionsCatalogs(self):
         return {
-            "2AGL":"$AGILE/catalogs/2AGL_2.reg"
+            "2AGL":"$AGILE/catalogs/2AGL_2.reg",
+            "3EG":"$AGILE/catalogs/3EG_1.reg",
+            "1AGL":"$AGILE/catalogs/1AGL_agl-allcat.reg",
+            "3FGL":"$AGILE/catalogs/3FGL/3FGL_gll_psc_v14_ell.reg",
+            "4FGL":"$AGILE/catalogs/4FGL/gll_psc_v17_ell.reg"
         }
 
     """
@@ -73,10 +79,10 @@ class PlottingUtils(metaclass=Singleton):
         fig5   fig6
         ..     ..
     """
-    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFilePath, catalogRegions, catalogRegionsColor):
+    def displaySkyMapsSingleMode(self, fitsFilepaths, smooth, saveImage, fileFormat, titles, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType):
         # self._updateRC()
-        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
-        regionsColors = ["green", catalogRegionsColor]
+        regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
+        regionsColors = [*regFileColors, catalogRegionsColor]
 
         numberOfSubplots = len(fitsFilepaths)
 
@@ -103,8 +109,10 @@ class PlottingUtils(metaclass=Singleton):
                 data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
             else:
                 data = hdu.data
+            
+            norm = simple_norm(data, normType)
 
-            im = axs[row][col].imshow(data, origin='lower', norm=None, cmap=cmap)
+            im = axs[row][col].imshow(data, origin='lower', norm=norm, cmap=cmap)
 
             fig.colorbar(im, ax=axs[row][col],fraction=0.046, pad=0.04)
 
@@ -134,12 +142,11 @@ class PlottingUtils(metaclass=Singleton):
             plt.show()
             return None
 
-    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFilePath, catalogRegions, catalogRegionsColor):
+    def displaySkyMap(self, fitsFilepath, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType):
         # self._updateRC()
 
-        regionsFiles = self._getRegionsFiles(regFilePath, catalogRegions)
-        regionsColors = ["green", catalogRegionsColor]
-
+        regionsFiles = self._getRegionsFiles(regFiles, catalogRegions)
+        regionsColors = [*regFileColors ,catalogRegionsColor]
 
         hdu = fits.open(fitsFilepath)[0]
         wcs = WCS(hdu.header)
@@ -150,8 +157,10 @@ class PlottingUtils(metaclass=Singleton):
             data = ndimage.gaussian_filter(hdu.data, sigma=float(smooth), order=0, output=float)
         else:
             data = hdu.data
+        
+        norm = simple_norm(data, normType)
 
-        plt.imshow(data, origin='lower', norm=None, cmap=cmap)
+        plt.imshow(data, origin='lower', norm=norm, cmap=cmap)
 
         ax = self._configAxes(ax, title, regionsFiles, regionsColors, wcs)
 
@@ -164,7 +173,6 @@ class PlottingUtils(metaclass=Singleton):
             filename = self.outdir.joinpath(filename+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(filename)
             self.logger.info(self, "Produced: %s", filename)
-            print("filename: ",filename)
             return str(filename)
         else:
             plt.show()
@@ -249,8 +257,6 @@ class PlottingUtils(metaclass=Singleton):
         hist, bins = np.histogram(separations, bins=bins, density=False)
         hist2, bins2 = np.histogram(separations, bins=bins2, density=False)
 
-        print(hist)
-
         width = 1. * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
         width2 = 1. * (bins2[1] - bins2[0])
@@ -288,15 +294,16 @@ class PlottingUtils(metaclass=Singleton):
 
         return filePath
 
-    def _getRegionsFiles(self, regFilePath, catalogRegions):
+    def _getRegionsFiles(self, regFiles, catalogRegions):
 
         regionsFiles = []
+        if regFiles:
+            for regionFile in regFiles:
+                if regionFile:
+                    regionFile = Utils._expandEnvVar(regionFile)
+                    self.logger.info(self, "The region catalog %s will be loaded.", regionFile)
 
-        if regFilePath:
-            regFilePath = Utils._expandEnvVar(regFilePath)
-            self.logger.info(self, "The region catalog %s will be loaded.", regFilePath)
-
-        regionsFiles.append(regFilePath)
+                regionsFiles.append(regionFile)
 
         regionsFilesDict = self.getSupportedRegionsCatalogs()
         if catalogRegions in regionsFilesDict.keys():
@@ -351,6 +358,9 @@ class PlottingUtils(metaclass=Singleton):
         if title:
             ax.set_title(title, fontsize='large')
 
+        if len(regionFiles) != len(regionsColors):
+            raise ConfigurationsNotValidError(
+                "lenght of regFiles does not match with length of regFileColors\n")
 
         # interpolation = "gaussian",
         for idx, regionFile in enumerate(regionFiles):
@@ -375,9 +385,35 @@ class PlottingUtils(metaclass=Singleton):
 
         return ax
 
+    def plotGenericColumn(self, filename, column, um=None, saveImage=False):
+
+        data = pd.read_csv(filename, header=0, sep=" ")
+        data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data = data.sort_values(by="tm")
+
+        fig = go.Figure()
+
+        fig.add_traces(go.Scatter(x=data["tm"], y=data[column]))
+
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
+
+        fig.update_yaxes(showline=True, linecolor="black",
+                         title=um)
+        fig.update_layout(xaxis=dict(tickformat="g"))
+
+        if saveImage:
+            filePath = join(self.outdir, column+".png")
+            self.logger.info(self, column+" plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
+        
 
 
-    def plotLc(self, filename, lineValue, lineError, saveImage=False):
+
+    def plotLc(self, filename, lineValue, lineError, saveImage, fermiLC):
         # reading and setting dataframe
         data = pd.read_csv(filename, header=0, sep=" ")
         data["flux"] = data["flux"] * 10 ** 8
@@ -389,24 +425,57 @@ class PlottingUtils(metaclass=Singleton):
         data["x_minus"] = data["tm"] - data["time_start_mjd"]
         sel1 = data.loc[data["sqrt(ts)"] >= 3]
         sel2 = data.loc[data["sqrt(ts)"] < 3]
-
+        
         #Plotting
         fig = go.Figure()
         fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
                                   error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
                                                arrayminus=sel1["x_minus"]),
                                   error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
-                                  name="sqrts >=3"))
+                                  customdata = np.stack((sel1["time_start_mjd"],
+                                             sel1["time_end_mjd"]), axis=-1),
+                                  hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="sqrts >=3"))
         fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
                                   error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
                                                arrayminus=sel2["x_minus"]), mode='markers',
+                                  hovertemplate="tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
+                                  customdata=np.stack((sel2["time_start_mjd"],
+                                                      sel2["time_end_mjd"]), axis=-1),
                                   marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
+
+        if fermiLC is not None:
+            fermiData = pd.read_csv(fermiLC, header=0, sep=" ")
+            fermiData["tm"] = fermiData[["tmin_mjd", "tmax_mjd"]].mean(axis=1)
+            fermiData["x_plus"] = fermiData["tmax_mjd"] - fermiData["tm"]
+            fermiData["x_minus"] = fermiData["tm"] - fermiData["tmin_mjd"]
+            fermiData["sqrt(ts)"] = fermiData["ts"].apply(np.sqrt)
+            fermiData["flux"] = fermiData["flux"] *10 ** 8
+            fermiData["flux_err"] = fermiData["flux_err"] * 10 ** 8
+            fermiData["flux_ul95"] = fermiData["flux_ul95"] * 10 ** 8
+            fermiDatasel1 = fermiData.loc[fermiData["sqrt(ts)"] >= 3]
+            fermiDatasel2 = fermiData.loc[fermiData["sqrt(ts)"] < 3]
+
+            fig.add_traces(go.Scatter(x=fermiDatasel1["tm"], y=fermiDatasel1["flux"],
+                                      error_x=dict(type="data", symmetric=False, array=fermiDatasel1["x_plus"],
+                                                   arrayminus=fermiDatasel1["x_minus"]),
+                                      error_y=dict(type="data", symmetric=True, array=fermiDatasel1["flux_err"]), mode="markers",
+                                      customdata=np.stack((fermiDatasel1["tmin_mjd"],
+                                                           fermiDatasel1["tmax_mjd"]), axis=-1),
+                                      hovertemplate="FERMI tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="FERMI sqrts >=3"))
+            
+            fig.add_traces(go.Scatter(x=fermiDatasel2["tm"], y=fermiDatasel2["flux_ul95"],
+                                      error_x=dict(type="data", symmetric=False, array=fermiDatasel2["x_plus"],
+                                                   arrayminus=fermiDatasel2["x_minus"]), mode='markers',
+                                      hovertemplate="FERMI tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
+                                      customdata=np.stack((fermiDatasel2["tmin_mjd"],
+                                                           fermiDatasel2["tmax_mjd"]), axis=-1),
+                                      marker_symbol="triangle-down", marker_size=10, name="FERMI sqrts < 3"))
 
         if lineValue is not None and lineError is not None:
             fig.add_traces(go.Scatter(x=data["tm"], y=[lineValue] * len(data["tm"]), error_y= dict(type="constant", value=lineError), line=dict(dash="dash"), name="line1"))
 
 
-        fig.update_xaxes(showline=True, linecolor="black", title="Time(mjd)")
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
         fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
         fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
         
@@ -444,7 +513,7 @@ class PlottingUtils(metaclass=Singleton):
         bins = 0.5 * (bins[:-1] + bins[1:])
 
         mu, sigma = scipy.stats.norm.fit(data["exp"])
-        print(mu, sigma)
+        # print(mu, sigma)
         best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
 
         fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)

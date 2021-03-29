@@ -1,6 +1,23 @@
 # Changelog
+## Next release (1.3.0)
+* (\#133) New normalization functions in displaymaps
+* (\#196) Notebooks have their own documentation section
+* (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.
+* (\#202) A new dataset (for testing/validation purposes) has been included.
+* (\#203) The "INDEX file with one line crash" bug has been fixed.
+* (\#208) useEDPmatrixforEXP default value is now: False.
+* (\#215) After calling mle(), each free parameter will be updated (if they need to).
+* (\#217) The quickstart guide and the tutorial notebooks show how to change the value of a spectrum parameter of a source
+* (\#231) New utility for filtering ap in Astroutils
+* (\#238) New methods setOptionTimeMJD setOptionEnergybin
+* (\#242) tdms progress bars 
+* (\#252) New methods for setting dq
+* (\#260) New lightcurvedata file
+* (\#264) New plotting method for generic lightcurvedata columns
+* (\#265) New parameter for plotting FERMI's lightcurve
+* (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
-## Release 1.2.0
+## Release 1.2.0 - 10/12/20
 * (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True.
 * (\#152) The setOptions() call to increment the number of energy bins while galcoeff and isocoeff are equal = null  won't throw an error anymore.
 * (\#161, \#165, \#166) Documentation updated.

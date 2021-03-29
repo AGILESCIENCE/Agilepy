@@ -30,7 +30,8 @@ from typing import List
 from numbers import Number
 
 from agilepy.utils.Utils import Utils
-from agilepy.utils.CustomExceptions import ConfigFileOptionTypeError
+from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
     
@@ -73,7 +74,7 @@ class ValidationStrategies:
 
         if numberOfIsoCoeff < numberOfMaps:
 
-            error_str = f"The number of bg isotropic coefficients {isocoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
+            error_str = f"The number of isotropic coefficients (galcoeff={isocoeff}) must be equal to X = number of energy bins * fovbinnumber)"
 
             errors["model/isocoeff"] = error_str
 
@@ -81,7 +82,7 @@ class ValidationStrategies:
 
         if numberOfGalCoeff < numberOfMaps:
 
-            error_str = f"The number of bg galactic coefficients {galcoeff} is less then the number of numberOfMaps {numberOfMaps} (number of maps = number of energy bins*fovbinnumber)"
+            error_str = f"The number of galcoeff coefficients (galcoeff={galcoeff}) must be equal to X = number of energy bins * fovbinnumber)"
 
             errors["model/galcoeff"] = error_str
 
@@ -108,36 +109,35 @@ class ValidationStrategies:
     def _validateTimeInIndex(confDict):
         errors = {}
 
-        (first, last, lineSize) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
+        (first, last) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
 
         idxTmin = Utils._extractTimes(first)[0]
         idxTmax = Utils._extractTimes(last)[1]
 
-        if lineSize > 1024:
-            print("[ValidationStrategies] ! WARNING ! The byte size of the first input/evtfile line {} is {} B.\
-                   This value is greater than 500. Please, check the evt index time range: TMIN: {} - TMAX: {}".format(first, lineSize, idxTmin, idxTmax))
-
         userTmin = confDict["selection"]["tmin"]
         userTmax = confDict["selection"]["tmax"]
+        timetype = confDict["selection"]["timetype"]
 
-
+        if timetype == "MJD":
+            userTmin = AstroUtils.time_mjd_to_tt(userTmin)
+            userTmax = AstroUtils.time_mjd_to_tt(userTmax)
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmin, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmin) > float(idxTmax):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmin"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmin, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
 
         if float(userTmax) > float(idxTmax):
             errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax > indexTmax). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmax, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         if float(userTmax) < float(idxTmin):
             errors["input/tmax"]="tmax: {} is outside the time range of {} (tmax < indexTmin). Index file time range: [{}, {}]" \
-                                  .format(confDict["selection"]["tmax"], confDict["input"]["evtfile"], idxTmin, idxTmax)
+                                  .format(userTmax, confDict["input"]["evtfile"], idxTmin, idxTmax)
 
         return errors
 
@@ -167,6 +167,7 @@ class ValidationStrategies:
 
         return errors
 
+    
     @staticmethod
     def _validateLOCCL(confDict):
 
@@ -174,12 +175,60 @@ class ValidationStrategies:
 
         loccl = confDict["mle"]["loccl"]
 
-        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629]:
+        if loccl not in [9.21034, 5.99147, 2.29575, 1.38629, 0]:
 
-            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629]".format(loccl)
+            errors["mle/loccl"] = "loccl values ({}) is not compatibile.. Possible values = [9.21034, 5.99147, 2.29575, 1.38629, 0.0]".format(loccl)
 
         return errors
+    
+    @staticmethod
+    def _validateFluxcorrection(confdict):
+        
+        errors = {}
 
+        fluxcorrection = confdict["mle"]["fluxcorrection"]
+
+        if fluxcorrection not in [0, 1, 2]:
+            errors["mle/fluxcorrection"] = "fluxcorrection is not compatible.. Possible values = [1, 2, 3]"
+        
+        return errors
+
+
+    @staticmethod
+    def _validateDQ(confdict):
+        
+        errors = {}
+        
+        dq = confdict["selection"]["dq"]
+
+        if dq < 0 or dq > 9:
+            errors["selection/dq"] = f"dq = {confdict['selection']['dq']} -> invalid value. Possible values [0,1,2,3,4,5,6,7,8,9]"
+        
+        return errors
+
+
+    """@staticmethod
+    def _validateAlbedorad(confdict):
+        
+        errors = {}
+
+        dq = confdict["selection"]["dq"]
+
+        if dq != 0:
+            errors["selection/albedorad"] = f"dq = {confdict['selection']['dq']} -> you can't change albedorad (nor fovradmax). Set dq to 0 if you want to use custom values for albedorad or fovradmax"
+        
+        return errors
+    
+    @staticmethod
+    def _validateFovradmax(confDict):
+        
+        errors = {}
+        
+        dq = confDict["selection"]["dq"]
+        if dq != 0:
+             errors["selection/fovradmax"] = f"dq = {confDict['selection']['dq']} -> you can't change fovradmax (nor albedorad). Set dq to 0 if you want to use custom values for albedorad or fovradmax"
+
+        return errors"""
 
     @staticmethod
     def _validateOptionType(optionName, optionValue, validType):
