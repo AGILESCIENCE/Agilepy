@@ -14,6 +14,7 @@
 * (\#252) New methods for setting dq
 * (\#260) New lightcurvedata file
 * (\#264) New plotting method for generic lightcurvedata columns
+* (\#265) New parameter for plotting FERMI's lightcurve
 * (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
 ## Release 1.2.0 - 10/12/20
