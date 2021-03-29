@@ -13,5 +13,10 @@ Develop: ![Continuous integration workflow](https://github.com/AGILESCIENCE/Agil
 [![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/platforms.svg)](https://anaconda.org/agilescience/agilepy)
 
 AGILE Python Analysis Framework
+
+Agilepy is an open-source Python package developed at INAF/OAS Bologna to analyse AGILE/GRID data built on top of the command-line version of the AGILE/GRID Science Tools.
+
+The main purpose of the package is to provide an easy to use high-level Python interface to analyse AGILE/GRID data by simplifying the configuration of the tasks and ensuring straightforward access to the data. The current features are the generation and display of sky maps and light curves, the access to gamma-ray sources catalogues, the analysis to perform spectral model and position fitting including the background evaluation, the aperture photometry analysis, and the wavelet analysis. In addition, Agilepy provides an engineering interface to analyse the time evolution of the AGILE off-axis viewing angle for a chosen sky region, comparing them with Fermi/LAT off-axis evolution.
+
   * Documentation: [https://agilepy.readthedocs.io/en/1.3.0/](https://agilepy.readthedocs.io/en/1.3.0/)
   * Licensed under the the [GNU General Public License v3.0](https://github.com/AGILESCIENCE/Agilepy/blob/master/LICENSE)
