@@ -445,9 +445,9 @@ class PlottingUtils(metaclass=Singleton):
 
         if fermiLC is not None:
             fermiData = pd.read_csv(fermiLC, header=0, sep=" ")
-            fermiData["tm"] = fermiData[["tmin_mjd", "tmax_mjd"]].mean(axis=1)
-            fermiData["x_plus"] = fermiData["tmax_mjd"] - fermiData["tm"]
-            fermiData["x_minus"] = fermiData["tm"] - fermiData["tmin_mjd"]
+            fermiData["tm"] = fermiData[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+            fermiData["x_plus"] = fermiData["time_end_mjd"] - fermiData["tm"]
+            fermiData["x_minus"] = fermiData["tm"] - fermiData["time_start_mjd"]
             fermiData["sqrt(ts)"] = fermiData["ts"].apply(np.sqrt)
             fermiData["flux"] = fermiData["flux"] *10 ** 8
             fermiData["flux_err"] = fermiData["flux_err"] * 10 ** 8
@@ -459,16 +459,16 @@ class PlottingUtils(metaclass=Singleton):
                                       error_x=dict(type="data", symmetric=False, array=fermiDatasel1["x_plus"],
                                                    arrayminus=fermiDatasel1["x_minus"]),
                                       error_y=dict(type="data", symmetric=True, array=fermiDatasel1["flux_err"]), mode="markers",
-                                      customdata=np.stack((fermiDatasel1["tmin_mjd"],
-                                                           fermiDatasel1["tmax_mjd"]), axis=-1),
+                                      customdata=np.stack((fermiDatasel1["time_start_mjd"],
+                                                           fermiDatasel1["time_end_mjd"]), axis=-1),
                                       hovertemplate="FERMI tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="FERMI sqrts >=3"))
             
             fig.add_traces(go.Scatter(x=fermiDatasel2["tm"], y=fermiDatasel2["flux_ul95"],
                                       error_x=dict(type="data", symmetric=False, array=fermiDatasel2["x_plus"],
                                                    arrayminus=fermiDatasel2["x_minus"]), mode='markers',
                                       hovertemplate="FERMI tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
-                                      customdata=np.stack((fermiDatasel2["tmin_mjd"],
-                                                           fermiDatasel2["tmax_mjd"]), axis=-1),
+                                      customdata=np.stack((fermiDatasel2["time_start_mjd"],
+                                                           fermiDatasel2["time_end_mjd"]), axis=-1),
                                       marker_symbol="triangle-down", marker_size=10, name="FERMI sqrts < 3"))
 
         if lineValue is not None and lineError is not None:
