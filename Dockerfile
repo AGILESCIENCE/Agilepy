@@ -1,9 +1,11 @@
 FROM agilescience/agilepy-recipe:latest
+WORKDIR /tmp
+ARG SOURCE_BRANCH
 
-
-RUN ls -alt && \
+RUN ls && \
     pwd && \
-    env 
+    env && \
+    echo "SOURCE_BRANCH: ${SOURCE_BRANCH}"
 
 #RUN conda activate agilepydev && \
 #    git clone https://github.com/AGILESCIENCE/Agilepy.git && \
