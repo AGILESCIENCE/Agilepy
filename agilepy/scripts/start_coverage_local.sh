@@ -23,6 +23,6 @@ pytest --cov-config="$script_dir/../testing/unittesting/coverage/.coveragerc" \
        --cov-report "html:$script_dir/../testing/unittesting/coverage/cov_html_report" \
        --cov-report "xml:$script_dir/../testing/unittesting/coverage/cov_xml_report" \
        --cov-report= \
-       --cov=agilepy.api \
+       --cov=agilepy.api,agilepy.core \
        --cov-append \
        "$script_dir/../testing/unittesting/api"
