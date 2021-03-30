@@ -39,7 +39,7 @@ else
   pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.api, agilepy.core \
+         --cov=agilepy.api,agilepy.core \
          --cov-append \
          "$agilepy_path/testing/unittesting/api"
 
