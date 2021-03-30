@@ -251,6 +251,7 @@ class PLExpCutoff(Spectrum):
     def __init__(self, type):
         super().__init__(type)
         self.index = Parameter("index", "float", free=0, scale=-1.0, min=0.5, max=5)
+        self.indexErr = OutputVal("indexErr", "float")
         self.cutoffEnergy = Parameter("cutoffEnergy", "float", free=0, scale=-1.0, min=20, max=10000)
         self.cutoffEnergyErr = OutputVal("cutoffEnergyErr", "float")
 
@@ -266,6 +267,7 @@ class PLExpCutoff(Spectrum):
     def getParameters(self):
         return {
             "flux(ph/cm2s)" : (self.flux.value, self.fluxErr.value),
+            "index" : (self.index.value,self.indexErr.value),
             "cutoffEnergy" : (self.cutoffEnergy.value, self.cutoffEnergyErr.value)
         }
 
