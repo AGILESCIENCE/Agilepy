@@ -446,6 +446,22 @@ class SourcesLibrary:
         multiOutput.multiPar3.setAttributes(value = allValues[73])
         multiOutput.multiPar3Err.setAttributes(value = allValues[74])
 
+        multiOutput.multiFitCts.setAttributes(value = allValues[75])
+        multiOutput.multiFitFitstatus0.setAttributes(value = allValues[76])
+        multiOutput.multiFitFcn0.setAttributes(value= allValues[77])
+        multiOutput.multiFitEdm0.setAttributes(value = allValues[78])
+        multiOutput.multiFitNvpar0.setAttributes(value = allValues[79])
+        multiOutput.multiFitNparx0.setAttributes(value=allValues[80])
+        multiOutput.multiFitIter0.setAttributes(value=allValues[81])
+        multiOutput.multiFitFitstatus1.setAttributes(value=allValues[82])
+        multiOutput.multiFitFcn1.setAttributes(value = allValues[83])
+        multiOutput.multiFitEdm1.setAttributes(value=allValues[84])
+        multiOutput.multiFitNvpar1.setAttributes(value=allValues[85])
+        multiOutput.multiFitNparx1.setAttributes(value=allValues[86])
+        multiOutput.multiFitIter1.setAttributes(value=allValues[87])
+        multiOutput.multiFitLikelihood1.setAttributes(value=allValues[88])
+
+
         multiOutput.multiGalCoeff.setAttributes(value = allValues[89])
         multiOutput.multiGalErr.setAttributes(value = allValues[90])
         multiOutput.multiIsoCoeff.setAttributes(value = allValues[93])
