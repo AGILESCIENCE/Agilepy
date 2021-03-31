@@ -26,6 +26,9 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import string
+import random
+import shutil
 import subprocess
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -46,6 +49,7 @@ class ProcessWrapper(ABC):
         self.products = {} 
         self.callCounter = 0
         self.isAgileTool = True
+        self.tmpDir = Path("/tmp/agilepy_tmp")
 
     @abstractmethod
     def configureTool(self, confDict, extraParams=None):
@@ -104,10 +108,14 @@ class ProcessWrapper(ABC):
 
         if self.isAgileTool:
             # copy par file
-            pfile_location = os.path.join(os.environ["AGILE"],"share")
+            pfile_location = os.path.join(os.environ["AGILE"], "share")
             pfile = os.path.join(pfile_location,self.exeName+".par")
 
-            command = "cp "+pfile+" ./"
+            tempDir = self.tmpDir.joinpath(''.join(random.choice(string.ascii_lowercase) for i in range(5)))
+            tempDir.mkdir(parents=True, exist_ok=True)
+
+            command = f"cp {pfile} {str(tempDir)}"
+
             self.executeCommand(command, printStdout=False)
 
 
@@ -115,10 +123,9 @@ class ProcessWrapper(ABC):
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
 
+        # remove temporary directory containing the par file copy 
         if self.isAgileTool:
-            # remove par file
-            command = "rm ./"+self.exeName+".par"
-            self.executeCommand(command, printStdout=False)
+            shutil.rmtree(str(tempDir))
 
         self.callCounter += 1
 
