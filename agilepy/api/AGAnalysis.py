@@ -28,8 +28,6 @@
 
 import os
 import re
-import random
-import string
 # from tqdm import tqdm, trange  
 from tqdm.notebook import trange, tqdm
 from time import time
@@ -1570,12 +1568,10 @@ plotting:
             skymapFilename = basename(maplistRow[0])
 
             # This data should be read from the FITS header
-            #emin = skymapFilename.split("EN")[1].split("_")[0]
-            #emax = skymapFilename.split("EX")[1].split("_")[0]
+            emin = skymapFilename.split("EN")[1].split("_")[0]
+            emax = skymapFilename.split("EX")[1].split("_")[0]
 
-            #title = f"{skyMapType}\nemin: {emin} emax: {emax} bincenter: {maplistRow[3]}\ngalcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
-            title = ''.join(random.choice(string.ascii_lowercase)
-                            for i in range(5))
+            title = f"{skyMapType}\nemin: {emin} emax: {emax} bincenter: {maplistRow[3]}\ngalcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
 
             titles.append(title)
 
