@@ -26,7 +26,8 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-
+import random
+import string
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
 
@@ -43,7 +44,8 @@ class CtsMapGenerator(ProcessWrapper):
         # self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
         self.outputDir = config.getOptionValue("outdir")
         
-        outputName = config.getOptionValue("filenameprefix")+".cts.gz"
+        outputName = ''.join(random.choice(string.ascii_lowercase)
+                             for i in range(5))+".cts.gz"
 
         outfilePath = os.path.join(self.outputDir, outputName)
 
@@ -88,7 +90,8 @@ class ExpMapGenerator(ProcessWrapper):
         # self.outputDir = os.path.join(config.getOptionValue("outdir"), "maps")
         self.outputDir = config.getOptionValue("outdir")
 
-        outputName = config.getOptionValue("filenameprefix")+".exp.gz"
+        outputName = ''.join(random.choice(string.ascii_lowercase)
+                             for i in range(5))+".exp.gz"
 
         edpmatrix = "None"
         if config.getOptionValue("useEDPmatrixforEXP"):
@@ -143,7 +146,8 @@ class GasMapGenerator(ProcessWrapper):
 
         self.outputDir = config.getOptionValue("outdir")
 
-        outputName = config.getOptionValue("filenameprefix")+".gas.gz"
+        outputName = ''.join(random.choice(string.ascii_lowercase)
+                             for i in range(5))+".gas.gz"
 
         outfilePath = os.path.join(self.outputDir, outputName)
 
@@ -172,7 +176,8 @@ class IntMapGenerator(ProcessWrapper):
 
         self.outputDir = config.getOptionValue("outdir")
 
-        outputName = config.getOptionValue("filenameprefix")+".int.gz"
+        outputName = ''.join(random.choice(string.ascii_lowercase)
+                             for i in range(5))+".int.gz"
 
         outfilePath = os.path.join(self.outputDir, outputName)
 

@@ -28,6 +28,8 @@
 
 import os
 import re
+import random
+import string
 # from tqdm import tqdm, trange  
 from tqdm.notebook import trange, tqdm
 from time import time
@@ -1259,7 +1261,8 @@ plotting:
         "l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err " \
         "Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux " \
         "typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr " \
-        "expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode\n"
+        "expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0 " \
+        "fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1\n"
         
         timecounter = 0
 
@@ -1292,7 +1295,8 @@ plotting:
                     # l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err
                     # Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux
                     # typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr
-                    # expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode
+                    # expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0
+                    # fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1
 
                     if "nan" in lcDataDict['flux']:
                         lcDataDict['flux'] = 0
@@ -1310,7 +1314,10 @@ plotting:
                         f"{lcDataDict['start_b']} {lcDataDict['start_flux']} {lcDataDict['typefun']} {lcDataDict['par2']} {lcDataDict['par3']} {lcDataDict['galmode2']} "\
                         f"{lcDataDict['galmode2fit']} {lcDataDict['isomode2']} {lcDataDict['isomode2fit']} {lcDataDict['edpcor']} {lcDataDict['fluxcor']} {lcDataDict['integratortype']} "\
                         f"{lcDataDict['expratioEval']} {lcDataDict['expratio_minthr']} {lcDataDict['expratio_maxthr']} {lcDataDict['expratio_size']} {lcDataDict['emin']} {lcDataDict['emax']} "\
-                        f"{lcDataDict['fovmin']} {lcDataDict['fovmax']} {lcDataDict['albedo']} {lcDataDict['binsize']} {lcDataDict['expstep']} {lcDataDict['phasecode']}\n"
+                        f"{lcDataDict['fovmin']} {lcDataDict['fovmax']} {lcDataDict['albedo']} {lcDataDict['binsize']} {lcDataDict['expstep']} {lcDataDict['phasecode']} " \
+                        f"{lcDataDict['fit_cts']} {lcDataDict['fit_fitstatus0']} {lcDataDict['fit_fcn0']} {lcDataDict['fit_edm0']} {lcDataDict['fit_nvpar0']} {lcDataDict['fit_nparx0']} " \
+                        f"{lcDataDict['fit_iter0']} {lcDataDict['fit_fitstatus1']} {lcDataDict['fit_fcn1']} {lcDataDict['fit_edm1']} {lcDataDict['fit_nvpar1']} {lcDataDict['fit_nparx1']} " \
+                        f"{lcDataDict['fit_iter1']} {lcDataDict['fit_Likelihood1']}\n"
 
                     timecounter += 1
 
@@ -1468,6 +1475,21 @@ plotting:
             "Erglog_Err": multiOutput.get("multiErgLogErr", strr=True),
             "Erglog_UL": multiOutput.get("multiErgLogUL", strr=True),
 
+            "fit_cts": multiOutput.get("multiFitCts", strr=True),
+            "fit_fitstatus0": multiOutput.get("multiFitFitstatus0", strr=True),
+            "fit_fcn0": multiOutput.get("multiFitFcn0", strr=True),
+            "fit_edm0": multiOutput.get("multiFitEdm0", strr=True),
+            "fit_nvpar0": multiOutput.get("multiFitNvpar0", strr=True),
+            "fit_nparx0": multiOutput.get("multiFitNparx0", strr=True),
+            "fit_iter0": multiOutput.get("multiFitIter0", strr=True),
+            "fit_fitstatus1": multiOutput.get("multiFitFitstatus1", strr=True),
+            "fit_fcn1": multiOutput.get("multiFitFcn1", strr=True),
+            "fit_edm1": multiOutput.get("multiFitEdm1", strr=True),
+            "fit_nvpar1": multiOutput.get("multiFitNvpar1", strr=True),
+            "fit_nparx1": multiOutput.get("multiFitNparx1", strr=True),
+            "fit_iter1": multiOutput.get("multiFitIter1", strr=True),
+            "fit_Likelihood1": multiOutput.get("multiFitLikelihood1", strr=True),
+
 
             "time_start_tt" : float(multiOutput.get("startDataTT", strr=True)),
             "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True)),
@@ -1548,10 +1570,12 @@ plotting:
             skymapFilename = basename(maplistRow[0])
 
             # This data should be read from the FITS header
-            emin = skymapFilename.split("EN")[1].split("_")[0]
-            emax = skymapFilename.split("EX")[1].split("_")[0]
+            #emin = skymapFilename.split("EN")[1].split("_")[0]
+            #emax = skymapFilename.split("EX")[1].split("_")[0]
 
-            title = f"{skyMapType}\nemin: {emin} emax: {emax} bincenter: {maplistRow[3]}\ngalcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
+            #title = f"{skyMapType}\nemin: {emin} emax: {emax} bincenter: {maplistRow[3]}\ngalcoeff: {maplistRow[4]} isocoeff: {maplistRow[5]}"
+            title = ''.join(random.choice(string.ascii_lowercase)
+                            for i in range(5))
 
             titles.append(title)
 

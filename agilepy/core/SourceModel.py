@@ -426,6 +426,21 @@ class MultiOutput(SourceDescription):
         self.multiPar3 = OutputVal("multiPar3", "float")
         self.multiPar3Err = OutputVal("multiPar3Err", "float")
 
+        self.multiFitCts = OutputVal("multiFitCts", "float")
+        self.multiFitFitstatus0 = OutputVal("multiFitFitstatus0", "float")
+        self.multiFitFcn0 = OutputVal("multiFitFcn0", "float")
+        self.multiFitEdm0 = OutputVal("multiFitEdm0", "float")
+        self.multiFitNvpar0 = OutputVal("multiFitNvpar0", "float")
+        self.multiFitNparx0 = OutputVal("multiFitNparx0", "float")
+        self.multiFitIter0 = OutputVal("multiFitIter0", "float")
+        self.multiFitFitstatus1 = OutputVal("multiFitFitstatus1", "float")
+        self.multiFitFcn1 = OutputVal("multiFitFcn1", "float")
+        self.multiFitEdm1 = OutputVal("multiFitEdm1", "float")
+        self.multiFitNvpar1 = OutputVal("multiFitNvpar1", "float")
+        self.multiFitNparx1 = OutputVal("multiFitNparx1", "float")
+        self.multiFitIter1 = OutputVal("multiFitIter1", "float")
+        self.multiFitLikelihood1 = OutputVal("multiFitLikelihood1", "float")
+
         self.multiGalCoeff = OutputVal("multiGalCoeff", "List<float>")
         self.multiGalErr = OutputVal("multiGalErr", "List<float>")
 
