@@ -477,7 +477,8 @@ class PlottingUtils(metaclass=Singleton):
 
         fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
         fig.update_yaxes(showline=True, linecolor="black", title=r"$10^{-8} ph cm^{-2} s^{-1}$")
-        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"))
+        fig.update_layout(legend=dict(font=dict(
+            size=17), orientation="h", yanchor="bottom", y=1.02, xanchor="left"), xaxis=dict(tickformat="g"))
         
         if saveImage:
             filePath = join(self.outdir, "LightCurve.png")
