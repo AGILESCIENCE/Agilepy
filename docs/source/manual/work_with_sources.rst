@@ -54,6 +54,7 @@ How to inspect a Source object
 The common way to inspect a Source object is to print it:
 
 ::
+    
     source = ag.selectSources('name == "2AGLJ2254+1609"', show=False).pop()
     print(source)
     -----------------------------------------------------------
@@ -80,6 +81,16 @@ The user can call selectSources (with show=True) to show the source description
 ::
 
     ag.selectSources(lambda name, sqrtTS: name == "2AGLJ2021+4029" AND sqrtTS> 0, show=True)
+
+A getter method is available for "spectrum" and "multi" parameters:
+
+::
+    
+    print(source.multi.get("multiFitLikelihood1"))
+
+::
+    
+    print(source.spectrum.get("index1"))
 
 
 
