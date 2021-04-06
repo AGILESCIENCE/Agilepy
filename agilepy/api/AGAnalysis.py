@@ -226,7 +226,7 @@ ap:
 plotting:
   twocolumns: False
 
-        """%(evtfile, logfile, outputDir, userName, sourceName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """%(evtfile, logfile, outputDir, sourceName, userName, verboselvl, tmin, tmax, timetype, glon, glat)
 
         with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
