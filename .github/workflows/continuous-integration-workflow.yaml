@@ -44,6 +44,13 @@ jobs:
           printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
           bash $agilepy_path/scripts/start_coverage.sh
+      
+      - name: Triggering dockerhub for container building
+        shell: bash -l {0}
+        run: |
+          curl -H "Content-Type: application/json" \
+          --data '{"source_type": "Branch", "source_name": "develop"}' \
+          -X POST "https://hub.docker.com/api/build/v1/source/2e3f2827-4912-486e-9353-43f2e540c25b/trigger/6b916551-0929-46b7-bc2b-74115a63017b/call/"
 
 
   building-testing-on-os-centos7:
@@ -111,3 +118,10 @@ jobs:
         conda activate agilepydevops	
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)	
         ./codacy-coverage-reporter report -l Python -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
+    
+    - name: Triggering dockerhub for container building
+      shell: bash -l {0}
+      run: |
+        curl -H "Content-Type: application/json" \
+        --data '{"source_type": "Branch", "source_name": "develop"}' \
+        -X POST "https://hub.docker.com/api/build/v1/source/2e3f2827-4912-486e-9353-43f2e540c25b/trigger/6b916551-0929-46b7-bc2b-74115a63017b/call/"
