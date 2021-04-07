@@ -1472,7 +1472,7 @@ plotting:
             "Index_Err": multiOutput.get("multiIndexErr", strr=True),
             "Par2": multiOutput.get("multiPar2", strr=True),
             "Par2_Err": multiOutput.get("multiPar2Err", strr=True),
-            "Par3": multiOutput.get("multiPar2", strr=True),
+            "Par3": multiOutput.get("multiPar3", strr=True),
             "Par3_Err": multiOutput.get("multiPar3Err", strr=True),
             "Erglog":  multiOutput.get("multiErgLog", strr=True),
             "Erglog_Err": multiOutput.get("multiErgLogErr", strr=True),
