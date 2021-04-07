@@ -1165,15 +1165,12 @@ plotting:
         if self.lightCurveData[analysisName] is not None and analysisName=="ap":
             return self.plottingUtils.plotSimpleLc(self.lightCurveData[analysisName], lineValue, lineError, saveImage=saveImage)
 
-    def displayGenericColumn(self, filename, column, um=None, saveImage=False, fermi=False):
+    def displayGenericColumns(self, filename, columns, um=None, saveImage=False):
         """An utility method for viewing a generic column from the lightcurvedata
-
-        phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0 " \
-        "fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1
 
         Args:
             filename (str): the path of the Lightcurve text data file. It defaults to None. If None the last generated file will be used.
-            column (str): the name of the column to display, possible values:
+            columns (array of str): the name of the columns to display, possible values:
                 (time_start_mjd | time_end_mjd | sqrt(ts) | flux | flux_err | flux_ul | gal | gal_error | iso | iso_error | l_peak | b_peak | dist_peak | l | b | r | 
                 ell_dist | a | b | phi | exposure | ExpRatio | counts | counts_err | Index | Index_Err | Par2 | Par2_Err | Par3 | Par3_Err | Erglog | Erglog_Err | Erglog_UL |
                 time_start_utc | time_end_utc | time_start_tt | time_end_tt | Fix | index | ULConfidenceLevel | SrcLocConfLevel | start_l | start_b | start_flux | 
@@ -1181,14 +1178,17 @@ plotting:
                 expratio_minthr | expratio_maxthr | expratio_size | Emin | emax | fovmin | fovmax | albedo | binsize | expstep | phasecode | fit_cts | fit_fitstatus0 | 
                 fit_fcn0 | fit_edm0 | fit_nvpar0 | fit_nparx0 | fit_iter0 | fit_fitstatus1 | fit_fcn1 | fit_edm1 | fit_nvpar1 | fit_nparx1 | fit_iter1 | fit_Likelihood1)
             
-            um (str): unit of measurement
+            um (array of str): unit of measurement, same length of columns
             saveImage (bool): if set to true, saves the image into the output directory. It defaults to False.
 
         Returns:
             If saveImage is true tha path of the image otherwise the plot
         """
-
-        return self.plottingUtils.plotGenericColumn(filename, column, um, saveImage)
+        if len(columns) == 1 and len(um) == 1:
+            return self.plottingUtils.plotGenericColumn(filename, columns[0], um[0], saveImage)
+        
+        else:
+            return self.plottingUtils.plotGenericColumns(filename, columns, um, saveImage)
 
 
     ############################################################################

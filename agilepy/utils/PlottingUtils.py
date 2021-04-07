@@ -409,6 +409,55 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
+
+    def plotGenericColumns(self, filename, columns, um=None, saveImage=False):
+
+        if len(um) != len(columns):
+            raise ConfigurationsNotValidError(
+                "lenght of um does not match with length of columns\n")
+
+        data = pd.read_csv(filename, header=0, sep=" ")
+        data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data = data.sort_values(by="tm")
+
+        subplots = len(columns)
+
+        nrows = ceil(subplots/2)
+        ncols = 2
+        
+        fig = make_subplots(rows=nrows, cols=ncols)
+
+        for idx, column in enumerate(columns):
+            row, col = divmod(idx, ncols)
+
+            fig.add_trace(go.Scatter(
+                x=data["tm"], y=data[column], name=column), row=row+1, col=col+1)
+            
+            fig.update_yaxes(showline=True, linecolor="black",
+                             title=um[idx], row=row+1, col=col+1)
+            fig.update_xaxes(showline=True, linecolor="black",
+                             title="Time(MJD)", tickformat="g", row=row+1, col=col+1)
+        if subplots != 2:
+            fig.update_layout(height=1000, width=1000)
+
+        """fig = go.Figure()
+
+        fig.add_traces(go.Scatter(x=data["tm"], y=data[columns]))
+
+        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
+
+        fig.update_yaxes(showline=True, linecolor="black",
+                         title=um)
+        fig.update_layout(xaxis=dict(tickformat="g"))"""
+
+        if saveImage:
+            filePath = join(self.outdir, "plot.png")
+            self.logger.info(self,"plot at: %s", filePath)
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
         
 
 
