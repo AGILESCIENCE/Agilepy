@@ -399,13 +399,13 @@ class AGAnalysisUT(unittest.TestCase):
         lightCurveData = ag.lightCurveMLE(
             self.VELA, tmin=433860000, tmax=433880000, timetype="TT", binsize=20000)
 
-        filename = ag.displayGenericColumns(
-            lightCurveData, columns=["l_peak"], um=["test_um"], saveImage=True)
-
-        self.assertEqual(True, os.path.isfile(filename))
+        #filename = ag.displayGenericColumns(
+        #    lightCurveData, columns=["l_peak"], um=["test_um"], saveImage=True)
 
         filename = ag.displayGenericColumns(
             lightCurveData, columns=["l_peak", "counts"], um=["test_um", "counts"], saveImage=True)
+
+        self.assertEqual(True, os.path.isfile(filename))
 
         ag.destroy()
 

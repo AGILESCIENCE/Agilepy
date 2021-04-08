@@ -385,7 +385,7 @@ class PlottingUtils(metaclass=Singleton):
 
         return ax
 
-    def plotGenericColumn(self, filename, column, um=None, saveImage=False):
+    """def plotGenericColumn(self, filename, column, um=None, saveImage=False):
 
         data = pd.read_csv(filename, header=0, sep=" ")
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
@@ -408,7 +408,7 @@ class PlottingUtils(metaclass=Singleton):
             return filePath
         else:
             fig.show()
-            return None
+            return None"""
 
     def plotGenericColumns(self, filename, columns, um=None, saveImage=False):
 
@@ -420,26 +420,29 @@ class PlottingUtils(metaclass=Singleton):
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
         data = data.sort_values(by="tm")
 
-        subplots = len(columns)
-
-        nrows = ceil(subplots/2)
-        ncols = 2
+        nrows = len(columns) +1
         
-        fig = make_subplots(rows=nrows, cols=ncols)
+        fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True)
 
-        for idx, column in enumerate(columns):
-            row, col = divmod(idx, ncols)
+        trace1, trace2 = self.plotLc(filename, None, None, False, None, True)
 
+        fig.add_trace(trace1, row=1, col=1)
+        fig.add_trace(trace2, row=1, col=1)
+
+        fig.update_yaxes(showline=True, linecolor="black",
+                         title="cm^2 s sr", row=1, col=1)
+        fig.update_xaxes(showline=True, linecolor="black",
+                         title="Time(MJD)", tickformat="g", row=1, col=1, showticklabels=True)
+
+        for i in range(len(columns)):
+            
             fig.add_trace(go.Scatter(
-                x=data["tm"], y=data[column], name=column), row=row+1, col=col+1)
+                x=data["tm"], y=data[columns[i]], name=columns[i]), row=i+2, col=1)
             
             fig.update_yaxes(showline=True, linecolor="black",
-                             title=um[idx], row=row+1, col=col+1)
+                             title=um[i], row=i+2, col=1)
             fig.update_xaxes(showline=True, linecolor="black",
-                             title="Time(MJD)", tickformat="g", row=row+1, col=col+1)
-        if subplots != 2:
-            fig.update_layout(height=1000, width=1000)
-
+                             title="Time(MJD)", tickformat="g", row=i+2, col=1, showticklabels=True)
         """fig = go.Figure()
 
         fig.add_traces(go.Scatter(x=data["tm"], y=data[columns]))
@@ -450,6 +453,9 @@ class PlottingUtils(metaclass=Singleton):
                          title=um)
         fig.update_layout(xaxis=dict(tickformat="g"))"""
 
+        fig.update_layout(height=500+(len(columns)*500))
+        
+
         if saveImage:
             filePath = join(self.outdir, "plot.png")
             self.logger.info(self,"plot at: %s", filePath)
@@ -458,11 +464,8 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
-        
 
-
-
-    def plotLc(self, filename, lineValue, lineError, saveImage, fermiLC):
+    def plotLc(self, filename, lineValue, lineError, saveImage, fermiLC, trace=False):
         # reading and setting dataframe
         data = pd.read_csv(filename, header=0, sep=" ")
         data["flux"] = data["flux"] * 10 ** 8
@@ -477,20 +480,24 @@ class PlottingUtils(metaclass=Singleton):
         
         #Plotting
         fig = go.Figure()
-        fig.add_traces(go.Scatter(x=sel1["tm"], y=sel1["flux"],
-                                  error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
-                                               arrayminus=sel1["x_minus"]),
-                                  error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
-                                  customdata = np.stack((sel1["time_start_mjd"],
-                                             sel1["time_end_mjd"]), axis=-1),
-                                  hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="sqrts >=3"))
-        fig.add_traces(go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
-                                  error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
-                                               arrayminus=sel2["x_minus"]), mode='markers',
-                                  hovertemplate="tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
-                                  customdata=np.stack((sel2["time_start_mjd"],
-                                                      sel2["time_end_mjd"]), axis=-1),
-                                  marker_symbol="triangle-down", marker_size=10, name="sqrts < 3"))
+        trace1 = go.Scatter(x=sel1["tm"], y=sel1["flux"],
+                            error_x=dict(type="data", symmetric=False, array=sel1["x_plus"],
+                                         arrayminus=sel1["x_minus"]),
+                            error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
+                            customdata=np.stack((sel1["time_start_mjd"],
+                                                 sel1["time_end_mjd"]), axis=-1),
+                            hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="sqrts >=3")
+        fig.add_traces(trace1)
+
+        trace2 = go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
+                            error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
+                                         arrayminus=sel2["x_minus"]), mode='markers',
+                            hovertemplate="tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
+                            customdata=np.stack((sel2["time_start_mjd"],
+                                                 sel2["time_end_mjd"]), axis=-1),
+                            marker_symbol="triangle-down", marker_size=10, name="sqrts < 3")
+        
+        fig.add_traces(trace2)
 
         if fermiLC is not None:
             fermiData = pd.read_csv(fermiLC, header=0, sep=" ")
@@ -534,6 +541,9 @@ class PlottingUtils(metaclass=Singleton):
             self.logger.info(self, "Light curve plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath
+
+        elif trace: #trace==true is used by displaygenericolumns for getting the curves on its subplot
+            return trace1, trace2
         else:
             fig.show()
             return None
