@@ -172,6 +172,17 @@ to facilitate this process. Please, add the new tag within the CHANGELOG.md file
 DevOps
 ======
 
-.. image:: static/agilepy_devops.jpg
+A high level description of agilepy's devops is in the image below: 
+
+.. image:: static/agilepy_devops.png
   :width: 1200
   :alt: Git flow
+
+This scheme workflow produces three images:
+
+* **base_image**: It's an image with all the dependencies except Agilepy python library, it's used for developing purposes only by developers. Base image is built after a new commit in agilepy-recipe repository.
+
+* **latest code image**: It's the base_image with Agilepy's develop branch at latest commit, useful for using or testing agilepy's updates not officially released. This image is not supported nor stable and is built by dockerhub after github's testing pipelines are successful.
+
+* **released image**: The base_image with Agilepy's release tag. By default the community shall be download this image. It's built when a new tag is created.
+
