@@ -88,7 +88,7 @@ Using this command you can launch the container and automatically start jupyter 
     "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
     jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
 
-shared_dir must be created before launching the command, is not necessary, but useful for several cases(exporting analysis outside the container, link another dataset etc.)
+shared_dir must be created before launching the command, it is not necessary, but useful for several cases(exporting analysis outside the container, link another dataset etc.)
 
 Agilepy's containers can be found at dockerhub `page <https://hub.docker.com/repository/docker/agilescience/agilepy>`_
 
