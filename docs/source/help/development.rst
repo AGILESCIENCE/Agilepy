@@ -125,6 +125,7 @@ Add configuration parameters
 Let's say we want to add the following configuration section to the AGAnalysis' configuration file.
 
 ::
+    
     ap:
         radius: 0.25
         timeslot: 3600
@@ -174,7 +175,7 @@ DevOps
 
 A high level description of agilepy's devops is in the image below: 
 
-.. image:: static/agilepy_devops.png
+.. image:: static/agilepy_devops.jpg
   :width: 1200
   :alt: Git flow
 
