@@ -92,6 +92,22 @@ shared_dir must be created before launching the command, it is not necessary, bu
 
 Agilepy's containers can be found at dockerhub `page <https://hub.docker.com/repository/docker/agilescience/agilepy>`_
 
+Supported platforms:
+
+  - linux-64
+  - osx-64
+  - win-64(see note)
+
+Tested on:
+
+  - CentOs 7.6
+  - Ubuntu 18.04
+  - Ubuntu 19.10
+  - Ubuntu 20.04
+  - macOs 10.14
+  - macOs 10.15
+  - Windows 10 v2004(May 2020 Update)
+
 .. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
           in order to do that, you need to install WSL2 and docker first.
 
