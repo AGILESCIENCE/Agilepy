@@ -485,17 +485,17 @@ class PlottingUtils(metaclass=Singleton):
                                          arrayminus=sel1["x_minus"]),
                             error_y=dict(type="data", symmetric=True, array=sel1["flux_err"]), mode="markers",
                             customdata=np.stack((sel1["time_start_mjd"],
-                                                 sel1["time_end_mjd"]), axis=-1),
-                            hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}", name="sqrts >=3")
+                                                 sel1["time_end_mjd"], sel1["sqrt(ts)"]), axis=-1),
+                            hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}, sqrts: %{customdata[2]:.4f}", name="flux")
         fig.add_traces(trace1)
 
         trace2 = go.Scatter(x=sel2["tm"], y=sel2["flux_ul"],
                             error_x=dict(type="data", symmetric=False, array=sel2["x_plus"],
                                          arrayminus=sel2["x_minus"]), mode='markers',
-                            hovertemplate="tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}",
+                            hovertemplate="tstart: %{customdata[0]:.4f}, tend:%{customdata[1]:.4f}, flux_ul: %{y:.2f}, sqrts: %{customdata[2]:.4f}",
                             customdata=np.stack((sel2["time_start_mjd"],
-                                                 sel2["time_end_mjd"]), axis=-1),
-                            marker_symbol="triangle-down", marker_size=10, name="sqrts < 3")
+                                                 sel2["time_end_mjd"], sel2["sqrt(ts)"]), axis=-1),
+                            marker_symbol="triangle-down", marker_size=10, name="flux_ul")
         
         fig.add_traces(trace2)
 
