@@ -26,7 +26,6 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
 

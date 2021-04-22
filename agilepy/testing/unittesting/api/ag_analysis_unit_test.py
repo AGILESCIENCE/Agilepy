@@ -399,8 +399,11 @@ class AGAnalysisUT(unittest.TestCase):
         lightCurveData = ag.lightCurveMLE(
             self.VELA, tmin=433860000, tmax=433880000, timetype="TT", binsize=20000)
 
-        filename = ag.displayGenericColumn(
-            lightCurveData, column="l_peak", um="test_um", saveImage=True)
+        #filename = ag.displayGenericColumns(
+        #    lightCurveData, columns=["l_peak"], um=["test_um"], saveImage=True)
+
+        filename = ag.displayGenericColumns(
+            lightCurveData, columns=["l_peak", "counts"], um=["test_um", "counts"], saveImage=True)
 
         self.assertEqual(True, os.path.isfile(filename))
 
@@ -445,14 +448,19 @@ class AGAnalysisUT(unittest.TestCase):
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
+
         lcdataKeys = ["sqrt(ts)", "flux","flux_err", "flux_ul","gal","gal_error","iso","iso_error",\
             "l_peak","b_peak","dist_peak","l","b","r","ell_dist","a","b","phi","exp","ExpRatio","counts",\
             "counts_err","Index","Index_Err","Par2","Par2_Err","Par3","Par3_Err","Erglog","Erglog_Err","Erglog_UL",\
             "time_start_tt","time_end_tt","Fix","index","ULConfidenceLevel","SrcLocConfLevel","start_l","start_b",\
             "start_flux","typefun","par2","par3","galmode2","isomode2","isomode2fit","edpcor","fluxcor",\
             "integratortype","expratioEval","expratio_minthr","expratio_maxthr","expratio_size",\
-            "emin","emax","fovmin","fovmax","albedo","binsize","expstep","phasecode"]
+            "emin", "emax", "fovmin", "fovmax", "albedo", "binsize", "expstep", "phasecode", "fit_cts", \
+            "fit_fitstatus0", "fit_fcn0", "fit_edm0", "fit_nvpar0", "fit_nparx0", "fit_iter0", \
+            "fit_fitstatus1", "fit_fcn1", "fit_edm1", "fit_nvpar1", "fit_nparx1", "fit_iter1", "fit_Likelihood1"]
 
+        self.assertEqual(len(lcdataKeys), len(lcdata))
+        
         for key in lcdataKeys:
             self.assertEqual(True, key in lcdata)
 

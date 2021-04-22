@@ -1,5 +1,10 @@
 # Changelog
-## Next release (1.3.0)
+##  Release 1.4.0 (22/04/21)
+* (\#234)Added new installation method with docker containers
+* (\#267) Added several columns into lightcurvedata txt
+* (\#272  Updated method for displaying columns of lightcurve data
+* Various bugfixes and improvements
+##  Release 1.3.0 - 29/03/21
 * (\#133) New normalization functions in displaymaps
 * (\#196) Notebooks have their own documentation section
 * (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.

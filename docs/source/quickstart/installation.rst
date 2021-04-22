@@ -1,6 +1,8 @@
 Installation
 ============
 
+Agilepy is available as Anaconda package or into a ready-to-use Docker container(from 1.4.0)
+
 Installation with Anaconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -60,12 +62,72 @@ Running unit tests:
     start_coverage.sh
 
 
+Installation with Docker
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can pull the image directly from terminal as shown below.
+
+::
+
+    docker pull agilescience/agilepy:release-1.4.0
+
+.. note:: If you want to try agilepy’s new features that are not officially released yet, you need to
+          pull a develop image available using **agilepy:develop-latest** tag
+
+
+Using this command you can launch the container and automatically start jupyter notebook.
+
+
+::
+
+    docker run --rm -it -p 8888:8888 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v $PWD/shared_dir:/shared_dir \
+    agilescience/agilepy:release-1.4.0 /bin/bash -c \
+    "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
+    jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
+
+shared_dir must be created before launching the command, it is not necessary, but useful for several cases(exporting analysis outside the container, link another dataset etc.)
+
+Agilepy's containers can be found at dockerhub `page <https://hub.docker.com/repository/docker/agilescience/agilepy>`_
+
+Supported platforms:
+
+  - linux-64
+  - osx-64
+  - win-64(see note)
+
+Tested on:
+
+  - CentOs 7.6
+  - Ubuntu 18.04
+  - Ubuntu 19.10
+  - Ubuntu 20.04
+  - macOs 10.14
+  - macOs 10.15
+  - Windows 10 v2004(May 2020 Update)
+
+.. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
+          in order to do that, you need to install WSL2 and docker first.
+
+          Check the installation instructions for WSL2 `here <https://docs.microsoft.com/it-it/windows/wsl/install-win10>`_
+          and docker `here <https://docs.docker.com/docker-for-windows/wsl/>`_
+
+
+
 
 Uninstalling
 ^^^^^^^^^^^^
+Anaconda
 ::
 
     conda env remove --name <virtualenv_name>
+
+Docker
+::
+
+    docker rmi agilescience/agilepy:release-1.4.0
 
 
 Package distribution structure
