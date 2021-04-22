@@ -8,6 +8,9 @@ Install the development environment
 If you want to try agilepy's new features that are not officially released yet, 
 a develpoment environment called agilepy-environment is available into Anaconda cloud. 
 It contains all the dependencies unless agilepy, which must be installed by hand cloning the repository.
+
+Anaconda
+--------
 ::
 
     
@@ -19,6 +22,25 @@ It contains all the dependencies unless agilepy, which must be installed by hand
     cd Agilepy && git checkout develop
     conda env update -f environment.yml
     python setup.py develop
+
+Docker
+------
+
+::
+
+    docker pull agilescience/agilepy-recipe:develop-latest
+    mkdir shared_dir && cd shared_dir && git clone https://github.com/AGILESCIENCE/Agilepy.git \
+    && cd Agilepy && git checkout develop
+    
+    docker run --rm -it -p 8888:8888 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v $SHARED_DIR_PATH:/shared_dir \
+    agilescience/agilepy-recipe:develop-latest
+    
+    ## -- Inside the container --
+    cd /shared_dir/Agilepy python setup.py develop
+
 
 Now you have the agilepy's latest version installed in your environment.
 

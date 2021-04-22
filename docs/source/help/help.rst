@@ -3,8 +3,9 @@ Need Help
 
 If you have troubles please email to:
 
-  - leonardo.baroncelli@inaf.it
-  - andrea.bulgarelli@inaf.it
+  - leonardo.baroncelli[at]inaf.it
+  - antonio.addis[at]inaf.it
+  - andrea.bulgarelli[at]inaf.it
 
 or open an issue of GitHub: https://github.com/AGILESCIENCE/Agilepy/issues
 
