@@ -1,7 +1,7 @@
 Installation
 ============
 
-Agilepy is available as Anaconda package or into a ready-to-use Docker container(from 1.4.0)
+Agilepy is available as Anaconda package or into a ready-to-use Docker container (from 1.4.0)
 
 Installation with Anaconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,7 +88,9 @@ Using this command you can launch the container and automatically start jupyter 
     "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
     jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
 
-shared_dir must be created before launching the command, it is not necessary, but useful for several cases(exporting analysis outside the container, link another dataset etc.)
+shared_dir must be created before launching the command, it is not necessary, but useful for several cases (exporting analysis outside the container, link another dataset etc.)
+
+Jupyter server is at localhost:8888
 
 Agilepy's containers can be found at dockerhub `page <https://hub.docker.com/repository/docker/agilescience/agilepy>`_
 
@@ -106,7 +108,7 @@ Tested on:
   - Ubuntu 20.04
   - macOs 10.14
   - macOs 10.15
-  - Windows 10 v2004(May 2020 Update)
+  - Windows 10 v2004 (May 2020 Update)
 
 .. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
           in order to do that, you need to install WSL2 and docker first.
