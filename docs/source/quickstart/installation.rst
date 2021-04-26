@@ -69,7 +69,7 @@ You can pull the image directly from dockerhub using the following command:
 
 ::
 
-    docker pull agilescience/agilepy:release-1.4.0
+    docker pull agilescience/agilepy:release-1.4.1
 
 .. note:: If you want to try agilepy’s new features that are not officially released yet, you need to
           pull a develop image available using **agilepy:develop-latest** tag
@@ -84,7 +84,7 @@ Using this command you can launch the container and automatically start jupyter 
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
     -v $PWD/shared_dir:/shared_dir \
-    agilescience/agilepy:release-1.4.0 /bin/bash -c \
+    agilescience/agilepy:release-1.4.1 /bin/bash -c \
     "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
     jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
 
@@ -129,7 +129,7 @@ Anaconda
 Docker
 ::
 
-    docker rmi agilescience/agilepy:release-1.4.0
+    docker rmi agilescience/agilepy:release-1.4.1
 
 
 Package distribution structure

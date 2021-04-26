@@ -1,4 +1,6 @@
 # Changelog
+## Release 1.4.1 (26/04/21)
+* minor bugfixes and docs updated
 ##  Release 1.4.0 (22/04/21)
 * (\#234)Added new installation method with docker containers
 * (\#267) Added several columns into lightcurvedata txt
