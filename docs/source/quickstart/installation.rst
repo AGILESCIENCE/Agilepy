@@ -65,7 +65,7 @@ Running unit tests:
 Installation with Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can pull the image directly from terminal as shown below.
+You can pull the image directly from dockerhub using the following command:
 
 ::
 
