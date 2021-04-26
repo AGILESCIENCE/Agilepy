@@ -34,7 +34,7 @@ In order to interact with the library you need to obtain an instance of the AGAn
     ag = AGAnalysis('agconfig.yaml')
 
 
-The you have to load the models of the sources (you can filter them by their distance (degree) from l,b provided within the configuration file):
+Then you have to load the models of the sources (you can filter them by their distance (degree) from l,b provided within the configuration file):
 
 ::
 
@@ -68,7 +68,7 @@ To perform an maximum likelyhood estimation analysis:
 
     sourcefiles = ag.mle()
 
-You can query the Sources Library with an arbitrary boolean expression string..
+You can query the sources with an arbitrary boolean expression string..
 
 ::
 

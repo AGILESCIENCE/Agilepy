@@ -47,6 +47,21 @@ Here some examples of LOG and EVT indexes:
     /ASDC_PROC3/FM3.119_ASDCSTDk/EVT/ag0912201200_1001151200_STD1Kal_FM.EVT.gz 188395134.000000 190641534.000000 EVT
 
 
+You can use the AG_indexgen tool to generate the .index file:
+
+::
+
+    AG_indexgen <path to data> <type> <output file>
+
+Where <type> can be EVT or LOG.
+
+Example:
+
+::
+
+    AG_indexgen /AGILE_PROC3/FM3.119_ASDC2/EVT EVT /home/user/data.index
+
+
 
 Agilepy test data
 ******************
