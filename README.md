@@ -20,3 +20,5 @@ The main purpose of the package is to provide an easy to use high-level Python i
 
   * Documentation: [https://agilepy.readthedocs.io](https://agilepy.readthedocs.io)
   * Licensed under the the [GNU General Public License v3.0](https://github.com/AGILESCIENCE/Agilepy/blob/master/LICENSE)
+  * Anaconda cloud: [https://anaconda.org/agilescience/agilepy](https://anaconda.org/agilescience/agilepy)
+  * Docker Hub: [https://hub.docker.com/repository/docker/agilescience/agilepy](https://hub.docker.com/repository/docker/agilescience/agilepy)
