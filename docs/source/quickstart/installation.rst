@@ -106,7 +106,7 @@ Tested on:
 .. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
           in order to do that, you need to install WSL2 and docker first.
 
-          Check the installation instructions for WSL2 `here <https://docs.microsoft.com/it-it/windows/wsl/install-win10>`_
+          Check the installation instructions for WSL2 `here <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_
           and docker `here <https://docs.docker.com/docker-for-windows/wsl/>`_
 
 
