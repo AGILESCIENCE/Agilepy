@@ -72,7 +72,7 @@ class Utils:
 
     @staticmethod
     def _extractTimes(indexFileLine):
-        elements = indexFileLine.split(" ")
+        elements = indexFileLine.split()
         return (elements[1], elements[2])
     
     @staticmethod

@@ -49,17 +49,10 @@ or
 
     source activate <virtualenv_name>
 
-When you activate the environment the following environment variables will be set:
+Running jupyter server:
 ::
 
-    AGILE=$CONDA_PREFIX/agiletools
-    PATH=$AGILE/bin:$AGILE/scripts:$AGILE/scripts/extendesources:$PATH
-    LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$CONDA_PREFIX/lib64:$AGILE/lib:$LD_LIBRARY_PATH
-
-Running unit tests:
-::
-
-    start_coverage.sh
+    start_agilepy_notebooks.sh
 
 
 Installation with Docker
@@ -113,7 +106,7 @@ Tested on:
 .. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
           in order to do that, you need to install WSL2 and docker first.
 
-          Check the installation instructions for WSL2 `here <https://docs.microsoft.com/it-it/windows/wsl/install-win10>`_
+          Check the installation instructions for WSL2 `here <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_
           and docker `here <https://docs.docker.com/docker-for-windows/wsl/>`_
 
 
