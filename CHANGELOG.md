@@ -1,4 +1,6 @@
 # Changelog
+## Release 1.4.2 (26/05/21)
+* Minor hotfixes and docs updated
 ## Release 1.4.1 (26/04/21)
 * minor bugfixes and docs updated
 ##  Release 1.4.0 (22/04/21)
