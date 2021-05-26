@@ -129,6 +129,7 @@ class AGAnalysis(AGBaseAnalysis):
             sourceName (str): the name of the source.
             tmin (float): the start time of the analysis.
             tmax (float): the stop time of the analysis.
+            timetype (str): timetype format possible values: "TT" or "MJD"
             glon (float): the galactic longitude (L) of the analysis.
             glat (float): the galactic latitude (B) of the analysis.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
