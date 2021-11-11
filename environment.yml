@@ -16,5 +16,5 @@ dependencies:
   - pyyaml==5.4
   - regions==0.5
   - pytest-cov==2.8.1
-  - python-kaleido==0.2.1
+  - python-kaleido
   - tqdm==4.59.0
