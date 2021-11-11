@@ -113,6 +113,8 @@ class ProcessWrapper(ABC):
 
             tempDir = self.tmpDir.joinpath(''.join(random.choice(string.ascii_lowercase) for i in range(5)))
             tempDir.mkdir(parents=True, exist_ok=True)
+            #tempDir.mkdir(parents=True, exist_ok=True, mode=0o777)
+            #os.chmod(str(tempDir))
 
             command = f"cp {pfile} {str(tempDir)}"
 
