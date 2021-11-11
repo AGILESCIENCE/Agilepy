@@ -37,6 +37,7 @@ Tested on:
   - Ubuntu 20.04
   - macOs 10.14
   - macOs 10.15
+  - macOS 12.0.1
 
 In order to use the software you need to activate the virtual environment first:
 ::
