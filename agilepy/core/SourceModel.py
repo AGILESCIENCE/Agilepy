@@ -484,10 +484,7 @@ class Source:
     freeParams = {
         "spectrum": ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature", "index2"],
         "spatialModel": ["pos"]
-
-
     }
-
 
     mapping = {
         "flux" : "multiFlux",
@@ -505,6 +502,29 @@ class Source:
         "curvature" : "multiPar3",
         "curvatureErr" : "multiPar3Err"
     }
+
+
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
+
+        self.initialSpatialModel = None
+        self.initialSpectrum = None
+
+        self.spatialModel = None
+        self.spectrum = None
+        
+        self.multi = None
+
+        self.intitialized = False
+
+    def setInitialAttributes(self):
+        
+        if not self.intitialized:
+            self.initialSpatialModel = deepcopy(self.spatialModel)
+            self.initialSpectrum = deepcopy(self.spectrum)
+
+        self.intitialized = True
 
     def getSourceDistanceFromLB(self, l, b):
 
@@ -525,8 +545,6 @@ class Source:
             sourceB = pos[1]
 
         return AstroUtils.distance(sourceL, sourceB, l, b)
-
-
 
     def saveMultiAnalysisResults(self, mapCenterL, mapCenterB):
         stype = type(self.spectrum).__name__
@@ -549,35 +567,9 @@ class Source:
             newDistance = self.getSourceDistanceFromLB(mapCenterL, mapCenterB)
             self.initialSpatialModel.dist.setAttributes(value = newDistance)
 
-
-
-
-
-
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
-
-        self.initialSpatialModel = None
-        self.initialSpectrum = None
-
-        self.spatialModel = None
-        self.spectrum = None
-        
-        self.multi = None
-
-        self.intitialized = False
-
-    def setInitialAttributes(self):
-        if not self.intitialized:
-            self.initialSpatialModel = deepcopy(self.spatialModel)
-            self.initialSpectrum = deepcopy(self.spectrum)
-        self.intitialized = True
-
     def getFreeParams(self):
         return [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
                     [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
-
 
     def bold(self, ss):
         return Color.BOLD + ss + Color.END
@@ -588,7 +580,6 @@ class Source:
     def colorBlue(self, ss):
         return Color.BLUE + ss + Color.END
 
-    
     def __str__title(self):
         strr = '\n-----------------------------------------------------------'
         strr += self.bold(f'\n Source name: {self.name} ({self.type})')
@@ -602,9 +593,6 @@ class Source:
             return f'\n  * {self.bold("Free parameters")}: none'
         else:
             return f'\n  * {self.bold("Free parameters")}: '+' '.join(freeParams)
-
-
-
 
     def __str__sourcePos(self):
 
@@ -686,7 +674,6 @@ class Source:
         strr += '\n-----------------------------------------------------------'
         return strr
         
-    
     def __str__(self):
         strr = ''
         strr += self.__str__title()
@@ -694,6 +681,9 @@ class Source:
         strr += self.__str__sourceParams()
         strr += self.__str__multiAnalisys()
         return strr
+
+    def get(self, paramName):
+
 
     def getSpectralIndex(self):
         return self.spectrum.getSpectralIndex()
@@ -726,7 +716,6 @@ class Source:
 
         else:
             return None
-
 
     def isCompatibleWith(self, paramName):
         if paramName in Source._getSelectionParams(onlyMultiParams=True) and self.multi is None:
