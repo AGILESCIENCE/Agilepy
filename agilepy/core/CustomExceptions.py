@@ -123,11 +123,16 @@ class ValueOutOfRange(Exception):
         super().__init__(message)
 
 
-class SourceAttributeNotFound(Exception):
+class SourceParameterNotFound(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-class AttributeNotManuallyUpdatable(Exception):
+class ParameterNotManuallyUpdatable(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class AttributeNotSupportedError(Exception):
     def __init__(self, message):
         super().__init__(message)
 

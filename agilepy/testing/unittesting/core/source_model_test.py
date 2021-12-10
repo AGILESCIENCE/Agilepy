@@ -34,7 +34,7 @@ from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.core.SourceModel import MultiOutput
 from agilepy.core.SourcesLibrary import SourcesLibrary
-from agilepy.core.CustomExceptions import SourceAttributeNotFound, AttributeNotManuallyUpdatable
+from agilepy.core.CustomExceptions import SourceParameterNotFound, ParameterNotManuallyUpdatable
 
 
 class SourceModelUT(unittest.TestCase):

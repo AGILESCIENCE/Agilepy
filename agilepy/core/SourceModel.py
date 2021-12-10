@@ -34,8 +34,8 @@ from agilepy.core.CustomExceptions import   SpectrumTypeNotFoundError, \
                                             SelectionParamNotSupported, \
                                             NotFreeableParamsError, \
                                             WrongSpatialModelTypeError, \
-                                            SourceAttributeNotFound, \
-                                            AttributeNotManuallyUpdatable
+                                            SourceParameterNotFound, \
+                                            ParameterNotManuallyUpdatable
 
 
 from agilepy.core.AgilepyLogger import Color 
@@ -529,13 +529,11 @@ class Source:
     def get(self, sourceAttribute):
         """It returns a source's attribute.
 
-        If the 
-
         Args:
             paramName (str): the name of the source's attribute.
 
         Raises:
-            SourceAttributeNotFound: if the source's attribute is not found.
+            SourceParameterNotFound: if the source's attribute is not found.
 
         Returns:
             The value of the source's attribute.
@@ -558,34 +556,41 @@ class Source:
             if val is not None:
                 return val
                 
-        raise SourceAttributeNotFound(f"Cannot perform get(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
+        raise SourceParameterNotFound(f"Cannot perform get(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
     
-    def set(self, sourceAttribute, value):
-        """It sets a value for a source's attribute.
+    def set(self, sourceParameterName, attributeName, value):
+        """It changes a source parameter attribute.
 
         Args:
-            sourceAttribute (str): attribute to set
+            sourceParameterName (str): parameter to change
+            attributeName (str): attribute to change
             value (int, float, str): value to set
 
         Raises:
-            SourceAttributeNotFound: The attribute doesn't exist or it is a multi attribute but multi is None
+            SourceParameterNotFound: The parameter doesn't exist or it is a multi attribute but multi is None
 
         Returns:
-            True if the source's attribute is set correctly.
+            True if the source parameter attribute is set correctly.
 
         Example:
-            >>> s.set("index", 42.5)
-            >>> s.set("pos", "(30,40)")
+            >>> s.set("index", "value", 42.5)
+            >>> s.set("index", "min", 1000)
 
         """
-        if sourceAttribute == "pos":
-            raise AttributeNotManuallyUpdatable("You can NOT update the pos attribute directly. Please, use the following method: AGAnalysis.updateSourcePosition")
+        if attributeName not in ["value", "min", "max"]:
+            raise 
 
-        isSet = self.spectrum.set(sourceAttribute, value)
+        if sourceParameterName == "pos":
+            raise ParameterNotManuallyUpdatable("You can NOT update the pos parameter directly. Please, use the following method: AGAnalysis.updateSourcePosition")
+
+#       setAttributes(self, name=None, value=None, free=None, scale=None, min=None, max=None):
+        kv = {attributeName:value}
+
+        isSet = self.spectrum.setAttributes(**kv)
         if isSet:
             return isSet
 
-        isSet = self.spatialModel.set(sourceAttribute, value)
+        isSet = self.spatialModel.setAttributes(**kv)
         if isSet:
             return isSet
         
@@ -594,7 +599,7 @@ class Source:
             if isSet:
                 return isSet
         
-        raise SourceAttributeNotFound(f"Cannot perform set(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
+        raise SourceParameterNotFound(f"Cannot perform set(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
         
 
     def getFreeParams(self):
