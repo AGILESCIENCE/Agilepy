@@ -28,7 +28,7 @@ Docker
 
 ::
 
-    docker pull agilescience/agilepy-recipe:develop-latest
+    docker pull agilescience/agilepy-recipe:latest
     mkdir shared_dir && cd shared_dir && git clone https://github.com/AGILESCIENCE/Agilepy.git \
     && cd Agilepy && git checkout develop
     
@@ -36,9 +36,10 @@ Docker
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
     -v $SHARED_DIR_PATH:/shared_dir \
-    agilescience/agilepy-recipe:develop-latest
+    agilescience/agilepy-recipe:latest
     
     ## -- Inside the container --
+    conda activate agilepydev
     cd /shared_dir/Agilepy python setup.py develop
 
 

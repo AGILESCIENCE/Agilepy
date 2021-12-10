@@ -25,14 +25,16 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+import os
+import shutil
 import unittest
-
-
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.core.SourcesLibrary import SourcesLibrary
-from agilepy.core.AgilepyLogger import AgilepyLogger
+from pathlib import Path
 from agilepy.core.SourceModel import Source
+from agilepy.core.AgilepyLogger import AgilepyLogger
+from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.core.SourceModel import MultiOutput
+from agilepy.core.SourcesLibrary import SourcesLibrary
+from agilepy.core.CustomExceptions import SourceAttributeNotFound, AttributeNotManuallyUpdatable
 
 
 class SourceModelUT(unittest.TestCase):
@@ -49,7 +51,8 @@ class SourceModelUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.sourcesConfTxt = os.path.join(self.currentDirPath,"test_data/sourcesconf.txt")
+        self.sourcesConfTxt = os.path.join(self.currentDirPath,"test_data/sourceconf.txt")
+        self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyConf)
@@ -63,12 +66,45 @@ class SourceModelUT(unittest.TestCase):
 
     def test_get(self):
 
-        added = self.sl.loadSourcesFromFile(self.sourcesConfTxt)
+        source = self.sl.loadSourcesFromFile(self.sourcesConfTxt).pop()
 
-        for a in added:
-            print(a)
+        assert 960.59 == source.get("cutoffEnergy")
 
-        
+        print(source)
+        assert (75.2562, 0.151831) == source.get("pos")
+        assert  4.746224592316892 == source.get("dist")
+        print(source.spatialModel.get("locationLimit"))
+        assert 0 == source.get("locationLimit")
+
+        # mle() has not been performed yet.
+        self.assertRaises(SourceAttributeNotFound, source.get, "multiFluxNegErr")
+
+        source.multi = MultiOutput()
+        source.multi.multiFluxNegErr.setAttributes(value=666) 
+        assert 666 == source.get("multiFluxNegErr")
+
+        self.assertRaises(SourceAttributeNotFound, source.get, "DOGE")
 
 
 
+    def test_set(self):
+
+        source = self.sl.loadSourcesFromFile(self.sourcesConfTxt).pop()
+
+        coenergy = 42
+        assert True == source.set("cutoffEnergy", coenergy)
+        assert  coenergy == source.get("cutoffEnergy")
+
+        self.assertRaises(AttributeNotManuallyUpdatable, source.set, "pos", "(1, 1)")
+
+        source.set("dist", 0.5)
+        assert source.spatialModel.dist.value == 0.5
+
+        source.set("locationLimit", 1)
+        assert source.spatialModel.locationLimit.value == 1
+
+        self.assertRaises(SourceAttributeNotFound, source.get, "multiFluxNegErr")
+
+        source.multi = MultiOutput()
+        source.set("multiFluxNegErr", 666)
+        assert source.multi.multiFluxNegErr.value == 666

@@ -29,16 +29,17 @@ from copy import deepcopy
 from typing import List
 from abc import ABC, abstractmethod
 
-from agilepy.core.CustomExceptions import  SpectrumTypeNotFoundError, \
-                              AttributeValueDatatypeNotSupportedError, \
-                              SelectionParamNotSupported, \
-                              NotFreeableParamsError, \
-                              WrongSpatialModelTypeError
+from agilepy.core.CustomExceptions import   SpectrumTypeNotFoundError, \
+                                            AttributeValueDatatypeNotSupportedError, \
+                                            SelectionParamNotSupported, \
+                                            NotFreeableParamsError, \
+                                            WrongSpatialModelTypeError, \
+                                            SourceAttributeNotFound, \
+                                            AttributeNotManuallyUpdatable
 
 
 from agilepy.core.AgilepyLogger import Color 
 from agilepy.utils.AstroUtils import AstroUtils
-
 
 
 class Value:
@@ -91,14 +92,14 @@ class OutputVal(Value):
         if value is not None:
             self.value = self.castTo(value)
 
+
 class Parameter(Value):
-    def __init__(self, name, datatype=None, free=0, scale=None, min=None, max=None, locationLimit=None):
+    def __init__(self, name, datatype=None, free=0, scale=None, min=None, max=None):
         super().__init__(name, datatype)
         self.free = free
         self.scale = scale
         self.min = min
         self.max = max
-        self.locationLimit = locationLimit
 
     def __str__(self):
         return f'\t- {self.name}: {self.value} free: {self.free}'
@@ -110,7 +111,7 @@ class Parameter(Value):
             self.free = freeVal
             return True
 
-    def setAttributes(self, name=None, value=None, free=None, scale=None, min=None, max=None, locationLimit=None):
+    def setAttributes(self, name=None, value=None, free=None, scale=None, min=None, max=None):
         if value is not None:
             self.value = self.castTo(value)
         if free is not None:
@@ -121,8 +122,6 @@ class Parameter(Value):
             self.min = float(min)
         if max is not None:
             self.max = float(max)
-        if locationLimit is not None:
-            self.locationLimit = int(locationLimit)
 
     def toDict(self):
         d = vars(self)
@@ -132,6 +131,7 @@ class Parameter(Value):
                 outDict[k] = str(v)
 
         return outDict
+
 
 class SourceDescription:
 
@@ -147,7 +147,11 @@ class SourceDescription:
             parameter = getattr(self, attributeName)
         except AttributeError:
             return None
-        return parameter.get(strr=strr) # calling Value's get()
+        try:
+            return parameter.get(strr=strr) # calling Value's get()
+        except:
+            # if parameter is not of class "Parameter" or "OutputVal"
+            return parameter
 
     def setFree(self, attributeName, freeVal):
         try:
@@ -337,18 +341,19 @@ class SpatialModel(SourceDescription):
         return PointSourceSpatialModel(type, ll)
 
 
-    def __init__(self, sptype, ll):
+    def __init__(self, sptype):
         self.sptype = sptype
-        self.locationLimit = ll
 
 class PointSourceSpatialModel(SpatialModel):
     def __init__(self, type, ll):
-        super().__init__(type, ll)
+        super().__init__(type)
         self.pos = Parameter("pos", "tuple<float,float>")
         self.dist = OutputVal("dist", "float")
+        self.locationLimit = Parameter("locationLimit", "int")
+        self.locationLimit.setAttributes(value=ll)
 
     def __str__(self):
-        return f'\n - SpatialModel type: {self.sptype}\n{self.pos}\n{self.dist}'
+        return f'\n - SpatialModel type: {self.sptype}\n{self.pos}\n{self.dist}\n{self.locationLimit}'
 
     def getParameterDict(self):
         return [self.pos.toDict()]
@@ -469,7 +474,10 @@ class MultiOutput(SourceDescription):
 
 
 class Source:
+    """This class represent a source and its attributes.
+    
 
+    """
     selectionParams = {
         "source": {
             "name": ["name", "Name", "NAME"],
@@ -517,6 +525,93 @@ class Source:
         self.multi = None
 
         self.intitialized = False
+
+    def get(self, sourceAttribute):
+        """It returns a source's attribute.
+
+        If the 
+
+        Args:
+            paramName (str): the name of the source's attribute.
+
+        Raises:
+            SourceAttributeNotFound: if the source's attribute is not found.
+
+        Returns:
+            The value of the source's attribute.
+        
+        Example:
+            >>> s.get("index")
+            >>> s.get("pos")
+
+        """
+        val = self.spectrum.get(sourceAttribute)
+        if val is not None:
+            return val
+        
+        val = self.spatialModel.get(sourceAttribute)
+        if val is not None:
+            return val
+        
+        if self.multi is not None:
+            val = self.multi.get(sourceAttribute)
+            if val is not None:
+                return val
+                
+        raise SourceAttributeNotFound(f"Cannot perform get(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
+    
+    def set(self, sourceAttribute, value):
+        """It sets a value for a source's attribute.
+
+        Args:
+            sourceAttribute (str): attribute to set
+            value (int, float, str): value to set
+
+        Raises:
+            SourceAttributeNotFound: The attribute doesn't exist or it is a multi attribute but multi is None
+
+        Returns:
+            True if the source's attribute is set correctly.
+
+        Example:
+            >>> s.set("index", 42.5)
+            >>> s.set("pos", "(30,40)")
+
+        """
+        if sourceAttribute == "pos":
+            raise AttributeNotManuallyUpdatable("You can NOT update the pos attribute directly. Please, use the following method: AGAnalysis.updateSourcePosition")
+
+        isSet = self.spectrum.set(sourceAttribute, value)
+        if isSet:
+            return isSet
+
+        isSet = self.spatialModel.set(sourceAttribute, value)
+        if isSet:
+            return isSet
+        
+        if self.multi:
+            isSet = self.multi.set(sourceAttribute, value)
+            if isSet:
+                return isSet
+        
+        raise SourceAttributeNotFound(f"Cannot perform set(), {sourceAttribute} is not found or it is a multi attribute but multi is None.")
+        
+
+    def getFreeParams(self):
+        """It returns the source's attributes that are free to vary.
+
+        Returns:
+            The list of attributes that are free to vary.
+
+        Example:
+            >>> s.getFreeParams()
+            >>> ["flux", "index"]
+
+        """
+        return [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
+                    [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
+
+
 
     def setInitialAttributes(self):
         
@@ -567,9 +662,6 @@ class Source:
             newDistance = self.getSourceDistanceFromLB(mapCenterL, mapCenterB)
             self.initialSpatialModel.dist.setAttributes(value = newDistance)
 
-    def getFreeParams(self):
-        return [k for k,v in vars(self.spectrum).items() if isinstance(v, Parameter) and self.spectrum.getFree(k) > 0] + \
-                    [k for k,v in vars(self.spatialModel).items() if isinstance(v, Parameter) and self.spatialModel.getFree(k) > 0]
 
     def bold(self, ss):
         return Color.BOLD + ss + Color.END
@@ -598,6 +690,7 @@ class Source:
 
         print(self.initialSpatialModel.get("dist"))
         print(self.initialSpatialModel.get("pos"))
+        print(self.initialSpatialModel.get("locationLimit"))
 
     def __str__sourceParams(self):
         strR = ''
@@ -681,8 +774,6 @@ class Source:
         strr += self.__str__sourceParams()
         strr += self.__str__multiAnalisys()
         return strr
-
-    def get(self, paramName):
 
 
     def getSpectralIndex(self):
