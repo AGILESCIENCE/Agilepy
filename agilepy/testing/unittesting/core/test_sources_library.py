@@ -35,7 +35,7 @@ from xml.etree.ElementTree import parse
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.core.SourcesLibrary import SourcesLibrary
 from agilepy.core.AgilepyLogger import AgilepyLogger
-from agilepy.core.SourceModel import Source
+from agilepy.core.source.Source import Source, PointSource
 
 from agilepy.core.CustomExceptions import SourceParamNotFoundError, \
                                           SpectrumTypeNotFoundError,  \
@@ -50,13 +50,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.test_logs_dir.mkdir(parents=True, exist_ok=True)
         os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
 
-
-        self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
-        self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
         self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-
-        #self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourceconf.xml")
-        #self.agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.txt")
 
         self.config = AgilepyConfig()
         self.config.loadBaseConfigurations(self.agilepyConf)
@@ -65,7 +59,7 @@ class SourcesLibraryUT(unittest.TestCase):
         self.logger = AgilepyLogger()
         self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
 
-        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/api"))
+        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/core"))
 
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
@@ -76,17 +70,17 @@ class SourcesLibraryUT(unittest.TestCase):
     def get_free_params(source):
 
         return {
-                 "curvature": source.spectrum.curvature.free,
-                 "pivot_energy": source.spectrum.pivotEnergy.free,
-                 "index": source.spectrum.index.free,
-                 "pos": source.spatialModel.pos.free,
-                 "flux": source.spectrum.flux.free
+                 "curvature": source.spectrum.curvature["free"],
+                 "pivot_energy": source.spectrum.pivotEnergy["free"],
+                 "index": source.spectrum.index["free"],
+                 "pos": source.spatialModel.pos["free"],
+                 "flux": source.spectrum.flux["free"]
                }
 
 
     def test_load_file_with_wrong_extension(self):
 
-        xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf.wrongext")
+        xmlsourcesconfPath = os.path.join(self.currentDirPath,"test_data/sourceconf.wrongext")
 
         self.assertRaises(SourceModelFormatNotSupported, self.sl.loadSourcesFromFile, xmlsourcesconfPath)
 
@@ -122,8 +116,8 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(30, len(self.sl.sources))
 
     def test_load_sources_from_xml_file(self):
-
-        added = self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        
+        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
 
         self.assertEqual(2, len(added))
         self.assertEqual(2, len(self.sl.sources))
@@ -131,24 +125,22 @@ class SourcesLibraryUT(unittest.TestCase):
         sources = self.sl.selectSources('name == "2AGLJ2021+4029"')
         self.assertEqual(1, len(sources))
         source = sources.pop()
-        self.assertEqual(119.3e-08, source.spectrum.get("flux"))
-        self.assertEqual(1.75, source.spectrum.get("index"))
-        self.assertEqual(78.2375, source.spatialModel.get("pos")[0])
-        self.assertEqual(True, source.spatialModel.get("dist") > 0)
-
+        self.assertEqual(119.3e-08, source.spectrum.getVal("flux"))
+        self.assertEqual(1.75, source.spectrum.getVal("index"))
+        self.assertEqual(78.2375, source.spatialModel.getVal("pos")[0])
+        self.assertEqual(True, source.spatialModel.getVal("dist") > 0)
 
         sources = self.sl.selectSources('name == "2AGLJ2021+3654"')
         self.assertEqual(1, len(sources))
         source = sources.pop()
-        self.assertEqual(70.89e-08, source.spectrum.get("flux"))
-        self.assertEqual(1.38, source.spectrum.get("index"))
-        self.assertEqual(75.2562, source.spatialModel.get("pos")[0])
-        self.assertEqual(True, source.spatialModel.get("dist") > 0)
+        self.assertEqual(70.89e-08, source.spectrum.getVal("flux"))
+        self.assertEqual(1.38, source.spectrum.getVal("index"))
+        self.assertEqual(75.2562, source.spatialModel.getVal("pos")[0])
+        self.assertEqual(True, source.spatialModel.getVal("dist") > 0)
 
     def test_load_sources_from_txt_file(self):
-        agsourcesconfPath = os.path.join(self.currentDirPath,"conf/sourceconf_for_load_test.txt")
 
-        added = self.sl.loadSourcesFromFile(agsourcesconfPath)
+        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.txt"))
 
         self.assertEqual(10, len(added))
         self.assertEqual(10, len(self.sl.sources))
@@ -157,11 +149,9 @@ class SourcesLibraryUT(unittest.TestCase):
         self.assertEqual(1, len(sources))
         source = sources.pop()
 
-        self.assertEqual(3.579e-07, source.spectrum.get("flux"))
-        self.assertEqual(3.37991, source.spectrum.get("index"))
-        self.assertEqual(6.16978, source.spatialModel.get("pos")[0])
-
-
+        self.assertEqual(3.579e-07, source.spectrum.getVal("flux"))
+        self.assertEqual(3.37991, source.spectrum.getVal("index"))
+        self.assertEqual(6.16978, source.spatialModel.getVal("pos")[0])
 
         # testing fixflags
         f0 = {"curvature":0, "pivot_energy":0, "index":0, "pos":0, "flux":0} # special case
@@ -190,49 +180,49 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_source_file_parsing(self):
 
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ0835-4514.source")
+        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ0835-4514.source")
 
         res = self.sl.parseSourceFile(sourceFile)
 
         self.assertEqual(True, bool(res))
 
-        self.assertEqual(True, isinstance(res.multiFlux.value, float))
-        self.assertEqual(9.07364e-06, res.multiFlux.value)
-        self.assertEqual(True, isinstance(res.multiSqrtTS.value, float))
-        self.assertEqual(2.17268, res.multiSqrtTS.value)
-        self.assertEqual(None, res.multiDist.value)
+        self.assertEqual(True, isinstance(res.multiFlux["value"], float))
+        self.assertEqual(9.07364e-06, res.multiFlux["value"])
+        self.assertEqual(True, isinstance(res.multiSqrtTS["value"], float))
+        self.assertEqual(2.17268, res.multiSqrtTS["value"])
+        self.assertEqual(None, res.multiDist["value"])
 
-    def load_source_from_catalog_without_scaling(self):
+    def test_load_source_from_catalog_without_scaling(self):
 
-        sources = self.sl.loadSourcesFromCAT2()
-
-        self.assertEqual(175, len(sources))
-
-        self.assertEqual(7.45398e-08, sources[0].getFlux())
-
-    def load_source_from_catalog_with_scaling(self):
-
-        self.config.setOptions(emin=10, emax=1000)
-
-        sources = self.sl.loadSourcesFromCAT2()
+        sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
 
         self.assertEqual(175, len(sources))
 
-        self.assertEqual(6.940938928095228e-07, sources[0].getFlux())
+        self.assertEqual(7.45398e-08, sources[0].spectrum.getVal("flux"))
+
+    def test_load_source_from_catalog_with_scaling(self):
+
+        self.config.setOptions(emin_sources=10, emax_sources=1000)
+
+        sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
+
+        self.assertEqual(175, len(sources))
+
+        self.assertEqual(6.940938928095228e-07, sources[0].spectrum.getVal("flux"))
 
     def test_select_sources_with_selection_string(self):
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
         self.assertEqual(2, len(self.sl.sources))
 
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
 
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
 
-        source = self.sl.parseSourceFile(sourceFile)
+        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
 
-        self.sl.updateMulti(source)
+        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
 
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
@@ -240,72 +230,66 @@ class SourcesLibraryUT(unittest.TestCase):
         """
         MAP sqrtTS con multiSqrtTS
         """
-        sources = self.sl.selectSources('sqrtTS == 10')
+        sources = self.sl.selectSources('multisqrtts == 10')
         self.assertEqual(1, len(sources))
+        print(sources.pop())
 
     def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
 
         sources = self.sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
         self.assertEqual(1, len(sources))
 
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
+        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
 
-        source = self.sl.parseSourceFile(sourceFile)
+        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
 
-        self.sl.updateMulti(source)
+        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
 
         sources = self.sl.selectSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0)
         self.assertEqual(1, len(sources))
 
     def test_free_sources_with_selection_string(self):
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
-        source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
+        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
+        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", False)
 
         self.assertEqual(1, len(sources))
-        self.assertEqual(0, sources[0].spectrum.getFree("flux"))
-        self.assertEqual("0", sources[0].spectrum.getFree("flux", strr=True))
-
+        self.assertEqual(True, "flux" not in sources[0].getFreeParams())
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", True)
-        self.assertEqual(1, sources[0].spectrum.getFree("flux"))
-        self.assertEqual("1", sources[0].spectrum.getFree("flux", strr=True))
-
+        self.assertEqual(True, "flux" in sources[0].getFreeParams())
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", True)
-        self.assertEqual(1, sources[0].spectrum.getFree("index"))
-        self.assertEqual("1", sources[0].spectrum.getFree("index", strr=True))
-
+        self.assertEqual(True, "index" in sources[0].getFreeParams())
 
         sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", False)
-        self.assertEqual(0, sources[0].spectrum.getFree("index"))
-        self.assertEqual("0", sources[0].spectrum.getFree("index", strr=True))
+        self.assertEqual(True, "index" not in sources[0].getFreeParams())
 
     def test_free_sources_with_selection_lambda(self):
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
-        sourceFile = os.path.join(self.currentDirPath,"data/testcase_2AGLJ2021+3654.source")
-        source = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateMulti(source)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
+        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
+        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
 
         sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", False)
         self.assertEqual(1, len(sources))
-        self.assertEqual(0, sources[0].spectrum.getFree("flux"))
+        self.assertEqual(True, "flux" not in sources[0].getFreeParams())
 
         sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", True)
-        self.assertEqual(1, sources[0].spectrum.getFree("flux"))
+        self.assertEqual(True, "flux" in sources[0].getFreeParams())
 
         sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", True)
-        self.assertEqual(1, sources[0].spectrum.getFree("index"))
+        self.assertEqual(True, "index" in sources[0].getFreeParams())
 
         sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", False)
-        self.assertEqual(0, sources[0].spectrum.getFree("index"))
+        self.assertEqual(True, "index" not in sources[0].getFreeParams())
 
     def test_write_to_file_xml(self):
 
@@ -313,7 +297,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
 
         outfileName = "write_to_file_testcase"
 
@@ -331,7 +315,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config.loadBaseConfigurations(self.agilepyConf)
 
-        sourcesFile = os.path.join(self.currentDirPath,"conf/sourcesconf_for_write_to_file_txt.txt")
+        sourcesFile = os.path.join(self.currentDirPath,"test_data/sourcesconf_for_write_to_file_txt.txt")
 
         self.sl.loadSourcesFromFile(sourcesFile)
 
@@ -354,7 +338,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
 
         newSourceDict = {
             "a" : 10
@@ -376,38 +360,28 @@ class SourcesLibraryUT(unittest.TestCase):
         }
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "", newSourceDict)
         self.assertRaises(SourceParamNotFoundError, self.sl.addSource, None, newSourceDict)
-
-        newSourceObj = self.sl.addSource("newsource", newSourceDict)
-        self.assertEqual(True, isinstance(newSourceObj, Source))
-
-        newSource = self.sl.selectSources('name == "newsource"').pop()
-
-        self.assertEqual(0, newSource.spectrum.get("flux"))
-        self.assertEqual(0, newSource.spectrum.get("curvature"))
-        self.assertEqual("newsource", newSource.name)
-        self.assertEqual(35.2462913047547, newSource.spatialModel.get("dist"))
+        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "newsource", newSourceDict)
 
         newSourceDict = {
             "glon" : 250,
             "glat": 30,
             "spectrumType" : "LogParabola",
-            "flux": 1,
-            "curvature":2
+            "flux": 40,
+            "index": 2,
+            "pivotEnergy": 4,
+            "curvature": 5
         }
+        newSourceObj = self.sl.addSource("newsource", newSourceDict)
 
-        newSourceObj = self.sl.addSource("newsource2", newSourceDict)
-        self.assertEqual(True, isinstance(newSourceObj, Source))
+        self.assertEqual(True, isinstance(newSourceObj, PointSource))
 
+        newSource = self.sl.selectSources('name == "newsource"').pop()
 
-        newSource = self.sl.selectSources('name == "newsource2"').pop()
-        self.assertEqual(1, newSource.spectrum.get("flux"))
-        self.assertEqual(2, newSource.spectrum.get("curvature"))
-        self.assertEqual(250, newSource.spatialModel.get("pos")[0])
-        self.assertEqual(30, newSource.spatialModel.get("pos")[1])
-        self.assertEqual("newsource2", newSource.name)
+        self.assertEqual(40, newSource.spectrum.getVal("flux"))
+        self.assertEqual(5, newSource.spectrum.getVal("curvature"))
+        self.assertEqual("newsource", newSource.name)
+        self.assertEqual(35.2462913047547, newSource.spatialModel.getVal("dist"))
 
-
-        self.assertEqual(None, self.sl.addSource("newsource2", newSourceDict))
 
     def test_convert_catalog_to_xml(self):
 
@@ -430,7 +404,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.config.loadBaseConfigurations(self.agilepyConf)
 
-        self.sl.loadSourcesFromFile(self.sourcesConfXml)
+        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
 
         """
         for s in self.sl.getSources():

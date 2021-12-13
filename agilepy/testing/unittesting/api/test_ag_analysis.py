@@ -184,8 +184,6 @@ class AGAnalysisUT(unittest.TestCase):
         ag.generateMaps()
         self.assertRaises(SourcesLibraryIsEmpty, ag.mle)
 
-        
-
     def test_analysis_pipeline(self):
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -215,22 +213,20 @@ class AGAnalysisUT(unittest.TestCase):
         
         ag.destroy()
 
-
-
     def test_source_dist_updated_after_source_position_update(self):
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         ag.setOptions(tmin = 433857532, tmax = 433857542, timetype = "TT", fovbinnumber=1, energybins=[[100,200]], glon = 263.55, glat = -2.78)
 
         source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_1 = source_1.spatialModel.get("dist")
+        dist_1 = source_1.spatialModel.get("dist")["value"]
 
         ag.updateSourcePosition(self.VELA, glon=264, glat=-3)
 
         source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_2 = source_2.spatialModel.get("dist")
+        dist_2 = source_2.spatialModel.get("dist")["value"]
 
-        self.assertNotEqual(dist_1, dist_2)
+        assert True, dist_1 != dist_2
         ag.destroy()
 
     def test_source_dist_updated_after_mle(self):
@@ -243,16 +239,18 @@ class AGAnalysisUT(unittest.TestCase):
         ag.freeSources(lambda name: name == self.VELA, "flux", True)
 
         source = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_before = source.spatialModel.get("dist")
+        print(source)
+        dist_before = source.get("dist")["value"]
 
         ag.mle(maplistFilePath)
 
         source = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_after = source.spatialModel.get("dist")
-        multiDist_after = source.multi.get("multiDist")
+        print(source)
+        dist_after = source.get("dist")["value"]
+        multiDist_after = source.get("multiDist")["value"]
 
-        self.assertNotEqual(dist_before, dist_after)
-        self.assertEqual(multiDist_after, dist_after)
+        assert dist_before == dist_after
+        assert multiDist_after != dist_after
 
         ag.destroy()
 
@@ -266,17 +264,16 @@ class AGAnalysisUT(unittest.TestCase):
 
         source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
         
-        flux_1 = source_1.spectrum.get("flux")
+        flux_1 = source_1.get("flux")["value"]
 
         ag.mle(maplistFilePath)
 
         source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
-        flux_2 = source_2.multi.get("multiFlux")
+        flux_2 = source_2.get("multiFlux")["value"]
 
         self.assertNotEqual(flux_1, flux_2)
 
         ag.destroy()
-
 
     def test_parse_maplistfile(self):
 
@@ -506,17 +503,17 @@ class AGAnalysisUT(unittest.TestCase):
         
         source = sources.pop()
 
-        self.assertEqual(1.34774, source.spectrum.get("index2"))
-        source.spectrum.set("index2", 1)
-        self.assertEqual(1, source.spectrum.get("index2"))
+        self.assertEqual(1.34774, source.spectrum.getVal("index2"))
+        source.set("index2", {"value": 1})
+        assert 1 == source.spectrum.getVal("index2")
 
-        self.assertEqual(969.539e-08, source.spectrum.get("flux"))
-        source.spectrum.set("flux", 1)
-        self.assertEqual(1, source.spectrum.get("flux"))
+        self.assertEqual(969.539e-08, source.spectrum.getVal("flux"))
+        source.set("flux", {"value": 1})
+        assert 1 == source.spectrum.getVal("flux")
 
-        self.assertEqual(3913.06, source.spectrum.get("cutoffEnergy"))
-        source.spectrum.set("cutoffEnergy", 1)
-        self.assertEqual(1, source.spectrum.get("cutoffEnergy"))
+        self.assertEqual(3913.06, source.spectrum.getVal("cutoffEnergy"))
+        source.set("cutoffEnergy", {"value": 1})
+        assert 1 == source.spectrum.getVal("cutoffEnergy")
 
         # self.assertRaises(AttributeError, source.spectrum.get, "index")
         # self.assertRaises(AttributeError, source.spectrum.set, "index", 10)
@@ -534,18 +531,28 @@ class AGAnalysisUT(unittest.TestCase):
         source = sources.pop()
 
         #index2 = source.spectrum.get("index2")
-        flux = source.spectrum.get("flux")
+        flux = source.spectrum.getVal("flux")
         #cutoffEnergy = source.spectrum.get("cutoffEnergy") 
 
         ag.freeSources(lambda name: name == self.VELA, "pos", True)
         # ag.freeSources(lambda name: name == self.VELA, "index2", True)
         ag.freeSources(lambda name: name == self.VELA, "flux", True)
         # ag.freeSources(lambda name: name == self.VELA, "cutoffEnergy", True)
+        print(source)
 
         ag.mle()
 
-        self.assertEqual(True, source.multi.get("multiFlux") == source.spectrum.get("flux"))
-        self.assertEqual(True, flux != source.spectrum.get("flux"))
+        print(source)
+
+        assert source.multiAnalysis.getVal("multiFlux") != source.spectrum.getVal("flux")
+        assert flux == source.spectrum.getVal("flux")
+
+        ag.mle()
+
+        assert source.multiAnalysis.getVal("multiFlux") != source.spectrum.getVal("flux")
+        assert flux != source.spectrum.getVal("flux")
+
+        print(source)
 
         #todo: validation test 
 
@@ -567,15 +574,13 @@ class AGAnalysisUT(unittest.TestCase):
 
         sources_subset = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 30))
 
-        print("sources_subset: ",len(sources_subset))
-
         self.assertRaises(SourceModelFormatNotSupported, ag.writeSourcesOnFile, "regfile", "notsupportedformat", None)
 
         #reg
         regfile = ag.writeSourcesOnFile("regfile", "reg", sources_subset)    
         with open(regfile) as f:
             linesNum = sum(1 for line in f)
-        self.assertEqual(1, linesNum)
+        assert 1 == linesNum
         
         """
         ag.generateMaps()
@@ -648,7 +653,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
     
-
     def test_setDQ(self):
 
         ag = AGAnalysis(self.agilepyConf)
@@ -672,8 +676,6 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
-
     def test_fixed_parameters(self):
 
         ag = AGAnalysis(self.agilepyConf)
@@ -685,25 +687,22 @@ class AGAnalysisUT(unittest.TestCase):
 
         sources = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 25))
         
-        source = ag.selectSources(
-            'name == "2AGLJ0835-4514"')
-        flux0 = source[0].initialSpectrum.get("flux")
-        flux1 = source[0].spectrum.get("flux")
-        
-        self.assertEqual(len(sources), 9)
+        assert len(sources) == 9
 
+        source = ag.selectSources('name == "2AGLJ0835-4514"').pop()
+
+        flux0 = source.spectrum.getVal("flux")
+        
         sources = ag.freeSources(
-            'name == "2AGLJ0835-4514"', "flux", True, show=True)
+            'name == "2AGLJ0835-4514"', "flux", False, show=True)
 
         _ = ag.generateMaps()
 
         _ = ag.mle()
         
-        flux2 = sources[0].spectrum.get("flux")
-        flux3 = source[0].initialSpectrum.get("flux")
+        flux1 = source.get("multiFlux")["value"]
 
-        self.assertEqual(flux0, flux3)
-        self.assertNotEqual(flux1, flux2)
+        assert flux0 == flux1
 
         ag.destroy()
     

@@ -45,7 +45,7 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.Parameters import Parameters
 from agilepy.core.MapList import MapList
 from agilepy.utils.Utils import Utils
-from agilepy.core.CustomExceptions import  AGILENotFoundError, \
+from agilepy.core.CustomExceptions import   AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \
@@ -606,9 +606,6 @@ plotting:
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
 
-                    """
-                    REFACTOR FROM NOW ON TO A FUNCTION..
-                    """
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
                     configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
@@ -859,7 +856,7 @@ plotting:
 
                 multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
 
-                self.sourcesLibrary.updateMulti(multiOutputData)
+                self.sourcesLibrary.updateSourceWithMLEResults(multiOutputData)
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
@@ -1431,100 +1428,100 @@ plotting:
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
-        flux     = self._fixToNegativeExponent(multiOutput.get("multiFlux"), fixedExponent=-8)
-        flux_err = self._fixToNegativeExponent(multiOutput.get("multiFluxErr"), fixedExponent=-8)
-        flux_ul  = self._fixToNegativeExponent(multiOutput.get("multiUL"), fixedExponent=-8)
+        flux     = self._fixToNegativeExponent(multiOutput.getVal("multiFlux"), fixedExponent=-8)
+        flux_err = self._fixToNegativeExponent(multiOutput.getVal("multiFluxErr"), fixedExponent=-8)
+        flux_ul  = self._fixToNegativeExponent(multiOutput.getVal("multiUL"), fixedExponent=-8)
 
 
 
         lcDataDict = {
-            "sqrt(ts)" : multiOutput.get("multiSqrtTS", strr=True),
+            "sqrt(ts)" : multiOutput.getVal("multiSqrtTS", strr=True),
             "flux"     : flux,
             "flux_err" : flux_err,
             "flux_ul"  : flux_ul,
 
-            "gal" : ','.join(map(str, multiOutput.get("multiGalCoeff"))),
-            "gal_error": ','.join(map(str, multiOutput.get("multiGalErr"))),
+            "gal" : ','.join(map(str, multiOutput.getVal("multiGalCoeff"))),
+            "gal_error": ','.join(map(str, multiOutput.getVal("multiGalErr"))),
 
-            "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
-            "iso_error": ','.join(map(str, multiOutput.get("multiIsoErr"))),
+            "iso" : ','.join(map(str, multiOutput.getVal("multiIsoCoeff"))),
+            "iso_error": ','.join(map(str, multiOutput.getVal("multiIsoErr"))),
             
-            "l_peak"    : multiOutput.get("multiLPeak", strr=True),
-            "b_peak"    : multiOutput.get("multiBPeak", strr=True),
-            "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strr=True),
+            "l_peak"    : multiOutput.getVal("multiLPeak", strr=True),
+            "b_peak"    : multiOutput.getVal("multiBPeak", strr=True),
+            "dist_peak" : multiOutput.getVal("multiDistFromStartPositionPeak", strr=True),
 
-            "l"    : multiOutput.get("multiL", strr=True),
-            "b"    : multiOutput.get("multiB", strr=True),
-            "r"    : multiOutput.get("multir", strr=True),
-            "ell_dist": multiOutput.get("multiDistFromStartPosition", strr=True),
+            "l"    : multiOutput.getVal("multiL", strr=True),
+            "b"    : multiOutput.getVal("multiB", strr=True),
+            "r"    : multiOutput.getVal("multir", strr=True),
+            "ell_dist": multiOutput.getVal("multiDistFromStartPosition", strr=True),
 
-            "a": multiOutput.get("multia", strr=True),
-            "b": multiOutput.get("multib", strr=True),
-            "phi": multiOutput.get("multiphi", strr=True),
-            "exp": multiOutput.get("multiExp", strr=True),
-            "ExpRatio": multiOutput.get("multiExpRatio", strr=True),
-            "counts": multiOutput.get("multiCounts", strr=True),
-            "counts_err": multiOutput.get("multiCountsErr", strr=True),
-            "Index": multiOutput.get("multiIndex", strr=True),
-            "Index_Err": multiOutput.get("multiIndexErr", strr=True),
-            "Par2": multiOutput.get("multiPar2", strr=True),
-            "Par2_Err": multiOutput.get("multiPar2Err", strr=True),
-            "Par3": multiOutput.get("multiPar3", strr=True),
-            "Par3_Err": multiOutput.get("multiPar3Err", strr=True),
-            "Erglog":  multiOutput.get("multiErgLog", strr=True),
-            "Erglog_Err": multiOutput.get("multiErgLogErr", strr=True),
-            "Erglog_UL": multiOutput.get("multiErgLogUL", strr=True),
+            "a": multiOutput.getVal("multia", strr=True),
+            "b": multiOutput.getVal("multib", strr=True),
+            "phi": multiOutput.getVal("multiphi", strr=True),
+            "exp": multiOutput.getVal("multiExp", strr=True),
+            "ExpRatio": multiOutput.getVal("multiExpRatio", strr=True),
+            "counts": multiOutput.getVal("multiCounts", strr=True),
+            "counts_err": multiOutput.getVal("multiCountsErr", strr=True),
+            "Index": multiOutput.getVal("multiIndex", strr=True),
+            "Index_Err": multiOutput.getVal("multiIndexErr", strr=True),
+            "Par2": multiOutput.getVal("multiPar2", strr=True),
+            "Par2_Err": multiOutput.getVal("multiPar2Err", strr=True),
+            "Par3": multiOutput.getVal("multiPar3", strr=True),
+            "Par3_Err": multiOutput.getVal("multiPar3Err", strr=True),
+            "Erglog":  multiOutput.getVal("multiErgLog", strr=True),
+            "Erglog_Err": multiOutput.getVal("multiErgLogErr", strr=True),
+            "Erglog_UL": multiOutput.getVal("multiErgLogUL", strr=True),
 
-            "fit_cts": multiOutput.get("multiFitCts", strr=True),
-            "fit_fitstatus0": multiOutput.get("multiFitFitstatus0", strr=True),
-            "fit_fcn0": multiOutput.get("multiFitFcn0", strr=True),
-            "fit_edm0": multiOutput.get("multiFitEdm0", strr=True),
-            "fit_nvpar0": multiOutput.get("multiFitNvpar0", strr=True),
-            "fit_nparx0": multiOutput.get("multiFitNparx0", strr=True),
-            "fit_iter0": multiOutput.get("multiFitIter0", strr=True),
-            "fit_fitstatus1": multiOutput.get("multiFitFitstatus1", strr=True),
-            "fit_fcn1": multiOutput.get("multiFitFcn1", strr=True),
-            "fit_edm1": multiOutput.get("multiFitEdm1", strr=True),
-            "fit_nvpar1": multiOutput.get("multiFitNvpar1", strr=True),
-            "fit_nparx1": multiOutput.get("multiFitNparx1", strr=True),
-            "fit_iter1": multiOutput.get("multiFitIter1", strr=True),
-            "fit_Likelihood1": multiOutput.get("multiFitLikelihood1", strr=True),
+            "fit_cts": multiOutput.getVal("multiFitCts", strr=True),
+            "fit_fitstatus0": multiOutput.getVal("multiFitFitstatus0", strr=True),
+            "fit_fcn0": multiOutput.getVal("multiFitFcn0", strr=True),
+            "fit_edm0": multiOutput.getVal("multiFitEdm0", strr=True),
+            "fit_nvpar0": multiOutput.getVal("multiFitNvpar0", strr=True),
+            "fit_nparx0": multiOutput.getVal("multiFitNparx0", strr=True),
+            "fit_iter0": multiOutput.getVal("multiFitIter0", strr=True),
+            "fit_fitstatus1": multiOutput.getVal("multiFitFitstatus1", strr=True),
+            "fit_fcn1": multiOutput.getVal("multiFitFcn1", strr=True),
+            "fit_edm1": multiOutput.getVal("multiFitEdm1", strr=True),
+            "fit_nvpar1": multiOutput.getVal("multiFitNvpar1", strr=True),
+            "fit_nparx1": multiOutput.getVal("multiFitNparx1", strr=True),
+            "fit_iter1": multiOutput.getVal("multiFitIter1", strr=True),
+            "fit_Likelihood1": multiOutput.getVal("multiFitLikelihood1", strr=True),
 
 
-            "time_start_tt" : float(multiOutput.get("startDataTT", strr=True)),
-            "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True)),
+            "time_start_tt" : float(multiOutput.getVal("startDataTT", strr=True)),
+            "time_end_tt"   : float(multiOutput.getVal("endDataTT", strr=True)),
 
-            "Fix": multiOutput.get("multiFix", strr=True),
-            "index": multiOutput.get("multiindex", strr=True),
-            "ULConfidenceLevel": multiOutput.get("multiULConfidenceLevel", strr=True),
-            "SrcLocConfLevel": multiOutput.get("multiSrcLocConfLevel", strr=True),
-            "start_l": multiOutput.get("multiStartL", strr=True),
-            "start_b": multiOutput.get("multiStartB", strr=True),
-            "start_flux": multiOutput.get("multiStartFlux", strr=True),
-            "typefun": multiOutput.get("multiTypefun", strr=True),
-            "par2": multiOutput.get("multipar2", strr=True),
-            "par3": multiOutput.get("multipar3", strr=True),
-            "galmode2":  multiOutput.get("multiGalmode2", strr=True),
-            "galmode2fit": multiOutput.get("multiGalmode2fit", strr=True),
-            "isomode2":  multiOutput.get("multiIsomode2", strr=True),
-            "isomode2fit": multiOutput.get("multiIsomode2fit", strr=True),
-            "edpcor": multiOutput.get("multiEdpcor", strr=True),
-            "fluxcor": multiOutput.get("multiFluxcor", strr=True),
-            "integratortype": multiOutput.get("multiIntegratorType", strr=True),
-            "expratioEval": multiOutput.get("multiExpratioEval", strr=True),
-            "expratio_minthr": multiOutput.get("multiExpratioMinthr", strr=True),
-            "expratio_maxthr":  multiOutput.get("multiExpratioMaxthr", strr=True),
-            "expratio_size": multiOutput.get("multiExpratioSize", strr=True),
+            "Fix": multiOutput.getVal("multiFix", strr=True),
+            "index": multiOutput.getVal("multiindex", strr=True),
+            "ULConfidenceLevel": multiOutput.getVal("multiULConfidenceLevel", strr=True),
+            "SrcLocConfLevel": multiOutput.getVal("multiSrcLocConfLevel", strr=True),
+            "start_l": multiOutput.getVal("multiStartL", strr=True),
+            "start_b": multiOutput.getVal("multiStartB", strr=True),
+            "start_flux": multiOutput.getVal("multiStartFlux", strr=True),
+            "typefun": multiOutput.getVal("multiTypefun", strr=True),
+            "par2": multiOutput.getVal("multipar2", strr=True),
+            "par3": multiOutput.getVal("multipar3", strr=True),
+            "galmode2":  multiOutput.getVal("multiGalmode2", strr=True),
+            "galmode2fit": multiOutput.getVal("multiGalmode2fit", strr=True),
+            "isomode2":  multiOutput.getVal("multiIsomode2", strr=True),
+            "isomode2fit": multiOutput.getVal("multiIsomode2fit", strr=True),
+            "edpcor": multiOutput.getVal("multiEdpcor", strr=True),
+            "fluxcor": multiOutput.getVal("multiFluxcor", strr=True),
+            "integratortype": multiOutput.getVal("multiIntegratorType", strr=True),
+            "expratioEval": multiOutput.getVal("multiExpratioEval", strr=True),
+            "expratio_minthr": multiOutput.getVal("multiExpratioMinthr", strr=True),
+            "expratio_maxthr":  multiOutput.getVal("multiExpratioMaxthr", strr=True),
+            "expratio_size": multiOutput.getVal("multiExpratioSize", strr=True),
 
-            "emin": ','.join(map(str, multiOutput.get("multiEmin"))),
-            "emax": ','.join(map(str, multiOutput.get("multiEmax"))),
-            "fovmin": ','.join(map(str, multiOutput.get("multifovmin"))),
-            "fovmax": ','.join(map(str, multiOutput.get("multifovmax"))),
+            "emin": ','.join(map(str, multiOutput.getVal("multiEmin"))),
+            "emax": ','.join(map(str, multiOutput.getVal("multiEmax"))),
+            "fovmin": ','.join(map(str, multiOutput.getVal("multifovmin"))),
+            "fovmax": ','.join(map(str, multiOutput.getVal("multifovmax"))),
             
-            "albedo": multiOutput.get("multialbedo", strr=True),
-            "binsize": multiOutput.get("multibinsize", strr=True),
-            "expstep": multiOutput.get("multiexpstep", strr=True),
-            "phasecode": multiOutput.get("multiphasecode", strr=True)
+            "albedo": multiOutput.getVal("multialbedo", strr=True),
+            "binsize": multiOutput.getVal("multibinsize", strr=True),
+            "expstep": multiOutput.getVal("multiexpstep", strr=True),
+            "phasecode": multiOutput.getVal("multiphasecode", strr=True)
 
         }
 
@@ -1542,8 +1539,8 @@ plotting:
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath.pop())
 
-        isoCoeff = multiOutput.get("multiIsoCoeff")
-        galCoeff = multiOutput.get("multiGalCoeff")
+        isoCoeff = multiOutput.getVal("multiIsoCoeff")
+        galCoeff = multiOutput.getVal("multiGalCoeff")
 
         self.logger.debug(self, f"Multioutput: {multiOutput}")
 

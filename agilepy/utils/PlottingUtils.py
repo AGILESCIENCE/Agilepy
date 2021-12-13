@@ -25,20 +25,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import matplotlib as mpl
+mpl.use("Agg")
 
-#mpl.use("Agg")
+import scipy
+import ntpath
+import numpy as np
+from os.path import join
+from pathlib import Path
+import scipy.ndimage as ndimage
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
 from astropy.visualization import simple_norm
 from regions import read_ds9
-import scipy.ndimage as ndimage
-import scipy
-import ntpath
-from os.path import join
-import numpy as np
-from pathlib import Path
 from scipy.stats import norm
 from time import strftime
 import plotly.graph_objects as go

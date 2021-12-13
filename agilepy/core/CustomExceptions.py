@@ -136,3 +136,11 @@ class AttributeNotSupportedError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class SourceTypeNotSupportedError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class XMLParseError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+

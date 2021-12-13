@@ -1,4 +1,7 @@
 # Changelog
+## Release ??
+* (\#234) Internal refactoring of Source class, new set/get interface for Source class. Docs updated.
+
 ## Release 1.4.2 (26/05/21)
 * Minor hotfixes and docs updated
 ## Release 1.4.1 (26/04/21)

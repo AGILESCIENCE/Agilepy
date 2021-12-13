@@ -42,6 +42,8 @@ Docker
     conda activate agilepydev
     cd /shared_dir/Agilepy python setup.py develop
 
+    jupyter notebook --port 8889 --ip 0.0.0.0  --allow-root
+
 
 Now you have the agilepy's latest version installed in your environment.
 

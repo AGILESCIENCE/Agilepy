@@ -28,15 +28,15 @@
 import os
 import shutil
 import unittest
-from pathlib import Path
 from time import sleep
+from pathlib import Path
 from datetime import datetime
 
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
+from agilepy.config.AgilepyConfig import AgilepyConfig
 
 class AgilepyUtilsUT(unittest.TestCase):
 
@@ -92,7 +92,7 @@ class AgilepyUtilsUT(unittest.TestCase):
                     saveImage=True,
                     normType="linear")
 
-        self.assertEqual(True, os.path.isfile(file))
+        assert True == os.path.isfile(file)
 
 
     def test_display_sky_map_single_mode_3_imgs(self):
@@ -121,7 +121,7 @@ class AgilepyUtilsUT(unittest.TestCase):
                     saveImage=True,
                     normType="linear")
 
-        self.assertEqual(True, os.path.isfile(file))
+        assert True == os.path.isfile(file)
 
     def test_display_sky_map_single_mode_2_imgs(self):
 
@@ -149,7 +149,7 @@ class AgilepyUtilsUT(unittest.TestCase):
                     saveImage=True,
                     normType="linear")
 
-        self.assertEqual(True, os.path.isfile(file))
+        assert True == os.path.isfile(file)
 
 
     def test_initialize_logger_verboselvl_2(self):
@@ -160,11 +160,11 @@ class AgilepyUtilsUT(unittest.TestCase):
         
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
-        self.assertEqual(True, logfilePath.is_file())
+        assert True == logfilePath.is_file()
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(1, linesNumber)
+            assert 1 == linesNumber
 
         self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
         self.agilepyLogger.info(self, "%s %s", "Info", "message")
@@ -173,7 +173,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(5, linesNumber)
+            assert 5 == linesNumber
 
 
     def test_initialize_logger_verboselvl_1(self):
@@ -184,11 +184,11 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
-        self.assertEqual(True, logfilePath.is_file())
+        assert True == logfilePath.is_file()
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(1, linesNumber)
+            assert 1 == linesNumber
 
         self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
         self.agilepyLogger.info(self, "%s %s", "Info", "message")
@@ -197,7 +197,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(5, linesNumber)
+            assert 5 == linesNumber
 
 
     def test_initialize_logger_verboselvl_0(self):
@@ -208,11 +208,11 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
 
-        self.assertEqual(True, logfilePath.is_file())
+        assert True == logfilePath.is_file()
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(1, linesNumber)
+            assert 1 == linesNumber
 
         self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
         self.agilepyLogger.info(self, "%s %s", "Info", "message")
@@ -221,7 +221,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(5, linesNumber)
+            assert 5 == linesNumber
 
     
     def test_filterAP(self):
@@ -233,7 +233,7 @@ class AgilepyUtilsUT(unittest.TestCase):
             self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap", 1, 174142800, 447490800, self.currentDirPath)
         with open(product, "r") as f:
             linesNumber = len(f.readlines())
-            self.assertEqual(4, linesNumber)
+            assert 4 == linesNumber
         
         os.remove(os.path.join(self.currentDirPath, "result.txt"))
         os.remove(os.path.join(self.currentDirPath, product))
@@ -250,12 +250,12 @@ class AgilepyUtilsUT(unittest.TestCase):
     def test_astro_utils_time_mjd_to_tt(self):
         sec_tolerance = 0.001
         tt = AstroUtils.time_mjd_to_tt(58871.45616898) # 506861812.99987227
-        self.assertEqual(True, abs(506861813-tt) <= sec_tolerance)
+        assert abs(506861813-tt) <= sec_tolerance
 
     def test_astro_utils_time_tt_to_mjd(self):
         sec_tolerance = 0.0000001
         mjd = AstroUtils.time_tt_to_mjd(507391426.9447)
-        self.assertEqual(True, abs(58877.58595999 - mjd) <= sec_tolerance)
+        assert abs(58877.58595999 - mjd) <= sec_tolerance
 
 
 
@@ -265,9 +265,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         tol = 0.044
 
         civ = AstroUtils.jd_to_civil(2458871.95616898)
-        self.assertEqual(civ[0], 2020)
-        self.assertEqual(civ[1], 1)
-        self.assertEqual(True, abs(23 - civ[2]) <= tol)
+        assert civ[0] == 2020
+        assert civ[1] == 1
+        assert abs(23 - civ[2]) <= tol
         # it should be 2020, 1, 23)........
 
 
@@ -279,7 +279,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         jd = AstroUtils.to_jd(dt)
 
-        self.assertEqual(True, abs(2458871.95616898 - jd) <= tol)
+        assert abs(2458871.95616898 - jd) <= tol
 
 
     def test_astro_utils_time_utc_to_mjd(self):
@@ -290,7 +290,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         mjd = AstroUtils.to_jd(dt, fmt="mjd")
 
-        self.assertEqual(True, abs(58871.45616898 - mjd) <= tol)
+        assert abs(58871.45616898 - mjd) <= tol
 
 
 
@@ -302,7 +302,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         tt = AstroUtils.time_utc_to_tt("2020-01-23T10:56:53")
 
-        self.assertEqual(True, abs(506861813 - tt) <= tol)
+        assert abs(506861813 - tt) <= tol
 
 
     def test_astro_utils_time_tt_to_utc(self):
@@ -312,12 +312,12 @@ class AgilepyUtilsUT(unittest.TestCase):
         utc = AstroUtils.time_tt_to_utc(506861813)
         dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
 
-        self.assertEqual(dt.year, 2020)
-        self.assertEqual(dt.month, 1)
-        self.assertEqual(dt.day, 23)
-        self.assertEqual(dt.hour, 10)
-        self.assertEqual(dt.minute, 56)
-        self.assertEqual(True, abs(53 - dt.second) <= sec_tol)
+        assert dt.year == 2020
+        assert dt.month == 1
+        assert dt.day == 23
+        assert dt.hour == 10
+        assert dt.minute == 56
+        assert abs(53 - dt.second) <= sec_tol
 
     def test_astro_utils_time_mjd_to_utc(self):
 
@@ -327,12 +327,12 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
 
-        self.assertEqual(dt.year, 2020)
-        self.assertEqual(dt.month, 1)
-        self.assertEqual(dt.day, 23)
-        self.assertEqual(dt.hour, 10)
-        self.assertEqual(dt.minute, 56)
-        self.assertEqual(True, abs(53 - dt.second) <= sec_tol)
+        assert dt.year == 2020
+        assert dt.month == 1
+        assert dt.day == 23
+        assert dt.hour == 10
+        assert dt.minute == 56
+        assert abs(53 - dt.second) <= sec_tol
 
 
 
@@ -342,8 +342,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         mjd = AstroUtils.time_utc_to_mjd("2020-01-23T10:56:53")
 
-        self.assertEqual(True, abs(58871.45616898 - mjd) <= sec_tol)
-
+        assert abs(58871.45616898 - mjd) <= sec_tol
 
     def test_get_first_and_last_line_in_file(self):
 
@@ -356,8 +355,8 @@ class AgilepyUtilsUT(unittest.TestCase):
         with open(test_file, "w") as f:
             f.write(line1)
         (first, last) = Utils._getFirstAndLastLineInFile(test_file)
-        self.assertEqual(first, line1)
-        self.assertEqual(last, line1)
+        assert first == line1
+        assert last == line1
 
         # II test: 2 lines
         test_file = self.tmpDir.joinpath("test_file2.txt")
@@ -365,8 +364,8 @@ class AgilepyUtilsUT(unittest.TestCase):
             f.write(line1)
             f.write(line2)
         (first, last) = Utils._getFirstAndLastLineInFile(test_file)
-        self.assertEqual(first, line1)
-        self.assertEqual(last, line2)
+        assert first == line1
+        assert last == line2
 
         # III test: 3 lines
         test_file = self.tmpDir.joinpath("test_file3.txt")
@@ -375,10 +374,9 @@ class AgilepyUtilsUT(unittest.TestCase):
             f.write(line2)
             f.write(line3)
         (first, last) = Utils._getFirstAndLastLineInFile(test_file)
-        self.assertEqual(first, line1)
-        self.assertEqual(last, line3)
+        assert first == line1
+        assert last == line3
 
-
-
+ 
 if __name__ == '__main__':
     unittest.main()

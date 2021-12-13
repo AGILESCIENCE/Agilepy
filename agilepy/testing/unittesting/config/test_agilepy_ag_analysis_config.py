@@ -26,10 +26,10 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import unittest
-from pathlib import Path
 import os
 import shutil
+import unittest
+from pathlib import Path
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, \

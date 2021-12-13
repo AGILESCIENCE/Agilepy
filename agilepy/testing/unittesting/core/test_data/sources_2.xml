@@ -23,17 +23,4 @@
     </spatialModel>
   </source>
 
-  <!-- Diffuse Sources
-  <source name="gal" type="DiffuseEmission">
-      <spatialModel type="ConstantValue">
-          <parameter free="0" name="gal" value="1.0"/>  galCoeff
-      </spatialModel>
-  </source>
-  <source name="iso" type="IsotropicEmission">
-      <spatialModel type="ConstantValue">
-          <parameter free="0" name="iso" value="7.0"/> isoCoeff
-      </spatialModel>
-  </source>
-  -->
-
 </source_library>

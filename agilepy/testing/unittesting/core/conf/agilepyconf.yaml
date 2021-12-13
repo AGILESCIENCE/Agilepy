@@ -13,11 +13,11 @@ output:
 selection:
   emin: 100
   emax: 10000
-  tmin: 433900000
-  tmax: 433957532
+  tmin: 433857532
+  tmax: 434289532
   timetype: TT
-  glon: 80
-  glat: 0
+  glon: 263.55
+  glat: -2.78
   timelist: None
   filtercode: 5
   fovradmin: 0
@@ -30,8 +30,6 @@ selection:
   bpointing: null
   maplistgen: None
 
-
-
 maps:
   mapsize: 40
   useEDPmatrixforEXP: yes
@@ -43,9 +41,6 @@ maps:
   energybins:
     - 100, 300
     - 300, 1000
-    # - 1000, 3000
-    # - 3000,10000
-
   fovbinnumber: 2
   binsize: 0.2
   offaxisangle: 30

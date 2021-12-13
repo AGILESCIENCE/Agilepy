@@ -29,12 +29,11 @@ import os
 import shutil
 import unittest
 from pathlib import Path
-from agilepy.core.SourceModel import Source
+from xml.etree.ElementTree import parse
+from agilepy.core.source.Source import Source, PointSource
 from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.core.SourceModel import MultiOutput
 from agilepy.core.SourcesLibrary import SourcesLibrary
-from agilepy.core.CustomExceptions import SourceParameterNotFound, ParameterNotManuallyUpdatable
 
 
 class SourceModelUT(unittest.TestCase):
@@ -51,7 +50,9 @@ class SourceModelUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-        self.sourcesConfTxt = os.path.join(self.currentDirPath,"test_data/sourceconf.txt")
+        self.sourcesTxt = os.path.join(self.currentDirPath,"test_data/sources.txt")
+        self.sourcesXml = os.path.join(self.currentDirPath,"test_data/sources.xml")
+
         self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
 
         self.config = AgilepyConfig()
@@ -63,48 +64,54 @@ class SourceModelUT(unittest.TestCase):
 
         self.sl = SourcesLibrary(self.config, self.logger)
 
+    def test_parse_source_XML_format(self):
 
-    def test_get(self):
+        xmlRoot = parse(self.sourcesXml).getroot()
 
-        source = self.sl.loadSourcesFromFile(self.sourcesConfTxt).pop()
+        sources = []
 
-        assert 960.59 == source.get("cutoffEnergy")
+        for sourceRoot in xmlRoot:
 
-        print(source)
-        assert (75.2562, 0.151831) == source.get("pos")
-        assert  4.746224592316892 == source.get("dist")
-        print(source.spatialModel.get("locationLimit"))
-        assert 0 == source.get("locationLimit")
+            source = Source.parseSourceXMLFormat(sourceRoot)
+            
+            sources.append(source)
 
-        # mle() has not been performed yet.
-        self.assertRaises(SourceAttributeNotFound, source.get, "multiFluxNegErr")
+        assert sources[0].get("flux")["value"] == 7.45398e-08
+        assert sources[0].get("pos")["value"] == (92.4102, -10.3946)
 
-        source.multi = MultiOutput()
-        source.multi.multiFluxNegErr.setAttributes(value=666) 
-        assert 666 == source.get("multiFluxNegErr")
+        assert sources[1].get("flux")["value"] == 41.6072e-08
+        assert sources[1].get("pos")["value"] == (119.677, 10.544)
 
-        self.assertRaises(SourceAttributeNotFound, source.get, "DOGE")
+        assert sources[2].get("flux")["value"] == 969.539e-08
+        assert sources[2].get("index2")["value"] == 1.3477
+        assert sources[2].get("index2")["free"] == 1
+        assert sources[2].get("pos")["value"] == (263.585, -2.84083)
+
+        assert sources[3].get("flux")["value"] == 35.79e-08
+        assert sources[3].get("curvature")["value"] == 0.682363
+        assert sources[3].get("curvature")["max"] == 3
+        assert sources[3].get("pos")["value"] == (6.16978, -0.0676943)
 
 
+    def test_parse_source_TXT_format(self):
 
-    def test_set(self):
+        sources = []
 
-        source = self.sl.loadSourcesFromFile(self.sourcesConfTxt).pop()
+        with open(self.sourcesTxt, "r") as txtFile:
 
-        coenergy = 42
-        assert True == source.set("cutoffEnergy", coenergy)
-        assert  coenergy == source.get("cutoffEnergy")
+            for line in txtFile:
 
-        self.assertRaises(AttributeNotManuallyUpdatable, source.set, "pos", "(1, 1)")
+                if line == "\n":
+                    continue
 
-        source.set("dist", 0.5)
-        assert source.spatialModel.dist.value == 0.5
+                source = Source.parseSourceTXTFormat(line)
 
-        source.set("locationLimit", 1)
-        assert source.spatialModel.locationLimit.value == 1
+                sources.append(source)
 
-        self.assertRaises(SourceAttributeNotFound, source.get, "multiFluxNegErr")
+        assert sources[0].name == "2AGLJ2021+4029"
+        assert sources[0].get("flux")["value"] == 119.3e-08
+        assert sources[0].get("pos")["value"] == (78.2375, 2.12298)
 
-        source.multi = MultiOutput()
-        source.set("multiFluxNegErr", 666)
-        assert source.multi.multiFluxNegErr.value == 666
+        assert sources[1].name == "2AGLJ2021+3654"
+        assert sources[1].get("flux")["value"] == 70.89e-08
+        assert sources[1].get("pos")["value"] == (75.2562, 0.151831)
