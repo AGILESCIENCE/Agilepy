@@ -35,6 +35,7 @@ The main purpose of the package is to provide an easy to use high-level Python i
   api/analysis_api
   api/engineering_api
   api/astroutils_api
+  api/source_api
 
 .. toctree::
   :caption: Help

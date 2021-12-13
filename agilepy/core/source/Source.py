@@ -46,14 +46,27 @@ class Source:
         self.spectrum = None
         self.spatialModel = None
         self.multiAnalysis = MultiAnalysis()
-
-    def setName(self, name):
-        self.name = name
     
     def getName(self):
+        """It gets the name for the source
+
+        Args:
+           None
+
+        Returns:
+            name(str): Source name
+        """
         return self.name
 
     def getFreeableParams(self):
+        """It gets parameters to free
+
+        Args:
+           None
+
+        Returns:
+            List(str): parameters to free
+        """
         return self.spectrum.getFreeableParams() + self.spatialModel.getFreeableParams()
 
     def setDistanceFromMapCenter(self, mapCenterL, mapCenterB):
@@ -382,31 +395,33 @@ class PointSource(Source):
             return getattr(self.multiAnalysis, parameterName)
 
         raise SourceParameterNotFound(f"Cannot perform get(), {parameterName} is not found.")
-
+    
+    
     def set(self, parameterName, attributeValueDict):
+        """It sets a source's parameter.
+
+        Args:
+            parameterName (str): the name of the source's parameter.
+
+        Returns:
+            None
+
+        Example:
+            >>> s.set("index",{"value":1, "min":10})
+        """
+
         try:
             self.spectrum.setParameter(parameterName, attributeValueDict)
-        except: 
+        except:
             pass
         try:
             self.spatialModel.setParameter(parameterName, attributeValueDict)
-        except: 
+        except:
             pass
         try:
             self.multiAnalysis.setParameter(parameterName, attributeValueDict)
-        except: 
+        except:
             pass
-
-
-
-    def setSpectrum(self, spectrumType):
-        self.spectrum = Spectrum.getSpectrum(spectrumType)
-
-    def setSpatialModel(self, spatialModelType):
-        self.spatialModel = SpatialModel.getSpatialModel(spatialModelType)
-
-    def setMultiAnalysis(self):
-        self.multiAnalysis = MultiAnalysis()
 
     def getFreeParams(self):
         """It returns the source's attributes that are free to vary.
@@ -420,7 +435,15 @@ class PointSource(Source):
 
         """
         return self.spectrum.getFreeParams() + self.spatialModel.getFreeParams()
-        
+
+    def setSpectrum(self, spectrumType):
+        self.spectrum = Spectrum.getSpectrum(spectrumType)
+
+    def setSpatialModel(self, spatialModelType):
+        self.spatialModel = SpatialModel.getSpatialModel(spatialModelType)
+
+    def setMultiAnalysis(self):
+        self.multiAnalysis = MultiAnalysis()
  
     def setFreeAttributeValueOf(self, parameterName, freeval):
 
