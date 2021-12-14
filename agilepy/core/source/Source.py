@@ -536,40 +536,48 @@ class PointSource(Source):
         for spectrumParamName, multiSpectrumParamName in MultiAnalysis.spectrumMultiMapping.items():
             if spectrumParamName in spectrumParamsNames:
                 param = self.multiAnalysis.get(multiSpectrumParamName)
+                paramErr = self.multiAnalysis.get(multiSpectrumParamName)
                 if spectrumParamName == "flux":
                     strr += f"\n\t- {spectrumParamName} ({param['um']}): {param['value']:.4e}"
-                    if param['err'] is not None:
-                        strr += f" +/- {param['err']:.4e}"
+                    if paramErr['value'] is not None:
+                        strr += f" +/- {paramErr['value']:.4e}"
                 else:
                     strr += f"\n\t- {spectrumParamName} {param['um']}: {param['value']}"
-                    if param['err'] is not None:
-                        strr += f" +/- {param['err']}"
+                    if paramErr['value'] is not None:
+                        strr += f" +/- {paramErr['value']}"
 
         # ag_multi parameters
-        strr += f'\n\t- upper limit({self.multiAnalysis.get("multiUL")["um"]}): {self.multiAnalysis.get("multiUL")["value"]}'
-        strr += f'\n\t- ergLog(erg/cm2s): {self.multiAnalysis.get("multiErgLog")["value"]}'
-        if self.multiAnalysis.get("multiErgLogErr")["value"] is not None:
-            strr += f' +/- {self.multiAnalysis.get("multiErgLogErr")["value"]}'
-        strr += f'\n\t- galCoeff: {self.multiAnalysis.get("multiGalCoeff")["value"]}'
-        if self.multiAnalysis.get("multiGalErr")["value"] is not None and sum(self.multiAnalysis.get("multiGalErr")["value"]) != 0:
-            strr += f' +/- {self.multiAnalysis.get("multiGalErr")["value"]}'
-        strr += f'\n\t- isoCoeff: {self.multiAnalysis.get("multiIsoCoeff")["value"]}' 
-        if self.multiAnalysis.get("multiIsoErr")["value"] is not None and sum(self.multiAnalysis.get("multiIsoErr")["value"]) != 0:
-            strr += f' +/- {self.multiAnalysis.get("multiIsoErr")["value"]}'
-        strr += f'\n\t- exposure({self.multiAnalysis.get("multiExp")["um"]}): {self.multiAnalysis.get("multiExp")["value"]}'
-        strr += f'\n\t- exp-ratio: {self.multiAnalysis.get("multiExpRatio")["value"]}'
-        strr += f'\n\t- L_peak: {self.multiAnalysis.get("multiLPeak")["value"]}'
-        strr += f'\n\t- B_peak: {self.multiAnalysis.get("multiBPeak")["value"]}'
-        strr += f'\n\t- Distance from start pos: {self.multiAnalysis.get("multiDistFromStartPositionPeak")["value"]}'
+        strr += f'\n\t- upper limit({self.multiAnalysis.get("multiUL")["um"]}): {self.multiAnalysis.getVal("multiUL")}'
+        if self.multiAnalysis.getVal("multiULErr") is not None:
+            strr += f' +/- {self.multiAnalysis.getVal("multiULErr")}'
+
+        strr += f'\n\t- ergLog(erg/cm2s): {self.multiAnalysis.getVal("multiErgLog")}'
+        if self.multiAnalysis.getVal("multiErgLogErr") is not None:
+            strr += f' +/- {self.multiAnalysis.getVal("multiErgLogErr")}'
+        
+        strr += f'\n\t- galCoeff: {self.multiAnalysis.getVal("multiGalCoeff")}'
+        if self.multiAnalysis.getVal("multiGalErr") is not None and sum(self.multiAnalysis.getVal("multiGalErr")) != 0:
+            strr += f' +/- {self.multiAnalysis.getVal("multiGalErr")}'
+        
+        strr += f'\n\t- isoCoeff: {self.multiAnalysis.getVal("multiIsoCoeff")}' 
+        if self.multiAnalysis.getVal("multiIsoErr") is not None and sum(self.multiAnalysis.getVal("multiIsoErr")) != 0:
+            strr += f' +/- {self.multiAnalysis.getVal("multiIsoErr")}'
+        
+        strr += f'\n\t- exposure({self.multiAnalysis.get("multiExp")["um"]}): {self.multiAnalysis.getVal("multiExp")}'
+        strr += f'\n\t- exp-ratio: {self.multiAnalysis.getVal("multiExpRatio")}'
+        strr += f'\n\t- L_peak: {self.multiAnalysis.getVal("multiLPeak")}'
+        strr += f'\n\t- B_peak: {self.multiAnalysis.getVal("multiBPeak")}'
+        strr += f'\n\t- Distance from start pos: {self.multiAnalysis.getVal("multiDistFromStartPositionPeak")}'
+        
         strr += f'\n\t- position:'
-        strr += f'\n\t    - L: {self.multiAnalysis.get("multiL")["value"]}'
-        strr += f'\n\t    - B: {self.multiAnalysis.get("multiB")["value"]}'
-        strr += f'\n\t    - Distance from start pos: {self.multiAnalysis.get("multiDistFromStartPosition")["value"]}'
-        strr += f'\n\t    - radius of circle: {self.multiAnalysis.get("multir")["value"]}'
+        strr += f'\n\t    - L: {self.multiAnalysis.getVal("multiL")}'
+        strr += f'\n\t    - B: {self.multiAnalysis.getVal("multiB")}'
+        strr += f'\n\t    - Distance from start pos: {self.multiAnalysis.getVal("multiDistFromStartPosition")}'
+        strr += f'\n\t    - radius of circle: {self.multiAnalysis.getVal("multir")}'
         strr += f'\n\t    - ellipse:'
-        strr += f'\n\t\t  - a: {self.multiAnalysis.get("multia")["value"]}'
-        strr += f'\n\t\t  - b: {self.multiAnalysis.get("multib")["value"]}'
-        strr += f'\n\t\t  - phi: {self.multiAnalysis.get("multiphi")["value"]}'
+        strr += f'\n\t\t  - a: {self.multiAnalysis.getVal("multia")}'
+        strr += f'\n\t\t  - b: {self.multiAnalysis.getVal("multib")}'
+        strr += f'\n\t\t  - phi: {self.multiAnalysis.getVal("multiphi")}'
         strr += '\n-----------------------------------------------------------'
         return strr
     
