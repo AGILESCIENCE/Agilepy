@@ -548,8 +548,6 @@ class PointSource(Source):
 
         # ag_multi parameters
         strr += f'\n\t- upper limit({self.multiAnalysis.get("multiUL")["um"]}): {self.multiAnalysis.getVal("multiUL")}'
-        if self.multiAnalysis.getVal("multiULErr") is not None:
-            strr += f' +/- {self.multiAnalysis.getVal("multiULErr")}'
 
         strr += f'\n\t- ergLog(erg/cm2s): {self.multiAnalysis.getVal("multiErgLog")}'
         if self.multiAnalysis.getVal("multiErgLogErr") is not None:
