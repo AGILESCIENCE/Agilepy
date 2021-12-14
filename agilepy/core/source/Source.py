@@ -536,7 +536,7 @@ class PointSource(Source):
         for spectrumParamName, multiSpectrumParamName in MultiAnalysis.spectrumMultiMapping.items():
             if spectrumParamName in spectrumParamsNames:
                 param = self.multiAnalysis.get(multiSpectrumParamName)
-                paramErr = self.multiAnalysis.get(multiSpectrumParamName)
+                paramErr = self.multiAnalysis.get(multiSpectrumParamName+"Err")
                 if spectrumParamName == "flux":
                     strr += f"\n\t- {spectrumParamName} ({param['um']}): {param['value']:.4e}"
                     if paramErr['value'] is not None:
