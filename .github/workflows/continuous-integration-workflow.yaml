@@ -69,11 +69,11 @@ jobs:
 
     - name: Installing Anaconda
       run: |
-        echo "Install anaconda 2020.11 x86_64"
-        wget -q  https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
-        echo "cf2ff493f11eaad5d09ce2b4feaa5ea90db5174303d5b3fe030e16d29aeef7de  Anaconda3-2020.11-Linux-x86_64.sh" > anaconda_hash_sha256
+        echo "Install anaconda 2021.11 x86_64"
+        wget -q  https://repo.anaconda.com/archive/Anaconda3-2021.11-Linux-x86_64.sh
+        echo "fedf9e340039557f7b5e8a8a86affa9d299f5e9820144bd7b92ae9f7ee08ac60  Anaconda3-2021.11-Linux-x86_64.sh" > anaconda_hash_sha256
         sha256sum -c anaconda_hash_sha256
-        bash Anaconda3-2020.11-Linux-x86_64.sh -b -p /opt/anaconda3
+        bash Anaconda3-2021.11-Linux-x86_64.sh -b -p /opt/anaconda3
         echo ". /opt/anaconda3/etc/profile.d/conda.sh" >> ~/.bashrc
         source ~/.bashrc
         conda update -y -n base -c defaults conda
