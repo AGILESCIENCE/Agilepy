@@ -122,7 +122,6 @@ class ValueOutOfRange(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-
 class SourceParameterNotFound(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -130,7 +129,6 @@ class SourceParameterNotFound(Exception):
 class ParameterNotManuallyUpdatable(Exception):
     def __init__(self, message):
         super().__init__(message)
-
 
 class AttributeNotSupportedError(Exception):
     def __init__(self, message):

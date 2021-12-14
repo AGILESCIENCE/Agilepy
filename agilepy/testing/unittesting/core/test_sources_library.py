@@ -28,6 +28,7 @@
 
 import os
 import shutil
+import pytest
 import unittest
 from pathlib import Path
 from xml.etree.ElementTree import parse
@@ -39,7 +40,8 @@ from agilepy.core.source.Source import Source, PointSource
 
 from agilepy.core.CustomExceptions import SourceParamNotFoundError, \
                                           SpectrumTypeNotFoundError,  \
-                                          SourceModelFormatNotSupported
+                                          SourceModelFormatNotSupported, \
+                                          MultiOutputNotFoundError
 
 class SourcesLibraryUT(unittest.TestCase):
 
@@ -214,7 +216,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
         self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
         self.assertEqual(2, len(self.sl.sources))
-
+        
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
 
@@ -227,12 +229,12 @@ class SourcesLibraryUT(unittest.TestCase):
         sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
         self.assertEqual(1, len(sources))
 
-        """
-        MAP sqrtTS con multiSqrtTS
-        """
         sources = self.sl.selectSources('multisqrtts == 10')
         self.assertEqual(1, len(sources))
-        print(sources.pop())
+
+        sources = self.sl.selectSources('sqrtts == 10')
+        self.assertEqual(1, len(sources))
+
 
     def test_select_sources_with_selection_lambda(self):
 

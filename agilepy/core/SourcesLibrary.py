@@ -156,7 +156,6 @@ class SourcesLibrary:
 
         return filteredSources
 
-
     def convertCatalogToXml(self, catalogFilepath):
 
         catalogFilepath = Utils._expandEnvVar(catalogFilepath)
@@ -218,19 +217,14 @@ class SourcesLibrary:
         return [s.name for s in self.sources]
 
     def selectSources(self, selection, show=False):
-        """
-        This method ... blablabla..
-        """
 
-        userSelectionParamsNames = [selParam.lower() for selParam in SourcesLibrary._extractSelectionParams(selection)]
-
-        SourceR.checkSelectionParameter(userSelectionParamsNames)
+        userSelectionParamsNames = SourcesLibrary._extractSelectionParams(selection)
 
         selected = []
 
         for source in self.sources:
 
-            if SourcesLibrary._selectSource(selection, source, userSelectionParamsNames):
+            if self._selectSource(selection, source, userSelectionParamsNames):
 
                 selected.append(source)
 
@@ -579,11 +573,19 @@ class SourcesLibrary:
     def _(selectionLambda):
         return list(signature(selectionLambda).parameters)
 
+    def _selectSource(self, selection, source, userSelectionParams):
+        
+        selectionParamsValues = []
+        
+        for paramName in userSelectionParams:
+            paramValue = source.getSelectionValue(paramName)
+            if paramValue is not None:
+                selectionParamsValues.append(paramValue)
+            else:
+                self.logger.warning(self, f"The selection parameter '{paramName}' cannot be used for source '{source.name}' since mle() has not been called yet! Skipping source..")
+                return None
 
-    @staticmethod
-    def _selectSource(selection, source, userSelectionParams):
-
-        selectionParamsValues = [source.getSelectionValue(paramName) for paramName in userSelectionParams]
+        self.logger.debug(self, f"userSelectionParams: {userSelectionParams} selectionParamsValues: {selectionParamsValues}")
 
         return SourcesLibrary.__selectSource(selection, source, userSelectionParams, selectionParamsValues)
 

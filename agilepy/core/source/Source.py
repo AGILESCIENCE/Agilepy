@@ -31,12 +31,14 @@ from agilepy.core.source.Spectrum import Spectrum
 from agilepy.core.source.SpatialModel import SpatialModel
 from agilepy.core.source.MultiAnalysis import MultiAnalysis
 
-from agilepy.core.CustomExceptions import SelectionParamNotSupported, SourceParameterNotFound, \
+from agilepy.core.CustomExceptions import SelectionParamNotSupported, \
+                                          SourceParameterNotFound, \
                                           NotFreeableParamsError, \
                                           SourceTypeNotSupportedError, \
                                           XMLParseError, \
                                           SourcesAgileFormatParsingError, \
-                                          SourceParamNotFoundError
+                                          SourceParamNotFoundError, \
+                                          MultiOutputNotFoundError
 
 class Source:
 
@@ -73,11 +75,13 @@ class Source:
 
     def getSelectionValue(self, paramName):
 
+        paramName = paramName.lower()
+    
         if paramName == "name":
             return self.name
 
         elif paramName == "flux":
-            if self.multiAnalysis.multiDate["value"] is not None:
+            if self.multiAnalysis.getVal("multiDate") is not None:
                 return self.get("multiFlux")["value"]
             else:
                 return self.get("flux")["value"]
@@ -88,8 +92,16 @@ class Source:
             else:
                 return self.get("dist")["value"]
 
-        elif paramName == "multisqrtts":
-            return self.get("multiSqrtTS")["value"]
+        elif paramName == "multisqrtts" or paramName == "sqrtts":
+            
+            if self.multiAnalysis.getVal("multiDate") is not None:
+                return self.get("multiSqrtTS")["value"]
+            else:
+                return None
+
+ 
+        else:
+            raise SelectionParamNotSupported(f"The selection parameter '{paramName}' is not supported!")
 
 
 
@@ -188,17 +200,6 @@ class Source:
 
 
     """
-
-
-
-
-
-    @staticmethod
-    def checkSelectionParameter(selectionParameters):
-        supportedParameters = ["name", "flux", "dist", "multisqrtts"]
-        for param in selectionParameters:
-            if param not in supportedParameters:
-                raise SelectionParamNotSupported(f"The selection parameter '{param}' is not supported! Supported parameters: {supportedParameters}")
 
 
     @staticmethod

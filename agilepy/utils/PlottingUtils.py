@@ -26,7 +26,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import matplotlib as mpl
-mpl.use("Agg")
+# mpl.use("Agg") # non-GUI backend
 
 import scipy
 import ntpath

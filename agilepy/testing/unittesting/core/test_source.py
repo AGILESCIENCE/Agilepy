@@ -30,6 +30,7 @@ import shutil
 import unittest
 from pathlib import Path
 from xml.etree.ElementTree import parse
+
 from agilepy.core.source.Source import Source, PointSource
 from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig

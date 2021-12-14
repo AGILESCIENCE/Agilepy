@@ -289,11 +289,11 @@ plotting:
         - name: the unique code identifying the source.
         - dist: the distance of the source from the center of the maps.
         - flux: the flux value.
-        - sqrtTS: the radix square of the ts.
+        - sqrtts: the radix square of the ts.
 
         Warning:
 
-            The sqrtTS parameter is available only after the maximum likelihood estimation analysis is performed.
+            The sqrtts parameter is available only after the maximum likelihood estimation analysis is performed.
 
         Args:
             selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
