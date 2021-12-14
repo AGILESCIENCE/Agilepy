@@ -79,8 +79,8 @@ class Spectrum(ABC, SourceComponent):
 class PowerLaw(Spectrum):
 
     def __init__(self):
-        self.flux =  {"name": "flux", "free": None, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
-        self.index = {"name": "index", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
+        self.flux =  {"name": "flux", "free": False, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
+        self.index = {"name": "index", "value": None, "err": None, "free": False, "min": 0.5, "max": 5, "scale": -1, "datatype": "float", "um" : ""}
 
     def getAttributes(self):
         return [self.flux, self.index]
@@ -91,9 +91,9 @@ class PowerLaw(Spectrum):
 class PLExpCutoff(Spectrum):
 
     def __init__(self):
-        self.flux =  {"name": "flux", "free": None, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
-        self.index = {"name": "index", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
-        self.cutoffEnergy = {"name": "cutoffEnergy", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
+        self.flux =  {"name": "flux", "free": False, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
+        self.index = {"name": "index", "value": None, "err": None, "free": False, "min": 0.5, "max": 5, "scale": -1, "datatype": "float", "um" : ""}
+        self.cutoffEnergy = {"name": "cutoffEnergy", "value": None, "err": None, "free": False, "min": 20, "max": 10000, "scale": -1, "datatype": "float", "um" : ""}
 
     def getAttributes(self):
         return [self.flux, self.index, self.cutoffEnergy]
@@ -104,10 +104,10 @@ class PLExpCutoff(Spectrum):
 class PLSuperExpCutoff(Spectrum):
 
     def __init__(self):
-        self.flux =  {"name": "flux", "free": None, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
-        self.index1 = {"name": "index1", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
-        self.cutoffEnergy = {"name": "cutoffEnergy", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
-        self.index2 = {"name": "index2", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
+        self.flux =  {"name": "flux", "free": False, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
+        self.index1 = {"name": "index1", "value": None, "err": None, "free": False, "min": 0.5, "max": 5, "scale": -1, "datatype": "float", "um" : ""}
+        self.cutoffEnergy = {"name": "cutoffEnergy", "value": None, "err": None, "free": False, "min": 20, "max": 10000, "scale": -1, "datatype": "float", "um" : ""}
+        self.index2 = {"name": "index2", "value": None, "err": None, "free": False, "min": 0, "max": 100, "scale": -1, "datatype": "float", "um" : ""}
 
     def getAttributes(self):
         return [self.flux, self.index1, self.cutoffEnergy, self.index2]
@@ -117,10 +117,10 @@ class PLSuperExpCutoff(Spectrum):
 
 class LogParabola(Spectrum):
     def __init__(self):
-        self.flux = {"name": "flux", "free": None, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
-        self.index = {"name": "index", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
-        self.pivotEnergy = {"name": "pivotEnergy", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
-        self.curvature = {"name": "curvature", "value": None, "err": None, "free": None, "min": None, "max": None, "scale": None, "datatype": "float", "um" : ""}
+        self.flux = {"name": "flux", "free": False, "value": None, "err": None, "datatype": "float", "um" : "ph/cm2s"}
+        self.index = {"name": "index", "value": None, "err": None, "free": False, "min": 1, "max": 4, "scale": -1, "datatype": "float", "um" : ""}
+        self.pivotEnergy = {"name": "pivotEnergy", "value": None, "err": None, "free": False, "min": 500, "max": 3000, "scale": -1, "datatype": "float", "um" : ""}
+        self.curvature = {"name": "curvature", "value": None, "err": None, "free": False, "min": 0.1, "max": 3, "scale": -1, "datatype": "float", "um" : ""}
 
     def getAttributes(self):
         return [self.flux, self.index, self.pivotEnergy, self.curvature]
