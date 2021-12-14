@@ -55,7 +55,7 @@ class SpatialModel(SourceComponent):
 class PointSource(SpatialModel):
 
     def __init__(self):
-        self.pos =  {"name": "pos", "free": None, "value": None, "datatype": "Tuple<float,float>", "um": "(l,b)"}
+        self.pos =  {"name": "pos", "free": False, "value": None, "datatype": "Tuple<float,float>", "um": "(l,b)"}
         self.dist =  {"name": "dist", "value": None, "datatype": "float", "um": "deg"}
         self.locationLimit =  {"name": "locationLimit", "value": None, "datatype": "int", "um": ""}
     
