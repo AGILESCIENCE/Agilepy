@@ -25,8 +25,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import matplotlib as mpl
-# mpl.use("Agg") # non-GUI backend
+#import matplotlib as mpl
+#mpl.use("Agg")
 
 import scipy
 import ntpath
