@@ -138,16 +138,16 @@ class MultiAnalysis(SourceComponent):
         self.startDataTT = {"value": None, "err": None, "datatype": "float", "um": ""}
         self.endDataTT = {"value": None, "datatype": "float", "um": ""}
 
-        self.multiEmin = {"value":None, "datatype": "List<float>", "um": ""}
-        self.multiEmax = {"value":None, "datatype": "List<float>", "um": ""}
-        self.multifovmin = {"value":None, "datatype": "List<float>", "um": ""}
-        self.multifovmax = {"value":None, "datatype": "List<float>", "um": ""}
-        self.multialbedo = {"value":None, "datatype": "float", "um": ""}
-        self.multibinsize = {"value":None, "datatype": "float", "um": ""}
-        self.multiexpstep = {"value":None, "datatype": "float", "um": ""}
-        self.multiphasecode = {"value":None, "datatype": "float", "um": ""}
+        self.multiEmin = {"value": None, "datatype": "List<float>", "um": ""}
+        self.multiEmax = {"value": None, "datatype": "List<float>", "um": ""}
+        self.multifovmin = {"value": None, "datatype": "List<float>", "um": ""}
+        self.multifovmax = {"value": None, "datatype": "List<float>", "um": ""}
+        self.multialbedo = {"value": None, "datatype": "float", "um": ""}
+        self.multibinsize = {"value": None, "datatype": "float", "um": ""}
+        self.multiexpstep = {"value": None, "datatype": "float", "um": ""}
+        self.multiphasecode = {"value": None, "datatype": "float", "um": ""}
 
-        self.multiExpRatio = {"value":None, "datatype": "float", "um": ""}
+        self.multiExpRatio = {"value": None, "datatype": "float", "um": ""}
 
     def setParameter(self, parameterName, dictionaryValues):
 

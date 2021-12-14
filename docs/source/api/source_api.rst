@@ -10,5 +10,5 @@ Source
 Point Source
 ************
 .. autoclass:: core.source.Source.PointSource
-    :members: get, set, getFreeParams
+    :members: get, getVal, set, setVal, getFreeParams
 

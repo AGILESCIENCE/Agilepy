@@ -368,6 +368,7 @@ class PointSource(Source):
 
     def __init__(self, name):
         super().__init__(name)
+        self.spatialModel = SpatialModel.getSpatialModel("PointSource")
 
     def get(self, parameterName):
         """It returns a source's parameter.
@@ -379,7 +380,7 @@ class PointSource(Source):
             SourceParameterNotFound: if the source's parameter is not found.
 
         Returns:
-            The value of the source's parameter.
+            A dictionary containing the source's attributes.
         
         Example:
             >>> s.get("index")
@@ -397,7 +398,25 @@ class PointSource(Source):
 
         raise SourceParameterNotFound(f"Cannot perform get(), {parameterName} is not found.")
     
-    
+    def getVal(self, parameterName):
+        """It returns a source's parameter value.
+
+        Args:
+            paramName (str): the name of the source's parameter.
+
+        Raises:
+            SourceParameterNotFound: if the source's parameter is not found.
+
+        Returns:
+            The value of the source's parameter.
+        
+        Example:
+            >>> s.getVal("index")
+            >>> s.getVal("pos")
+            >>> s.getVal("multiFlux")
+        """        
+        return self.get(parameterName)["value"] 
+
     def set(self, parameterName, attributeValueDict):
         """It sets a source's parameter.
 
@@ -410,19 +429,34 @@ class PointSource(Source):
         Example:
             >>> s.set("index",{"value":1, "min":10})
         """
+        if type(attributeValueDict) != dict:
+            raise ValueError("The input parameter 'attributeValueDict' must be a dictionary!")
 
-        try:
-            self.spectrum.setParameter(parameterName, attributeValueDict)
-        except:
-            pass
-        try:
-            self.spatialModel.setParameter(parameterName, attributeValueDict)
-        except:
-            pass
-        try:
-            self.multiAnalysis.setParameter(parameterName, attributeValueDict)
-        except:
-            pass
+        if self.spectrum is not None and parameterName in vars(self.spectrum):
+            return self.spectrum.setParameter(parameterName, attributeValueDict)
+
+        if self.spatialModel is not None and parameterName in vars(self.spatialModel):
+            return self.spatialModel.setParameter(parameterName, attributeValueDict)
+
+        if self.multiAnalysis is not None and parameterName in vars(self.multiAnalysis):
+            return self.multiAnalysis.setParameter(parameterName, attributeValueDict)
+
+        raise SourceParameterNotFound(f"Cannot perform set(), {parameterName} is not found.")
+
+   
+    def setVal(self, parameterName, parameterValue):
+        """It sets a source's parameter.
+
+        Args:
+            parameterName (str): the name of the source's parameter.
+
+        Returns:
+            None
+
+        Example:
+            >>> s.set("index",{"value":1, "min":10})
+        """
+        self.set(parameterName, {"value": parameterValue})
 
     def getFreeParams(self):
         """It returns the source's attributes that are free to vary.
@@ -460,10 +494,6 @@ class PointSource(Source):
 
         return willChange
 
-
-
-
-
     def bold(self, ss):
         return Color.BOLD + ss + Color.END
 
@@ -476,8 +506,8 @@ class PointSource(Source):
     def __str__title(self):
         strr = '\n-----------------------------------------------------------'
         strr += self.bold(f'\n Source name: {self.name} ({type(self).__name__})')
-        #if self.multi:
-        #    strr += self.bold(" => sqrt(ts): "+str(self.multi.get("multiSqrtTS")))
+        if self.multiAnalysis.getVal("multiSqrtTS") is not None:
+            strr += self.bold(" => sqrt(ts): "+str(self.multiAnalysis.getVal("multiSqrtTS")))
         return strr        
     
     def __str__spectrumType(self):

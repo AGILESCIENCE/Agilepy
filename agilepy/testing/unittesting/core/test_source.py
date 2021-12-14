@@ -27,6 +27,7 @@
 
 import os
 import shutil
+import pytest
 import unittest
 from pathlib import Path
 from xml.etree.ElementTree import parse
@@ -35,6 +36,8 @@ from agilepy.core.source.Source import Source, PointSource
 from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.core.SourcesLibrary import SourcesLibrary
+from agilepy.core.source.Spectrum import Spectrum
+from agilepy.core.CustomExceptions import SourceParameterNotFound
 
 
 class SourceModelUT(unittest.TestCase):
@@ -116,3 +119,69 @@ class SourceModelUT(unittest.TestCase):
         assert sources[1].name == "2AGLJ2021+3654"
         assert sources[1].get("flux")["value"] == 70.89e-08
         assert sources[1].get("pos")["value"] == (75.2562, 0.151831)
+
+
+    def test_init(self):
+
+        source = PointSource(name="test-source")
+        source.spectrum = Spectrum.getSpectrum("PowerLaw")
+        assert "PointSource" == type(source.spatialModel).__name__
+
+    def test_get(self):
+
+        source = PointSource(name="test-source")
+        source.spectrum = Spectrum.getSpectrum("PowerLaw")
+        assert "PointSource" == type(source.spatialModel).__name__
+
+        assert len(source.get("flux").keys()) == 6
+        assert source.getVal("flux") == None
+
+        with pytest.raises(SourceParameterNotFound):
+            source.get("fluxxx")
+            
+        with pytest.raises(SourceParameterNotFound):
+            source.getVal("fluxxx")
+
+
+    def test_set(self):
+
+        source = PointSource(name="test-source")
+        source.spectrum = Spectrum.getSpectrum("PowerLaw")
+        assert "PointSource" == type(source.spatialModel).__name__
+        
+        source.set("flux", {"min": 1}) 
+        source.setVal("flux", 10) 
+        assert source.spectrum.flux["min"] == 1
+        assert source.spectrum.flux["value"] == 10
+
+        with pytest.raises(SourceParameterNotFound):
+            source.set("fluxxx", {"value": 10})
+
+        with pytest.raises(ValueError):
+            source.set("fluxxx", 10)
+
+        with pytest.raises(SourceParameterNotFound):
+            source.setVal("fluxxx", 100)
+
+
+    def test_str(self):
+        source = PointSource(name="test-source")
+        source.spectrum = Spectrum.getSpectrum("PowerLaw")
+        source.setVal("flux", 100) 
+        source.setVal("index", 1000) 
+        source.setVal("pos", (30,15)) 
+
+        print(source)
+        
+        """
+        sourceStrComponents = str(source).split("\n")
+        assert sourceStrComponents[0] == ''
+        assert sourceStrComponents[1] == "-----------------------------------------------------------"
+        assert sourceStrComponents[2] == "Source name: test-source (PointSource)"
+        assert sourceStrComponents[3] == "  * Spectrum type: PowerLaw"
+        assert sourceStrComponents[4] == "  * Free parameters: none"
+        assert sourceStrComponents[5] == "  * Initial source parameters:"
+        assert sourceStrComponents[6] == "	- flux (ph/cm2s): 1.0000e+02"
+        assert sourceStrComponents[7] == "	- index : 1000"
+        assert sourceStrComponents[8] == "	- Source position (l,b): (30, 15)"
+        """
