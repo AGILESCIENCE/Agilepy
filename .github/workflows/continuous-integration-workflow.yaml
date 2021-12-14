@@ -50,7 +50,7 @@ jobs:
 
     name: Build+Test centos:7.7.1908 + Codacy
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     container: centos:7.7.1908
 
