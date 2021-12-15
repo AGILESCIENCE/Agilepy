@@ -98,7 +98,7 @@ jobs:
         bash $agilepy_path/scripts/start_coverage.sh
 
     - name: Uploading coverage report to Codacy
-    - shell: bash -l {0}
+      shell: bash -l {0}
       env:
         CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
