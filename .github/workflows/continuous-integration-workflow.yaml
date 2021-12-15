@@ -108,7 +108,9 @@ jobs:
         source ~/.bashrc	
         conda activate agilepydevops	
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-        bash <(curl -Ls https://coverage.codacy.com/get.sh) | report -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
+        curl -Ls https://coverage.codacy.com/get.sh -o get.sh
+        chmod +x get.sh
+        ./get.sh report -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
     
     - name: Triggering dockerhub for container building
       shell: bash -l {0}
