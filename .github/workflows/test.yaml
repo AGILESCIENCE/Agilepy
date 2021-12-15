@@ -31,6 +31,6 @@ jobs:
           CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
         run: |
           
-          curl -Ls https://coverage.codacy.com/get.sh
+          curl -Ls https://coverage.codacy.com/get.sh -o get.sh
           chmod +x get.sh 
           ./get.sh report -r pip.xml --commit-uuid "$GITHUB_SHA"
