@@ -1,0 +1,42 @@
+name: Continuous integration workflow
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - feature-*
+
+jobs:
+
+building-testing-on-os-centos7:
+
+    name: Build+Test centos:7.7.1908 + Codacy
+
+    runs-on: ubuntu-20.04
+
+    container: centos:7.7.1908
+
+    steps:
+
+    - name: Checking out code
+      uses: actions/checkout@v2
+
+    - name: Installing dependencies
+      run: |
+        yum -y install epel-release rsync unzip mailx bzip2
+        yum -y install git make gcc gcc-c++ binutils libX11-devel libXpm-devel libXft-devel libXext-devel
+        yum -y install curl less vim wget bc which
+        yum -y install libXcomposite libXcursor libXi libXtst libXrandr alsa-lib mesa-libEGL libXdamage mesa-libGL libXScrnSaver
+        yum -y install jq
+
+    - name: Uploading coverage report to Codacy
+    - shell: bash -l {0}
+      env:
+        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
+        CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
+      run: |
+        source ~/.bashrc
+        bash <(curl -Ls https://coverage.codacy.com/get.sh) | report -r pip.xml --commit-uuid "$GITHUB_SHA"
