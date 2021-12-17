@@ -185,9 +185,26 @@ class IntMapGenerator(ProcessWrapper):
                     ]
 
 
+class Indexgen(ProcessWrapper):
+    """
+    Thile class generates index file starting from LOG and EVT files
+    Usage:
+        AG_indexgen <log_dir> <type> <out_file>
+    Return:
+        indexfile
+    """
+    
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
 
+    def getRequiredOptions(self):
+        return ["logdir", "type", "out_file"]
 
-
+    def configureTool(self, confDict, extraParams=None):
+        
+        self.args = [extraParams["log_dir"],
+                     extraParams["type"],  
+                     extraParams["out_file"]]
 
 class Multi(ProcessWrapper):
     """
@@ -418,20 +435,3 @@ class Ccl(ProcessWrapper):
             ">",
             outfilePath
         ])
-
-
-
-
-
-    
-
-    
-    
-    
-
-
-
-
-
-
-
