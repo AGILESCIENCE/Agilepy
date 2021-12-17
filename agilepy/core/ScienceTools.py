@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from pathlib import Path
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
 
@@ -188,6 +189,11 @@ class IntMapGenerator(ProcessWrapper):
 class Indexgen(ProcessWrapper):
     """
     Thile class generates index file starting from LOG and EVT files
+
+    Args:
+        log dir:
+        type: EVT | LOG
+        out file:
     Usage:
         AG_indexgen <log_dir> <type> <out_file>
     Return:
@@ -196,15 +202,25 @@ class Indexgen(ProcessWrapper):
     
     def __init__(self, exeName, agilepyLogger):
         super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
 
     def getRequiredOptions(self):
         return ["logdir", "type", "out_file"]
 
     def configureTool(self, confDict, extraParams=None):
         
+        self.outputDir = extraParams["out_dir"]
+        outputFile = str(Path(self.outputDir).joinpath(extraParams["out_file"]))
+
         self.args = [extraParams["log_dir"],
-                     extraParams["type"],  
-                     extraParams["out_file"]]
+                     extraParams["type"],
+                     outputFile
+                    ]
+
+        self.products = {
+            outputFile : ProcessWrapper.REQUIRED_PRODUCT
+        }
+
 
 class Multi(ProcessWrapper):
     """

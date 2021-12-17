@@ -104,6 +104,8 @@ class ProcessWrapper(ABC):
             self.logger.warning(self, f"The {self.exeName} will not be called. Products already exists: \n{self.products}")
             return self.products
 
+        self.logger.debug(self, f"outputDir={self.outputDir}")
+
         Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 
         if self.isAgileTool:
@@ -122,6 +124,7 @@ class ProcessWrapper(ABC):
 
 
         # starting the tool
+        self.logger.debug(self, f"args: {self.args}")
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
 
@@ -148,7 +151,7 @@ class ProcessWrapper(ABC):
 
     def executeCommand(self, command, printStdout=True):
 
-        self.logger.debug(self, "Executing command >>%s ", command)
+        self.logger.debug(self, f"Executing command >>{command}")
 
         completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
 
