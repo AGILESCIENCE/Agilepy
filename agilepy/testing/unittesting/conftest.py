@@ -47,3 +47,20 @@ def testdataset():
     log = expandvars("$AGILE/agilepy-test-data/test_dataset_6.0/LOG")
 
     return {"evt": evt, "log": log}
+
+@pytest.fixture(scope="function")
+def gettmpdir(request):
+
+    script_path = Path( __file__ ).absolute().parent
+
+    marker = request.node.get_closest_marker("testdir")
+
+    if marker is None:
+        raise ValueError("marker is None! Something wrong passing 'testdir' to fixture!")
+
+    testdir = marker.args[0]
+
+    tmpDir = Path( __file__ ).absolute().parent.joinpath(testdir, "tmp")
+    tmpDir.mkdir(exist_ok=True, parents=True)
+
+    return tmpDir
