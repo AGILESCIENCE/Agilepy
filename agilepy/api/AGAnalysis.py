@@ -120,7 +120,7 @@ class AGAnalysis(AGBaseAnalysis):
     ############################################################################
 
     @staticmethod
-    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile=None, logfile=None, datapath="$AGILE/agilepy_data"):
         """Utility method to create a configuration file.
 
         Args:
@@ -136,33 +136,37 @@ class AGAnalysis(AGBaseAnalysis):
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
             evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
             logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            datapath (str, optional): Datapath to download AGILE data. Index files will be generated into this path.
 
 
         Returns:
             None
         """
 
-        configuration = """
+        configuration = f"""
 input:
-  evtfile: %s
-  logfile: %s
+  evtfile: {evtfile}
+  logfile: {logfile}
+  datapath: {datapath}
+  evtQfile: $AGILE/agilepy_data/EVT.qfile
+  logQfile: $AGILE/agilepy_data/LOG.qfile
 
 output:
-  outdir: %s
+  outdir: {outputDir}
   filenameprefix: analysis_product
   logfilenameprefix: analysis_log
-  sourcename: %s
-  username: %s
-  verboselvl: %d
+  sourcename: {sourceName}
+  username: {userName}
+  verboselvl: {verboselvl}
 
 selection:  
   emin: 100
   emax: 10000
-  tmin: %f
-  tmax: %f
-  timetype: %s
-  glon: %f
-  glat: %f
+  tmin: {tmin}
+  tmax: {tmax}
+  timetype: {timetype}
+  glon: {glon}
+  glat: {glat}
   proj: ARC
   timelist: None
   filtercode: 5
@@ -227,7 +231,7 @@ ap:
 plotting:
   twocolumns: False
 
-        """%(evtfile, logfile, outputDir, sourceName, userName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """
 
         with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
@@ -564,7 +568,12 @@ plotting:
         if timetype == "MJD":
             tmin =  AstroUtils.time_mjd_to_tt(tmin)
             tmax =  AstroUtils.time_mjd_to_tt(tmax)    
-            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")         
+            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
+
+        ############# check indexfiles #########
+        
+
+
 
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")

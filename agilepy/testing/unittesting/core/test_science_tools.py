@@ -38,7 +38,7 @@ class TestSourceModel:
         indexgen = Indexgen("AG_indexgen", logger)
 
         args = {
-            "log_dir": testdataset["log"],
+            "data_dir": testdataset["log"],
             "type": "log",
             "out_dir": str(Path( __file__ ).absolute().parent),
             "out_file": "INDEX.LOG"

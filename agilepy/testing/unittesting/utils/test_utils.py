@@ -94,7 +94,6 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         assert True == os.path.isfile(file)
 
-
     def test_display_sky_map_single_mode_3_imgs(self):
 
         pu = PlottingUtils(self.config, self.agilepyLogger)
@@ -151,7 +150,6 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         assert True == os.path.isfile(file)
 
-
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)
         self.agilepyLogger.reset()
@@ -174,7 +172,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         with open(logfilePath, "r") as f:
             linesNumber = len(f.readlines())
             assert 5 == linesNumber
-
 
     def test_initialize_logger_verboselvl_1(self):
         sleep(1.0)
@@ -199,7 +196,6 @@ class AgilepyUtilsUT(unittest.TestCase):
             linesNumber = len(f.readlines())
             assert 5 == linesNumber
 
-
     def test_initialize_logger_verboselvl_0(self):
         sleep(1.0)
         self.agilepyLogger.reset()
@@ -223,10 +219,8 @@ class AgilepyUtilsUT(unittest.TestCase):
             linesNumber = len(f.readlines())
             assert 5 == linesNumber
 
-    
     def test_filterAP(self):
-        
-        
+    
         print(self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap")
         print(self.currentDirPath)
         product = AstroUtils.AP_filter(
@@ -257,9 +251,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         mjd = AstroUtils.time_tt_to_mjd(507391426.9447)
         assert abs(58877.58595999 - mjd) <= sec_tolerance
 
-
-
-
     def test_astro_utils_time_jd_to_civil(self):
 
         tol = 0.044
@@ -269,7 +260,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert civ[1] == 1
         assert abs(23 - civ[2]) <= tol
         # it should be 2020, 1, 23)........
-
 
     def test_astro_utils_time_utc_to_jd(self):
 
@@ -281,7 +271,6 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         assert abs(2458871.95616898 - jd) <= tol
 
-
     def test_astro_utils_time_utc_to_mjd(self):
 
         tol = 0.00000001
@@ -292,10 +281,6 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         assert abs(58871.45616898 - mjd) <= tol
 
-
-
-
-
     def test_astro_utils_time_utc_to_tt(self):
 
         tol = 0.0001
@@ -303,7 +288,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         tt = AstroUtils.time_utc_to_tt("2020-01-23T10:56:53")
 
         assert abs(506861813 - tt) <= tol
-
 
     def test_astro_utils_time_tt_to_utc(self):
 
@@ -333,8 +317,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert dt.hour == 10
         assert dt.minute == 56
         assert abs(53 - dt.second) <= sec_tol
-
-
 
     def test_astro_utils_time_utc_to_mjd_2(self):
 
@@ -377,6 +359,21 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert first == line1
         assert last == line3
 
- 
+    def test_sort_index_file(self):
+        evtfileIndex = Path(self.datadir).joinpath("indexfile_not_ordered.test")
+        import shutil
+        copy = evtfileIndex.with_suffix(".2")
+        shutil.copy(evtfileIndex, copy)
+        Utils.sortIndexFile(copy)
+        with open(copy, 'r') as fh:
+            lines = fh.readlines()
+        assert lines[0] == "/pippoz/a.gz 10.100000 371995132.000000 EVT"
+        assert lines[1] == "/pippoz/b.gz 20.200000 371995132.000000 EVT"
+        assert lines[2] == "/pippoz/c.gz 30.300000 371995132.000000 EVT"
+        assert lines[3] == "/pippoz/d.gz 40.400000 371995132.000000 EVT"
+        assert lines[4] == "/pippoz/e.gz 50.500000 371995132.000000 EVT"
+
+        
+
 if __name__ == '__main__':
     unittest.main()

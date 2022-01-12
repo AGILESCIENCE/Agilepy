@@ -45,7 +45,7 @@ class TestAGRest:
     @pytest.mark.testdir("utils")
     def test_extract_data(self, logger, gettmpdir):
 
-        inputTarFile = Path( __file__ ).absolute().parent.joinpath("data", "1640011226033.tar")
+        inputTarFile = Path( __file__ ).absolute().parent.joinpath("data", "1640082532426.tar")
 
         agrest = AGRest(logger)
 
@@ -54,16 +54,18 @@ class TestAGRest:
         evtData = gettmpdir.joinpath("EVT")
         logData = gettmpdir.joinpath("LOG")
 
-        assert len(os.listdir(evtData)) > 3
-        assert len(os.listdir(logData)) > 3        
+        assert len(os.listdir(evtData)) > 1
+        assert len(os.listdir(logData)) > 1        
 
-
+    @pytest.mark.testdir("utils")
     def test_generate_index(self, logger):
 
         agrest = AGRest(logger)
         
         outDir = Path( __file__ ).absolute().parent.joinpath("tmp")
         outDir.mkdir(exist_ok=True, parents=True)
+
+        #agrest._generateIndex()
 
         evt = outDir.joinpath("EVT.index")
         log = outDir.joinpath("LOG.index")
@@ -73,3 +75,4 @@ class TestAGRest:
 
         assert 69 == sum(1 for line in open(evt))
         assert 666 == sum(1 for line in open(log))  
+
