@@ -25,10 +25,12 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import pytest 
 from pathlib import Path 
-
+from agilepy.config import AgilepyConfig
 from agilepy.core.ScienceTools import Indexgen
+from agilepy.core.ScienceTools import Spotfinder
 
 class TestSourceModel:
 
@@ -54,3 +56,43 @@ class TestSourceModel:
         assert products[expected_output_file] == 1
         assert (expected_output_file in products) == True
         assert Path(expected_output_file).exists() == True
+
+class TestSpotFinder:
+    
+    @pytest.mark.testdir("core")
+    def test_spotfinder(self, config, logger):
+
+        current_path = Path(__file__).parent.resolve()
+        current_path = current_path.joinpath("test_data")
+        print(config)
+
+        self.config = AgilepyConfig()
+        self.config.loadBaseConfigurations(config)
+
+
+        spotfinder = Spotfinder("AG_spotfinder", logger)
+        
+        args = {
+            "input_file": f"{current_path}/testcase_EMIN00100_EMAX00300_01.cts.gz",
+            "input_binsize": 0.5,
+            "smoothing": 2,
+            "max_region": 10,
+            "output_files": "MLE0000hypothesis1.multi",
+            "algorithm": 1,
+            "remove_spot": 2,
+            "sky_segmentation": 0,
+            "shift_to_north": 0,
+            "remove_sources": 50.0,
+            "exp_filename": f"{current_path}/testcase_EMIN00100_EMAX00300_01.exp.gz",
+            "min_exp": 50
+        }
+        
+        spotfinder.configureTool(self.config, args)
+
+        products = spotfinder.call()
+
+        self.expectedmulti = str(Path(self.config.getOptionValue("outdir")).joinpath(args["output_files"]))
+        self.expectedreg = str(Path(self.config.getOptionValue("outdir")).joinpath(args["output_files"]))+".reg"
+        
+        assert Path(self.expectedmulti).exists() == True
+        assert Path(self.expectedreg).exists() == True
