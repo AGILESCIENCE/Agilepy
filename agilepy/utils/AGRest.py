@@ -17,6 +17,7 @@ class AGRest:
 
     def gridList(self, tmin, tmax):
         """
+
         {'Response': {'message': None, 'statusCode': 'OK'}
         'AgileFiles': [ 
                 {'filename': 'ag-182087934_STD0P.LOG.gz', 'absolutePath': 'std/0909301200_0910151200-86596/STD0P_LOG/ag-182087934_STD0P.LOG.gz'}, 
@@ -56,6 +57,8 @@ class AGRest:
 
     def gridFiles(self, tmin, tmax):
         """
+        https://tools.ssdc.asi.it/AgileData/rest/GRIDFiles/2009-10-20T00:00:00/2009-11-10T00:00:00
+
         The actual data being downloaded could correspond to a bigger interval than tmin and tmax:
         this is because the SSDC rest service uses the following conventions:
         * the EVT file always contains 15 days of data
@@ -71,7 +74,7 @@ class AGRest:
         tmin_utc = AstroUtils.time_mjd_to_utc(tmin)
         tmax_utc = AstroUtils.time_mjd_to_utc(tmax)
 
-        api_url = f"https://toolsdev.ssdc.asi.it/AgileData/rest/GRIDFiles/{tmin_utc}/{tmax_utc}"
+        api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDFiles/{tmin_utc}/{tmax_utc}"
 
         self.logger.info(self, f"Downloading data ({tmin},{tmax}) from {api_url}..")
 
@@ -81,8 +84,7 @@ class AGRest:
 
         end = time() - start
 
-        self.logger.info(self, "Took {} seconds")
-        print(f"Took {end} seconds")
+        self.logger.info(self, f"Took {end} seconds")
 
         outpath = f"/tmp/agile_{str(uuid.uuid4())}.tar.gz"
 

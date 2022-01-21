@@ -14,15 +14,15 @@ from enum import Enum
 class DataStatus(Enum):
     OK = 0
     MISSING = 1
-    PARTIALLY_MISSING = 2 # not hanlded
-    TOTALLY_MISSING = 3 # not hanlded
+    #PARTIALLY_MISSING = 2 # not hanlded
+    #TOTALLY_MISSING = 3 # not hanlded
 
 class AGDataset:
 
     def __init__(self, logger):
         self.logger = logger
 
-    def downloadData(self, confdict, tmin, tmax):
+    def downloadData(self, agilepyConf, tmin, tmax):
         """ It downloads EVT and LOG data that the user requires to perform a scientific
         analysis from tmin to tmax.
 
@@ -30,46 +30,51 @@ class AGDataset:
 
         The actual data being downloaded could correspond to a bigger interval than tmin and tmax:
         this is because the SSDC rest service.
+
+        @param tmin: mjd
+        @param tmax: mjd
         """
-        dataPath = confdict["input"]["datapath"]
-        evtQfile = confdict["input"]["evtQfile"]
-        logQfile = confdict["input"]["logQfile"]
+        dataPath = Path(agilepyConf.getConf("input", "datapath"))
+        evtIndex = Path(agilepyConf.getConf("input", "evtfile"))
+        logIndex = Path(agilepyConf.getConf("input", "logfile"))
+
+        evtQfile =  dataPath.joinpath("EVT.qfile")
+        logQfile = dataPath.joinpath("LOG.qfile")
 
         evtDataMissing = False
         logDataMissing = False
 
-        if not self.dataIsAlreadyPresent(tmin, tmax, evtQfile, 15):
-            self.logger.info(f"EVT data in interval {tmin} {tmax} is missing!")
+        if self.dataIsMissing(tmin, tmax, evtQfile, 15):
+            self.logger.info(self, f"EVT data in interval {tmin} {tmax} is missing!")
             evtDataMissing = True
 
-        if not self.dataIsAlreadyPresent(tmin, tmax, logQfile, 1):
-            self.logger.info(f"LOG data in interval {tmin} {tmax} is missing!")
+        if self.dataIsMissing(tmin, tmax, logQfile, 1):
+            self.logger.info(self, f"LOG data in interval {tmin} {tmax} is missing!")
             logDataMissing = True
 
         if evtDataMissing or logDataMissing:
 
-            agRest = AGRest()
+            agRest = AGRest(self.logger)
             # filesList = agRest.gridList(tmin, tmax)
-            tarFilePath = agRest.gridFiles(tmin, tmax, dataPath)
+            tarFilePath = agRest.gridFiles(tmin, tmax)
 
-        ssdcTmin, ssdcTmax = self.convertToSSDC(tmin, tmax)
 
         if evtDataMissing:
             extractedFiles = self.extractData("EVT", tarFilePath, dataPath)
-            self.logger.debug(f"Extracted files: {extractedFiles}")
-            self.updateQFile(evtQfile, ssdcTmin, ssdcTmax)
-            self.generateIndex(confdict, dataPath, "EVT")
+            self.logger.debug(self, f"Extracted files: {extractedFiles}")
+            self.updateQFile(evtQfile, tmin, tmax, evtQfile)
+            self.generateIndex(agilepyConf, dataPath, "EVT", evtIndex)
 
         if logDataMissing:
             extractedFiles = self.extractData("LOG", tarFilePath, dataPath)
-            self.logger.debug(f"Extracted files: {extractedFiles}")
-            self.updateQFile(logQfile, ssdcTmin, ssdcTmax)
-            self.generateIndex(confdict, dataPath, "LOG")
+            self.logger.debug(self, f"Extracted files: {extractedFiles}")
+            self.updateQFile(logQfile, tmin, tmax, logQfile)
+            self.generateIndex(agilepyConf, dataPath, "LOG", logIndex)
+
+        return evtDataMissing or logDataMissing
 
 
-
-
-    def computeSSDCslots(self, tmin, tmax):
+    def computeEVT_SSDCslots(self, tmin, tmax):
         """
         Funzione che dato un tmin e tmax crea slot di 15 gg:
         Es:
@@ -77,11 +82,11 @@ class AGDataset:
 
         return
         15/06/2018 30/06/2018
-        01/07/2018 15/07/2018
+        30/07/2018 15/07/2018
         15/07/2018 31/07/2018
-        01/08/2018 15/08/2018
+        31/08/2018 15/08/2018
         15/08/2018 31/08/2018
-        01/09/2018 15/09/2018
+        31/09/2018 15/09/2018
         15/09/2018 30/09/2018
         """
 
@@ -105,25 +110,54 @@ class AGDataset:
             lastDayOfMonth = datetime.datetime.combine(lastDayOfMonth, datetime.datetime.min.time())
 
             if tmin >= firstDayOfMonth and tmin <= firstDayOfMonth + dt14:
-                slot = f"{firstDayOfMonth - dt1} {firstDayOfMonth + dt14}"
+                slot = [firstDayOfMonth - dt1, firstDayOfMonth + dt14]
                 tmin = firstDayOfMonth + dt15
 
             elif tmin > firstDayOfMonth + dt14 and tmin <= lastDayOfMonth:
-                slot = f"{firstDayOfMonth + dt14}  {lastDayOfMonth}"
+                slot = [firstDayOfMonth + dt14, lastDayOfMonth]
                 tmin = lastDayOfMonth + dt1
 
             slots.append(slot)
 
-            #print("firstDayOfMonth:",firstDayOfMonth)
-            #print("lastDayOfMonth:",lastDayOfMonth)
-            #print("slot:",slot) 
-            #print("new tmin:",tmin)
-            #input("\n")
-        return slots
+        return pd.DataFrame(slots, columns=["tmin", "tmax"])
 
-    def dataIsAlreadyPresent(self, tmin, tmax, queryFilepath, blockSize):
+
+    def computeLOG_SSDCslots(self, tmin, tmax):
+        """
+        Given tmin e tmax it creates a daytime slot(tmax is included):
+        Es:
+        tmin 16/06/2018 tmax 20/06/2018
+
+        return
+        16/06/2018 17/06/2018
+        17/06/2018 18/06/2018
+        18/06/2018 19/06/2018
+        19/06/2018 20/06/2018
+        20/06/2018 21/06/2018
+        """
+
+        dt1 = datetime.timedelta(days=1)
+        tmin = AstroUtils.time_mjd_to_utc(tmin)
+        tmax = AstroUtils.time_mjd_to_utc(tmax)
+
+        tmin = datetime.datetime.strptime(tmin, "%Y-%m-%dT%H:%M:%S")
+        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
+        slots = []
+        while tmin <= tmax:
+
+            slot = [tmin, tmin + dt1]
+            tmin = tmin + dt1
+            slots.append(slot)
+
+        return pd.DataFrame(slots, columns=["tmin", "tmax"])
+
+    def dataIsMissing(self, tmin, tmax, queryFilepath, blockSize):
         """ This method can be extended to handle the case of partial missing data
         """
+        if not queryFilepath.exists():
+            self.logger.warning(self, f"Query file {queryFilepath} does not exists")
+            return DataStatus.MISSING
+
         tminUtc = AstroUtils.time_mjd_to_utc(tmin) # YYYY-MM-DDTHH:mm:ss
         tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
 
@@ -239,10 +273,29 @@ class AGDataset:
         return extractedFiles                    
 
 
-    def updateQfile(self, tarInfo, fileType, evtDest):
-        pass
+    def updateQFile(self, qfile, tmin, tmax, qfileOut):
+        """
+        @param tmin: mjd
+        @param tmax: mjd
+        """
+
+        datesDF = pd.read_csv(qfile, header=None, sep=" ", names=["tmin","tmax"], parse_dates=["tmin","tmax"])
+        
+        if "EVT" in qfile.stem:
+            slots = self.computeEVT_SSDCslots(tmin, tmax)
+        
+        if "LOG" in qfile.stem:
+            slots = self.computeLOG_SSDCslots(tmin, tmax)
+
+        concatted = pd.concat([datesDF, slots], ignore_index=True)
+
+        concatted.sort_values(by='tmin', inplace=True)
+        concatted.reset_index(drop=True, inplace=True)
+
+        concatted.to_csv(qfileOut, index=False, header=False, sep=" ", date_format="%Y-%m-%dT%H:%M:%S")
 
 
+    
     def handleTarInfo(self, tarFileHandle, tarInfo, fileType, destPath):
         """ This method extract a member of the tarball. If the member is not yet present in the dabatase of Agilepy, it will be added.   
 
@@ -259,7 +312,7 @@ class AGDataset:
 
         # if file already exist, append a suffix to it
         if outFile.exists():
-            self.logger.debug(f"The '{fileType}' file '{outFile}' is already present. Skipping it.")
+            self.logger.debug(self, f"The '{fileType}' file '{outFile}' is already present. Skipping it.")
             return False
             # /WHATEVER/EVT/ag0909131200_0909161200_STD0P_FM, .EVT.gz
             #root, _ = str(outFile).split(f".{fileType}.gz")
@@ -278,21 +331,25 @@ class AGDataset:
 
         return True
 
-    def generateIndex(self, confdict, dataPath, filetype):
+    def generateIndex(self, agilepyConf, dataPath, filetype, pathToIndex):
 
         index_name = f"{filetype}.index"
 
-        extraparams = {"outdir":"",
+        extraparams = {
+                       "out_dir" : pathToIndex.parent,
+                       "out_file": pathToIndex.name,
                        "type": filetype,
                        "data_dir":dataPath}
         
         igen = Indexgen("AG_indexgen", self.logger)
-        igen.configureTool(confdict, extraParams=extraparams)
+        igen.configureTool(agilepyConf, extraParams=extraparams)
 
         indexfile = igen.call()
-        self.logger.info(f"indexfile at {indexfile}")
+        self.logger.info(self, f"indexfile at {indexfile}")
 
+    """
     def _checkindexfile(self, indexfile):
 
         with open(indexfile, "r") as f:
             pass
+    """

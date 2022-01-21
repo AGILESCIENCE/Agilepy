@@ -41,6 +41,7 @@ class AGAnalysisConfig():
     def completeConfiguration(self, confDict):
         CompletionStrategies._expandFileEnvVars(confDict, "evtfile")
         CompletionStrategies._expandFileEnvVars(confDict, "logfile")
+        CompletionStrategies._expandFileEnvVars(confDict, "datapath")
         CompletionStrategies._glonDeltaIncrement(confDict)
         CompletionStrategies._convertEnergyBinsStrings(confDict)
         CompletionStrategies._convertBackgroundCoeff(confDict, "isocoeff")

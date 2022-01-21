@@ -120,7 +120,7 @@ class AGAnalysis(AGBaseAnalysis):
     ############################################################################
 
     @staticmethod
-    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile=None, logfile=None, datapath="$AGILE/agilepy_data"):
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index", useRestApi=True, datapath=None):
         """Utility method to create a configuration file.
 
         Args:
@@ -134,9 +134,10 @@ class AGAnalysis(AGBaseAnalysis):
             glat (float): the galactic latitude (B) of the analysis.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
-            evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
-            logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
-            datapath (str, optional): Datapath to download AGILE data. Index files will be generated into this path.
+            evtfile (str, optional [default=/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index]): the index file to be used for event data if userRestAPI is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            logfile (str, optional [default=/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index]): the index file to be used for log data if userRestAPI is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            useRestAPI (bool, optional [default=True]): If True, the SSDC REST API will be used to download missing data.
+            datapath (str, optional [default=None]): Datapath to download AGILE data if userRestAPI is set to True. Index files will be generated into this path.
 
 
         Returns:
@@ -147,9 +148,8 @@ class AGAnalysis(AGBaseAnalysis):
 input:
   evtfile: {evtfile}
   logfile: {logfile}
+  useRestAPI: {useRestApi}
   datapath: {datapath}
-  evtQfile: $AGILE/agilepy_data/EVT.qfile
-  logQfile: $AGILE/agilepy_data/LOG.qfile
 
 output:
   outdir: {outputDir}
@@ -571,7 +571,7 @@ plotting:
             configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
 
         ############# check indexfiles #########
-        
+        # downloadData(configBKP, tmin, tmax)
 
 
 
