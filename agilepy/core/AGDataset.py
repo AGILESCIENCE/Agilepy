@@ -37,6 +37,9 @@ class AGDataset:
         dataPath = Path(agilepyConf.getConf("input", "datapath"))
         evtIndex = Path(agilepyConf.getConf("input", "evtfile"))
         logIndex = Path(agilepyConf.getConf("input", "logfile"))
+        
+        evtPath  = dataPath.joinpath("EVT")
+        logPath  = dataPath.joinpath("LOG")
 
         evtQfile =  dataPath.joinpath("EVT.qfile")
         logQfile = dataPath.joinpath("LOG.qfile")
@@ -63,13 +66,13 @@ class AGDataset:
             extractedFiles = self.extractData("EVT", tarFilePath, dataPath)
             self.logger.debug(self, f"Extracted files: {extractedFiles}")
             self.updateQFile(evtQfile, tmin, tmax, evtQfile)
-            self.generateIndex(agilepyConf, dataPath, "EVT", evtIndex)
+            self.generateIndex(agilepyConf, evtPath, "EVT", evtIndex)
 
         if logDataMissing:
             extractedFiles = self.extractData("LOG", tarFilePath, dataPath)
             self.logger.debug(self, f"Extracted files: {extractedFiles}")
             self.updateQFile(logQfile, tmin, tmax, logQfile)
-            self.generateIndex(agilepyConf, dataPath, "LOG", logIndex)
+            self.generateIndex(agilepyConf, logPath, "LOG", logIndex)
 
         return evtDataMissing or logDataMissing
 

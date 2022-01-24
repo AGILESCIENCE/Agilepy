@@ -51,6 +51,6 @@ class TestSourceModel:
 
         expected_output_file = str(Path(args["out_dir"]).joinpath(args["out_file"]))
 
-        assert products[expected_output_file] == 1
+        
         assert (expected_output_file in products) == True
         assert Path(expected_output_file).exists() == True

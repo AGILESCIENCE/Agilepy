@@ -1,24 +1,24 @@
 input:
-  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
-  logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
-  userestapi: False
-  datapath: None
-
+  evtfile: $AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index
+  logfile: $AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index
+  userestapi: True
+  datapath: "/foo/bar"
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
-  filenameprefix: "utils-testcase"
-  logfilenameprefix: "utils-testcase"
+  outdir: $AGILE/agilepy-test-data/unittesting-output/config
+  filenameprefix: testcase
+  logfilenameprefix: testcase
   sourcename: source-test
   username: user-test
   verboselvl: 1
 
+
 selection:
   emin: 100
   emax: 10000
-  tmin: 456361778
-  tmax: 456537945
-  timetype: "TT"
+  tmin: 433900000
+  tmax: 433957532
+  timetype: TT
   glon: 80
   glat: 0
   timelist: None
@@ -33,7 +33,6 @@ selection:
   bpointing: null
   maplistgen: "None"
 
-
 maps:
   mapsize: 40
   useEDPmatrixforEXP: yes
@@ -44,11 +43,7 @@ maps:
   proj: ARC
   energybins:
     - 100, 300
-    - 300, 1000
-    # - 1000, 3000
-    # - 3000,10000
-
-  fovbinnumber: 2
+  fovbinnumber: 1
   binsize: 0.2
   offaxisangle: 30
 
@@ -64,7 +59,6 @@ model:
   galmode2fit: 0
   isomode2: 0
   isomode2fit: 0
-
 
 mle:
   ranal: 10

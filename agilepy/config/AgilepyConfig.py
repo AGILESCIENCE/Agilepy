@@ -237,7 +237,7 @@ class AgilepyConfig(Observable):
 
     @staticmethod
     def _notUpdatable(optionName):
-        if optionName in ["logfilenameprefix", "verboselvl"]:
+        if optionName in ["userestapi", "datapath", "logfilenameprefix", "verboselvl"]:
             return True
         return False
 

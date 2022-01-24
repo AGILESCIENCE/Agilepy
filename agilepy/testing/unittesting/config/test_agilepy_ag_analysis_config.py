@@ -51,7 +51,9 @@ class AgilepyConfigUT(unittest.TestCase):
         if outDir.exists() and outDir.is_dir():
             shutil.rmtree(outDir)
 
-
+    
+    ##### TEST NOT SUPPORTED AFTER REST FEATURE
+    """
     def test_validation_tmin_not_in_index(self):
 
         self.config = AgilepyConfig()
@@ -61,7 +63,7 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
 
 
-
+    
     def test_validation_tmax_not_in_index(self):
 
         self.config = AgilepyConfig()
@@ -70,7 +72,7 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
                           tmin=433900000, tmax=456537946, timetype="TT")
-
+    """
  
     def test_validation_min_max(self):
 
@@ -277,6 +279,52 @@ class AgilepyConfigUT(unittest.TestCase):
 
         self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))
         self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
+
+    
+    def test_datapath_restapi(self):
+        
+        self.config = AgilepyConfig()
+
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+
+        self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, datapath="/foo/bar")
+        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, userestapi=True)
+
+    def test_set_evtlog_ifdatapath(self):
+        self.config = AgilepyConfig()
+
+        conf1Path = os.path.join(self.currentDirPath,"conf/conf4.yaml")
+
+        self.config.loadBaseConfigurations(conf1Path)
+        self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.assertEqual(self.config.getOptionValue("evtfile"), Path(self.config.getOptionValue("datapath")).joinpath("EVT.index"))
+        self.assertEqual(self.config.getOptionValue("logfile"), Path(self.config.getOptionValue("datapath")).joinpath("LOG.index"))
+
+    ##### TEST NOT SUPPORTED AFTER REST FEATURE
+    """
+    def test_validation_tmin_not_in_index(self):
+
+        self.config = AgilepyConfig()
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
+
+
+    
+    def test_validation_tmax_not_in_index(self):
+
+        self.config = AgilepyConfig()
+        self.config.loadBaseConfigurations(self.agilepyconfPath)
+        self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
+                          tmin=433900000, tmax=456537946, timetype="TT")
+    """
 
 if __name__ == '__main__':
     unittest.main()

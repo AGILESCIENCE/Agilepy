@@ -192,3 +192,10 @@ class CompletionStrategies:
             confDict["mle"]["loccl"] = 0.0
         else:
             confDict["mle"]["loccl"] = 5.99147
+
+    @staticmethod
+    def _completeDatapathForRest(confDict):
+        if confDict["input"]["userestapi"] == True:
+            confDict["input"]["evtfile"] = Path(confDict["input"]["datapath"]).joinpath("EVT.index")
+            confDict["input"]["logfile"] = Path(confDict["input"]["datapath"]).joinpath("LOG.index")
+

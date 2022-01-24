@@ -25,6 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from os import stat
 from pathlib import Path
 from typing import List
 from numbers import Number
@@ -39,8 +40,12 @@ class ValidationStrategies:
     def _validateEvtFile(confDict):
 
         errors = {}
+
+        if Path(confDict["input"]["evtfile"]) is None and confDict["input"]["userestapi"] == False:
+            error_str = f"evtfile is None and userestapi is set to False"
+            errors["input/evtfile"] = error_str
         
-        if not Path(confDict["input"]["evtfile"]).exists():
+        elif not Path(confDict["input"]["evtfile"]).exists():
             error_str = f"The evtfile={confDict['input']['evtfile']} does not exist."
             errors["input/evtfile"] = error_str            
         
@@ -51,7 +56,11 @@ class ValidationStrategies:
         
         errors = {}
 
-        if not Path(confDict["input"]["logfile"]).exists():
+        if Path(confDict["input"]["logfile"]) is None and confDict["input"]["userestapi"] == False:
+            error_str = f"logfile is None and userestapi is set to False"
+            errors["input/logfile"] = error_str
+
+        elif not Path(confDict["input"]["logfile"]).exists():
             error_str = f"The logfile={confDict['input']['logfile']} does not exist."
             errors["input/logfile"] = error_str            
         
@@ -193,7 +202,6 @@ class ValidationStrategies:
         
         return errors
 
-
     @staticmethod
     def _validateDQ(confdict):
         
@@ -285,3 +293,14 @@ class ValidationStrategies:
 
                     elif type(elem) != validType[0]:
                         raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected type={} but you passed {}. Elem of index {},{} ({}) has the type={}".format(optionName, validType[0], optionValue, i, j, elem, type(elem)))
+    @staticmethod
+    def _validateDatapath(confDict):
+        
+        errors = {}
+        
+        if Path(confDict["input"]["datapath"]) is None and confDict["input"]["userestapi"] == True:
+            error_str = f"datapath is None and userestapi is set to True"
+            errors["input/datapath"] = error_str
+
+        return errors
+

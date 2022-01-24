@@ -52,11 +52,9 @@ class TestAGDataset:
         queryLOGPath = testOutputDir.joinpath("LOG.qfile")
 
         with open(queryEVTPath, "w") as inf:
-            inf.write("""2020-01-15T00:00:00 2020-01-31T00:00:00
-2020-03-15T00:00:00 2020-03-31T00:00:00""")
+            inf.write("""2020-01-15T00:00:00 2020-01-31T00:00:00\n2020-03-15T00:00:00 2020-03-31T00:00:00""")
         with open(queryLOGPath, "w") as infLOG:
-            infLOG.write("""2020-01-15T00:00:00 2020-01-31T00:00:00
-2020-03-15T00:00:00 2020-03-31T00:00:00""")
+            infLOG.write("""2020-01-15T00:00:00 2020-01-31T00:00:00\n2020-03-15T00:00:00 2020-03-31T00:00:00""")
 
         os.environ["TEST_LOGS_DIR"] = str(Path( __file__ ).absolute().parent.joinpath("test_out"))
 

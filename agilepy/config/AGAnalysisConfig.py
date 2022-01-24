@@ -51,6 +51,7 @@ class AGAnalysisConfig():
         CompletionStrategies._setExpStep(confDict)
         CompletionStrategies._transformLoccl(confDict)
         CompletionStrategies._dqCompletion(confDict)
+        CompletionStrategies._completeDatapathForRest(confDict)
         return confDict
 
 
@@ -71,6 +72,7 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
         #errors.update( ValidationStrategies._validateFovradmax(confDict) )
         errors.update( ValidationStrategies._validateDQ(confDict) )
+        errors.update(ValidationStrategies._validateDatapath(confDict))
 
 
         return errors
