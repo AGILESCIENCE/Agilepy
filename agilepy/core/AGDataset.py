@@ -18,13 +18,17 @@ class DataStatus(Enum):
     #TOTALLY_MISSING = 3 # not hanlded
 
 class AGDataset:
+    """
+    This class manages the AGILE's archive stored on SSDC servers, it contains a REST API
+    to download AGILE EVT and LOG data and it creates query files in order to keep the data requests updated.
+    """
 
     def __init__(self, logger):
         self.logger = logger
 
-    def downloadData(self, agilepyConf, tmin, tmax):
+    def downloadData(self, tmin, tmax, dataPath, evtIndex, logIndex):
         """ It downloads EVT and LOG data that the user requires to perform a scientific
-        analysis from tmin to tmax.
+        analysis from tmin to tmax (in MJD format).
 
         If the data is already present on disk, the download will be skipped. 
 
@@ -34,10 +38,8 @@ class AGDataset:
         @param tmin: mjd
         @param tmax: mjd
         """
-        dataPath = Path(agilepyConf.getConf("input", "datapath"))
-        evtIndex = Path(agilepyConf.getConf("input", "evtfile"))
-        logIndex = Path(agilepyConf.getConf("input", "logfile"))
-        
+        dataPath = Path(dataPath)
+
         evtPath  = dataPath.joinpath("EVT")
         logPath  = dataPath.joinpath("LOG")
 
@@ -66,13 +68,13 @@ class AGDataset:
             extractedFiles = self.extractData("EVT", tarFilePath, dataPath)
             self.logger.debug(self, f"Extracted files: {extractedFiles}")
             self.updateQFile(evtQfile, tmin, tmax, evtQfile)
-            self.generateIndex(agilepyConf, evtPath, "EVT", evtIndex)
+            self.generateIndex(evtPath, "EVT", evtIndex)
 
         if logDataMissing:
             extractedFiles = self.extractData("LOG", tarFilePath, dataPath)
             self.logger.debug(self, f"Extracted files: {extractedFiles}")
             self.updateQFile(logQfile, tmin, tmax, logQfile)
-            self.generateIndex(agilepyConf, logPath, "LOG", logIndex)
+            self.generateIndex(logPath, "LOG", logIndex)
 
         return evtDataMissing or logDataMissing
 
@@ -281,9 +283,11 @@ class AGDataset:
         @param tmin: mjd
         @param tmax: mjd
         """
+        if Path(qfile).exists():
+            datesDF = pd.read_csv(qfile, header=None, sep=" ", names=["tmin","tmax"], parse_dates=["tmin","tmax"])
+        else:
+            datesDF = pd.DataFrame([])
 
-        datesDF = pd.read_csv(qfile, header=None, sep=" ", names=["tmin","tmax"], parse_dates=["tmin","tmax"])
-        
         if "EVT" in qfile.stem:
             slots = self.computeEVT_SSDCslots(tmin, tmax)
         
@@ -334,9 +338,11 @@ class AGDataset:
 
         return True
 
-    def generateIndex(self, agilepyConf, dataPath, filetype, pathToIndex):
+    def generateIndex(self, dataPath, filetype, pathToIndex):
 
         index_name = f"{filetype}.index"
+
+        self.logger.debug(self, f"pathtoindex is {pathToIndex}")
 
         extraparams = {
                        "out_dir" : pathToIndex.parent,
@@ -345,7 +351,7 @@ class AGDataset:
                        "data_dir":dataPath}
         
         igen = Indexgen("AG_indexgen", self.logger)
-        igen.configureTool(agilepyConf, extraParams=extraparams)
+        igen.configureTool(extraParams=extraparams)
 
         indexfile = igen.call()
         self.logger.info(self, f"indexfile at {indexfile}")

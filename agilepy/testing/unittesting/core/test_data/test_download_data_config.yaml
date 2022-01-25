@@ -1,8 +1,8 @@
 input:
   evtfile: /home/antonio/Scrivania/repos/Agilepy/agilepy/testing/unittesting/core/test_out/EVT.index
   logfile: /home/antonio/Scrivania/repos/Agilepy/agilepy/testing/unittesting/core/test_out/LOG.index
-  useRestAPI: True
-  datapath: /home/antonio/Scrivania/repos/Agilepy/agilepy/testing/unittesting/core/test_out
+  userestapi: True
+  datapath: $TEST_LOGS_DIR
 
 output:
   outdir: $TEST_LOGS_DIR
@@ -10,14 +10,14 @@ output:
   logfilenameprefix: logtestcase
   sourcename: vela-unittesting
   username: unittesting
-  verboselvl: 0
+  verboselvl: 1
 
 selection:
   emin: 100
   emax: 10000
-  tmin: 433857532
-  tmax: 434289532
-  timetype: TT
+  tmin: 57083
+  tmax: 57090
+  timetype: MJD
   glon: 263.55
   glat: -2.78
   timelist: None

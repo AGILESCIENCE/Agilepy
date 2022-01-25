@@ -35,6 +35,8 @@ from pathlib import Path
 from shutil import rmtree
 from ntpath import basename
 from os.path import join, splitext, expandvars
+
+from agilepy.core.AGDataset import AGDataset
 pattern = re.compile('e([+\-]\d+)')
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
@@ -564,16 +566,21 @@ plotting:
         tmin = configBKP.getOptionValue("tmin")
         tmax = configBKP.getOptionValue("tmax")
         timetype = configBKP.getOptionValue("timetype")
+
+        ####### REST API #######
+
+        if configBKP.getOptionValue("userestapi"):
+            agdataset = AGDataset(self.logger)
+            if timetype == "TT":
+                tminRest = AstroUtils.time_tt_to_mjd(tmin)
+                tmaxRest = AstroUtils.time_tt_to_mjd(tmax)
+            agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
+
         
         if timetype == "MJD":
             tmin =  AstroUtils.time_mjd_to_tt(tmin)
             tmax =  AstroUtils.time_mjd_to_tt(tmax)    
             configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
-
-        ############# check indexfiles #########
-        # downloadData(configBKP, tmin, tmax)
-
-
 
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")

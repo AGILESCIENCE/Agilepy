@@ -207,7 +207,7 @@ class Indexgen(ProcessWrapper):
     def getRequiredOptions(self):
         return ["datadir", "type", "out_file"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, confDict=None, extraParams=None):
         
         self.outputDir = extraParams["out_dir"]
         outputFile = str(Path(self.outputDir).joinpath(extraParams["out_file"]))

@@ -39,8 +39,6 @@ class TestAGDataset:
     @pytest.mark.testdir("core")
     def test_download_data(self, logger):
 
-        
-
         testOutputDir = Path( __file__ ).absolute().parent.joinpath("test_out")
 
         if testOutputDir.exists():
@@ -56,17 +54,19 @@ class TestAGDataset:
         with open(queryLOGPath, "w") as infLOG:
             infLOG.write("""2020-01-15T00:00:00 2020-01-31T00:00:00\n2020-03-15T00:00:00 2020-03-31T00:00:00""")
 
-        os.environ["TEST_LOGS_DIR"] = str(Path( __file__ ).absolute().parent.joinpath("test_out"))
+        os.environ["TEST_LOGS_DIR"] = str(testOutputDir)
 
         configPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_download_data_config.yaml")
         config = AgilepyConfig()
         config.loadBaseConfigurations(configPath)
+        config.loadConfigurationsForClass("AGAnalysis")
+
 
         agdataset = AGDataset(logger)
 
         tmin = 57083 # 2015-02-28T00:00:00
         tmax = 57090 # 2015-03-15T00:00:00
-        downloaded = agdataset.downloadData(config, tmin, tmax)
+        downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
 
         assert downloaded == True
 
@@ -83,14 +83,14 @@ class TestAGDataset:
         # ^               ^
         tmin = 57081 # 2015-02-28T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
-        assert DataStatus.OK == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
         # Test 2 - inside range
         # =================
         #   ^          ^   
         tmin = 57082 # 2015-03-01T00:00:00
         tmax = 57086 # 2015-03-05T00:00:00
-        assert DataStatus.OK == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
         # Test 2 - boundaries of multiple lines
         # =================
@@ -99,7 +99,7 @@ class TestAGDataset:
         #                 ^          
         tmin = 59000 # 2020-05-31T00:00:00
         tmax = 59030 # 2020-06-30T00:00:00
-        assert DataStatus.OK == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
         # Test 3 - inside of multiple lines
         # =================
@@ -108,7 +108,7 @@ class TestAGDataset:
         #               ^          
         tmin = 59014 # 2020-06-14T00:00:00
         tmax = 59028 # 2020-06-28T00:00:00
-        assert DataStatus.OK == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
 
         # Test 4 - partial missing data
@@ -116,7 +116,7 @@ class TestAGDataset:
         # ^               ^
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)        
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)        
 
         # Test 5 - partial missing data on multiple lines
         #       =================
@@ -125,7 +125,7 @@ class TestAGDataset:
         #                       ^                
         tmin = 58984 # 2020-05-15T00:00:00
         tmax = 59030 # 2020-06-30T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)   
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)   
 
 
         # Test 5 - totally missing data
@@ -133,7 +133,7 @@ class TestAGDataset:
         # ^  ^               
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57042 # 2015-01-20T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsAlreadyPresent(tmin, tmax, queryEVTPath, blocksize)        
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)        
 
     
         
@@ -196,17 +196,17 @@ class TestAGDataset:
 
         agdataset = AGDataset(logger)
         
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "EVT.qfile")
-        queryEVTPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "EVT.qfile.out")
+        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_update_qfiles_not_empty_EVT.qfile")
+        queryEVTPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "test_update_qfiles_not_empty_EVT.qfile.out")
 
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "LOG.qfile")
-        queryLOGPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "LOG.qfile.out")
+        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_update_qfiles_not_empty_LOG.qfile")
+        queryLOGPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "test_update_qfiles_not_empty_LOG.qfile.out")
 
         tmin = 58849 # 2020-Jan-01 00:00:00
         tmax = 58955 # 2020-Apr-16 00:00:00
 
-        agdataset.updateQfile(queryEVTPath, tmin, tmax, queryEVTPathOut)
-        agdataset.updateQfile(queryLOGPath, tmin, tmax, queryLOGPathOut)
+        agdataset.updateQFile(queryEVTPath, tmin, tmax, queryEVTPathOut)
+        agdataset.updateQFile(queryLOGPath, tmin, tmax, queryLOGPathOut)
 
         with open(queryEVTPathOut, "r") as qf:
            assert len(qf.readlines()) == 10
@@ -228,9 +228,9 @@ class TestAGDataset:
 
         tmin = 58849 # 2020-Jan-01 00:00:00
         tmax = 58955 # 2020-Apr-16 00:00:00
-        agdataset.updateQfile(queryEVTPath, tmin, tmax, queryEVTPathOut)
+        agdataset.updateQFile(queryEVTPath, tmin, tmax, queryEVTPathOut)
 
-        agdataset.updateQfile(queryLOGPath, tmin, tmax, queryLOGPathOut)
+        agdataset.updateQFile(queryLOGPath, tmin, tmax, queryLOGPathOut)
 
         with open(queryEVTPathOut, "r") as qf:
            assert len(qf.readlines()) == 8
@@ -257,8 +257,8 @@ class TestAGDataset:
 
         tmin = 58849 # 2020-Jan-01 00:00:00
         tmax = 58955 # 2020-Apr-16 00:00:00
-        agdataset.updateQfile(queryEVTPath, tmin, tmax, queryEVTPathOut)
-        agdataset.updateQfile(queryLOGPath, tmin, tmax, queryLOGPathOut)
+        agdataset.updateQFile(queryEVTPath, tmin, tmax, queryEVTPathOut)
+        agdataset.updateQFile(queryLOGPath, tmin, tmax, queryLOGPathOut)
 
         with open(queryEVTPathOut, "r") as qf:
            assert len(qf.readlines()) == 10
