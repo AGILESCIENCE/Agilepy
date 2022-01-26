@@ -49,13 +49,17 @@ class AGDataset:
         evtDataMissing = False
         logDataMissing = False
 
-        if self.dataIsMissing(tmin, tmax, evtQfile, 15):
+        if self.dataIsMissing(tmin, tmax, evtQfile, 15) == DataStatus.MISSING:
             self.logger.info(self, f"EVT data in interval {tmin} {tmax} is missing!")
             evtDataMissing = True
+        else:
+            self.logger.info(self, f"Local data for EVT already in dataset")
 
-        if self.dataIsMissing(tmin, tmax, logQfile, 1):
+        if self.dataIsMissing(tmin, tmax, logQfile, 1) == DataStatus.MISSING:
             self.logger.info(self, f"LOG data in interval {tmin} {tmax} is missing!")
             logDataMissing = True
+        else:
+            self.logger.info(self, f"Local data for LOG already in dataset")
 
         if evtDataMissing or logDataMissing:
 
@@ -174,8 +178,8 @@ class AGDataset:
         datesDF = pd.read_csv(queryFilepath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
 
         
-        print(datesDF)
-        print(f"{tminUtc}, {tmaxUtc}")
+        self.logger.debug(self, str(datesDF))
+        self.logger.debug(self, f"{tminUtc}, {tmaxUtc}")
 
         # check interval of tmin 
         intervalIndexTmin = self.getInterval(datesDF, tminUtc)
@@ -191,40 +195,33 @@ class AGDataset:
             self.logger.debug(self, f"tmaxUtc {tmaxUtc} not present in any interval!")
             return DataStatus.MISSING
 
-        print("intervalIndexTmin:", intervalIndexTmin)
-        print("intervalIndexTmax:", intervalIndexTmax)
+        self.logger.debug(self, f"intervalIndexTmin: {str(intervalIndexTmin)}")
+        self.logger.debug(self, f"intervalIndexTmax: {str(intervalIndexTmax)}")
 
         # check if there's missing data between the 2 intervals
-        if self.gotHole(datesDF, intervalIndexTmin, intervalIndexTmax, blockSize):
-            self.logger.debug(self, f"Got HOLE!")
+        if self.gotHole(datesDF, intervalIndexTmin, intervalIndexTmax):
+            self.logger.debug(self, f"Missing data between the 2 intervals!")
             return DataStatus.MISSING
         
         return DataStatus.OK
 
 
-
     def getInterval(self, datesDF, t):
         for index, block in datesDF.iterrows():
-            if t >= block['ssdctmin'] and t <= block['ssdctmax']:
+            if t >= block['ssdctmin'] and t < block['ssdctmax']:
                 return index
         return -1
-        
 
-
-    def gotHole(self, datesDF, intervalIndexTmin, intervalIndexTmax, blockSize):
+    def gotHole(self, datesDF, intervalIndexTmin, intervalIndexTmax):
         
         tstart = intervalIndexTmin
         tstop = intervalIndexTmax
 
         while tstart < tstop:
-            ssdcStartDate = datesDF.iloc[[tstart]]["ssdctmin"]
+            ssdcStartDate = datesDF.iloc[[tstart]]["ssdctmax"]
             ssdcStopDate = datesDF.iloc[[tstart+1]]["ssdctmin"]
             tstart = tstart+1
-            diffDays = (ssdcStopDate.iloc[0] - ssdcStartDate.iloc[0])
-            print("diffDays")
-            print(diffDays)
-            print(type(diffDays))
-            if diffDays.days > blockSize:
+            if ssdcStopDate.iloc[0] != ssdcStartDate.iloc[0]:
                 return True
 
         return False
@@ -352,6 +349,12 @@ class AGDataset:
         
         igen = Indexgen("AG_indexgen", self.logger)
         igen.configureTool(extraParams=extraparams)
+
+
+        #check if indexgen exists and delete it for overwriting
+        ifile = Path(pathToIndex)
+        if ifile.exists():
+            ifile.unlink()
 
         indexfile = igen.call()
         self.logger.info(self, f"indexfile at {indexfile}")

@@ -26,12 +26,15 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from cgi import test
 import os
+import pandas as pd
 from shutil import rmtree
 import pytest
 from pathlib import Path
 from agilepy.core.AGDataset import AGDataset 
 from agilepy.core.AGDataset import DataStatus
 from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.utils.AstroUtils import AstroUtils
+from datetime import datetime
 
 class TestAGDataset:
 
@@ -133,7 +136,16 @@ class TestAGDataset:
         # ^  ^               
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57042 # 2015-01-20T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)        
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+
+
+        # Test 6 - test 2010
+        #       =================
+        # ^  ^               
+
+        tmin = 55513.0
+        tmax = 55521.0
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)       
 
     
         
@@ -241,8 +253,8 @@ class TestAGDataset:
 
         agdataset = AGDataset(logger)
         
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_out", "overwrite_EVT.qfile")
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_out", "overwrite_LOG.qfile")
+        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_EVT.qfile")
+        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_LOG.qfile")
         with open(queryEVTPath, "w") as inf:
             inf.write("""2020-01-15T00:00:00 2020-01-31T00:00:00
 2020-03-15T00:00:00 2020-03-31T00:00:00""")
@@ -265,3 +277,123 @@ class TestAGDataset:
 
         with open(queryLOGPathOut, "r") as qf:
            assert len(qf.readlines()) == 109
+
+    
+    @pytest.mark.testdir("core")
+    def test_getInterval(self, logger):
+        agdataset = AGDataset(logger)
+
+        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_EVT.qfile")
+        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_LOG.qfile")
+
+        datesEVTDF = pd.read_csv(queryEVTPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
+        datesLOGDF = pd.read_csv(queryLOGPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
+
+        t = 58906 #2020-02-27T00:00:00
+
+        tUtc = AstroUtils.time_mjd_to_utc(t)
+        tUtc = datetime.strptime(tUtc, "%Y-%m-%dT%H:%M:%S")
+
+        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tUtc)
+        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tUtc)
+
+        assert intervalIndexEVT == 3
+        assert intervalIndexLOG == 58
+
+        t = 59003 #2020-06-03T00:00:00
+
+        tUtc = AstroUtils.time_mjd_to_utc(t)
+        tUtc = datetime.strptime(tUtc, "%Y-%m-%dT%H:%M:%S")
+
+        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tUtc)
+        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tUtc)
+
+        assert intervalIndexEVT == -1
+        assert intervalIndexLOG == -1
+
+
+
+
+
+
+
+
+    @pytest.mark.testdir("core")
+    def test_gotHole(self, logger):
+
+        agdataset = AGDataset(logger)
+
+        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_EVT.qfile")
+        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_LOG.qfile")
+
+        tmin = 58051
+        tmax = 58058
+
+        tminUtc = AstroUtils.time_mjd_to_utc(tmin)
+        tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
+
+        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S")
+        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S")
+
+        datesEVTDF = pd.read_csv(queryEVTPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
+        datesLOGDF = pd.read_csv(queryLOGPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
+
+        ### EVT ###
+        intervalIndexTmin = agdataset.getInterval(datesEVTDF, tminUtc)
+        intervalIndexTmax = agdataset.getInterval(datesEVTDF, tmaxUtc)
+
+        print(f"intervals in EVT file are {intervalIndexTmin} {intervalIndexTmax}")
+
+        hole = agdataset.gotHole(datesEVTDF, intervalIndexTmin, intervalIndexTmax)
+
+        assert hole == False
+
+        ### LOG ###
+        intervalIndexTmin = agdataset.getInterval(datesLOGDF, tminUtc)
+        intervalIndexTmax = agdataset.getInterval(datesLOGDF, tmaxUtc)
+
+        print(f"intervals in LOG file are {intervalIndexTmin} {intervalIndexTmax}")
+
+        hole = agdataset.gotHole(datesLOGDF, intervalIndexTmin, intervalIndexTmax)
+
+        assert hole == False
+
+
+        tmin = 58051
+        tmax = 58152
+
+        tminUtc = AstroUtils.time_mjd_to_utc(tmin)
+        tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
+
+        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S")
+        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S")
+
+        intervalIndexTmin = agdataset.getInterval(datesEVTDF, tminUtc)
+        intervalIndexTmax = agdataset.getInterval(datesEVTDF, tmaxUtc)
+
+        print(f"intervals in EVT file are {intervalIndexTmin} {intervalIndexTmax}")
+
+        hole = agdataset.gotHole(datesEVTDF, intervalIndexTmin, intervalIndexTmax)
+
+        assert hole == True
+
+        ###### LOG #####
+
+        intervalIndexTmin = agdataset.getInterval(datesLOGDF, tminUtc)
+        intervalIndexTmax = agdataset.getInterval(datesLOGDF, tmaxUtc)
+
+        print(f"intervals in LOG file are {intervalIndexTmin} {intervalIndexTmax}")
+
+        hole = agdataset.gotHole(datesLOGDF, intervalIndexTmin, intervalIndexTmax)
+
+        assert hole == True
+
+
+
+
+
+
+
+
+
+
