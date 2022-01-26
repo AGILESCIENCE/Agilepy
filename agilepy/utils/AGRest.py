@@ -36,7 +36,7 @@ class AGRest:
         tmin_utc = AstroUtils.time_mjd_to_utc(tmin)
         tmax_utc = AstroUtils.time_mjd_to_utc(tmax)
 
-        api_url = f"https://toolsdev.ssdc.asi.it/AgileData/rest/GRIDList/{tmin_utc}/{tmax_utc}"
+        api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDList/{tmin_utc}/{tmax_utc}"
 
         self.logger.info(self, f"Downloading filelist to download ({tmin},{tmax}) ({tmin_utc}, {tmax_utc}) from {api_url}..")
 

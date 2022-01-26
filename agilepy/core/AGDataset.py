@@ -294,6 +294,7 @@ class AGDataset:
         concatted = pd.concat([datesDF, slots], ignore_index=True)
 
         concatted.sort_values(by='tmin', inplace=True)
+        concatted = concatted.drop_duplicates()
         concatted.reset_index(drop=True, inplace=True)
 
         concatted.to_csv(qfileOut, index=False, header=False, sep=" ", date_format="%Y-%m-%dT%H:%M:%S")

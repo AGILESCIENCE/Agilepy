@@ -311,13 +311,6 @@ class TestAGDataset:
         assert intervalIndexEVT == -1
         assert intervalIndexLOG == -1
 
-
-
-
-
-
-
-
     @pytest.mark.testdir("core")
     def test_gotHole(self, logger):
 

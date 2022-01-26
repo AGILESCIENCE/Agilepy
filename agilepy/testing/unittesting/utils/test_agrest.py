@@ -26,12 +26,12 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import pytest
-import unittest # WHATTT! TODO: REMOVE ME
 from pathlib import Path
 
 from agilepy.utils.AGRest import AGRest 
+from agilepy.core.CustomExceptions import SSDCRestError
 
-class TestAGRest:
+class TestAGRest():
 
     """
     def test_request_data(logger):
@@ -43,36 +43,40 @@ class TestAGRest:
     """
 
     @pytest.mark.testdir("utils")
-    def test_extract_data(self, logger, gettmpdir):
-
-        inputTarFile = Path( __file__ ).absolute().parent.joinpath("data", "1640082532426.tar")
+    def test_gridfiles(self, logger, gettmpdir):
 
         agrest = AGRest(logger)
 
-        agrest._extractData(inputTarFile, gettmpdir)
+        tmin = 58051
+        tmax = 58055
 
-        evtData = gettmpdir.joinpath("EVT")
-        logData = gettmpdir.joinpath("LOG")
+        outfile = agrest.gridFiles(tmin, tmax)
 
-        assert len(os.listdir(evtData)) > 1
-        assert len(os.listdir(logData)) > 1        
+        filepath = Path(outfile)
+
+        assert True == filepath.exists()
+
+        filepath.unlink()
+
+        assert False == filepath.exists()
+
+
 
     @pytest.mark.testdir("utils")
-    def test_generate_index(self, logger):
+    def test_gridList(self, logger, gettmpdir):
 
         agrest = AGRest(logger)
+
+        tmin = 58051
+        tmax = 58072
         
-        outDir = Path( __file__ ).absolute().parent.joinpath("tmp")
-        outDir.mkdir(exist_ok=True, parents=True)
+        gridlist = agrest.gridList(tmin, tmax)
 
-        #agrest._generateIndex()
+        assert len(gridlist) == 24
 
-        evt = outDir.joinpath("EVT.index")
-        log = outDir.joinpath("LOG.index")
+        tmax = 58200
 
-        assert evt.is_file() == True 
-        assert log.is_file() == True
-
-        assert 69 == sum(1 for line in open(evt))
-        assert 666 == sum(1 for line in open(log))  
-
+        with pytest.raises(SSDCRestError):
+            gridlist = agrest.gridList(tmin, tmax)
+        
+        
