@@ -62,6 +62,7 @@ class TestAGRest():
 
 
 
+
     @pytest.mark.testdir("utils")
     def test_gridList(self, logger, gettmpdir):
 
@@ -78,5 +79,14 @@ class TestAGRest():
 
         with pytest.raises(SSDCRestError):
             gridlist = agrest.gridList(tmin, tmax)
+
+        tmin = 59549
+        tmax = 59569
+
+        with pytest.raises(SSDCRestError):
+            gridlist = agrest.gridList(tmin, tmax)
+
+
+
         
         

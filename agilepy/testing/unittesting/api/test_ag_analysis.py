@@ -683,8 +683,8 @@ class AGAnalysisUT(unittest.TestCase):
         tmin1 = 58030.0
         tmax1 = 58035.0
 
-        tmintt = AstroUtils.time_mjd_to_tt(tmin1)
-        tmaxtt = AstroUtils.time_mjd_to_tt(tmax1)
+        tmintt = AstroUtils.time_mjd_to_agile_seconds(tmin1)
+        tmaxtt = AstroUtils.time_mjd_to_agile_seconds(tmax1)
 
         ag.setOptionTimeMJD(tmin=tmin1, tmax=tmax1)
 

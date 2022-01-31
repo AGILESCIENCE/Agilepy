@@ -128,8 +128,8 @@ class ValidationStrategies:
         timetype = confDict["selection"]["timetype"]
 
         if timetype == "MJD":
-            userTmin = AstroUtils.time_mjd_to_tt(userTmin)
-            userTmax = AstroUtils.time_mjd_to_tt(userTmax)
+            userTmin = AstroUtils.time_mjd_to_agile_seconds(userTmin)
+            userTmax = AstroUtils.time_mjd_to_agile_seconds(userTmax)
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \

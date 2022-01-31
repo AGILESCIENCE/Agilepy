@@ -88,6 +88,8 @@ class Utils:
     def download_AGILE_data(tmin, tmax):
         pass
 
+
+    """
     @staticmethod
     def sortIndexFile(indexFilePath):
 
@@ -97,3 +99,4 @@ class Utils:
         with open(indexFilePath, 'w') as fh:
             for line in sorted(lines, key=lambda line: line.split()[0]):
                 fh.write(line)
+    """

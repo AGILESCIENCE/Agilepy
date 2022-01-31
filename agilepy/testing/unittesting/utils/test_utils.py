@@ -27,6 +27,7 @@
 
 import os
 import shutil
+import pytest
 import unittest
 from time import sleep
 from pathlib import Path
@@ -150,6 +151,28 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         assert True == os.path.isfile(file)
 
+
+
+    def test_plot_data_availability(self):
+
+        outputDir = self.currentDirPath.joinpath("output", "test_plot_data_availability")
+        outputDir.mkdir(parents=True, exist_ok=True)
+        os.environ["TEST_LOGS_DIR"] = str(outputDir)
+        
+        config = AgilepyConfig()
+        config.loadBaseConfigurations(self.currentDirPath.joinpath("conf", "test_plot_data_availability.yaml"))
+
+        pu = PlottingUtils(config, self.agilepyLogger)
+
+        dataDir = Path(self.datadir).joinpath("test_plot_data_availability")
+
+        pu.plotDataAvailability(dataDir.joinpath("EVT.qfile"), dataDir.joinpath("EVT.index"), saveImage=True)
+
+        #pu.plotDataAvailability(dataDir.joinpath("LOG.qfile"), dataDir.joinpath("LOG.index"), saveImage=True)
+
+
+
+
     def test_initialize_logger_verboselvl_2(self):
         sleep(1.0)
         self.agilepyLogger.reset()
@@ -232,42 +255,28 @@ class AgilepyUtilsUT(unittest.TestCase):
         os.remove(os.path.join(self.currentDirPath, "result.txt"))
         os.remove(os.path.join(self.currentDirPath, product))
 
-
-
-
-
     """
     Time conversions
         # https://tools.ssdc.asi.it/conversionTools
         # https://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl?time_in_i=&time_in_c=&time_in_d=&time_in_j=&time_in_m=58871.45616898&time_in_sf=&time_in_wf=&time_in_sl=&time_in_sni=&time_in_snu=&time_in_s=&time_in_h=&time_in_sz=&time_in_ss=&time_in_sn=&timesys_in=u&timesys_out=u&apply_clock_offset=yes
     """
-    def test_astro_utils_time_mjd_to_tt(self):
+    def test_astro_utils_time_mjd_to_agile_seconds(self):
         sec_tolerance = 0.001
-        tt = AstroUtils.time_mjd_to_tt(58871.45616898) # 506861812.99987227
+        tt = AstroUtils.time_mjd_to_agile_seconds(58871.45616898) # 506861812.99987227
         assert abs(506861813-tt) <= sec_tolerance
 
-    def test_astro_utils_time_tt_to_mjd(self):
+    def test_astro_utils_time_agile_seconds_to_mjd(self):
         sec_tolerance = 0.0000001
-        mjd = AstroUtils.time_tt_to_mjd(507391426.9447)
+        mjd = AstroUtils.time_agile_seconds_to_mjd(507391426.9447)
         assert abs(58877.58595999 - mjd) <= sec_tolerance
-
-    def test_astro_utils_time_jd_to_civil(self):
-
-        tol = 0.044
-
-        civ = AstroUtils.jd_to_civil(2458871.95616898)
-        assert civ[0] == 2020
-        assert civ[1] == 1
-        assert abs(23 - civ[2]) <= tol
-        # it should be 2020, 1, 23)........
 
     def test_astro_utils_time_utc_to_jd(self):
 
         tol = 0.00000001
 
-        dt = datetime.strptime("2020-01-23T10:56:53", '%Y-%m-%dT%H:%M:%S')
+        dt = "2020-01-23T10:56:53.000"
 
-        jd = AstroUtils.to_jd(dt)
+        jd = AstroUtils.time_fits_to_jd(dt)
 
         assert abs(2458871.95616898 - jd) <= tol
 
@@ -275,9 +284,9 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         tol = 0.00000001
 
-        dt = datetime.strptime("2020-01-23T10:56:53", '%Y-%m-%dT%H:%M:%S')
+        dt = "2020-01-23T10:56:53.000"
 
-        mjd = AstroUtils.to_jd(dt, fmt="mjd")
+        mjd = AstroUtils.time_fits_to_mjd(dt)
 
         assert abs(58871.45616898 - mjd) <= tol
 
@@ -285,16 +294,21 @@ class AgilepyUtilsUT(unittest.TestCase):
 
         tol = 0.0001
 
-        tt = AstroUtils.time_utc_to_tt("2020-01-23T10:56:53")
+        agileseconds = AstroUtils.time_fits_to_agile_seconds("2020-01-23T10:56:53.000")
 
-        assert abs(506861813 - tt) <= tol
+        assert abs(506861813 - agileseconds) <= tol
 
-    def test_astro_utils_time_tt_to_utc(self):
+    def test_astro_utils_time_agile_seconds_to_jd(self):
+        jd = AstroUtils.time_agile_seconds_to_jd(449582332)
+        assert jd == pytest.approx(2458208.99921296, 0.00001)
+
+
+    def test_astro_utils_time_agile_seconds_to_utc(self):
 
         sec_tol = 1
-
+        """
         utc = AstroUtils.time_tt_to_utc(506861813)
-        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
+        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S.%f')
 
         assert dt.year == 2020
         assert dt.month == 1
@@ -302,14 +316,28 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert dt.hour == 10
         assert dt.minute == 56
         assert abs(53 - dt.second) <= sec_tol
+        """
 
-    def test_astro_utils_time_mjd_to_utc(self):
+        # This date would result in "0 days"
+        sec_tolerance = 0.0000001
+        fitstime = AstroUtils.time_agile_seconds_to_fits(449582332)
+        dt = datetime.strptime(fitstime, '%Y-%m-%dT%H:%M:%S.%f')
+
+        assert dt.year == 2018
+        assert dt.month == 3
+        assert dt.day == 31
+        assert dt.hour == 11
+        assert dt.minute == 58
+        assert abs(52 - dt.second) <= sec_tol
+
+
+    def test_astro_utils_time_mjd_to_fits(self):
 
         sec_tol = 1
 
-        utc = AstroUtils.time_mjd_to_utc(58871.45616898)
+        fitstime = AstroUtils.time_mjd_to_fits(58871.45616898)
 
-        dt = datetime.strptime(utc, '%Y-%m-%dT%H:%M:%S')
+        dt = datetime.strptime(fitstime, '%Y-%m-%dT%H:%M:%S.%f')
 
         assert dt.year == 2020
         assert dt.month == 1
@@ -318,11 +346,11 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert dt.minute == 56
         assert abs(53 - dt.second) <= sec_tol
 
-    def test_astro_utils_time_utc_to_mjd_2(self):
+    def test_astro_utils_time_fits_to_mjd_2(self):
 
         sec_tol = 0.00000001
 
-        mjd = AstroUtils.time_utc_to_mjd("2020-01-23T10:56:53")
+        mjd = AstroUtils.time_fits_to_mjd("2020-01-23T10:56:53.000")
 
         assert abs(58871.45616898 - mjd) <= sec_tol
 
@@ -359,9 +387,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert first == line1
         assert last == line3
 
+    """
     def test_sort_index_file(self):
         evtfileIndex = Path(self.datadir).joinpath("indexfile_not_ordered.test")
-        import shutil
         copy = evtfileIndex.with_suffix(".2")
         shutil.copy(evtfileIndex, copy)
         Utils.sortIndexFile(copy)
@@ -372,7 +400,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert lines[2] == "/pippoz/c.gz 30.300000 371995132.000000 EVT"
         assert lines[3] == "/pippoz/d.gz 40.400000 371995132.000000 EVT"
         assert lines[4] == "/pippoz/e.gz 50.500000 371995132.000000 EVT"
-
+    """
         
 
 if __name__ == '__main__':

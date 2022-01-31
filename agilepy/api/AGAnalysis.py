@@ -474,7 +474,7 @@ plotting:
 
         """
 
-        self.config.setOptions(tmin=AstroUtils.time_mjd_to_tt(tmin), tmax=AstroUtils.time_mjd_to_tt(tmax), timetype="TT")
+        self.config.setOptions(tmin=AstroUtils.time_mjd_to_agile_seconds(tmin), tmax=AstroUtils.time_mjd_to_agile_seconds(tmax), timetype="TT")
 
     def setOptionEnergybin(self, value):
         """An useful utility method that maps a value in a specific energybin and it calls the setOptions function.
@@ -572,14 +572,14 @@ plotting:
         if configBKP.getOptionValue("userestapi"):
             agdataset = AGDataset(self.logger)
             if timetype == "TT":
-                tminRest = AstroUtils.time_tt_to_mjd(tmin)
-                tmaxRest = AstroUtils.time_tt_to_mjd(tmax)
+                tminRest = AstroUtils.time_agile_seconds_to_mjd(tmin)
+                tmaxRest = AstroUtils.time_agile_seconds_to_mjd(tmax)
             agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
 
         
         if timetype == "MJD":
-            tmin =  AstroUtils.time_mjd_to_tt(tmin)
-            tmax =  AstroUtils.time_mjd_to_tt(tmax)    
+            tmin =  AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax =  AstroUtils.time_mjd_to_agile_seconds(tmax)    
             configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
 
         glon = configBKP.getOptionValue("glon")
@@ -730,8 +730,8 @@ plotting:
         timetype = self.config.getOptionValue("timetype")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
 
         if pastTimeWindow == 0:
             tmin = tmin
@@ -902,8 +902,8 @@ plotting:
             self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
 
         tmin = int(tmin)
         tmax = int(tmax)
@@ -1298,11 +1298,11 @@ plotting:
                     time_start_tt = lcDataDict["time_start_tt"] # + binsize * timecounter
                     time_end_tt   = lcDataDict["time_end_tt"]   # + binsize * timecounter
 
-                    time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
-                    time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
+                    time_start_mjd = AstroUtils.time_agile_seconds_to_mjd(time_start_tt)
+                    time_end_mjd   = AstroUtils.time_agile_seconds_to_mjd(time_end_tt)
 
-                    time_start_utc = AstroUtils.time_mjd_to_utc(time_start_mjd)
-                    time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
+                    time_start_utc = AstroUtils.time_mjd_to_fits(time_start_mjd)
+                    time_end_utc   = AstroUtils.time_mjd_to_fits(time_end_mjd)
 
                     # time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist
                     # l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err

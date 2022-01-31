@@ -81,12 +81,12 @@ class TestAGDataset:
         agdataset = AGDataset(logger)
         blocksize = 15
 
-        # Test 1 - boundaries
+        # Test 1 - boundaries (tmax is not included)
         # =================
         # ^               ^
         tmin = 57081 # 2015-02-28T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
-        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
         # Test 2 - inside range
         # =================
@@ -95,16 +95,16 @@ class TestAGDataset:
         tmax = 57086 # 2015-03-05T00:00:00
         assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
-        # Test 2 - boundaries of multiple lines
+        # Test 3 - boundaries of multiple lines
         # =================
         # ^
         # =================
         #                 ^          
         tmin = 59000 # 2020-05-31T00:00:00
         tmax = 59030 # 2020-06-30T00:00:00
-        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
-        # Test 3 - inside of multiple lines
+        # Test 4 - inside of multiple lines
         # =================
         #   ^
         # =================
@@ -114,14 +114,14 @@ class TestAGDataset:
         assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
 
-        # Test 4 - partial missing data
+        # Test 5 - partial missing data
         #      =================
         # ^               ^
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
         assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)        
 
-        # Test 5 - partial missing data on multiple lines
+        # Test 6 - partial missing data on multiple lines
         #       =================
         # ^                
         #       =================
@@ -131,7 +131,7 @@ class TestAGDataset:
         assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)   
 
 
-        # Test 5 - totally missing data
+        # Test 7 - totally missing data
         #       =================
         # ^  ^               
         tmin = 57032 # 2015-01-10T00:00:00
@@ -139,7 +139,7 @@ class TestAGDataset:
         assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
 
 
-        # Test 6 - test 2010
+        # Test 8 - test 2010
         #       =================
         # ^  ^               
 
@@ -214,17 +214,17 @@ class TestAGDataset:
         queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_update_qfiles_not_empty_LOG.qfile")
         queryLOGPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "test_update_qfiles_not_empty_LOG.qfile.out")
 
-        tmin = 58849 # 2020-Jan-01 00:00:00
-        tmax = 58955 # 2020-Apr-16 00:00:00
+        tmin = 58849 # 2020-Jan-01T00:00:00
+        tmax = 58955 # 2020-Apr-16T00:00:00
 
         agdataset.updateQFile(queryEVTPath, tmin, tmax, queryEVTPathOut)
         agdataset.updateQFile(queryLOGPath, tmin, tmax, queryLOGPathOut)
 
         with open(queryEVTPathOut, "r") as qf:
-           assert len(qf.readlines()) == 10
+           assert len(qf.readlines()) == 8
 
         with open(queryLOGPathOut, "r") as qf:
-           assert len(qf.readlines()) == 109
+           assert len(qf.readlines()) == 108
 
 
     @pytest.mark.testdir("core")
@@ -273,7 +273,7 @@ class TestAGDataset:
         agdataset.updateQFile(queryLOGPath, tmin, tmax, queryLOGPathOut)
 
         with open(queryEVTPathOut, "r") as qf:
-           assert len(qf.readlines()) == 10
+           assert len(qf.readlines()) == 8
 
         with open(queryLOGPathOut, "r") as qf:
            assert len(qf.readlines()) == 109
@@ -283,30 +283,30 @@ class TestAGDataset:
     def test_getInterval(self, logger):
         agdataset = AGDataset(logger)
 
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_EVT.qfile")
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_LOG.qfile")
+        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_EVT.qfile")
+        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_LOG.qfile")
 
         datesEVTDF = pd.read_csv(queryEVTPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
         datesLOGDF = pd.read_csv(queryLOGPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
 
-        t = 58906 #2020-02-27T00:00:00
+        t = 58053 #2017-10-27T00:00:00.000
 
-        tUtc = AstroUtils.time_mjd_to_utc(t)
-        tUtc = datetime.strptime(tUtc, "%Y-%m-%dT%H:%M:%S")
+        tfits = AstroUtils.time_mjd_to_fits(t)
+        tfits = datetime.strptime(tfits, "%Y-%m-%dT%H:%M:%S.%f")
 
-        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tUtc)
-        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tUtc)
+        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tfits)
+        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tfits)
 
-        assert intervalIndexEVT == 3
-        assert intervalIndexLOG == 58
+        assert intervalIndexEVT == 0
+        assert intervalIndexLOG == 2
 
         t = 59003 #2020-06-03T00:00:00
 
-        tUtc = AstroUtils.time_mjd_to_utc(t)
-        tUtc = datetime.strptime(tUtc, "%Y-%m-%dT%H:%M:%S")
+        tfits = AstroUtils.time_mjd_to_fits(t)
+        tfits = datetime.strptime(tfits, "%Y-%m-%dT%H:%M:%S.%f")
 
-        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tUtc)
-        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tUtc)
+        intervalIndexEVT = agdataset.getInterval(datesEVTDF, tfits)
+        intervalIndexLOG = agdataset.getInterval(datesLOGDF, tfits)
 
         assert intervalIndexEVT == -1
         assert intervalIndexLOG == -1
@@ -322,11 +322,11 @@ class TestAGDataset:
         tmin = 58051
         tmax = 58058
 
-        tminUtc = AstroUtils.time_mjd_to_utc(tmin)
-        tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
+        tminUtc = AstroUtils.time_mjd_to_fits(tmin)
+        tmaxUtc = AstroUtils.time_mjd_to_fits(tmax)
 
-        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S")
-        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S")
+        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S.%f")
+        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S.%f")
 
         datesEVTDF = pd.read_csv(queryEVTPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
         datesLOGDF = pd.read_csv(queryLOGPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
@@ -355,11 +355,11 @@ class TestAGDataset:
         tmin = 58051
         tmax = 58152
 
-        tminUtc = AstroUtils.time_mjd_to_utc(tmin)
-        tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
+        tminUtc = AstroUtils.time_mjd_to_fits(tmin)
+        tmaxUtc = AstroUtils.time_mjd_to_fits(tmax)
 
-        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S")
-        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S")
+        tminUtc = datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S.%f")
+        tmaxUtc = datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S.%f")
 
         intervalIndexTmin = agdataset.getInterval(datesEVTDF, tminUtc)
         intervalIndexTmax = agdataset.getInterval(datesEVTDF, tmaxUtc)

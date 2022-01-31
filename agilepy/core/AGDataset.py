@@ -4,6 +4,7 @@ import datetime
 from time import time
 from tqdm import tqdm
 from pathlib import Path
+from agilepy.core.CustomExceptions import SSDCRestError
 from agilepy.utils.AGRest import AGRest
 from agilepy.core.ScienceTools import Indexgen
 from agilepy.utils.AstroUtils import AstroUtils
@@ -64,8 +65,12 @@ class AGDataset:
         if evtDataMissing or logDataMissing:
 
             agRest = AGRest(self.logger)
-            # filesList = agRest.gridList(tmin, tmax)
-            tarFilePath = agRest.gridFiles(tmin, tmax)
+
+            try:
+                message = agRest.gridList(tmin, tmax)
+                tarFilePath = agRest.gridFiles(tmin, tmax)
+            except SSDCRestError as err:
+                print(err)
 
 
         if evtDataMissing:
@@ -99,11 +104,11 @@ class AGDataset:
         15/09/2018 30/09/2018
         """
 
-        tmin = AstroUtils.time_mjd_to_utc(tmin)
-        tmax = AstroUtils.time_mjd_to_utc(tmax)
+        tmin = AstroUtils.time_mjd_to_fits(tmin)
+        tmax = AstroUtils.time_mjd_to_fits(tmax)
 
-        tmin = datetime.datetime.strptime(tmin, "%Y-%m-%dT%H:%M:%S")
-        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
+        tmin = datetime.datetime.strptime(tmin, "%Y-%m-%dT%H:%M:%S.%f")
+        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S.%f")
         
         dt1 = datetime.timedelta(days=1)
         dt14 = datetime.timedelta(days=14)        
@@ -146,11 +151,11 @@ class AGDataset:
         """
 
         dt1 = datetime.timedelta(days=1)
-        tmin = AstroUtils.time_mjd_to_utc(tmin)
-        tmax = AstroUtils.time_mjd_to_utc(tmax)
+        tmin = AstroUtils.time_mjd_to_fits(tmin)
+        tmax = AstroUtils.time_mjd_to_fits(tmax)
 
-        tmin = datetime.datetime.strptime(tmin, "%Y-%m-%dT%H:%M:%S")
-        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
+        tmin = datetime.datetime.strptime(tmin, "%Y-%m-%dT%H:%M:%S.%f")
+        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S.%f")
         slots = []
         while tmin <= tmax:
 
@@ -167,11 +172,11 @@ class AGDataset:
             self.logger.warning(self, f"Query file {queryFilepath} does not exists")
             return DataStatus.MISSING
 
-        tminUtc = AstroUtils.time_mjd_to_utc(tmin) # YYYY-MM-DDTHH:mm:ss
-        tmaxUtc = AstroUtils.time_mjd_to_utc(tmax)
+        tminUtc = AstroUtils.time_mjd_to_fits(tmin) # YYYY-MM-DDTHH:mm:ss
+        tmaxUtc = AstroUtils.time_mjd_to_fits(tmax)
 
-        tminUtc = datetime.datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S")
-        tmaxUtc = datetime.datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S")
+        tminUtc = datetime.datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S.%f")
+        tmaxUtc = datetime.datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S.%f")
 
         self.logger.debug(self, f"({tmin}, {tmax}) => ({tminUtc}, {tmaxUtc})")
 
@@ -297,7 +302,7 @@ class AGDataset:
         concatted = concatted.drop_duplicates()
         concatted.reset_index(drop=True, inplace=True)
 
-        concatted.to_csv(qfileOut, index=False, header=False, sep=" ", date_format="%Y-%m-%dT%H:%M:%S")
+        concatted.to_csv(qfileOut, index=False, header=False, sep=" ", date_format="%Y-%m-%dT%H:%M:%S.%f")
 
 
     

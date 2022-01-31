@@ -33,8 +33,8 @@ class AGRest:
             ]
         """
 
-        tmin_utc = AstroUtils.time_mjd_to_utc(tmin)
-        tmax_utc = AstroUtils.time_mjd_to_utc(tmax)
+        tmin_utc = AstroUtils.time_mjd_to_fits(tmin)
+        tmax_utc = AstroUtils.time_mjd_to_fits(tmax)
 
         api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDList/{tmin_utc}/{tmax_utc}"
 
@@ -51,6 +51,9 @@ class AGRest:
         self.logger.info(self, f"Took {end} seconds")
 
         if json_data["Response"]["statusCode"] != "OK":
+            raise SSDCRestError(json_data["Response"]["message"])
+
+        if json_data["Response"]["statusCode"] == "OK" and json_data["Response"]["message"] == "No data found.":
             raise SSDCRestError(json_data["Response"]["message"])
 
         return json_data["AgileFiles"]
@@ -71,8 +74,8 @@ class AGRest:
                 * 2 evt files: 01/01/21 to 15/01/21 and 15/01/21 to 31/01/21
                 * 5 log files: 14/01/21, 15/01/21, 16/01/21, 17/01/21, 18/01/21         
         """
-        tmin_utc = AstroUtils.time_mjd_to_utc(tmin)
-        tmax_utc = AstroUtils.time_mjd_to_utc(tmax)
+        tmin_utc = AstroUtils.time_mjd_to_fits(tmin)
+        tmax_utc = AstroUtils.time_mjd_to_fits(tmax)
 
         api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDFiles/{tmin_utc}/{tmax_utc}"
 
