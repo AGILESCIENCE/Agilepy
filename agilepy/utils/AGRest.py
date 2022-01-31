@@ -14,6 +14,38 @@ class AGRest:
     def __init__(self, logger):
         self.logger = logger
 
+    def get_coverage(self):
+        """
+        It returns Data coverage of AGILE database on SSDC server
+        Args:
+            None
+
+        Returns:
+            tmin(dateformat fits type str)
+            tmax(dateformat fits type str)
+        """
+
+        api_url = f"https://tools.ssdc.asi.it/AgileData/rest/publicdatacoverage"
+
+        self.logger.info(self, f"Getting data coverage to SSDC server..")
+
+        start = time() 
+
+        response = requests.get(api_url)
+
+        json_data = json.loads(response.text)
+
+        if json_data["Response"]["statusCode"] != "OK":
+            raise SSDCRestError(json_data["Response"]["message"])
+
+        tmin = json_data["DataCoverageFrom"]
+        tmax = json_data["DataCoverageTo"]
+
+        end = time() - start
+
+        self.logger.info(self, f"Took {end} seconds")
+
+        return tmin, tmax
 
     def gridList(self, tmin, tmax):
         """

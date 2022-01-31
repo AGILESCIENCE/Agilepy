@@ -86,6 +86,18 @@ class TestAGRest():
         with pytest.raises(SSDCRestError):
             gridlist = agrest.gridList(tmin, tmax)
 
+    
+    @pytest.mark.testdir("utils")
+    def test_datacoverage(self, logger, gettmpdir):
+
+        agrest = AGRest(logger)
+
+        tmin, tmax = agrest.get_coverage()
+
+        print(tmin, tmax)
+
+        assert tmin == "2007-12-01T12:00:00"
+
 
 
         
