@@ -145,3 +145,7 @@ class XMLParseError(Exception):
 class SSDCRestError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+class NoCoverageDataError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

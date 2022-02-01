@@ -35,6 +35,7 @@ from agilepy.core.AGDataset import DataStatus
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AstroUtils import AstroUtils
 from datetime import datetime
+from agilepy.core.CustomExceptions import NoCoverageDataError
 
 class TestAGDataset:
 
@@ -64,14 +65,26 @@ class TestAGDataset:
         config.loadBaseConfigurations(configPath)
         config.loadConfigurationsForClass("AGAnalysis")
 
+        datacoveragepath = Path( __file__ ).absolute().parent.joinpath("test_data", "AGILE_test_datacoverage")
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
+
+        #test download data
 
         tmin = 57083 # 2015-02-28T00:00:00
         tmax = 57090 # 2015-03-15T00:00:00
         downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
 
         assert downloaded == True
+
+        #test tmax outside data coverage
+        tmin = 58051
+        tmax = 59582
+
+        with pytest.raises(NoCoverageDataError):
+            downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
+
+        
 
     @pytest.mark.testdir("core")
     def test_extract_data_evt(self, logger):
@@ -380,8 +393,6 @@ class TestAGDataset:
         hole = agdataset.gotHole(datesLOGDF, intervalIndexTmin, intervalIndexTmax)
 
         assert hole == True
-
-
 
 
 

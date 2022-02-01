@@ -4,7 +4,7 @@ import datetime
 from time import time
 from tqdm import tqdm
 from pathlib import Path
-from agilepy.core.CustomExceptions import SSDCRestError
+from agilepy.core.CustomExceptions import SSDCRestError, NoCoverageDataError
 from agilepy.utils.AGRest import AGRest
 from agilepy.core.ScienceTools import Indexgen
 from agilepy.utils.AstroUtils import AstroUtils
@@ -24,8 +24,31 @@ class AGDataset:
     to download AGILE EVT and LOG data and it creates query files in order to keep the data requests updated.
     """
 
-    def __init__(self, logger):
+    def __init__(self, logger, datacoveragepath=Path(__file__).parent.resolve().joinpath("../utils/AGILE_datacoverage").resolve()):
         self.logger = logger
+        self.agrest = AGRest(self.logger)
+
+        with open(datacoveragepath, "r") as f:
+            self.logger.debug(self, f"opening coverage file at {datacoveragepath}")
+            line = f.readline().split(" ")
+            self.coverage_tmin = line[0]
+            self.coverage_tmax = line[1]
+            self.logger.info(self, f"AGILE data coverage from {self.coverage_tmin} to {self.coverage_tmax}")
+
+        if not self.checkcoverage(self.coverage_tmin, self.coverage_tmax):
+            new_coverage_tmin, new_coverage_tmax = self.agrest.get_coverage()
+            
+            with open(datacoveragepath, "w") as f:
+                self.logger.debug(self, f"writing new coverage file at {datacoveragepath}")
+                f.write(f"{new_coverage_tmin} {new_coverage_tmax}")
+
+    def checkcoverage(self, tmin, tmax):        
+        tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
+        if tmin == "2007-12-01T12:00:00" and (datetime.datetime.today() - tmax).days <= 60:
+            self.logger.info(self, f"check coverage OK!")
+            return True
+        else:
+            return False
 
     def downloadData(self, tmin, tmax, dataPath, evtIndex, logIndex):
         """ It downloads EVT and LOG data that the user requires to perform a scientific
@@ -38,7 +61,14 @@ class AGDataset:
 
         @param tmin: mjd
         @param tmax: mjd
-        """
+        """    
+
+        print(tmax, self.coverage_tmax)
+
+        if tmax > AstroUtils.time_fits_to_mjd(self.coverage_tmax):
+            raise NoCoverageDataError("tmax exceeds AGILE data coverage")
+           
+
         dataPath = Path(dataPath)
 
         evtPath  = dataPath.joinpath("EVT")
@@ -63,12 +93,9 @@ class AGDataset:
             self.logger.info(self, f"Local data for LOG already in dataset")
 
         if evtDataMissing or logDataMissing:
-
-            agRest = AGRest(self.logger)
-
             try:
-                message = agRest.gridList(tmin, tmax)
-                tarFilePath = agRest.gridFiles(tmin, tmax)
+                message = self.agrest.gridList(tmin, tmax)
+                tarFilePath = self.agrest.gridFiles(tmin, tmax)
             except SSDCRestError as err:
                 print(err)
 
