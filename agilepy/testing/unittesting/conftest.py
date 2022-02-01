@@ -16,14 +16,14 @@ def logger(request):
         raise ValueError("marker is None! Something wrong passing 'testdir' to fixture!")
 
     testdir = marker.args[0]
+    testname = marker.args[1]
 
-    logdir = script_path.joinpath(testdir)
+    testlogger.initialize(testdir, f"{testname}", 1)
 
-    logdir.mkdir(parents=True, exist_ok=True)
+    yield testlogger
 
-    testlogger.initialize(logdir, f"{testdir}_logs", 1)
-
-    return testlogger
+    testlogger.reset() 
+    
 
 
 @pytest.fixture(scope="function")
@@ -64,3 +64,15 @@ def gettmpdir(request):
     tmpDir.mkdir(exist_ok=True, parents=True)
 
     return tmpDir
+
+
+@pytest.fixture(scope="function")
+def datacoveragepath(request):
+    
+    marker = request.node.get_closest_marker("testdir")
+
+    testdir = marker.args[0]
+
+    datacoveragepath = Path( __file__ ).absolute().parent.joinpath(testdir, "test_data", "AGILE_test_datacoverage")
+
+    return datacoveragepath

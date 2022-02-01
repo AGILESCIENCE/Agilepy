@@ -42,7 +42,8 @@ class AGDataset:
                 self.logger.debug(self, f"writing new coverage file at {datacoveragepath}")
                 f.write(f"{new_coverage_tmin} {new_coverage_tmax}")
 
-    def checkcoverage(self, tmin, tmax):        
+    def checkcoverage(self, tmin, tmax):
+
         tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
         if tmin == "2007-12-01T12:00:00" and (datetime.datetime.today() - tmax).days <= 60:
             self.logger.info(self, f"check coverage OK!")
@@ -51,7 +52,8 @@ class AGDataset:
             return False
 
     def downloadData(self, tmin, tmax, dataPath, evtIndex, logIndex):
-        """ It downloads EVT and LOG data that the user requires to perform a scientific
+        """ 
+        It downloads EVT and LOG data that the user requires to perform a scientific
         analysis from tmin to tmax (in MJD format).
 
         If the data is already present on disk, the download will be skipped. 
@@ -63,7 +65,7 @@ class AGDataset:
         @param tmax: mjd
         """    
 
-        print(tmax, self.coverage_tmax)
+        # print(tmax, self.coverage_tmax)
 
         if tmax > AstroUtils.time_fits_to_mjd(self.coverage_tmax):
             raise NoCoverageDataError("tmax exceeds AGILE data coverage")
@@ -80,24 +82,21 @@ class AGDataset:
         evtDataMissing = False
         logDataMissing = False
 
-        if self.dataIsMissing(tmin, tmax, evtQfile, 15) == DataStatus.MISSING:
+        if self.dataIsMissing(tmin, tmax, evtQfile) == DataStatus.MISSING:
             self.logger.info(self, f"EVT data in interval {tmin} {tmax} is missing!")
             evtDataMissing = True
         else:
             self.logger.info(self, f"Local data for EVT already in dataset")
 
-        if self.dataIsMissing(tmin, tmax, logQfile, 1) == DataStatus.MISSING:
+        if self.dataIsMissing(tmin, tmax, logQfile) == DataStatus.MISSING:
             self.logger.info(self, f"LOG data in interval {tmin} {tmax} is missing!")
             logDataMissing = True
         else:
             self.logger.info(self, f"Local data for LOG already in dataset")
 
         if evtDataMissing or logDataMissing:
-            try:
-                message = self.agrest.gridList(tmin, tmax)
+                _ = self.agrest.gridList(tmin, tmax)
                 tarFilePath = self.agrest.gridFiles(tmin, tmax)
-            except SSDCRestError as err:
-                print(err)
 
 
         if evtDataMissing:
@@ -192,8 +191,9 @@ class AGDataset:
 
         return pd.DataFrame(slots, columns=["tmin", "tmax"])
 
-    def dataIsMissing(self, tmin, tmax, queryFilepath, blockSize):
-        """ This method can be extended to handle the case of partial missing data
+    def dataIsMissing(self, tmin, tmax, queryFilepath):
+        """ 
+        This method can be extended to handle the case of partial missing data
         """
         if not queryFilepath.exists():
             self.logger.warning(self, f"Query file {queryFilepath} does not exists")
@@ -210,7 +210,8 @@ class AGDataset:
         datesDF = pd.read_csv(queryFilepath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
 
         
-        self.logger.debug(self, str(datesDF))
+        
+        #self.logger.debug(self, str(datesDF))
         self.logger.debug(self, f"{tminUtc}, {tmaxUtc}")
 
         # check interval of tmin 
@@ -391,10 +392,3 @@ class AGDataset:
 
         indexfile = igen.call()
         self.logger.info(self, f"indexfile at {indexfile}")
-
-    """
-    def _checkindexfile(self, indexfile):
-
-        with open(indexfile, "r") as f:
-            pass
-    """

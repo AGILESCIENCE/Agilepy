@@ -24,7 +24,7 @@
 
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cgi import test
+#from cgi import test
 import os
 import pandas as pd
 from shutil import rmtree
@@ -39,9 +39,9 @@ from agilepy.core.CustomExceptions import NoCoverageDataError
 
 class TestAGDataset:
 
-
-    @pytest.mark.testdir("core")
-    def test_download_data(self, logger):
+    
+    @pytest.mark.testdir("core", "test_download_data")
+    def test_download_data(self, logger, datacoveragepath):
 
         testOutputDir = Path( __file__ ).absolute().parent.joinpath("test_out")
 
@@ -67,7 +67,7 @@ class TestAGDataset:
 
         datacoveragepath = Path( __file__ ).absolute().parent.joinpath("test_data", "AGILE_test_datacoverage")
 
-        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
+        agdataset = AGDataset(logger, datacoveragepath)
 
         #test download data
 
@@ -86,27 +86,26 @@ class TestAGDataset:
 
         
 
-    @pytest.mark.testdir("core")
-    def test_extract_data_evt(self, logger):
+    @pytest.mark.testdir("core", "test_extract_data_evt")
+    def test_extract_data_evt(self, logger, datacoveragepath):
 
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_extract_data_EVT.qfile")
 
-        agdataset = AGDataset(logger)
-        blocksize = 15
+        agdataset = AGDataset(logger, datacoveragepath)
 
         # Test 1 - boundaries (tmax is not included)
         # =================
         # ^               ^
         tmin = 57081 # 2015-02-28T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)
 
         # Test 2 - inside range
         # =================
         #   ^          ^   
         tmin = 57082 # 2015-03-01T00:00:00
         tmax = 57086 # 2015-03-05T00:00:00
-        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)
 
         # Test 3 - boundaries of multiple lines
         # =================
@@ -115,7 +114,7 @@ class TestAGDataset:
         #                 ^          
         tmin = 59000 # 2020-05-31T00:00:00
         tmax = 59030 # 2020-06-30T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)
 
         # Test 4 - inside of multiple lines
         # =================
@@ -124,7 +123,7 @@ class TestAGDataset:
         #               ^          
         tmin = 59014 # 2020-06-14T00:00:00
         tmax = 59028 # 2020-06-28T00:00:00
-        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)
 
 
         # Test 5 - partial missing data
@@ -132,7 +131,7 @@ class TestAGDataset:
         # ^               ^
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57096 # 2015-03-15T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)        
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)        
 
         # Test 6 - partial missing data on multiple lines
         #       =================
@@ -141,7 +140,7 @@ class TestAGDataset:
         #                       ^                
         tmin = 58984 # 2020-05-15T00:00:00
         tmax = 59030 # 2020-06-30T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)   
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)   
 
 
         # Test 7 - totally missing data
@@ -149,7 +148,7 @@ class TestAGDataset:
         # ^  ^               
         tmin = 57032 # 2015-01-10T00:00:00
         tmax = 57042 # 2015-01-20T00:00:00
-        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)
+        assert DataStatus.MISSING == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)
 
 
         # Test 8 - test 2010
@@ -158,26 +157,59 @@ class TestAGDataset:
 
         tmin = 55513.0
         tmax = 55521.0
-        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath, blocksize)       
+        assert DataStatus.OK == agdataset.dataIsMissing(tmin, tmax, queryEVTPath)       
 
     
         
-    @pytest.mark.testdir("core")
-    def test_extract_data_log(self, logger):
+    @pytest.mark.testdir("core", "test_extract_data_log")
+    def test_extract_data_log(self, logger, datacoveragepath):
         
         queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_extract_data_LOG.qfile")
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
 
-        blocksize = 1
+        # Test - inside of multiple lines
+        # =================
+        #   ^
+        # =================
+        #               ^   
+        tmin = "2017-10-27T00:00:00"
+        tmax = "2017-10-30T00:00:00"
+        assert DataStatus.OK == agdataset.dataIsMissing(AstroUtils.time_fits_to_mjd(tmin), AstroUtils.time_fits_to_mjd(tmax), queryLOGPath)
 
-        # TODO: impklement me!11!11!!!!!
+        # Test - inside range
+        # =================
+        #   ^          ^   
+        tmin = "2017-10-27T00:00:00"
+        tmax = "2017-10-27T05:00:00"
+        assert DataStatus.OK == agdataset.dataIsMissing(AstroUtils.time_fits_to_mjd(tmin), AstroUtils.time_fits_to_mjd(tmax), queryLOGPath)
 
 
-    @pytest.mark.testdir("core")
-    def test_compute_ssdc_slots(self, logger):
+        # Test - totally missing data
+        #       =================
+        # ^  ^               
+        tmin = "2022-01-27T00:00:00" # 2015-01-10T00:00:00
+        tmax = "2022-01-30T00:00:00" # 2015-01-20T00:00:00
+        assert DataStatus.MISSING == agdataset.dataIsMissing(AstroUtils.time_fits_to_mjd(tmin), AstroUtils.time_fits_to_mjd(tmax), queryLOGPath)
 
-        agdataset = AGDataset(logger)
+
+        # Test - partial missing data on multiple lines
+        # =================
+        # ^                
+        # =================
+        #                       ^     
+        tmin = "2018-02-09T00:00:00"
+        tmax = "2018-02-25T00:00:00"
+        assert DataStatus.MISSING == agdataset.dataIsMissing(AstroUtils.time_fits_to_mjd(tmin), AstroUtils.time_fits_to_mjd(tmax), queryLOGPath)
+        
+
+        
+
+
+    @pytest.mark.testdir("core", "test_compute_ssdc_slots")
+    def test_compute_ssdc_slots(self, logger, datacoveragepath):
+
+        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
 
         ################## EVT FILES
 
@@ -216,10 +248,10 @@ class TestAGDataset:
             assert f"{slot['tmin']} {slot['tmax']}" == expectedSlots[index]
         
 
-    @pytest.mark.testdir("core")
-    def test_update_qfiles_not_empty(self, logger): # with duplicates
+    @pytest.mark.testdir("core", "test_update_qfiles_not_empty")
+    def test_update_qfiles_not_empty(self, logger, datacoveragepath): # with duplicates
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath)
         
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_update_qfiles_not_empty_EVT.qfile")
         queryEVTPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "test_update_qfiles_not_empty_EVT.qfile.out")
@@ -240,10 +272,10 @@ class TestAGDataset:
            assert len(qf.readlines()) == 108
 
 
-    @pytest.mark.testdir("core")
-    def test_update_qfiles_empty(self, logger):
+    @pytest.mark.testdir("core", "test_update_qfiles_empty")
+    def test_update_qfiles_empty(self, logger, datacoveragepath):
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath)
         
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_update_qfiles_empty_EVT.qfile")
         queryEVTPathOut = Path( __file__ ).absolute().parent.joinpath("test_out", "test_update_qfiles_empty_EVT.qfile.out")
@@ -261,10 +293,10 @@ class TestAGDataset:
            assert len(qf.readlines()) == 8
 
 
-    @pytest.mark.testdir("core")
-    def test_update_qfiles_overwrite(self, logger):
+    @pytest.mark.testdir("core", "test_update_qfiles_overwrite")
+    def test_update_qfiles_overwrite(self, logger, datacoveragepath):
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath)
         
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_EVT.qfile")
         queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "overwrite_LOG.qfile")
@@ -292,9 +324,9 @@ class TestAGDataset:
            assert len(qf.readlines()) == 109
 
     
-    @pytest.mark.testdir("core")
-    def test_getInterval(self, logger):
-        agdataset = AGDataset(logger)
+    @pytest.mark.testdir("core", "test_getInterval")
+    def test_getInterval(self, logger, datacoveragepath):
+        agdataset = AGDataset(logger, datacoveragepath)
 
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_EVT.qfile")
         queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_LOG.qfile")
@@ -324,10 +356,10 @@ class TestAGDataset:
         assert intervalIndexEVT == -1
         assert intervalIndexLOG == -1
 
-    @pytest.mark.testdir("core")
-    def test_gotHole(self, logger):
+    @pytest.mark.testdir("core", "test_got_hole")
+    def test_got_hole(self, logger, datacoveragepath):
 
-        agdataset = AGDataset(logger)
+        agdataset = AGDataset(logger, datacoveragepath)
 
         queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_EVT.qfile")
         queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_LOG.qfile")
@@ -393,11 +425,3 @@ class TestAGDataset:
         hole = agdataset.gotHole(datesLOGDF, intervalIndexTmin, intervalIndexTmax)
 
         assert hole == True
-
-
-
-
-
-
-
-
