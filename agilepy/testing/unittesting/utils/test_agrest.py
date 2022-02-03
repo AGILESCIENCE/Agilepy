@@ -29,7 +29,7 @@ import pytest
 from pathlib import Path
 
 from agilepy.utils.AGRest import AGRest 
-from agilepy.core.CustomExceptions import SSDCRestError
+from agilepy.core.CustomExceptions import SSDCRestErrorDownload
 
 class TestAGRest():
 
@@ -77,13 +77,13 @@ class TestAGRest():
 
         tmax = 58200
 
-        with pytest.raises(SSDCRestError):
+        with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
 
         tmin = 59549
         tmax = 59569
 
-        with pytest.raises(SSDCRestError):
+        with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
 
     

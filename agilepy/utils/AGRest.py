@@ -7,7 +7,7 @@ from time import time
 from pathlib import Path
 
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.core.CustomExceptions import SSDCRestError
+from agilepy.core.CustomExceptions import SSDCRestErrorDownload
 
 class AGRest:
 
@@ -36,7 +36,7 @@ class AGRest:
         json_data = json.loads(response.text)
 
         if json_data["Response"]["statusCode"] != "OK":
-            raise SSDCRestError(json_data["Response"]["message"])
+            raise SSDCRestErrorDownload(json_data["Response"]["message"])
 
         tmin = json_data["DataCoverageFrom"]
         tmax = json_data["DataCoverageTo"]
@@ -83,10 +83,10 @@ class AGRest:
         self.logger.info(self, f"Took {end} seconds")
 
         if json_data["Response"]["statusCode"] != "OK":
-            raise SSDCRestError(json_data["Response"]["message"])
+            raise SSDCRestErrorDownload(json_data["Response"]["message"])
 
         if json_data["Response"]["statusCode"] == "OK" and json_data["Response"]["message"] == "No data found.":
-            raise SSDCRestError(json_data["Response"]["message"])
+            raise SSDCRestErrorDownload(json_data["Response"]["message"])
 
         return json_data["AgileFiles"]
 

@@ -1,10 +1,11 @@
+import os
 import tarfile
 import calendar
 import datetime
 from time import time
 from tqdm import tqdm
 from pathlib import Path
-from agilepy.core.CustomExceptions import SSDCRestError, NoCoverageDataError
+from agilepy.core.CustomExceptions import SSDCRestErrorDownload, NoCoverageDataError
 from agilepy.utils.AGRest import AGRest
 from agilepy.core.ScienceTools import Indexgen
 from agilepy.utils.AstroUtils import AstroUtils
@@ -305,6 +306,8 @@ class AGDataset:
                     extractedFiles.append(tarInfo.name)
         
         self.logger.debug(self, f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
+        self.logger.debug(self, f"Removing {targzPath} file")
+        os.remove(targzPath)
         return extractedFiles                    
 
 

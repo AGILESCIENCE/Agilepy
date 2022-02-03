@@ -105,6 +105,7 @@ class AGAnalysis(AGBaseAnalysis):
         }
 
         self.multiTool = Multi("AG_multi", self.logger)
+        self.agdataset = AGDataset(self.logger)
 
 
     def destroy(self):
@@ -570,11 +571,10 @@ plotting:
         ####### REST API #######
 
         if configBKP.getOptionValue("userestapi"):
-            agdataset = AGDataset(self.logger)
             if timetype == "TT":
                 tminRest = AstroUtils.time_agile_seconds_to_mjd(tmin)
                 tmaxRest = AstroUtils.time_agile_seconds_to_mjd(tmax)
-            agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
+            self.agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
 
         
         if timetype == "MJD":
@@ -902,9 +902,13 @@ plotting:
             self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
 
         if timetype == "MJD":
+            self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
+
             tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
             tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
-
+        else:    
+            self.agdataset.downloadData(AstroUtils.time_agile_seconds_to_mjd(tmin), AstroUtils.time_agile_seconds_to_mjd(tmax), self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
+            
         tmin = int(tmin)
         tmax = int(tmax)
 

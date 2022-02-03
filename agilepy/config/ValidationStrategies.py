@@ -28,6 +28,7 @@
 from os import stat
 from pathlib import Path
 from typing import List
+import numpy as np
 from numbers import Number
 
 from agilepy.utils.Utils import Utils
@@ -253,7 +254,7 @@ class ValidationStrategies:
                 raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
             
             # int is a Number...
-            if (type(optionValue)==int or type(optionValue)==float) and validType[0]==Number:
+            if (type(optionValue)==int or type(optionValue)==float) or type(optionValue) == np.float64 and validType[0]==Number:
                 pass
             
             elif type(optionValue) != validType[0]:
@@ -303,4 +304,3 @@ class ValidationStrategies:
             errors["input/datapath"] = error_str
 
         return errors
-
