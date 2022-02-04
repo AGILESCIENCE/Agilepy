@@ -307,7 +307,7 @@ class AGDataset:
         
         self.logger.debug(self, f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
         self.logger.debug(self, f"Removing {targzPath} file")
-        os.remove(targzPath)
+        #os.remove(targzPath)
         return extractedFiles                    
 
 
