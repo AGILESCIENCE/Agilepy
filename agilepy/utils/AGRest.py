@@ -125,7 +125,7 @@ class AGRest:
 
         with open(outpath, "wb") as f:
             #Writing chunks for large downloads
-            for chunk in response.iter_content(chunk_size=1024*1024):
+            for chunk in response.iter_content(chunk_size=1024):
                 f.write(chunk)
 
         if not Path(outpath).is_file():
