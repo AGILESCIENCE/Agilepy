@@ -25,7 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from os import stat
+from os import stat, listdir
 from pathlib import Path
 from typing import List
 import numpy as np
@@ -36,11 +36,14 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
-    
+    """
     @staticmethod
-    def _validateEvtFile(confDict):
+    def _validateEvtFile(confDict): #DEPRECATED
 
         errors = {}
+
+        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+           return errors
 
         if Path(confDict["input"]["evtfile"]) is None and confDict["input"]["userestapi"] == False:
             error_str = f"evtfile is None and userestapi is set to False"
@@ -53,9 +56,12 @@ class ValidationStrategies:
         return errors
 
     @staticmethod
-    def _validateLogFile(confDict):
+    def _validateLogFile(confDict): DEPRECATED
         
         errors = {}
+
+        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+           return errors
 
         if Path(confDict["input"]["logfile"]) is None and confDict["input"]["userestapi"] == False:
             error_str = f"logfile is None and userestapi is set to False"
@@ -66,7 +72,7 @@ class ValidationStrategies:
             errors["input/logfile"] = error_str            
         
         return errors
-
+    """
     @staticmethod
     def _validateBackgroundCoeff(confDict):
 
@@ -103,6 +109,11 @@ class ValidationStrategies:
 
         errors = {}
 
+        #print(f"{type(confDict['input']['userestapi'])} \n\n\n\n {len(listdir(Path(confDict['input']['datapath'])))}")
+
+        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+            return errors
+
         pathEvt = Path(confDict["input"]["evtfile"])
 
         if not pathEvt.exists() or not pathEvt.is_file():
@@ -118,6 +129,9 @@ class ValidationStrategies:
     @staticmethod
     def _validateTimeInIndex(confDict):
         errors = {}
+
+        if (confDict["input"]["userestapi"] == True) and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+            return errors
 
         (first, last) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
 
@@ -254,7 +268,7 @@ class ValidationStrategies:
                 raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
             
             # int is a Number...
-            if (type(optionValue)==int or type(optionValue)==float) or type(optionValue) == np.float64 and validType[0]==Number:
+            if (type(optionValue) in [int, float, np.float64]) and validType[0]==Number:
                 pass
             
             elif type(optionValue) != validType[0]:

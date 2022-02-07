@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from genericpath import exists
 import os
 import shutil
 import unittest
@@ -297,12 +298,17 @@ class AgilepyConfigUT(unittest.TestCase):
         self.config = AgilepyConfig()
 
         conf1Path = os.path.join(self.currentDirPath,"conf/conf4.yaml")
+        
+        dirpath = Path("/tmp/foo/bar") 
+        dirpath.mkdir(parents=True, exist_ok=True)
 
         self.config.loadBaseConfigurations(conf1Path)
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.assertEqual(self.config.getOptionValue("evtfile"), Path(self.config.getOptionValue("datapath")).joinpath("EVT.index"))
         self.assertEqual(self.config.getOptionValue("logfile"), Path(self.config.getOptionValue("datapath")).joinpath("LOG.index"))
+
+        dirpath.rmdir()
 
     ##### TEST NOT SUPPORTED AFTER REST FEATURE
     """

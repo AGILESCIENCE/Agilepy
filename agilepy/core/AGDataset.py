@@ -16,8 +16,6 @@ from enum import Enum
 class DataStatus(Enum):
     OK = 0
     MISSING = 1
-    #PARTIALLY_MISSING = 2 # not hanlded
-    #TOTALLY_MISSING = 3 # not hanlded
 
 class AGDataset:
     """
@@ -111,6 +109,8 @@ class AGDataset:
             self.logger.debug(self, f"Extracted files: {extractedFiles}")
             self.updateQFile(logQfile, tmin, tmax, logQfile)
             self.generateIndex(logPath, "LOG", logIndex)
+        
+        os.remove(tarFilePath)
 
         return evtDataMissing or logDataMissing
 
@@ -307,7 +307,7 @@ class AGDataset:
         
         self.logger.debug(self, f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
         self.logger.debug(self, f"Removing {targzPath} file")
-        #os.remove(targzPath)
+        
         return extractedFiles                    
 
 

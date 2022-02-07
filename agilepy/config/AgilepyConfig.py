@@ -210,7 +210,7 @@ class AgilepyConfig(Observable):
 
         if errors:
             confBKP = None
-            raise ConfigurationsNotValidError("Errors: {}".format(errors))
+            raise ConfigurationsNotValidError(f"Errors: {errors}")
 
         # Use confBKP 
         self.conf = confBKP.copy()
