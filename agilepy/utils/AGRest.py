@@ -115,7 +115,7 @@ class AGRest:
 
         start = time() 
 
-        response = requests.get(api_url)
+        response = requests.get(api_url, stream=True)
 
         end = time() - start
 
@@ -125,7 +125,7 @@ class AGRest:
 
         with open(outpath, "wb") as f:
             #Writing chunks for large downloads
-            for chunk in response.iter_content(chunk_size=1024):
+            for chunk in response.iter_content(chunk_size=1024*1024*10):
                 f.write(chunk)
 
         if not Path(outpath).is_file():
