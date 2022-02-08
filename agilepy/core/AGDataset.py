@@ -110,7 +110,8 @@ class AGDataset:
             self.updateQFile(logQfile, tmin, tmax, logQfile)
             self.generateIndex(logPath, "LOG", logIndex)
         
-        os.remove(tarFilePath)
+        if evtDataMissing or logDataMissing:
+            os.remove(tarFilePath)
 
         return evtDataMissing or logDataMissing
 
@@ -395,3 +396,14 @@ class AGDataset:
 
         indexfile = igen.call()
         self.logger.info(self, f"indexfile at {indexfile}")
+        
+        #sorting indexfile & handling if newline is at the end of the line
+        with open(str(indexfile[0]), "r") as fr:
+           lines = sorted(fr.readlines())
+        
+        with open(str(indexfile[0]), "w") as fw:
+            for line in lines:
+                if line[-1] == "\n":
+                    fw.write(line)
+                else:
+                    fw.write(line+"\n")

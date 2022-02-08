@@ -110,8 +110,7 @@ class ValidationStrategies:
         errors = {}
 
         #print(f"{type(confDict['input']['userestapi'])} \n\n\n\n {len(listdir(Path(confDict['input']['datapath'])))}")
-
-        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+        if confDict["input"]["userestapi"]:
             return errors
 
         pathEvt = Path(confDict["input"]["evtfile"])
@@ -126,11 +125,13 @@ class ValidationStrategies:
 
         return errors
 
+
+    #Deprecated after 1.5.0 release
     @staticmethod
     def _validateTimeInIndex(confDict):
         errors = {}
 
-        if (confDict["input"]["userestapi"] == True) and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+        if (confDict["input"]["userestapi"] == True):
             return errors
 
         (first, last) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])

@@ -63,7 +63,7 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateLogFile(confDict) ) deprecated
         errors.update( ValidationStrategies._validateBackgroundCoeff(confDict) )
         errors.update( ValidationStrategies._validateIndexFiles(confDict) )
-        errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
+        #errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
         errors.update( ValidationStrategies._validateLOCCL(confDict) )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )

@@ -2,7 +2,7 @@ input:
   evtfile: $AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index
   logfile: $AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index
   userestapi: True
-  datapath: "/foo/bar"
+  datapath: "/tmp/foo/bar"
 
 output:
   outdir: $AGILE/agilepy-test-data/unittesting-output/config
