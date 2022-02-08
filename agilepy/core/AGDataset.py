@@ -26,9 +26,12 @@ class AGDataset:
     def __init__(self, logger, datacoveragepath=Path(__file__).parent.resolve().joinpath("../utils/AGILE_datacoverage").resolve()):
         self.logger = logger
         self.agrest = AGRest(self.logger)
+        self.datacoveragepath = datacoveragepath
 
-        with open(datacoveragepath, "r") as f:
-            self.logger.debug(self, f"opening coverage file at {datacoveragepath}")
+
+    def agilecoverage(self):
+        with open(self.datacoveragepath, "r") as f:
+            self.logger.debug(self, f"opening coverage file at {self.datacoveragepath}")
             line = f.readline().split(" ")
             self.coverage_tmin = line[0]
             self.coverage_tmax = line[1]
@@ -37,9 +40,10 @@ class AGDataset:
         if not self.checkcoverage(self.coverage_tmin, self.coverage_tmax):
             new_coverage_tmin, new_coverage_tmax = self.agrest.get_coverage()
             
-            with open(datacoveragepath, "w") as f:
-                self.logger.debug(self, f"writing new coverage file at {datacoveragepath}")
+            with open(self.datacoveragepath, "w") as f:
+                self.logger.debug(self, f"writing new coverage file at {self.datacoveragepath}")
                 f.write(f"{new_coverage_tmin} {new_coverage_tmax}")
+
 
     def checkcoverage(self, tmin, tmax):
 

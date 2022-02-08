@@ -105,7 +105,10 @@ class AGAnalysis(AGBaseAnalysis):
         }
 
         self.multiTool = Multi("AG_multi", self.logger)
-        self.agdataset = AGDataset(self.logger)
+
+        if self.config.getOptionValue("userestapi"):
+            self.agdataset = AGDataset(self.logger)
+            self.agdataset.agilecoverage()
 
 
     def destroy(self):
