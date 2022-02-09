@@ -1,6 +1,6 @@
-*************************
-Dataset Download via REST
-*************************
+*****************************
+Dataset Download via REST API
+*****************************
 
 
 Overview

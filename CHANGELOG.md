@@ -5,6 +5,8 @@
 * (\#291) Codacy coverage fixed
 * (\#282) Dependencies updated and CI improved
 * (\#287b) Completely new API for date conversion using Astropy Time
+* (\#303) AG_spotfinder implemented in Agilepy
+* Various bugfixes and improvements
 
 ## Release 1.4.2 (26/05/21)
 * Minor hotfixes and docs updated
