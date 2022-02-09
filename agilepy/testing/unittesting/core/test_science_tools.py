@@ -60,7 +60,7 @@ class TestSourceModel:
 
 class TestSpotFinder:
     
-    @pytest.mark.testdir("core")
+    @pytest.mark.testdir("core", "test_spotfinder")
     def test_spotfinder(self, config, logger):
 
         current_path = Path(__file__).parent.resolve()
