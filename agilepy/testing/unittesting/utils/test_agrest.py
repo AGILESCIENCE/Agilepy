@@ -41,9 +41,13 @@ class TestAGRest():
         data = agrest.requestData(tmin, tmax)
         assert Path(data).is_file() == True
     """
-
-    @pytest.mark.testdir("utils", "test_gridfiles")
+    @pytest.mark.ssdc
+    @pytest.mark.testdir("utils", "test_gridfiles","ssdc")
     def test_gridfiles(self, logger, gettmpdir):
+
+        """
+        To run this test --runrest it needed when calling pytest
+        """
 
         agrest = AGRest(logger)
 
@@ -62,9 +66,14 @@ class TestAGRest():
 
 
 
-
+    @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_gridList")
     def test_gridList(self, logger, gettmpdir):
+
+
+        """
+        To run this test --runrest it needed when calling pytest
+        """
 
         agrest = AGRest(logger)
 
@@ -86,9 +95,13 @@ class TestAGRest():
         with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
 
-    
+    @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_datacoverage")
     def test_datacoverage(self, logger, gettmpdir):
+
+        """
+        To run this test --runrest it needed when calling pytest
+        """
 
         agrest = AGRest(logger)
 

@@ -39,9 +39,12 @@ from agilepy.core.CustomExceptions import NoCoverageDataError
 
 class TestAGDataset:
 
-    
+    @pytest.mark.ssdc
     @pytest.mark.testdir("core", "test_download_data")
     def test_download_data(self, logger, datacoveragepath):
+        """
+        To run this test --runrest it needed when calling pytest
+        """
 
         testOutputDir = Path( __file__ ).absolute().parent.joinpath("test_out")
 
