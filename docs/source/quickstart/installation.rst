@@ -3,6 +3,12 @@ Installation
 
 Agilepy is available as Anaconda package or into a ready-to-use Docker container (from 1.4.0)
 
+.. note:: Release 1.5.0 is now available through dockerhub and anaconda cloud! 
+          Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 
+          Agilepy automatically handles the data and no actions are required from the user.
+          For more information visit `this page <../manual/Ag_dataset_rest_api.html>`_.
+          This major release includes many new important features and a general refactoring.
+
 Installation with Anaconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -195,7 +195,7 @@ class Indexgen(ProcessWrapper):
         type: EVT | LOG
         out file:
     Usage:
-        AG_indexgen <log_dir> <type> <out_file>
+        AG_indexgen <data_dir> <type> <out_file>
     Return:
         indexfile
     """
@@ -205,14 +205,14 @@ class Indexgen(ProcessWrapper):
         self.isAgileTool = False
 
     def getRequiredOptions(self):
-        return ["logdir", "type", "out_file"]
+        return ["datadir", "type", "out_file"]
 
-    def configureTool(self, confDict, extraParams=None):
+    def configureTool(self, confDict=None, extraParams=None):
         
         self.outputDir = extraParams["out_dir"]
         outputFile = str(Path(self.outputDir).joinpath(extraParams["out_file"]))
 
-        self.args = [extraParams["log_dir"],
+        self.args = [extraParams["data_dir"],
                      extraParams["type"],
                      outputFile
                     ]

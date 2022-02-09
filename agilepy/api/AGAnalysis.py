@@ -35,6 +35,8 @@ from pathlib import Path
 from shutil import rmtree
 from ntpath import basename
 from os.path import join, splitext, expandvars
+
+from agilepy.core.AGDataset import AGDataset
 pattern = re.compile('e([+\-]\d+)')
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
@@ -104,6 +106,10 @@ class AGAnalysis(AGBaseAnalysis):
 
         self.multiTool = Multi("AG_multi", self.logger)
 
+        if self.config.getOptionValue("userestapi"):
+            self.agdataset = AGDataset(self.logger)
+            self.agdataset.agilecoverage()
+
 
     def destroy(self):
         """ It clears the list of sources and the current maplist file.
@@ -120,7 +126,7 @@ class AGAnalysis(AGBaseAnalysis):
     ############################################################################
 
     @staticmethod
-    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index", userestapi=True, datapath=None):
         """Utility method to create a configuration file.
 
         Args:
@@ -134,35 +140,39 @@ class AGAnalysis(AGBaseAnalysis):
             glat (float): the galactic latitude (B) of the analysis.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
-            evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
-            logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            evtfile (str, optional [default=/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index]): the index file to be used for event data if userestapi is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            logfile (str, optional [default=/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index]): the index file to be used for log data if userestapi is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            userestapi (bool, optional [default=True]): If True, the SSDC REST API will be used to download missing data.
+            datapath (str, optional [default=None]): Datapath to download AGILE data if userestapi is set to True. Index files will be generated into this path.
 
 
         Returns:
             None
         """
 
-        configuration = """
+        configuration = f"""
 input:
-  evtfile: %s
-  logfile: %s
+  evtfile: {evtfile}
+  logfile: {logfile}
+  userestapi: {userestapi}
+  datapath: {datapath}
 
 output:
-  outdir: %s
+  outdir: {outputDir}
   filenameprefix: analysis_product
   logfilenameprefix: analysis_log
-  sourcename: %s
-  username: %s
-  verboselvl: %d
+  sourcename: {sourceName}
+  username: {userName}
+  verboselvl: {verboselvl}
 
 selection:  
   emin: 100
   emax: 10000
-  tmin: %f
-  tmax: %f
-  timetype: %s
-  glon: %f
-  glat: %f
+  tmin: {tmin}
+  tmax: {tmax}
+  timetype: {timetype}
+  glon: {glon}
+  glat: {glat}
   proj: ARC
   timelist: None
   filtercode: 5
@@ -227,7 +237,7 @@ ap:
 plotting:
   twocolumns: False
 
-        """%(evtfile, logfile, outputDir, sourceName, userName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """
 
         with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
@@ -468,7 +478,7 @@ plotting:
 
         """
 
-        self.config.setOptions(tmin=AstroUtils.time_mjd_to_tt(tmin), tmax=AstroUtils.time_mjd_to_tt(tmax), timetype="TT")
+        self.config.setOptions(tmin=AstroUtils.time_mjd_to_agile_seconds(tmin), tmax=AstroUtils.time_mjd_to_agile_seconds(tmax), timetype="TT")
 
     def setOptionEnergybin(self, value):
         """An useful utility method that maps a value in a specific energybin and it calls the setOptions function.
@@ -560,11 +570,20 @@ plotting:
         tmin = configBKP.getOptionValue("tmin")
         tmax = configBKP.getOptionValue("tmax")
         timetype = configBKP.getOptionValue("timetype")
+
+        ####### REST API #######
+
+        if configBKP.getOptionValue("userestapi"):
+            if timetype == "TT":
+                tminRest = AstroUtils.time_agile_seconds_to_mjd(tmin)
+                tmaxRest = AstroUtils.time_agile_seconds_to_mjd(tmax)
+            self.agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
+
         
         if timetype == "MJD":
-            tmin =  AstroUtils.time_mjd_to_tt(tmin)
-            tmax =  AstroUtils.time_mjd_to_tt(tmax)    
-            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")         
+            tmin =  AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax =  AstroUtils.time_mjd_to_agile_seconds(tmax)    
+            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
 
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")
@@ -714,8 +733,8 @@ plotting:
         timetype = self.config.getOptionValue("timetype")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
 
         if pastTimeWindow == 0:
             tmin = tmin
@@ -886,9 +905,15 @@ plotting:
             self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            if self.config.getOptionValue("userestapi"):
+                self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
 
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
+        
+        if self.config.getOptionValue("userestapi"):    
+            self.agdataset.downloadData(AstroUtils.time_agile_seconds_to_mjd(tmin), AstroUtils.time_agile_seconds_to_mjd(tmax), self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
+            
         tmin = int(tmin)
         tmax = int(tmax)
 
@@ -1282,11 +1307,11 @@ plotting:
                     time_start_tt = lcDataDict["time_start_tt"] # + binsize * timecounter
                     time_end_tt   = lcDataDict["time_end_tt"]   # + binsize * timecounter
 
-                    time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
-                    time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
+                    time_start_mjd = AstroUtils.time_agile_seconds_to_mjd(time_start_tt)
+                    time_end_mjd   = AstroUtils.time_agile_seconds_to_mjd(time_end_tt)
 
-                    time_start_utc = AstroUtils.time_mjd_to_utc(time_start_mjd)
-                    time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
+                    time_start_utc = AstroUtils.time_mjd_to_fits(time_start_mjd)
+                    time_end_utc   = AstroUtils.time_mjd_to_fits(time_end_mjd)
 
                     # time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist
                     # l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err

@@ -25,8 +25,10 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from os import stat, listdir
 from pathlib import Path
 from typing import List
+import numpy as np
 from numbers import Number
 
 from agilepy.utils.Utils import Utils
@@ -34,29 +36,43 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
 
 class ValidationStrategies:
-    
+    """
     @staticmethod
-    def _validateEvtFile(confDict):
+    def _validateEvtFile(confDict): #DEPRECATED
 
         errors = {}
+
+        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+           return errors
+
+        if Path(confDict["input"]["evtfile"]) is None and confDict["input"]["userestapi"] == False:
+            error_str = f"evtfile is None and userestapi is set to False"
+            errors["input/evtfile"] = error_str
         
-        if not Path(confDict["input"]["evtfile"]).exists():
+        elif not Path(confDict["input"]["evtfile"]).exists():
             error_str = f"The evtfile={confDict['input']['evtfile']} does not exist."
             errors["input/evtfile"] = error_str            
         
         return errors
 
     @staticmethod
-    def _validateLogFile(confDict):
+    def _validateLogFile(confDict): DEPRECATED
         
         errors = {}
 
-        if not Path(confDict["input"]["logfile"]).exists():
+        if confDict["input"]["userestapi"] and (len(listdir(Path(confDict["input"]["datapath"]))) == 0):
+           return errors
+
+        if Path(confDict["input"]["logfile"]) is None and confDict["input"]["userestapi"] == False:
+            error_str = f"logfile is None and userestapi is set to False"
+            errors["input/logfile"] = error_str
+
+        elif not Path(confDict["input"]["logfile"]).exists():
             error_str = f"The logfile={confDict['input']['logfile']} does not exist."
             errors["input/logfile"] = error_str            
         
         return errors
-
+    """
     @staticmethod
     def _validateBackgroundCoeff(confDict):
 
@@ -93,6 +109,10 @@ class ValidationStrategies:
 
         errors = {}
 
+        #print(f"{type(confDict['input']['userestapi'])} \n\n\n\n {len(listdir(Path(confDict['input']['datapath'])))}")
+        if confDict["input"]["userestapi"]:
+            return errors
+
         pathEvt = Path(confDict["input"]["evtfile"])
 
         if not pathEvt.exists() or not pathEvt.is_file():
@@ -105,9 +125,14 @@ class ValidationStrategies:
 
         return errors
 
+
+    #Deprecated after 1.5.0 release
     @staticmethod
     def _validateTimeInIndex(confDict):
         errors = {}
+
+        if (confDict["input"]["userestapi"] == True):
+            return errors
 
         (first, last) = Utils._getFirstAndLastLineInFile(confDict["input"]["evtfile"])
 
@@ -119,8 +144,8 @@ class ValidationStrategies:
         timetype = confDict["selection"]["timetype"]
 
         if timetype == "MJD":
-            userTmin = AstroUtils.time_mjd_to_tt(userTmin)
-            userTmax = AstroUtils.time_mjd_to_tt(userTmax)
+            userTmin = AstroUtils.time_mjd_to_agile_seconds(userTmin)
+            userTmax = AstroUtils.time_mjd_to_agile_seconds(userTmax)
 
         if float(userTmin) < float(idxTmin):
             errors["input/tmin"]="tmin: {} is outside the time range of {} (tmin < indexTmin). Index file time range: [{}, {}]" \
@@ -193,7 +218,6 @@ class ValidationStrategies:
         
         return errors
 
-
     @staticmethod
     def _validateDQ(confdict):
         
@@ -245,7 +269,7 @@ class ValidationStrategies:
                 raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
             
             # int is a Number...
-            if (type(optionValue)==int or type(optionValue)==float) and validType[0]==Number:
+            if (type(optionValue) in [int, float, np.float64]) and validType[0]==Number:
                 pass
             
             elif type(optionValue) != validType[0]:
@@ -285,3 +309,13 @@ class ValidationStrategies:
 
                     elif type(elem) != validType[0]:
                         raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected type={} but you passed {}. Elem of index {},{} ({}) has the type={}".format(optionName, validType[0], optionValue, i, j, elem, type(elem)))
+    @staticmethod
+    def _validateDatapath(confDict):
+        
+        errors = {}
+        
+        if Path(confDict["input"]["datapath"]) is None and confDict["input"]["userestapi"] == True:
+            error_str = f"datapath is None and userestapi is set to True"
+            errors["input/datapath"] = error_str
+
+        return errors

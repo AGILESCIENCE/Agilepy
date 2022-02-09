@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import pandas as pd
 from os.path import expandvars
 
 
@@ -55,7 +56,6 @@ class Utils:
         else:
             return path
 
-
     @staticmethod
     def _parseListNotation(strList):
         # check regular expression??
@@ -83,3 +83,20 @@ class Utils:
         path = path.joinpath(str(currentOutputDirectories[-1] + 1)) # 2+1
         path.mkdir(exist_ok=True)
         return path
+
+    @staticmethod
+    def download_AGILE_data(tmin, tmax):
+        pass
+
+
+    """
+    @staticmethod
+    def sortIndexFile(indexFilePath):
+
+        with open(indexFilePath, 'r') as fh:
+            lines = readlines()
+
+        with open(indexFilePath, 'w') as fh:
+            for line in sorted(lines, key=lambda line: line.split()[0]):
+                fh.write(line)
+    """

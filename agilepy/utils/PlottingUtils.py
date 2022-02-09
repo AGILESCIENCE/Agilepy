@@ -30,11 +30,13 @@
 
 import scipy
 import ntpath
+import datetime
 import numpy as np
 from os.path import join
 from pathlib import Path
 import scipy.ndimage as ndimage
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from astropy.wcs import WCS
 from astropy.io import fits
@@ -49,7 +51,7 @@ import pandas as pd
 from math import ceil
 from agilepy.utils.Utils import Utils
 from agilepy.core.CustomExceptions import ConfigurationsNotValidError
-
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Singleton
 
 
@@ -254,7 +256,6 @@ class PlottingUtils(metaclass=Singleton):
 
         bins  = [0, 10, 20, 30, 40, 50, 60, 70, 80]
         bins2 = [80, 180]
-        separations = [s.value for s in separations]
         hist, bins = np.histogram(separations, bins=bins, density=False)
         hist2, bins2 = np.histogram(separations, bins=bins2, density=False)
 
@@ -592,6 +593,66 @@ class PlottingUtils(metaclass=Singleton):
             filePath = join(self.outdir, outfilename)
             self.logger.info(self, "Light curve plot at: %s", filePath)
             fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
+
+    def plotDataAvailability(self, qFilePath, indexFilePath, saveImage=False):
+
+        queryDatesDF = pd.read_csv(qFilePath, header=None, sep=" ", names=["tmin","tmax"], parse_dates=["tmin","tmax"])
+        
+       
+        # df = pd.read_csv( "/agilepy/testing/unittesting/utils/data/EVT.index", header=None, sep=" ", names=["name","tmin", "tmax", "type"])
+        indexDatesDF = pd.read_csv(indexFilePath, header=None, sep=" ", names=["name","tmin", "tmax", "type"])
+
+        dateformat = "%Y-%m-%d"
+        print(indexDatesDF)
+
+        indexDatesDF["tmin"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmin"])
+        indexDatesDF["tmax"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmax"])
+
+        indexDatesDF["tmin"] = [
+                datetime.datetime.strptime(
+                        tmin, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmin in indexDatesDF["tmin"]]
+        
+        indexDatesDF["tmax"] = [
+                datetime.datetime.strptime(
+                        tmax, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmax in indexDatesDF["tmax"]]
+        
+        print(indexDatesDF["tmin"], indexDatesDF["tmax"])
+
+
+        fig, ax = plt.subplots(1, 1)
+        #ax2 = ax.twinx()
+
+        for index, slot in indexDatesDF.iterrows():  
+            daterange = pd.date_range(start=slot["tmin"], end=slot["tmax"], freq="D" )
+            ax.plot(daterange,[0.5 for _ in range(len(daterange))], color="green", )
+
+        for index, slot in queryDatesDF.iterrows():  
+            daterange = pd.date_range(start=slot["tmin"], end=slot["tmax"], freq="D")
+            #ax.plot([7 for _ in range(len(daterange))],daterange, color="green", )
+            
+            ax.fill_between(daterange, 0, 1, 
+                            where = np.ones(shape=len(daterange)), 
+                            color='green', 
+                            alpha=0.5, 
+                            transform=ax.get_xaxis_transform(),
+                            edgecolor=None
+            )
+            
+            
+
+            #ax.bar(slot["tmin"], 0.5, width=slot["tmax"]-slot["tmin"])
+        
+        fig.autofmt_xdate(rotation=45)
+        
+        if saveImage:
+            filePath = join(self.outdir, "data_availability.png")
+            print("filePath",filePath)
+            self.logger.info(self,f"Plot at: {filePath}")
+            fig.savefig(filePath)
             return filePath
         else:
             fig.show()

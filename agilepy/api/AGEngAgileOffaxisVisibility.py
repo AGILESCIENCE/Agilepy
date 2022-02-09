@@ -236,10 +236,10 @@ output:
 
         # Conversion TT => MJD
         self.logger.info(self, "Converting ti_tt_tot from TT to MJD..Number of elements=%d", len(ti_tt_tot))
-        ti_mjd = AstroUtils.time_nparray_mjd_to_tt(ti_tt_tot)
+        ti_mjd = AstroUtils.time_mjd_to_agile_seconds(ti_tt_tot)
 
         self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
-        tf_mjd = AstroUtils.time_nparray_mjd_to_tt(tf_tt_tot)
+        tf_mjd = AstroUtils.time_mjd_to_agile_seconds(tf_tt_tot)
 
         """
         self.logger.info(self, "Computig meantimes..Number of elements=%d", len(ti_mjd))
@@ -270,7 +270,7 @@ output:
             outdirPath = Path(self.outdir).joinpath("offaxis_data")
             outdirPath.mkdir(parents=True, exist_ok=True)
             filenamePath = outdirPath.joinpath(filename)
-            np.save(filenamePath, separation_tot.value, allow_pickle=True)
+            np.save(filenamePath, separation_tot, allow_pickle=True)
             self.logger.info(self, "Produced: %s", filenamePath)
 
 

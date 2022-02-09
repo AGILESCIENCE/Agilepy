@@ -1,8 +1,12 @@
 # Changelog
-## Release ??
+## Release 1.5.0 (xxxx)
+* (\#287) New Feature: It's now possible to download AGILE public dataset using a REST API directly from SSDC!
 * (\#234) Internal refactoring of Source class, new set/get interface for Source class. Docs updated.
 * (\#291) Codacy coverage fixed
 * (\#282) Dependencies updated and CI improved
+* (\#287b) Completely new API for date conversion using Astropy Time
+* (\#303) AG_spotfinder implemented in Agilepy
+* Various bugfixes and improvements
 
 ## Release 1.4.2 (26/05/21)
 * Minor hotfixes and docs updated

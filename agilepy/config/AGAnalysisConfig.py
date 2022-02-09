@@ -41,6 +41,7 @@ class AGAnalysisConfig():
     def completeConfiguration(self, confDict):
         CompletionStrategies._expandFileEnvVars(confDict, "evtfile")
         CompletionStrategies._expandFileEnvVars(confDict, "logfile")
+        CompletionStrategies._expandFileEnvVars(confDict, "datapath")
         CompletionStrategies._glonDeltaIncrement(confDict)
         CompletionStrategies._convertEnergyBinsStrings(confDict)
         CompletionStrategies._convertBackgroundCoeff(confDict, "isocoeff")
@@ -50,6 +51,7 @@ class AGAnalysisConfig():
         CompletionStrategies._setExpStep(confDict)
         CompletionStrategies._transformLoccl(confDict)
         CompletionStrategies._dqCompletion(confDict)
+        CompletionStrategies._completeDatapathForRest(confDict)
         return confDict
 
 
@@ -57,11 +59,11 @@ class AGAnalysisConfig():
 
         errors = {}
 
-        errors.update( ValidationStrategies._validateEvtFile(confDict) )
-        errors.update( ValidationStrategies._validateLogFile(confDict) )
+        #errors.update( ValidationStrategies._validateEvtFile(confDict) ) deprecated
+        #errors.update( ValidationStrategies._validateLogFile(confDict) ) deprecated
         errors.update( ValidationStrategies._validateBackgroundCoeff(confDict) )
         errors.update( ValidationStrategies._validateIndexFiles(confDict) )
-        errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
+        #errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
         errors.update( ValidationStrategies._validateLOCCL(confDict) )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
@@ -70,6 +72,7 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
         #errors.update( ValidationStrategies._validateFovradmax(confDict) )
         errors.update( ValidationStrategies._validateDQ(confDict) )
+        errors.update(ValidationStrategies._validateDatapath(confDict))
 
 
         return errors

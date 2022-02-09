@@ -43,7 +43,7 @@ class Color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 
-class AgilepyLogger():
+class AgilepyLogger:
 
     def __init__(self):
         self.debug_lvl = None

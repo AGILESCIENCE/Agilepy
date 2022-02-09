@@ -63,13 +63,13 @@ class APDisplayAGILEFermiComparison:
 
         #---AGILE----
 
-        tm = (AstroUtils.time_tt_to_mjd(agile_data["tstart"]) + AstroUtils.time_tt_to_mjd(agile_data["tstop"])) / 2
+        tm = (AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"]) + AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"])) / 2
         #agile_data.loc[agile_data['cts'] == 0, 'rateError'] = 0
         #yerr = agile_data["rateError"]*1e8
         if plotrate:
             yerr = agile_data["rateError"]*1e8
             #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
-            tw = tm -  AstroUtils.time_tt_to_mjd(agile_data["tstart"])
+            tw = tm -  AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])
             ax.errorbar(tm, agile_data["rate"]*1e8, color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
 
             self.logger.info(self, f"AGILE mean {agile_data['rate'].mean()*1e8}")
@@ -81,7 +81,7 @@ class APDisplayAGILEFermiComparison:
         else:
             yerr = agile_data["rateError"]*agile_data["exp"]
             #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
-            tw = tm -  AstroUtils.time_tt_to_mjd(agile_data["tstart"])
+            tw = tm -  AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])
             ax.errorbar(tm, agile_data["cts"], color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
 
             self.logger.info(self, f"AGILE mean, {agile_data['cts'].mean()}")
@@ -98,7 +98,7 @@ class APDisplayAGILEFermiComparison:
 
         #---Fermi----
 
-        tmFermi = (AstroUtils.time_tt_to_mjd(fermi_data["tstart"]) + AstroUtils.time_tt_to_mjd(fermi_data["tstop"])) / 2
+        tmFermi = (AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + AstroUtils.time_tt_to_mjd(fermi_data["tstop"])) / 2
         #fermi_data.loc[fermi_data['cts'] == 0, 'rateError'] = 0
         if plotrate:
             fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rateError'] = 0
@@ -106,7 +106,7 @@ class APDisplayAGILEFermiComparison:
             fermi_data.loc[fermi_data['rate'] > 10000e-08, 'rate'] = 0
             yerrFermi = fermi_data["rateError"]*1e8
             #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
-            twFermi = tmFermi -  AstroUtils.time_tt_to_mjd(fermi_data["tstart"])
+            twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
             #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
             ax.errorbar(tmFermi, fermi_data["rate"]*1e8, color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
 
@@ -121,7 +121,7 @@ class APDisplayAGILEFermiComparison:
             #fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rate'] = 0
             yerrFermi = fermi_data["rateError"]*fermi_data["exp"]
             #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
-            twFermi = tmFermi -  AstroUtils.time_tt_to_mjd(fermi_data["tstart"])
+            twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
             #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
             ax.errorbar(tmFermi, fermi_data["cts"], color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
 
@@ -264,8 +264,8 @@ class APDisplayAGILEFermiComparison:
 
         for time in range(int(tstart), int(tstop)):
             #print(time)
-            tstart_tt = AstroUtils.time_mjd_to_tt(time)
-            tstop_tt = AstroUtils.time_mjd_to_tt(time+1)
+            tstart_tt = AstroUtils.time_mjd_to_agile_seconds(time)
+            tstop_tt = AstroUtils.time_mjd_to_agile_seconds(time+1)
             fermi_data2 = fermi_data[fermi_data.tstart >= tstart_tt]
             fermi_data2 = fermi_data2[fermi_data.tstop <= tstop_tt]
             fermimean = fermi_data2["cts"].mean()
@@ -297,8 +297,8 @@ class APDisplayAGILEFermiComparison:
         fermi_data = pd.read_csv(fermi, header=0, sep=" ")
 
         #---Converting times
-        tstart_tt = AstroUtils.time_mjd_to_tt(tstart)
-        tstop_tt = AstroUtils.time_mjd_to_tt(tstop)
+        tstart_tt = AstroUtils.time_mjd_to_agile_seconds(tstart)
+        tstop_tt = AstroUtils.time_mjd_to_agile_seconds(tstop)
 
         #---- Selecting data
         agile_data = agile_data[agile_data.tstart >= tstart_tt]
