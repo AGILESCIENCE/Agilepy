@@ -98,6 +98,7 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(True, os.path.isfile(skyMapRow[1])) #exp
             self.assertEqual(True, os.path.isfile(skyMapRow[2])) #gas
 
+    """
     def test_rest_generate_maps(self):
         
         test_out_dir = self.set_outputfolder("test_rest_generate_maps")
@@ -107,7 +108,7 @@ class AGAnalysisUT(unittest.TestCase):
         #ag.setOptions(tmin=55513, tmax=55521, timetype="MJD")
 
         maplistFilePath0 = ag.generateMaps()
-
+    """
 
             
     def test_generate_maps(self):
