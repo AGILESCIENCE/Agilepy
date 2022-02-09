@@ -605,36 +605,35 @@ class PlottingUtils(metaclass=Singleton):
        
         # df = pd.read_csv( "/agilepy/testing/unittesting/utils/data/EVT.index", header=None, sep=" ", names=["name","tmin", "tmax", "type"])
         indexDatesDF = pd.read_csv(indexFilePath, header=None, sep=" ", names=["name","tmin", "tmax", "type"])
-        print("indexFilePath", indexFilePath)
-        print("indexDatesDF", indexDatesDF)
 
-        for tmin in indexDatesDF["tmin"]:
-            print(tmin, AstroUtils.time_agile_seconds_to_fits(float(tmin)))
-        for tmax in indexDatesDF["tmax"]:
-            print(tmax, AstroUtils.time_agile_seconds_to_fits(float(tmax)))
-        
+        dateformat = "%Y-%m-%d"
+        print(indexDatesDF)
+
+        indexDatesDF["tmin"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmin"])
+        indexDatesDF["tmax"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmax"])
 
         indexDatesDF["tmin"] = [
                 datetime.datetime.strptime(
-                        AstroUtils.time_agile_seconds_to_fits(float(tmin)), "%Y-%m-%dT%H:%M:%S.%f") 
-                                                                        for tmin in indexDatesDF["tmin"]]
+                        tmin, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmin in indexDatesDF["tmin"]]
         
         indexDatesDF["tmax"] = [
                 datetime.datetime.strptime(
-                        AstroUtils.time_agile_seconds_to_fits(float(tmax)), "%Y-%m-%dT%H:%M:%S.%f") 
-                                                                        for tmax in indexDatesDF["tmax"]]
+                        tmax, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmax in indexDatesDF["tmax"]]
         
         print(indexDatesDF["tmin"], indexDatesDF["tmax"])
 
 
         fig, ax = plt.subplots(1, 1)
+        #ax2 = ax.twinx()
 
         for index, slot in indexDatesDF.iterrows():  
             daterange = pd.date_range(start=slot["tmin"], end=slot["tmax"], freq="D" )
-            ax.plot(daterange, [0.5 for _ in range(len(daterange))], color="green")
+            ax.plot(daterange,[0.5 for _ in range(len(daterange))], color="green", )
 
         for index, slot in queryDatesDF.iterrows():  
-            daterange = pd.date_range(start=slot["tmin"], end=slot["tmax"], freq="D" )
+            daterange = pd.date_range(start=slot["tmin"], end=slot["tmax"], freq="D")
+            #ax.plot([7 for _ in range(len(daterange))],daterange, color="green", )
+            
             ax.fill_between(daterange, 0, 1, 
                             where = np.ones(shape=len(daterange)), 
                             color='green', 
@@ -642,6 +641,8 @@ class PlottingUtils(metaclass=Singleton):
                             transform=ax.get_xaxis_transform(),
                             edgecolor=None
             )
+            
+            
 
             #ax.bar(slot["tmin"], 0.5, width=slot["tmax"]-slot["tmin"])
         
@@ -656,5 +657,3 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
-
-

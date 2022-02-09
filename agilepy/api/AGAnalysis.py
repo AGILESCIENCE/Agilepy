@@ -905,11 +905,13 @@ plotting:
             self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
 
         if timetype == "MJD":
-            self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
+            if self.config.getOptionValue("userestapi"):
+                self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
 
             tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
             tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
-        else:    
+        
+        if self.config.getOptionValue("userestapi"):    
             self.agdataset.downloadData(AstroUtils.time_agile_seconds_to_mjd(tmin), AstroUtils.time_agile_seconds_to_mjd(tmax), self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
             
         tmin = int(tmin)

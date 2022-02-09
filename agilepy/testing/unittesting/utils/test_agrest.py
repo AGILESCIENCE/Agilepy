@@ -42,7 +42,7 @@ class TestAGRest():
         assert Path(data).is_file() == True
     """
 
-    @pytest.mark.testdir("utils")
+    @pytest.mark.testdir("utils", "test_gridfiles")
     def test_gridfiles(self, logger, gettmpdir):
 
         agrest = AGRest(logger)
@@ -63,7 +63,7 @@ class TestAGRest():
 
 
 
-    @pytest.mark.testdir("utils")
+    @pytest.mark.testdir("utils", "test_gridList")
     def test_gridList(self, logger, gettmpdir):
 
         agrest = AGRest(logger)
@@ -87,7 +87,7 @@ class TestAGRest():
             gridlist = agrest.gridList(tmin, tmax)
 
     
-    @pytest.mark.testdir("utils")
+    @pytest.mark.testdir("utils", "test_datacoverage")
     def test_datacoverage(self, logger, gettmpdir):
 
         agrest = AGRest(logger)

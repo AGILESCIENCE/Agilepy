@@ -28,14 +28,15 @@ class AGDataset:
         self.agrest = AGRest(self.logger)
         self.datacoveragepath = datacoveragepath
 
-
-    def agilecoverage(self):
         with open(self.datacoveragepath, "r") as f:
             self.logger.debug(self, f"opening coverage file at {self.datacoveragepath}")
             line = f.readline().split(" ")
             self.coverage_tmin = line[0]
             self.coverage_tmax = line[1]
             self.logger.info(self, f"AGILE data coverage from {self.coverage_tmin} to {self.coverage_tmax}")
+
+
+    def agilecoverage(self):
 
         if not self.checkcoverage(self.coverage_tmin, self.coverage_tmax):
             new_coverage_tmin, new_coverage_tmax = self.agrest.get_coverage()

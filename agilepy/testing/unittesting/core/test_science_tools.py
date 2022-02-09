@@ -32,7 +32,7 @@ from agilepy.core.ScienceTools import Indexgen
 
 class TestSourceModel:
 
-    @pytest.mark.testdir("core")
+    @pytest.mark.testdir("core", "test_indexgen")
     def test_indexgen(self, config, logger, testdataset):
 
         indexgen = Indexgen("AG_indexgen", logger)
@@ -40,9 +40,10 @@ class TestSourceModel:
         args = {
             "data_dir": testdataset["log"],
             "type": "log",
-            "out_dir": str(Path( __file__ ).absolute().parent),
+            "out_dir": str(Path( __file__ ).absolute().parent.joinpath("test_out")),
             "out_file": "INDEX.LOG"
         }
+
 
         indexgen.configureTool(config, args)
 
