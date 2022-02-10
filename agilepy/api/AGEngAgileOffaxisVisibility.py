@@ -270,11 +270,12 @@ output:
             outdirPath = Path(self.outdir).joinpath("offaxis_data")
             outdirPath.mkdir(parents=True, exist_ok=True)
             filenamePath = outdirPath.joinpath(filename)
-            np.save(filenamePath, separation_tot, allow_pickle=True)
+
+            np.save(filenamePath, separation_tot.degree, allow_pickle=True)
             self.logger.info(self, "Produced: %s", filenamePath)
 
 
-        return separation_tot, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, filenamePath
+        return separation_tot.degree, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, filenamePath
 
     def _computeSeparationPerFile(self, doTimeMask, logFile, tmin_start, tmax_start, skyCordsFK5, zmax, step):
 
