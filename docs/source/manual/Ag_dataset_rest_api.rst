@@ -6,7 +6,7 @@ Dataset Download via REST API
 Overview
 ********
 
-Version 1.5.0 has implemented the SSDC REST Api in order to get the AGILE dataset from SSDC datacenter. All the required data is downloaded according to tmin and tmax values into a datapath selected in configuration file.
+Version 1.5.0 has implemented the SSDC REST Api in order to get the AGILE dataset from SSDC datacenter. All the required data is downloaded according to tmin and tmax values selected in configuration file.
 This feature works when generatesmaps method is called.
 
 

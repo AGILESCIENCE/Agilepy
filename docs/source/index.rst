@@ -15,7 +15,6 @@ The main purpose of the package is to provide an easy to use high-level Python i
 
   quickstart/main
   quickstart/installation
-  quickstart/agile_grid_data
   quickstart/quick_start
   quickstart/jupyter_notebooks
 
@@ -24,6 +23,7 @@ The main purpose of the package is to provide an easy to use high-level Python i
   :caption: Manual
 
   manual/configuration_file
+  manual/agile_grid_data
   manual/source_file
   manual/work_with_sources
   manual/products
