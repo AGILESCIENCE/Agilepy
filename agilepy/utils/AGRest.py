@@ -2,6 +2,8 @@ import os
 import uuid
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from time import time
 from pathlib import Path
@@ -13,6 +15,17 @@ class AGRest:
 
     def __init__(self, logger):
         self.logger = logger
+
+        self.retry_strategy = Retry(
+            total=5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            method_whitelist=["HEAD", "GET", "OPTIONS"],
+            backoff_factor=3)
+
+        self.adapter = HTTPAdapter(max_retries=self.retry_strategy)
+        self.http = requests.Session()
+        self.http.mount("https://", self.adapter)
+        self.http.mount("http://", self.adapter)
 
     def get_coverage(self):
         """
@@ -31,7 +44,7 @@ class AGRest:
 
         start = time() 
 
-        response = requests.get(api_url)
+        response = self.http.get(api_url)
 
         json_data = json.loads(response.text)
 
@@ -74,7 +87,7 @@ class AGRest:
 
         start = time() 
         
-        response = requests.get(api_url)
+        response = self.http.get(api_url)
 
         json_data = json.loads(response.text)
 
@@ -115,7 +128,7 @@ class AGRest:
 
         start = time() 
 
-        response = requests.get(api_url, stream=True)
+        response = self.http.get(api_url, stream=True)
 
         end = time() - start
 

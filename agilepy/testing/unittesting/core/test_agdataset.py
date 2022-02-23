@@ -28,6 +28,7 @@
 import os
 import pandas as pd
 from shutil import rmtree
+from time import sleep
 import pytest
 from pathlib import Path
 from agilepy.core.AGDataset import AGDataset 
@@ -79,7 +80,7 @@ class TestAGDataset:
         downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
 
         assert downloaded == True
-
+        sleep(3) # this sleep is to avoid too many requests ban
         #test tmax outside data coverage
         tmin = 58051
         tmax = 59582

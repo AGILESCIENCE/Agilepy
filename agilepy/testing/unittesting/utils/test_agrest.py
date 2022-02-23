@@ -27,7 +27,7 @@
 import os
 import pytest
 from pathlib import Path
-
+from time import sleep
 from agilepy.utils.AGRest import AGRest 
 from agilepy.core.CustomExceptions import SSDCRestErrorDownload
 
@@ -55,6 +55,7 @@ class TestAGRest():
         tmax = 58055
 
         outfile = agrest.gridFiles(tmin, tmax)
+        sleep(3) # this sleep is to avoid too many requests ban
 
         filepath = Path(outfile)
 
@@ -81,6 +82,7 @@ class TestAGRest():
         tmax = 58072
         
         gridlist = agrest.gridList(tmin, tmax)
+        sleep(3) # this sleep is to avoid too many requests ban
 
         assert len(gridlist) == 24
 
@@ -88,12 +90,16 @@ class TestAGRest():
 
         with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
+        
+        sleep(3) # this sleep is to avoid too many requests ban
 
         tmin = 59549
         tmax = 59569
 
         with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
+        
+        sleep(3) # this sleep is to avoid too many requests ban
 
     @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_datacoverage")
@@ -106,6 +112,8 @@ class TestAGRest():
         agrest = AGRest(logger)
 
         tmin, tmax = agrest.get_coverage()
+
+        sleep(3) # this sleep is to avoid too many requests ban
 
         print(tmin, tmax)
 
