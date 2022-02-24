@@ -4,9 +4,10 @@ import json
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
 from time import time
 from pathlib import Path
+
+from tqdm import tqdm
 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import SSDCRestErrorDownload
@@ -130,21 +131,22 @@ class AGRest:
 
         response = self.http.get(api_url, stream=True)
 
+        outpath = f"/tmp/agile_{str(uuid.uuid4())}.tar.gz"
+        with open(outpath, "wb") as f:
+            # Writing chunks for large downloads
+            for chunk in tqdm(response.iter_content(chunk_size=1024*1024*10)):
+                f.write(chunk)
+
         end = time() - start
 
-        self.logger.info(self, f"Took {end} seconds")
+        outpath_size = os.stat(outpath).st_size
 
-        outpath = f"/tmp/agile_{str(uuid.uuid4())}.tar.gz"
-
-        with open(outpath, "wb") as f:
-            #Writing chunks for large downloads
-            for chunk in response.iter_content(chunk_size=1024*1024*10):
-                f.write(chunk)
+        self.logger.info(self, f"Took {end} seconds. Downloaded {outpath_size} bytes.")
 
         if not Path(outpath).is_file():
             raise FileNotFoundError
 
-        if os.stat(outpath).st_size == 0:
+        if outpath_size == 0:
             self.logger.warning(self, f"The downloaded data {outpath} is empty.")
 
         return outpath

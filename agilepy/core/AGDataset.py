@@ -98,10 +98,14 @@ class AGDataset:
         else:
             self.logger.info(self, f"Local data for LOG already in dataset")
 
+
+        self.logger.info(self, f"Downloading data from ssdc..")
+
         if evtDataMissing or logDataMissing:
                 _ = self.agrest.gridList(tmin, tmax)
                 tarFilePath = self.agrest.gridFiles(tmin, tmax)
 
+        self.logger.info(self, f"Extracting data from the tarball..")
 
         if evtDataMissing:
             extractedFiles = self.extractData("EVT", tarFilePath, dataPath)
@@ -312,8 +316,10 @@ class AGDataset:
                     extractedFiles.append(tarInfo.name)
         
         self.logger.debug(self, f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
-        self.logger.debug(self, f"Removing {targzPath} file")
         
+        self.logger.debug(self, f"Removing {targzPath} file.")
+        
+
         return extractedFiles                    
 
 
