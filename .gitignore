@@ -6,6 +6,7 @@ dist/
 build/
 out/
 docs/build/
+docs/source/_build
 cov_html_report/
 .idea
 .ipynb_checkpoints
@@ -20,3 +21,6 @@ load_env.sh
 tag.sh
 *.png
 *.npy
+agilepy/testing/unittesting/utils/data/1640082532426.tar
+agilepy/testing/unittesting/utils/data/1640082575163.tar
+

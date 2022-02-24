@@ -2,6 +2,8 @@
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+rm -f $script_dir/../.coverage
+
 echo "Script dir: $script_dir"
 
 agilepy_path=$((python "$script_dir/get_agilepy_path.py") 2>&1)
@@ -21,26 +23,36 @@ else
 
   echo "agilepy_path: $agilepy_path"
 
-  pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+  pytest --disable-warnings \
+         --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.config \
-         --cov-append \
-         "$agilepy_path/testing/unittesting/config"
-
-  pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
-         --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
-         --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.utils \
+         --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/utils"
 
-
-  pytest --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+  pytest --disable-warnings \
+         --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
-         --cov=agilepy.api,agilepy.core \
+         --cov=agilepy \
+         --cov-append \
+         "$agilepy_path/testing/unittesting/config"
+
+  pytest --disable-warnings \
+         --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+         --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
+         --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
+         --cov=agilepy \
+         --cov-append \
+         "$agilepy_path/testing/unittesting/core"
+  
+  pytest --disable-warnings \
+         --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
+         --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
+         --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
+         --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/api"
-
+  
 fi

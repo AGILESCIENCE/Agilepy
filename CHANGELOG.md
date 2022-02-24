@@ -1,13 +1,26 @@
 # Changelog
+
+## Release 1.5.0 (24/02/22)
+* (\#287) New Feature: automatic download of the AGILE public data using a REST API directly from SSDC!
+* (\#234) Internal refactoring of Source class, new set/get interface for Source class. Docs updated.
+* (\#291) Codacy coverage fixed
+* (\#282) Dependencies updated and CI improved
+* (\#287b) Brand new API for date conversion using Astropy Time
+* (\#303) AG_spotfinder tool added
+* Various bugfixes and improvements
+
 ## Release 1.4.2 (26/05/21)
 * Minor hotfixes and docs updated
+
 ## Release 1.4.1 (26/04/21)
 * minor bugfixes and docs updated
+
 ##  Release 1.4.0 (22/04/21)
-* (\#234)Added new installation method with docker containers
+* (\#234) Added new installation method with docker containers
 * (\#267) Added several columns into lightcurvedata txt
 * (\#272  Updated method for displaying columns of lightcurve data
 * Various bugfixes and improvements
+
 ##  Release 1.3.0 - 29/03/21
 * (\#133) New normalization functions in displaymaps
 * (\#196) Notebooks have their own documentation section

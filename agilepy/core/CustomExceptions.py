@@ -122,4 +122,30 @@ class ValueOutOfRange(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class SourceParameterNotFound(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
+class ParameterNotManuallyUpdatable(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class AttributeNotSupportedError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class SourceTypeNotSupportedError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class XMLParseError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class SSDCRestErrorDownload(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+class NoCoverageDataError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

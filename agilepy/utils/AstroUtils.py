@@ -29,6 +29,7 @@ import math
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from astropy.time import Time
 
 class AstroUtils:
 
@@ -107,226 +108,196 @@ class AstroUtils:
 
 
 
-
-    # BASIC CONVERSIONS
-    @staticmethod
-    def time_mjd_to_tt(timemjd):
-        """
-        Convert mjd to tt. Tolerance = 0.001 s
-
-        Args:
-            timemjd (float): time in mjd format
-
-        Returns:
-            the input converted in tt format.
-        """
-        return (timemjd - 53005.0) * 86400.0
-
-    @staticmethod
-    def time_tt_to_mjd(timett):
-        """
-        Convert tt to mjd. Tolerance = 0.0000001 s
-
-        Args:
-            timett (float): time in tt format
-
-        Returns:
-            the input converted in mjd format.
-        """
-        return (timett / 86400.0) + 53005.0
+    ############################################################################
+    #
+    #   Astropy implementation
+    #  
+    #   https://docs.astropy.org/en/stable/time/index.html
+    #
+    #   The time "format" specifies how an instant of time is represented.
+    #   https://docs.astropy.org/en/stable/time/index.html#time-format
+    #
+    #   The time "scale" (or time standard) is 'a specification for measuring time: 
+    #   either the rate at which time passes; or points in time; or both'
+    #   https://docs.astropy.org/en/stable/time/index.html#time-scale
+    #
+    #   UNIX_AGILE_DELTA = 1072915200
+    #   AGILE_TIME = UNIX_TIME - UNIX_AGILE_DELTA
+    #
+    #   Supported formats = ["jd", "mjd", "fits", "iso", "unix", "agile seconds since 2004"]
+    
+    UNIX_AGILE_DELTA = 1072915200
+    
+    ############################
+    # Input: JD
 
     @staticmethod
-    def time_nparray_mjd_to_tt(timemjd_nparray):
-        if not isinstance(timemjd_nparray, np.ndarray):
-            timemjd_nparray = np.array(timemjd_nparray)
-        return (timemjd_nparray - 53005.0) * 86400.0
+    def time_jd_to_mjd(time_jd):
+        t = Time(time_jd, format="jd")
+        return t.mjd
 
     @staticmethod
-    def time_nparray_tt_to_mjd(timett_nparray):
-        if not isinstance(timett_nparray, np.ndarray):
-            timett_nparray = np.array(timett_nparray)
-        return (timett_nparray / 86400.0) + 53005.0
+    def time_jd_to_fits(time_jd):
+        t = Time(time_jd, format="jd")
+        return t.fits
 
     @staticmethod
-    def time_tt_to_utc(timett) -> str:
-        """
-        Convert tt to utc. Tolerance = 1 s
-
-        Args:
-            timett (float): time in tt format
-
-        Returns:
-            input converted in utc format (string).
-        """
-        utc_offset = 2400000.5
-        mjdref = 53005.0
-        sod = 86400.0
-        sec_offset = 43200.0
-
-        a = AstroUtils.jd_to_civil(utc_offset + mjdref + ( (timett + sec_offset)/sod ))
-        #print("jd_to_civil:",a)
-        b = AstroUtils.day_fraction_to_time(a[2] % 1)
-        #print("day_fraction_to_time:",b)
-        # utc = [a[0] , a[1] , float(int(a[2])), b[0] , b[1] , b[2] , b[3]]
-        utc_s = "%s-%02d-%02dT%02d:%02d:%02d"%(str(a[0]), int(a[1]), int(a[2]), b[0], b[1], b[2])
-        return utc_s
+    def time_jd_to_iso(time_jd):
+        t = Time(time_jd, format="jd")
+        return t.iso       
 
     @staticmethod
-    def to_jd(dt, fmt = 'jd'):
-        """
-        Converts a given datetime object to Julian date (jd o mjd). Tolerance = 0.00000001 days
-
-        Args:
-            dt (datetime): time in datetime format
-            fmt (str): jd or mjd
-
-        Returns:
-            input converted in jd format (jd o mjd).
-        """
-        a = math.floor((14-dt.month)/12)
-        y = dt.year + 4800 - a
-        m = dt.month + 12*a - 3
-
-        jdn = dt.day + math.floor((153*m + 2)/5) + 365*y + math.floor(y/4) - math.floor(y/100) + math.floor(y/400) - 32045
-
-        jd = jdn + (dt.hour - 12) / 24 + dt.minute / 1440 + dt.second / 86400 + dt.microsecond / 86400000000
-
-        if fmt.lower() == 'jd':
-            return jd
-        elif fmt.lower() == 'mjd':
-            return jd - 2400000.5
-        else: # fmt.lower() == 'rjd':
-            return jd - 2400000
+    def time_jd_to_unix(time_jd):
+        t = Time(time_jd, format="jd")
+        return np.round(t.unix)        
+        
+    @staticmethod
+    def time_jd_to_agile_seconds(time_jd):
+        t = Time(time_jd, format="jd")
+        return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)
+    
+    
+    ############################
+    # Input: AGILE SECONDS
 
     @staticmethod
-    def time_utc_to_tt(timeutc):
-        """
-        Convert utc to tt. Tolerance = 0.0001 s
-
-        Args:
-            timeutc (str): time in utc format
-
-        Returns:
-            input converted in tt format.
-        """
-        #ls1 = timeutc.split("T")[0]
-        ls2 = timeutc.split("T")[1]
-        #year=ls1.split("-")[0]
-        #month=ls1.split("-")[1]
-        #day=ls1.split("-")[2]
-        hour=ls2.split(":")[0]
-        min=ls2.split(":")[1]
-        sec=ls2.split(":")[2]
-
-        utc_offset = 2400000.5
-        mjdref = 53005.0
-        sod = 86400.0
-        sec_offset = 43200.0
-        fod = AstroUtils.time_to_day_fraction( int(hour) , int(min) , int(sec) )
-        #print("fod:\n",fod)
-
-        dt = datetime.strptime(timeutc, '%Y-%m-%dT%H:%M:%S')
-
-        jd = int(round(AstroUtils.to_jd(dt, fmt='jd')))
-        #print("jd:\n",jd)
-
-        jd = jd + fod
-        #print("jd+fod:\n",jd)
-
-        tt = (jd - utc_offset - mjdref) * sod
-        #print("utc_offset:\n",utc_offset)
-        #print("mjdref:\n",mjdref)
-        #print("sod:\n",sod)
-        #print("tt:\n",tt)
-
-        tt -= sec_offset
-        #print("sec_offset:\n",sec_offset)
-        #print("tt-sec_offset:\n",tt)
-
-        return tt
+    def time_agile_seconds_to_jd(time_agile_seconds):
+        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t.jd
 
     @staticmethod
-    def day_fraction_to_time(fr):
-        """
-        Convert a fractional day to [hours, minutes, seconds, fraction_of_a_second]
-        Args:
-            fr (float): fractional day
-
-        Returns:
-            input converted to [hours, minutes, seconds, fraction_of_a_second] (List).
-        """
-        ss,  fr = divmod(fr, 1/86400)
-        h,   ss = divmod(ss, 3600)
-        min, s  = divmod(ss, 60)
-        return h, min, s, fr
+    def time_agile_seconds_to_fits(time_agile_seconds):
+        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t.fits
 
     @staticmethod
-    def time_to_day_fraction(h, min, s):
-        """
-        Convert hours,minutes and seconds to a fraction of day.
-
-        Args:
-            timeutc (float): time in utc format
-            timeutc (float): time in utc format
-            timeutc (float): time in utc format
-
-        Returns:
-            input converted in a fraction of day.
-        """
-        return (h * 3600 + min * 60 + s)/86400
+    def time_agile_seconds_to_iso(time_agile_seconds):
+        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t.iso
+    
+    @staticmethod
+    def time_agile_seconds_to_unix(time_agile_seconds):
+        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        return np.round(time_unix)
 
     @staticmethod
-    def jd_to_civil(jd):
-        """
-        Convert a Julian Day Number to a Civil Date. Tolerance = 0.043 days
+    def time_agile_seconds_to_mjd(time_agile_seconds):
+        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t.mjd
 
-        Args:
-            jd (float): the Julian Day Number.
-
-        Returns:
-            Returns the corresponding [year, month, day_of_month] as a List.
-        """
-        x = math.floor((jd - 1867216.25) / 36524.25)
-        a = jd + 1 + x - math.floor(x / 4.0)
-
-        b = a + 1524
-        c = math.floor((b - 122.1) / 365.25)
-        d = math.floor(365.25 * c)
-        e = math.floor((b - d) / 30.6001)
-        dom = b - d - math.floor(30.6001 * e)
-        if e <= 13:
-            m = e - 1
-            y = c - 4716
-        else:
-            m = e - 13
-            y = c - 4715
-
-        return y, m, dom
-
-    # THEY DEPENDES TO THE PREVIOUS METHODS
+    ############################
+    # Input: MJD
 
     @staticmethod
-    def time_mjd_to_utc(timemjd) -> str:
-        """
-        Convert mjd to utc. Tolerance = 1 s
-
-        Args:
-            timemjd (float): time in mjd format
-
-        Returns:
-            input converted in utc format (str).
-        """
-        return AstroUtils.time_tt_to_utc(AstroUtils.time_mjd_to_tt(timemjd))
+    def time_mjd_to_jd(time_mjd):
+        t = Time(time_mjd, format="mjd")
+        return t.jd
 
     @staticmethod
-    def time_utc_to_mjd(timeutc):
-        """
-        Convert mjd to utc. Tolerance = 0.00000001 days
+    def time_mjd_to_fits(time_mjd):
+        t = Time(time_mjd, format="mjd")
+        return t.fits
 
-        Args:
-            timeutc (str): time in utc format
+    @staticmethod
+    def time_mjd_to_iso(time_mjd):
+        t = Time(time_mjd, format="mjd")
+        return t.iso
+    
+    @staticmethod
+    def time_mjd_to_unix(time_mjd):
+        t = Time(time_mjd, format="mjd")
+        return np.round(t.unix)
 
-        Returns:
-            input converted in mjd format.
-        """
-        return AstroUtils.time_tt_to_mjd(AstroUtils.time_utc_to_tt(timeutc))
+    @staticmethod
+    def time_mjd_to_agile_seconds(time_mjd):
+        t = Time(time_mjd, format="mjd")
+        return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)
+
+    ############################
+    # Input: ISO
+
+    @staticmethod
+    def time_iso_to_jd(time_iso):
+        t = Time(time_iso, format="iso")
+        return t.jd
+
+    @staticmethod
+    def time_iso_to_fits(time_iso):
+        t = Time(time_iso, format="iso")
+        return t.fits
+
+    @staticmethod
+    def time_iso_to_unix(time_iso):
+        t = Time(time_iso, format="iso")
+        return np.round(t.unix)
+
+    @staticmethod
+    def time_iso_to_agile_seconds(time_iso):
+        t = Time(time_iso, format="iso")
+        return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)
+
+    @staticmethod
+    def time_iso_to_mjd(time_iso):
+        t = Time(time_iso, format="iso")
+        return t.mjd
+        
+    ############################
+    # Input: FITS
+
+    @staticmethod
+    def time_fits_to_jd(time_fits):
+        t = Time(time_fits, format="fits")
+        return t.jd
+
+    @staticmethod
+    def time_fits_to_mjd(time_fits):
+        t = Time(time_fits, format="fits")
+        return t.mjd
+
+    @staticmethod
+    def time_fits_to_iso(time_fits):
+        t = Time(time_fits, format="fits")
+        return t.iso
+
+    @staticmethod
+    def time_fits_to_unix(time_fits):
+        t = Time(time_fits, format="fits")
+        return np.round(t.unix)
+
+    @staticmethod
+    def time_fits_to_agile_seconds(time_fits):
+        t = Time(time_fits, format="fits")
+        return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)
+
+            
+    ############################
+    # Input: UNIX
+    
+    @staticmethod
+    def time_unix_to_jd(time_unix):
+        t = Time(time_unix, format="unix")
+        return t.jd
+
+    @staticmethod
+    def time_unix_to_mjd(time_unix):
+        t = Time(time_unix, format="unix")
+        return t.mjd
+
+    @staticmethod
+    def time_unix_to_fits(time_unix):
+        t = Time(time_unix, format="unix")
+        return t.fits
+
+    @staticmethod
+    def time_unix_to_iso(time_unix):
+        t = Time(time_unix, format="unix")
+        return t.iso
+
+    @staticmethod
+    def time_unix_to_agile_seconds(time_unix):
+        t = Time(time_unix, format="unix")
+        return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)

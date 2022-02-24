@@ -7,7 +7,7 @@
       <parameter name="index" free="0" scale="-1.0" value="1.75" min="0.5" max="5"/>
       <parameter name="cutoffEnergy" free="0" value="3307.63" min="20" max="10000"/>
     </spectrum>
-    <spatialModel type="PointSource" locationLimit="0">
+    <spatialModel type="PointSource" location_limit="0">
       <parameter name="pos" value="(78.2375, 2.12298)" free="0" />
     </spatialModel>
   </source>
@@ -18,7 +18,7 @@
       <parameter name="index" free="0" scale="-1.0" value="1.38" min="0.5" max="5"/>
       <parameter name="cutoffEnergy" free="0" value="960.59" min="20" max="10000"/>
     </spectrum>
-    <spatialModel type="PointSource" locationLimit="0">
+    <spatialModel type="PointSource" location_limit="0">
       <parameter name="pos" value="(75.2562, 0.151831)" free="0"/>
     </spatialModel>
   </source>

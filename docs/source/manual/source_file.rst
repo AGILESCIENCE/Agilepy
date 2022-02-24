@@ -74,7 +74,7 @@ Source library format (xml document)
     <source name="2AGLJ0835-4514" type="PointSource">
       <spectrum type="PLSuperExpCutoff">
         <parameter name="flux" free="1"  value="969.539e-08"/>
-        <parameter name="index1" free="1" scale="-1.0" value="1.71345" min="0.5" min="5"/>
+        <parameter name="index1" free="1" scale="-1.0" value="1.71345" min="0.5" max="5"/>
         <parameter name="cutoffEnergy" free="1" value="3913.06" min="20" max="10000"/>
         <parameter name="index2" free="1" value="1.3477" min="0"  max="100"/>
       </spectrum>

@@ -1,6 +1,8 @@
 input:
   evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
   logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+  userestapi: False
+  datapath: None
 
 output:
   outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"

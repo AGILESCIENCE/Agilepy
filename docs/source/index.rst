@@ -15,7 +15,6 @@ The main purpose of the package is to provide an easy to use high-level Python i
 
   quickstart/main
   quickstart/installation
-  quickstart/agile_grid_data
   quickstart/quick_start
   quickstart/jupyter_notebooks
 
@@ -24,10 +23,12 @@ The main purpose of the package is to provide an easy to use high-level Python i
   :caption: Manual
 
   manual/configuration_file
+  manual/agile_grid_data
   manual/source_file
   manual/work_with_sources
   manual/products
   manual/advanced_configuration
+  manual/Ag_dataset_rest_api
 
 .. toctree::
   :caption: API
@@ -35,6 +36,7 @@ The main purpose of the package is to provide an easy to use high-level Python i
   api/analysis_api
   api/engineering_api
   api/astroutils_api
+  api/source_api
 
 .. toctree::
   :caption: Help

@@ -30,28 +30,10 @@ loads the sources, reading their model from a file.
 The `addSource(sourceName, sourceDict) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-addSource>`_ method allows the user to define on the fly a 
 source model with a python dictionary. Check the tutorial notebooks for an example. 
 
-
-
-How to let the source's parameters to vary
-******************************************
-In order to free or fix a sources' parameter, the user can rely on the `freeSources(selection, parameterName, free, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-freeSources>`_
-method. The sources can be selected via the "selection" argument, supporting either lambda functions and boolean expression strings. Please, check
-the `selectSources(selection, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-selectSources>`_ method documentation for more informations.
-
-::
-    
-    aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
-
-::
-
-    ag.freeSources('name == "2AGLJ1513-0905"', "index", True, show=True)
-
-Check the api documentation or the tutorial notebooks for additional examples. 
-
-
-How to inspect a Source object
-******************************
-The common way to inspect a Source object is to print it:
+How to select Source objects
+****************************
+The sources can be selected via the the `selectSources(selection, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-selectSources>`_ method.
+The "selection" argument supports either lambda functions and boolean expression strings. The user can call selectSources (with show=True) to show the source description 
 
 ::
     
@@ -67,30 +49,35 @@ The common way to inspect a Source object is to print it:
         - Distance from map center: 0.011 deg
    -----------------------------------------------------------
 
-
-The user can call selectSources (with show=True) to show the source description 
-
-::
-
-    ag.selectSources('name == "PKS1510-089"', show=True)
+Other examples:
 
 ::
 
-    ag.selectSources('flux > 0', show=True)
+    sources = ag.selectSources('name == "PKS1510-089"', show=False)
 
 ::
 
-    ag.selectSources(lambda name, sqrtTS: name == "2AGLJ2021+4029" AND sqrtTS> 0, show=True)
+    sources = ag.selectSources('flux > 0', show=False)
 
-A getter method is available for "spectrum" and "multi" parameters:
+::
+
+    sources = ag.selectSources(lambda name, sqrtTS: name == "2AGLJ2021+4029" AND sqrtTS> 0, show=False)
+
+
+How to let the source's parameters to vary
+******************************************
+In order to free or fix a sources' parameter, the user can rely on the `freeSources(selection, parameterName, free, show=False) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-freeSources>`_
+method. The "selection" argument is used like in `selectSources`, so you can free a parameter of multiple sources at once.
 
 ::
     
-    print(source.multi.get("multiFitLikelihood1"))
+    aganalysis.freeSources(lambda name, dist, flux : Name == "2AGLJ2021+4029" AND dist > 0 AND flux > 0, "flux", True)
 
 ::
-    
-    print(source.spectrum.get("index1"))
+
+    ag.freeSources('name == "2AGLJ1513-0905"', "index", True, show=True)
+
+Check the api documentation or the tutorial notebooks for additional examples. 
 
 
 
@@ -146,19 +133,37 @@ If the user performs an mle analysis, the Source object will contain also the an
 The values L_peak and B_peak set to the initial values in the source location is fixed. If it is allowed to vary then they are set to the position for which the TS is maximized. If a confidence contour was found, the parameters of the "ellipse" section describe the best-fit ellipse of the contour, described in detail below. The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, or the other spectral parameters, if applicable, are provided.
 
 
-How to manually change a source object's attributes
-***************************************************
-In order to change the spectrum parameters values, the user can call the set() method of the Spectrum object within the Source object. Example: 
+
+How to manually inspect source's attributes
+*******************************************
+The user can rely on a getter method `get(sourceAttribute) <../core/source_api.html#core-SourceModel-Source-get>`_ method. 
+
+::
+
+    print(source.get("cutoffEnergy"))
+    print(source.get("index"))
+    print(source.get("pos"))
+    print(source.get("dist"))
+    print(source.get("locationLimit"))
+    print(source.get("multiFlux"))
+
+
+
+How to manually change a source's attributes
+********************************************
+The user can rely on a setter method `set(sourceAttribute) <../core/source_api.html#core-SourceModel-Source-set>`_ method. 
 
 :: 
 
-    source.spectrum.set("index2", 1.34774)
+    source.set("index2", 1.34774)
 
-Another way is to call the setAttributes method of a Source attribute. This allow to change the following attributes: value, free, scale, min, max, locationLimit. Example:
+
+The setAttributes() method allows to change the following attributes: value, free, scale, min, max, locationLimit. Example:
 
 :: 
 
     source.spectrum.cutoffEnergy.setAttributes(min=3000, max=5000)
+
 
 
 In order to change the position of a source, the user can rely on the `updateSourcePosition(sourceName, glon, glat) <../api/analysis_api.html#api-AGAnalysis-AGAnalysis-updateSourcePosition>`_ 

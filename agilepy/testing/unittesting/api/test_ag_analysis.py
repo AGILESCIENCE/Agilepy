@@ -25,6 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from genericpath import exists
 import unittest
 import os
 import shutil
@@ -41,22 +42,23 @@ class AGAnalysisUT(unittest.TestCase):
     def setUp(self):
         self.currentDirPath = Path(__file__).parent.absolute()
 
-        self.test_logs_dir = Path(self.currentDirPath).joinpath("test_logs", "AGAnalysisUT")
-        self.test_logs_dir.mkdir(parents=True, exist_ok=True)
-
-        os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
-
-
+        self.test_logs_base_dir = Path(self.currentDirPath).joinpath("test_logs", "test_ag_analysis")
+        #self.test_logs_dir.mkdir(parents=True, exist_ok=True)
+    
         self.VELA = "2AGLJ0835-4514"
         self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
         self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
         self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+        self.agilepyRestConf = os.path.join(self.currentDirPath,"conf/agilepyconfREST.yaml")
 
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
+        #outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
+        #if outDir.exists() and outDir.is_dir():
+        #    shutil.rmtree(outDir)
 
     def test_delete_output_directory(self):
+
+        test_out_dir = self.set_outputfolder("test_delete_output_directory")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -67,6 +69,14 @@ class AGAnalysisUT(unittest.TestCase):
         ag.deleteAnalysisDir()
 
         self.assertEqual(False, outDir.exists())
+
+    def set_outputfolder(self, name):
+        
+        test_out_dir = self.test_logs_base_dir.joinpath(name)
+        test_out_dir.mkdir(parents=True, exist_ok=True)
+        os.environ["TEST_LOGS_DIR"] = str(test_out_dir)
+
+        return test_out_dir
 
 
     ########################################################################
@@ -87,8 +97,12 @@ class AGAnalysisUT(unittest.TestCase):
             self.assertEqual(True, os.path.isfile(skyMapRow[0])) #cts
             self.assertEqual(True, os.path.isfile(skyMapRow[1])) #exp
             self.assertEqual(True, os.path.isfile(skyMapRow[2])) #gas
+
+
             
     def test_generate_maps(self):
+
+        test_out_dir = self.set_outputfolder("test_generate_maps")
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -144,6 +158,8 @@ class AGAnalysisUT(unittest.TestCase):
         
     def test_update_gal_iso(self):
 
+        test_out_dir = self.set_outputfolder("test_update_gal_iso")
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.setOptions(tmin=433857532, tmax=433858532, timetype="TT")
@@ -178,15 +194,16 @@ class AGAnalysisUT(unittest.TestCase):
         # ag.destroy()
 
     def test_mle(self):
+
+        test_out_dir = self.set_outputfolder("test_mle")
         ag = AGAnalysis(self.agilepyConf)
         ag.setOptions(tmin = 433857532, tmax = 433858532, timetype = "TT", glon = 263.55, glat = -2.78)
         self.assertRaises(MaplistIsNone, ag.mle)
         ag.generateMaps()
         self.assertRaises(SourcesLibraryIsEmpty, ag.mle)
 
-        
-
     def test_analysis_pipeline(self):
+        test_out_dir = self.set_outputfolder("test_analysis_pipeline")
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.setOptions(tmin = 433857532, tmax = 434289532, timetype = "TT", glon = 263.55, glat = -2.78)
@@ -215,25 +232,29 @@ class AGAnalysisUT(unittest.TestCase):
         
         ag.destroy()
 
-
-
     def test_source_dist_updated_after_source_position_update(self):
+
+        test_out_dir = self.set_outputfolder("test_source_dist_updated_after_source_position_update")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         ag.setOptions(tmin = 433857532, tmax = 433857542, timetype = "TT", fovbinnumber=1, energybins=[[100,200]], glon = 263.55, glat = -2.78)
 
         source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_1 = source_1.spatialModel.get("dist")
+        dist_1 = source_1.spatialModel.get("dist")["value"]
 
         ag.updateSourcePosition(self.VELA, glon=264, glat=-3)
 
         source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_2 = source_2.spatialModel.get("dist")
+        dist_2 = source_2.spatialModel.get("dist")["value"]
 
-        self.assertNotEqual(dist_1, dist_2)
+        assert True, dist_1 != dist_2
         ag.destroy()
 
     def test_source_dist_updated_after_mle(self):
+
+        test_out_dir = self.set_outputfolder("test_source_dist_updated_after_mle")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -243,20 +264,25 @@ class AGAnalysisUT(unittest.TestCase):
         ag.freeSources(lambda name: name == self.VELA, "flux", True)
 
         source = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_before = source.spatialModel.get("dist")
+        print(source)
+        dist_before = source.get("dist")["value"]
 
         ag.mle(maplistFilePath)
 
         source = ag.selectSources(lambda name: name == self.VELA).pop()
-        dist_after = source.spatialModel.get("dist")
-        multiDist_after = source.multi.get("multiDist")
+        print(source)
+        dist_after = source.get("dist")["value"]
+        multiDist_after = source.get("multiDist")["value"]
 
-        self.assertNotEqual(dist_before, dist_after)
-        self.assertEqual(multiDist_after, dist_after)
+        assert dist_before == dist_after
+        assert multiDist_after != dist_after
 
         ag.destroy()
 
     def test_source_flux_updated_after_mle(self):
+
+        test_out_dir = self.set_outputfolder("test_source_flux_updated_after_mle")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -266,19 +292,21 @@ class AGAnalysisUT(unittest.TestCase):
 
         source_1 = ag.selectSources(lambda name: name == self.VELA).pop()
         
-        flux_1 = source_1.spectrum.get("flux")
+        flux_1 = source_1.get("flux")["value"]
 
         ag.mle(maplistFilePath)
 
         source_2 = ag.selectSources(lambda name: name == self.VELA).pop()
-        flux_2 = source_2.multi.get("multiFlux")
+        flux_2 = source_2.get("multiFlux")["value"]
 
         self.assertNotEqual(flux_1, flux_2)
 
         ag.destroy()
 
-
     def test_parse_maplistfile(self):
+
+        test_out_dir = self.set_outputfolder("test_parse_maplistfile")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -303,6 +331,9 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_saving_sky_maps(self):
 
+        test_out_dir = self.set_outputfolder("test_saving_sky_maps")
+
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         ag.setOptions(tmin = 433857532, tmax = 433857732, timetype = "TT")
         _ = ag.generateMaps()
@@ -323,6 +354,9 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_saving_sky_maps_singlemode(self):
 
+        test_out_dir = self.set_outputfolder("test_saving_sky_maps_singlemode")
+
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
         _ = ag.generateMaps()
 
@@ -341,6 +375,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_lc(self):
+
+        test_out_dir = self.set_outputfolder("test_lc")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -390,6 +427,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()"""
 
     def test_generic_column(self):
+
+        test_out_dir = self.set_outputfolder("g_col")
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         ag.setOptions(energybins=[[100, 300]], fovbinnumber=1)
@@ -410,6 +450,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_calc_bkg(self):
+
+        test_out_dir = self.set_outputfolder("test_calc_bkg")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -442,6 +485,9 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_extract_light_curve_data(self):
 
+        test_out_dir = self.set_outputfolder("test_extract_light_curve_data")
+
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         sourceFile = Path(self.currentDirPath).joinpath("data/testcase_2AGLJ0835-4514.source")
@@ -467,6 +513,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_fix_exponent(self):
+
+        test_out_dir = self.set_outputfolder("test_fix_exponent")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -500,23 +549,26 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_update_source_parameter_value(self):
 
+        test_out_dir = self.set_outputfolder("test_update_source_parameter_value")
+
+
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
         sources = ag.selectSources(lambda name: name == self.VELA)
         
         source = sources.pop()
 
-        self.assertEqual(1.34774, source.spectrum.get("index2"))
-        source.spectrum.set("index2", 1)
-        self.assertEqual(1, source.spectrum.get("index2"))
+        self.assertEqual(1.34774, source.spectrum.getVal("index2"))
+        source.set("index2", {"value": 1})
+        assert 1 == source.spectrum.getVal("index2")
 
-        self.assertEqual(969.539e-08, source.spectrum.get("flux"))
-        source.spectrum.set("flux", 1)
-        self.assertEqual(1, source.spectrum.get("flux"))
+        self.assertEqual(969.539e-08, source.spectrum.getVal("flux"))
+        source.set("flux", {"value": 1})
+        assert 1 == source.spectrum.getVal("flux")
 
-        self.assertEqual(3913.06, source.spectrum.get("cutoffEnergy"))
-        source.spectrum.set("cutoffEnergy", 1)
-        self.assertEqual(1, source.spectrum.get("cutoffEnergy"))
+        self.assertEqual(3913.06, source.spectrum.getVal("cutoffEnergy"))
+        source.set("cutoffEnergy", {"value": 1})
+        assert 1 == source.spectrum.getVal("cutoffEnergy")
 
         # self.assertRaises(AttributeError, source.spectrum.get, "index")
         # self.assertRaises(AttributeError, source.spectrum.set, "index", 10)
@@ -524,6 +576,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_multi_update_free_parameters(self):
+
+        test_out_dir = self.set_outputfolder("test_multi_update_free_parameters")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -534,24 +589,37 @@ class AGAnalysisUT(unittest.TestCase):
         source = sources.pop()
 
         #index2 = source.spectrum.get("index2")
-        flux = source.spectrum.get("flux")
+        flux = source.spectrum.getVal("flux")
         #cutoffEnergy = source.spectrum.get("cutoffEnergy") 
 
         ag.freeSources(lambda name: name == self.VELA, "pos", True)
         # ag.freeSources(lambda name: name == self.VELA, "index2", True)
         ag.freeSources(lambda name: name == self.VELA, "flux", True)
         # ag.freeSources(lambda name: name == self.VELA, "cutoffEnergy", True)
+        print(source)
 
         ag.mle()
 
-        self.assertEqual(True, source.multi.get("multiFlux") == source.spectrum.get("flux"))
-        self.assertEqual(True, flux != source.spectrum.get("flux"))
+        print(source)
+
+        assert source.multiAnalysis.getVal("multiFlux") != source.spectrum.getVal("flux")
+        assert flux == source.spectrum.getVal("flux")
+
+        ag.mle()
+
+        assert source.multiAnalysis.getVal("multiFlux") != source.spectrum.getVal("flux")
+        assert flux != source.spectrum.getVal("flux")
+
+        print(source)
 
         #todo: validation test 
 
         ag.destroy()
 
     def test_print_source(self):
+
+        test_out_dir = self.set_outputfolder("test_print_source")
+
 
         ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
 
@@ -563,11 +631,12 @@ class AGAnalysisUT(unittest.TestCase):
 
     def test_write_sources_on_file(self):
 
+        test_out_dir = self.set_outputfolder("test_write_sources_on_file")
+
+
         ag = AGAnalysis(self.agilepyConf)
 
         sources_subset = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 30))
-
-        print("sources_subset: ",len(sources_subset))
 
         self.assertRaises(SourceModelFormatNotSupported, ag.writeSourcesOnFile, "regfile", "notsupportedformat", None)
 
@@ -575,7 +644,7 @@ class AGAnalysisUT(unittest.TestCase):
         regfile = ag.writeSourcesOnFile("regfile", "reg", sources_subset)    
         with open(regfile) as f:
             linesNum = sum(1 for line in f)
-        self.assertEqual(1, linesNum)
+        assert 1 == linesNum
         
         """
         ag.generateMaps()
@@ -595,14 +664,17 @@ class AGAnalysisUT(unittest.TestCase):
         self.assertEqual(len(sources_subset)+1, linesNum)
 
     def test_setOptionTimeMJD(self):
+
+        test_out_dir = self.set_outputfolder("test_setOptionTimeMJD")
+
         
         ag = AGAnalysis(self.agilepyConf)
 
         tmin1 = 58030.0
         tmax1 = 58035.0
 
-        tmintt = AstroUtils.time_mjd_to_tt(tmin1)
-        tmaxtt = AstroUtils.time_mjd_to_tt(tmax1)
+        tmintt = AstroUtils.time_mjd_to_agile_seconds(tmin1)
+        tmaxtt = AstroUtils.time_mjd_to_agile_seconds(tmax1)
 
         ag.setOptionTimeMJD(tmin=tmin1, tmax=tmax1)
 
@@ -616,6 +688,9 @@ class AGAnalysisUT(unittest.TestCase):
         ag.destroy()
 
     def test_setOptionEnergybin(self):
+
+        test_out_dir = self.set_outputfolder("test_setOptionEnergybin")
+
 
         energybin0 = [[100, 10000]]
         energybin1 = [[100, 50000]]
@@ -648,8 +723,10 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
     
-
     def test_setDQ(self):
+
+        test_out_dir = self.set_outputfolder("test_setDQ")
+
 
         ag = AGAnalysis(self.agilepyConf)
 
@@ -672,9 +749,10 @@ class AGAnalysisUT(unittest.TestCase):
 
         ag.destroy()
 
-
-
     def test_fixed_parameters(self):
+
+        test_out_dir = self.set_outputfolder("test_fixed_parameters")
+
 
         ag = AGAnalysis(self.agilepyConf)
 
@@ -685,29 +763,29 @@ class AGAnalysisUT(unittest.TestCase):
 
         sources = ag.loadSourcesFromCatalog("2AGL", rangeDist=(0, 25))
         
-        source = ag.selectSources(
-            'name == "2AGLJ0835-4514"')
-        flux0 = source[0].initialSpectrum.get("flux")
-        flux1 = source[0].spectrum.get("flux")
-        
-        self.assertEqual(len(sources), 9)
+        assert len(sources) == 9
 
+        source = ag.selectSources('name == "2AGLJ0835-4514"').pop()
+
+        flux0 = source.spectrum.getVal("flux")
+        
         sources = ag.freeSources(
-            'name == "2AGLJ0835-4514"', "flux", True, show=True)
+            'name == "2AGLJ0835-4514"', "flux", False, show=True)
 
         _ = ag.generateMaps()
 
         _ = ag.mle()
         
-        flux2 = sources[0].spectrum.get("flux")
-        flux3 = source[0].initialSpectrum.get("flux")
+        flux1 = source.get("multiFlux")["value"]
 
-        self.assertEqual(flux0, flux3)
-        self.assertNotEqual(flux1, flux2)
+        assert flux0 == flux1
 
         ag.destroy()
     
     def test_get_analysis_dir(self):
+
+        test_out_dir = self.set_outputfolder("test_get_analysis_dir")
+
 
         ag = AGAnalysis(self.agilepyConf)
 

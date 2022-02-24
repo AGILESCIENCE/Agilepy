@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from pathlib import Path
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
 
@@ -185,9 +186,106 @@ class IntMapGenerator(ProcessWrapper):
                     ]
 
 
+class Indexgen(ProcessWrapper):
+    """
+    Thile class generates index file starting from LOG and EVT files
 
+    Args:
+        log dir:
+        type: EVT | LOG
+        out file:
+    Usage:
+        AG_indexgen <data_dir> <type> <out_file>
+    Return:
+        indexfile
+    """
+    
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
 
+    def getRequiredOptions(self):
+        return ["datadir", "type", "out_file"]
 
+    def configureTool(self, confDict=None, extraParams=None):
+        
+        self.outputDir = extraParams["out_dir"]
+        outputFile = str(Path(self.outputDir).joinpath(extraParams["out_file"]))
+
+        self.args = [extraParams["data_dir"],
+                     extraParams["type"],
+                     outputFile
+                    ]
+
+        self.products = {
+            outputFile : ProcessWrapper.REQUIRED_PRODUCT
+        }
+
+class Spotfinder(ProcessWrapper):
+    """
+    This class will call the AG_spotfinder tool.
+
+    Args:
+        input file:
+        binsize of the input:
+        smoothing:
+        max number of connected region to found:
+        output files:
+        algorithm type (int): it selects the algorithm to use: 0 original, 1 new with baricenter calculation, 2 new without baricenter calculation
+        remove spot to near: radious, if 0, dont remove
+        sky segmentation (optional): 0 - all sky, 1 - b >= 10, 2 - |b|<10, 3 - b <= -10
+        shift the result coordinate to north (optional):  true or false (if true, b = b + bin size)
+        remove sources outside radius r from the center of the map (default 0, don't remove) (optional)
+        exposure file name (optional): default, don't use
+        min exposure (optional): default 200
+    Usage:
+        AG_spotfinder AG_spotfinder MAP.cts.gz 0.5 2 10 MLE0000hypothesis1.multi 1 2 0 0 50.0 MAP.exp.gz 50
+    Return:
+        
+    """
+    def __init__(self, exeName, agilepyLogger):
+        super().__init__(exeName, agilepyLogger)
+        self.isAgileTool = False
+
+    def getRequiredOptions(self):
+        return ["input_file", "input_binsize", "smoothing", "max_region", "output_files", "algorithm", "remove_spot"]
+
+    def configureTool(self, confDict, extraParams=None):
+
+        self.products = {}
+
+        self.outputDir = confDict.getOptionValue("outdir")
+
+        outputFile = outputFile = str(Path(self.outputDir).joinpath(extraParams["output_files"]))
+
+        self.args = [extraParams["input_file"],
+                     extraParams["input_binsize"],
+                     extraParams["smoothing"],
+                     extraParams["max_region"],
+                     outputFile,
+                     extraParams["algorithm"],
+                     extraParams["remove_spot"]
+                    ]
+        
+        if "sky_segmentation" in extraParams:
+            self.args.append(str(extraParams["sky_segmentation"]))
+
+        if "shift_to_north" in extraParams:
+            self.args.append(str(extraParams["shift_to_north"]))
+        
+        if "remove_sources" in extraParams:
+            self.args.append(str(extraParams["remove_sources"]))
+        
+        if "exp_filename" in extraParams:
+            self.args.append(str(extraParams["exp_filename"]))
+        
+        if "min_exp" in extraParams:
+            self.args.append(str(extraParams["min_exp"]))
+
+        self.products = {
+            outputFile : ProcessWrapper.REQUIRED_PRODUCT,
+            outputFile+".reg": ProcessWrapper.REQUIRED_PRODUCT
+        }
 
 class Multi(ProcessWrapper):
     """
@@ -418,20 +516,3 @@ class Ccl(ProcessWrapper):
             ">",
             outfilePath
         ])
-
-
-
-
-
-    
-
-    
-    
-    
-
-
-
-
-
-
-

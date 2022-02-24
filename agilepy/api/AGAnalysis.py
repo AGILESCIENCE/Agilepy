@@ -35,6 +35,8 @@ from pathlib import Path
 from shutil import rmtree
 from ntpath import basename
 from os.path import join, splitext, expandvars
+
+from agilepy.core.AGDataset import AGDataset
 pattern = re.compile('e([+\-]\d+)')
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
@@ -45,7 +47,7 @@ from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.Parameters import Parameters
 from agilepy.core.MapList import MapList
 from agilepy.utils.Utils import Utils
-from agilepy.core.CustomExceptions import  AGILENotFoundError, \
+from agilepy.core.CustomExceptions import   AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, \
@@ -104,6 +106,10 @@ class AGAnalysis(AGBaseAnalysis):
 
         self.multiTool = Multi("AG_multi", self.logger)
 
+        if self.config.getOptionValue("userestapi"):
+            self.agdataset = AGDataset(self.logger)
+            self.agdataset.agilecoverage()
+
 
     def destroy(self):
         """ It clears the list of sources and the current maplist file.
@@ -120,7 +126,7 @@ class AGAnalysis(AGBaseAnalysis):
     ############################################################################
 
     @staticmethod
-    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"):
+    def getConfiguration(confFilePath, userName, sourceName, tmin, tmax, timetype, glon, glat, outputDir, verboselvl, evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index", logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index", userestapi=True, datapath=None):
         """Utility method to create a configuration file.
 
         Args:
@@ -134,35 +140,39 @@ class AGAnalysis(AGBaseAnalysis):
             glat (float): the galactic latitude (B) of the analysis.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
-            evtfile (str, optional): the index file to be used for event data. It defaults to /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
-            logfile (str, optional): the index file to be used for log data. It defaults to /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index which time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            evtfile (str, optional [default=/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index]): the index file to be used for event data if userestapi is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            logfile (str, optional [default=/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index]): the index file to be used for log data if userestapi is set to False. The time range starts from 107092735 TT, 54244.49924768 MJD, 2007-05-24 11:58:55 UTC
+            userestapi (bool, optional [default=True]): If True, the SSDC REST API will be used to download missing data.
+            datapath (str, optional [default=None]): Datapath to download AGILE data if userestapi is set to True. Index files will be generated into this path.
 
 
         Returns:
             None
         """
 
-        configuration = """
+        configuration = f"""
 input:
-  evtfile: %s
-  logfile: %s
+  evtfile: {evtfile}
+  logfile: {logfile}
+  userestapi: {userestapi}
+  datapath: {datapath}
 
 output:
-  outdir: %s
+  outdir: {outputDir}
   filenameprefix: analysis_product
   logfilenameprefix: analysis_log
-  sourcename: %s
-  username: %s
-  verboselvl: %d
+  sourcename: {sourceName}
+  username: {userName}
+  verboselvl: {verboselvl}
 
 selection:  
   emin: 100
   emax: 10000
-  tmin: %f
-  tmax: %f
-  timetype: %s
-  glon: %f
-  glat: %f
+  tmin: {tmin}
+  tmax: {tmax}
+  timetype: {timetype}
+  glon: {glon}
+  glat: {glat}
   proj: ARC
   timelist: None
   filtercode: 5
@@ -227,7 +237,7 @@ ap:
 plotting:
   twocolumns: False
 
-        """%(evtfile, logfile, outputDir, sourceName, userName, verboselvl, tmin, tmax, timetype, glon, glat)
+        """
 
         with open(Utils._expandEnvVar(confFilePath),"w") as cf:
 
@@ -289,11 +299,11 @@ plotting:
         - name: the unique code identifying the source.
         - dist: the distance of the source from the center of the maps.
         - flux: the flux value.
-        - sqrtTS: the radix square of the ts.
+        - sqrtts: the radix square of the ts.
 
         Warning:
 
-            The sqrtTS parameter is available only after the maximum likelihood estimation analysis is performed.
+            The sqrtts parameter is available only after the maximum likelihood estimation analysis is performed.
 
         Args:
             selection (lambda or str): a lambda function or a boolean expression string specifying the selection criteria.
@@ -468,7 +478,7 @@ plotting:
 
         """
 
-        self.config.setOptions(tmin=AstroUtils.time_mjd_to_tt(tmin), tmax=AstroUtils.time_mjd_to_tt(tmax), timetype="TT")
+        self.config.setOptions(tmin=AstroUtils.time_mjd_to_agile_seconds(tmin), tmax=AstroUtils.time_mjd_to_agile_seconds(tmax), timetype="TT")
 
     def setOptionEnergybin(self, value):
         """An useful utility method that maps a value in a specific energybin and it calls the setOptions function.
@@ -560,11 +570,20 @@ plotting:
         tmin = configBKP.getOptionValue("tmin")
         tmax = configBKP.getOptionValue("tmax")
         timetype = configBKP.getOptionValue("timetype")
+
+        ####### REST API #######
+
+        if configBKP.getOptionValue("userestapi"):
+            if timetype == "TT":
+                tminRest = AstroUtils.time_agile_seconds_to_mjd(tmin)
+                tmaxRest = AstroUtils.time_agile_seconds_to_mjd(tmax)
+            self.agdataset.downloadData(tminRest, tmaxRest, configBKP.getOptionValue("datapath"), configBKP.getOptionValue("evtfile"), configBKP.getOptionValue("logfile"))
+
         
         if timetype == "MJD":
-            tmin =  AstroUtils.time_mjd_to_tt(tmin)
-            tmax =  AstroUtils.time_mjd_to_tt(tmax)    
-            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")         
+            tmin =  AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax =  AstroUtils.time_mjd_to_agile_seconds(tmax)    
+            configBKP.setOptions(tmin=tmin, tmax=tmax, timetype="TT")
 
         glon = configBKP.getOptionValue("glon")
         glat = configBKP.getOptionValue("glat")
@@ -606,9 +625,6 @@ plotting:
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
 
-                    """
-                    REFACTOR FROM NOW ON TO A FUNCTION..
-                    """
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
                     configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
@@ -717,8 +733,8 @@ plotting:
         timetype = self.config.getOptionValue("timetype")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
 
         if pastTimeWindow == 0:
             tmin = tmin
@@ -859,7 +875,7 @@ plotting:
 
                 multiOutputData = self.sourcesLibrary.parseSourceFile(sourceFile)
 
-                self.sourcesLibrary.updateMulti(multiOutputData)
+                self.sourcesLibrary.updateSourceWithMLEResults(multiOutputData)
 
         self.logger.info(self, "Took %f seconds.", time()-timeStart)
 
@@ -889,9 +905,15 @@ plotting:
             self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
 
         if timetype == "MJD":
-            tmin = AstroUtils.time_mjd_to_tt(tmin)
-            tmax = AstroUtils.time_mjd_to_tt(tmax)
+            if self.config.getOptionValue("userestapi"):
+                self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
 
+            tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
+            tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
+        
+        if self.config.getOptionValue("userestapi"):    
+            self.agdataset.downloadData(AstroUtils.time_agile_seconds_to_mjd(tmin), AstroUtils.time_agile_seconds_to_mjd(tmax), self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
+            
         tmin = int(tmin)
         tmax = int(tmax)
 
@@ -1285,11 +1307,11 @@ plotting:
                     time_start_tt = lcDataDict["time_start_tt"] # + binsize * timecounter
                     time_end_tt   = lcDataDict["time_end_tt"]   # + binsize * timecounter
 
-                    time_start_mjd = AstroUtils.time_tt_to_mjd(time_start_tt)
-                    time_end_mjd   = AstroUtils.time_tt_to_mjd(time_end_tt)
+                    time_start_mjd = AstroUtils.time_agile_seconds_to_mjd(time_start_tt)
+                    time_end_mjd   = AstroUtils.time_agile_seconds_to_mjd(time_end_tt)
 
-                    time_start_utc = AstroUtils.time_mjd_to_utc(time_start_mjd)
-                    time_end_utc   = AstroUtils.time_mjd_to_utc(time_end_mjd)
+                    time_start_utc = AstroUtils.time_mjd_to_fits(time_start_mjd)
+                    time_end_utc   = AstroUtils.time_mjd_to_fits(time_end_mjd)
 
                     # time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist
                     # l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err
@@ -1431,100 +1453,100 @@ plotting:
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath)
 
-        flux     = self._fixToNegativeExponent(multiOutput.get("multiFlux"), fixedExponent=-8)
-        flux_err = self._fixToNegativeExponent(multiOutput.get("multiFluxErr"), fixedExponent=-8)
-        flux_ul  = self._fixToNegativeExponent(multiOutput.get("multiUL"), fixedExponent=-8)
+        flux     = self._fixToNegativeExponent(multiOutput.getVal("multiFlux"), fixedExponent=-8)
+        flux_err = self._fixToNegativeExponent(multiOutput.getVal("multiFluxErr"), fixedExponent=-8)
+        flux_ul  = self._fixToNegativeExponent(multiOutput.getVal("multiUL"), fixedExponent=-8)
 
 
 
         lcDataDict = {
-            "sqrt(ts)" : multiOutput.get("multiSqrtTS", strr=True),
+            "sqrt(ts)" : multiOutput.getVal("multiSqrtTS", strr=True),
             "flux"     : flux,
             "flux_err" : flux_err,
             "flux_ul"  : flux_ul,
 
-            "gal" : ','.join(map(str, multiOutput.get("multiGalCoeff"))),
-            "gal_error": ','.join(map(str, multiOutput.get("multiGalErr"))),
+            "gal" : ','.join(map(str, multiOutput.getVal("multiGalCoeff"))),
+            "gal_error": ','.join(map(str, multiOutput.getVal("multiGalErr"))),
 
-            "iso" : ','.join(map(str, multiOutput.get("multiIsoCoeff"))),
-            "iso_error": ','.join(map(str, multiOutput.get("multiIsoErr"))),
+            "iso" : ','.join(map(str, multiOutput.getVal("multiIsoCoeff"))),
+            "iso_error": ','.join(map(str, multiOutput.getVal("multiIsoErr"))),
             
-            "l_peak"    : multiOutput.get("multiLPeak", strr=True),
-            "b_peak"    : multiOutput.get("multiBPeak", strr=True),
-            "dist_peak" : multiOutput.get("multiDistFromStartPositionPeak", strr=True),
+            "l_peak"    : multiOutput.getVal("multiLPeak", strr=True),
+            "b_peak"    : multiOutput.getVal("multiBPeak", strr=True),
+            "dist_peak" : multiOutput.getVal("multiDistFromStartPositionPeak", strr=True),
 
-            "l"    : multiOutput.get("multiL", strr=True),
-            "b"    : multiOutput.get("multiB", strr=True),
-            "r"    : multiOutput.get("multir", strr=True),
-            "ell_dist": multiOutput.get("multiDistFromStartPosition", strr=True),
+            "l"    : multiOutput.getVal("multiL", strr=True),
+            "b"    : multiOutput.getVal("multiB", strr=True),
+            "r"    : multiOutput.getVal("multir", strr=True),
+            "ell_dist": multiOutput.getVal("multiDistFromStartPosition", strr=True),
 
-            "a": multiOutput.get("multia", strr=True),
-            "b": multiOutput.get("multib", strr=True),
-            "phi": multiOutput.get("multiphi", strr=True),
-            "exp": multiOutput.get("multiExp", strr=True),
-            "ExpRatio": multiOutput.get("multiExpRatio", strr=True),
-            "counts": multiOutput.get("multiCounts", strr=True),
-            "counts_err": multiOutput.get("multiCountsErr", strr=True),
-            "Index": multiOutput.get("multiIndex", strr=True),
-            "Index_Err": multiOutput.get("multiIndexErr", strr=True),
-            "Par2": multiOutput.get("multiPar2", strr=True),
-            "Par2_Err": multiOutput.get("multiPar2Err", strr=True),
-            "Par3": multiOutput.get("multiPar3", strr=True),
-            "Par3_Err": multiOutput.get("multiPar3Err", strr=True),
-            "Erglog":  multiOutput.get("multiErgLog", strr=True),
-            "Erglog_Err": multiOutput.get("multiErgLogErr", strr=True),
-            "Erglog_UL": multiOutput.get("multiErgLogUL", strr=True),
+            "a": multiOutput.getVal("multia", strr=True),
+            "b": multiOutput.getVal("multib", strr=True),
+            "phi": multiOutput.getVal("multiphi", strr=True),
+            "exp": multiOutput.getVal("multiExp", strr=True),
+            "ExpRatio": multiOutput.getVal("multiExpRatio", strr=True),
+            "counts": multiOutput.getVal("multiCounts", strr=True),
+            "counts_err": multiOutput.getVal("multiCountsErr", strr=True),
+            "Index": multiOutput.getVal("multiIndex", strr=True),
+            "Index_Err": multiOutput.getVal("multiIndexErr", strr=True),
+            "Par2": multiOutput.getVal("multiPar2", strr=True),
+            "Par2_Err": multiOutput.getVal("multiPar2Err", strr=True),
+            "Par3": multiOutput.getVal("multiPar3", strr=True),
+            "Par3_Err": multiOutput.getVal("multiPar3Err", strr=True),
+            "Erglog":  multiOutput.getVal("multiErgLog", strr=True),
+            "Erglog_Err": multiOutput.getVal("multiErgLogErr", strr=True),
+            "Erglog_UL": multiOutput.getVal("multiErgLogUL", strr=True),
 
-            "fit_cts": multiOutput.get("multiFitCts", strr=True),
-            "fit_fitstatus0": multiOutput.get("multiFitFitstatus0", strr=True),
-            "fit_fcn0": multiOutput.get("multiFitFcn0", strr=True),
-            "fit_edm0": multiOutput.get("multiFitEdm0", strr=True),
-            "fit_nvpar0": multiOutput.get("multiFitNvpar0", strr=True),
-            "fit_nparx0": multiOutput.get("multiFitNparx0", strr=True),
-            "fit_iter0": multiOutput.get("multiFitIter0", strr=True),
-            "fit_fitstatus1": multiOutput.get("multiFitFitstatus1", strr=True),
-            "fit_fcn1": multiOutput.get("multiFitFcn1", strr=True),
-            "fit_edm1": multiOutput.get("multiFitEdm1", strr=True),
-            "fit_nvpar1": multiOutput.get("multiFitNvpar1", strr=True),
-            "fit_nparx1": multiOutput.get("multiFitNparx1", strr=True),
-            "fit_iter1": multiOutput.get("multiFitIter1", strr=True),
-            "fit_Likelihood1": multiOutput.get("multiFitLikelihood1", strr=True),
+            "fit_cts": multiOutput.getVal("multiFitCts", strr=True),
+            "fit_fitstatus0": multiOutput.getVal("multiFitFitstatus0", strr=True),
+            "fit_fcn0": multiOutput.getVal("multiFitFcn0", strr=True),
+            "fit_edm0": multiOutput.getVal("multiFitEdm0", strr=True),
+            "fit_nvpar0": multiOutput.getVal("multiFitNvpar0", strr=True),
+            "fit_nparx0": multiOutput.getVal("multiFitNparx0", strr=True),
+            "fit_iter0": multiOutput.getVal("multiFitIter0", strr=True),
+            "fit_fitstatus1": multiOutput.getVal("multiFitFitstatus1", strr=True),
+            "fit_fcn1": multiOutput.getVal("multiFitFcn1", strr=True),
+            "fit_edm1": multiOutput.getVal("multiFitEdm1", strr=True),
+            "fit_nvpar1": multiOutput.getVal("multiFitNvpar1", strr=True),
+            "fit_nparx1": multiOutput.getVal("multiFitNparx1", strr=True),
+            "fit_iter1": multiOutput.getVal("multiFitIter1", strr=True),
+            "fit_Likelihood1": multiOutput.getVal("multiFitLikelihood1", strr=True),
 
 
-            "time_start_tt" : float(multiOutput.get("startDataTT", strr=True)),
-            "time_end_tt"   : float(multiOutput.get("endDataTT", strr=True)),
+            "time_start_tt" : float(multiOutput.getVal("startDataTT", strr=True)),
+            "time_end_tt"   : float(multiOutput.getVal("endDataTT", strr=True)),
 
-            "Fix": multiOutput.get("multiFix", strr=True),
-            "index": multiOutput.get("multiindex", strr=True),
-            "ULConfidenceLevel": multiOutput.get("multiULConfidenceLevel", strr=True),
-            "SrcLocConfLevel": multiOutput.get("multiSrcLocConfLevel", strr=True),
-            "start_l": multiOutput.get("multiStartL", strr=True),
-            "start_b": multiOutput.get("multiStartB", strr=True),
-            "start_flux": multiOutput.get("multiStartFlux", strr=True),
-            "typefun": multiOutput.get("multiTypefun", strr=True),
-            "par2": multiOutput.get("multipar2", strr=True),
-            "par3": multiOutput.get("multipar3", strr=True),
-            "galmode2":  multiOutput.get("multiGalmode2", strr=True),
-            "galmode2fit": multiOutput.get("multiGalmode2fit", strr=True),
-            "isomode2":  multiOutput.get("multiIsomode2", strr=True),
-            "isomode2fit": multiOutput.get("multiIsomode2fit", strr=True),
-            "edpcor": multiOutput.get("multiEdpcor", strr=True),
-            "fluxcor": multiOutput.get("multiFluxcor", strr=True),
-            "integratortype": multiOutput.get("multiIntegratorType", strr=True),
-            "expratioEval": multiOutput.get("multiExpratioEval", strr=True),
-            "expratio_minthr": multiOutput.get("multiExpratioMinthr", strr=True),
-            "expratio_maxthr":  multiOutput.get("multiExpratioMaxthr", strr=True),
-            "expratio_size": multiOutput.get("multiExpratioSize", strr=True),
+            "Fix": multiOutput.getVal("multiFix", strr=True),
+            "index": multiOutput.getVal("multiindex", strr=True),
+            "ULConfidenceLevel": multiOutput.getVal("multiULConfidenceLevel", strr=True),
+            "SrcLocConfLevel": multiOutput.getVal("multiSrcLocConfLevel", strr=True),
+            "start_l": multiOutput.getVal("multiStartL", strr=True),
+            "start_b": multiOutput.getVal("multiStartB", strr=True),
+            "start_flux": multiOutput.getVal("multiStartFlux", strr=True),
+            "typefun": multiOutput.getVal("multiTypefun", strr=True),
+            "par2": multiOutput.getVal("multipar2", strr=True),
+            "par3": multiOutput.getVal("multipar3", strr=True),
+            "galmode2":  multiOutput.getVal("multiGalmode2", strr=True),
+            "galmode2fit": multiOutput.getVal("multiGalmode2fit", strr=True),
+            "isomode2":  multiOutput.getVal("multiIsomode2", strr=True),
+            "isomode2fit": multiOutput.getVal("multiIsomode2fit", strr=True),
+            "edpcor": multiOutput.getVal("multiEdpcor", strr=True),
+            "fluxcor": multiOutput.getVal("multiFluxcor", strr=True),
+            "integratortype": multiOutput.getVal("multiIntegratorType", strr=True),
+            "expratioEval": multiOutput.getVal("multiExpratioEval", strr=True),
+            "expratio_minthr": multiOutput.getVal("multiExpratioMinthr", strr=True),
+            "expratio_maxthr":  multiOutput.getVal("multiExpratioMaxthr", strr=True),
+            "expratio_size": multiOutput.getVal("multiExpratioSize", strr=True),
 
-            "emin": ','.join(map(str, multiOutput.get("multiEmin"))),
-            "emax": ','.join(map(str, multiOutput.get("multiEmax"))),
-            "fovmin": ','.join(map(str, multiOutput.get("multifovmin"))),
-            "fovmax": ','.join(map(str, multiOutput.get("multifovmax"))),
+            "emin": ','.join(map(str, multiOutput.getVal("multiEmin"))),
+            "emax": ','.join(map(str, multiOutput.getVal("multiEmax"))),
+            "fovmin": ','.join(map(str, multiOutput.getVal("multifovmin"))),
+            "fovmax": ','.join(map(str, multiOutput.getVal("multifovmax"))),
             
-            "albedo": multiOutput.get("multialbedo", strr=True),
-            "binsize": multiOutput.get("multibinsize", strr=True),
-            "expstep": multiOutput.get("multiexpstep", strr=True),
-            "phasecode": multiOutput.get("multiphasecode", strr=True)
+            "albedo": multiOutput.getVal("multialbedo", strr=True),
+            "binsize": multiOutput.getVal("multibinsize", strr=True),
+            "expstep": multiOutput.getVal("multiexpstep", strr=True),
+            "phasecode": multiOutput.getVal("multiphasecode", strr=True)
 
         }
 
@@ -1542,8 +1564,8 @@ plotting:
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath.pop())
 
-        isoCoeff = multiOutput.get("multiIsoCoeff")
-        galCoeff = multiOutput.get("multiGalCoeff")
+        isoCoeff = multiOutput.getVal("multiIsoCoeff")
+        galCoeff = multiOutput.getVal("multiGalCoeff")
 
         self.logger.debug(self, f"Multioutput: {multiOutput}")
 

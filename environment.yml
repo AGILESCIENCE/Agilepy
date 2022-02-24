@@ -3,18 +3,18 @@ channels:
  - conda-forge
  - plotly
 dependencies:
-  - astropy==4.0
-  - plotly==4.12.0
-  - psutil==5.7.0
-  - matplotlib==3.1.3
+  - astropy==4.*
+  - plotly==4.*
+  - psutil==5.*
+  - matplotlib==3.*
   - pandas==1.*
-  - ipympl==0.5.7
+  - ipympl==0.8
   - numpy==1.*
   - scipy==1.*
-  - sphinx==2.*
-  - sphinx_rtd_theme==0.4.3
-  - pyyaml==5.4
-  - regions==0.4
-  - pytest-cov==2.8.1
-  - python-kaleido==0.0.3
-  - tqdm==4.59.0
+  - sphinx==4.*
+  - sphinx_rtd_theme
+  - pyyaml==5.*
+  - regions
+  - pytest-cov==2.*
+  - python-kaleido
+  - tqdm==4.*

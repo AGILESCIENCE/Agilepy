@@ -30,13 +30,16 @@ from inspect import signature
 from os.path import splitext
 from os import listdir
 from copy import deepcopy
+from datetime import datetime
 
 from functools import singledispatch
 from xml.etree.ElementTree import parse, Element, SubElement, Comment, tostring
 from xml.dom import minidom
 
 from agilepy.core.Parameters import Parameters
-from agilepy.core.SourceModel import Source, MultiOutput, Spectrum, SpatialModel, Parameter
+from agilepy.core.source.Source import Source as SourceR
+from agilepy.core.source.MultiAnalysis import MultiAnalysis
+
 from agilepy.core.CustomExceptions import   SourceModelFormatNotSupported, \
                                             FileSourceParsingError, \
                                             SourceNotFound, \
@@ -82,7 +85,6 @@ class SourcesLibrary:
         supportedCatalogs = ["2AGL"]
         scaleFlux = False
 
-
         if catalogName == "2AGL":
             catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.xml")
             if not Path(catPath).exists():
@@ -119,44 +121,40 @@ class SourcesLibrary:
 
             raise SourceModelFormatNotSupported("Format of {} not supported. Supported formats: {}".format(filePath, ' '.join(supportFormats)))
 
-
         if fileExtension == ".xml":
             newSources = self._loadFromSourcesXml(filePath)
 
         elif fileExtension == ".txt" or fileExtension == ".multi":
             newSources = self._loadFromSourcesTxt(filePath)
 
-
         if newSources is None:
             self.logger.critical(self, "Errors during %s parsing (%s)", filePath, fileExtension)
             raise SourcesFileLoadingError("Errors during {} parsing ({})".format(filePath, fileExtension))
 
-        addedSources = []
-
-
         mapCenterL = float(self.config.getOptionValue("glon"))
         mapCenterB = float(self.config.getOptionValue("glat"))
 
-        newSources = [source for source in self._filterByDistance(newSources, rangeDist, mapCenterL, mapCenterB)]
+        for newSource in newSources: newSource.setDistanceFromMapCenter(mapCenterL, mapCenterB)
 
-        addedSources = [source for source in self._addSourcesGenerator(newSources)]
+        filteredSources = [source for source in self._filterByDistance(newSources, rangeDist)]
+
+        filteredSources = [source for source in self._discardIfAlreadyExist(filteredSources)]
 
         if scaleFlux:
 
-            addedSources = [source for source in self._scaleSourcesFlux(addedSources)]
-
-        # Set source Initial Attrubyrs
-        for source in addedSources:
-            source.setInitialAttributes()
+            filteredSources = [source for source in self._scaleSourcesFlux(filteredSources)]
 
         if show:
-            for s in addedSources:
+            for s in filteredSources:
                 print(f"{s}")
-                # self.logger.info(self, f"{s}")
 
-        self.logger.info(self, "Loaded %d sources. Total sources: %d", len(addedSources), len(self.sources))
+        for source in filteredSources:
 
-        return addedSources
+            self.sources.append(source)
+
+        self.logger.info(self, "Loaded %d sources. Total sources: %d", len(filteredSources), len(self.sources))
+
+        return filteredSources
 
     def convertCatalogToXml(self, catalogFilepath):
 
@@ -219,27 +217,20 @@ class SourcesLibrary:
         return [s.name for s in self.sources]
 
     def selectSources(self, selection, show=False):
-        """
-        This method ... blablabla..
-        """
+
         userSelectionParamsNames = SourcesLibrary._extractSelectionParams(selection)
-
-        sources = self._getCompatibleSources(userSelectionParamsNames)
-
-        userSelectionParamsMapping = Source._mapSelectionParams(userSelectionParamsNames)
 
         selected = []
 
-        for source in sources:
+        for source in self.sources:
 
-            if SourcesLibrary._selectSource(selection, source, userSelectionParamsMapping):
+            if self._selectSource(selection, source, userSelectionParamsNames):
 
                 selected.append(source)
 
         if show:
             for s in selected:
                 print(f"{s}")
-                # self.logger.info(self, f"{s}")
 
         return selected
 
@@ -249,7 +240,7 @@ class SourcesLibrary:
         """
         affected = False
 
-        freeableParams = Source.freeParams["spectrum"] + Source.freeParams["spatialModel"]
+        freeableParams = source.getFreeableParams()
 
         for paramName in freeableParams:
 
@@ -267,8 +258,6 @@ class SourcesLibrary:
         if len(sources) == 0:
             self.logger.warning(self, "No sources have been selected.")
             return []
-
-        free = 1 if free else 0
 
         affected = []
 
@@ -302,12 +291,11 @@ class SourcesLibrary:
         self.logger.info(self, "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
-
     def parseSourceFile(self, sourceFilePath):
         """
         Static method
 
-        returns: a MultiOutput object
+        returns: a MultiAnalysis object
         """
         self.logger.debug(self, "Parsing output file of AG_multi: %s", sourceFilePath)
 
@@ -374,116 +362,131 @@ class SourcesLibrary:
             self.logger.critical(self, "The values extracted from %s file are lesser then 128", sourceFilePath)
             raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
 
-        multiOutput = MultiOutput()
+        multiAnalysisResult = MultiAnalysis()
 
-        multiOutput.name.setAttributes(value = allValues[0])
+        multiAnalysisResult.setParameter("multiDate", {"value": datetime.now()})
 
-        multiOutput.multiFix.setAttributes(value = allValues[1])
-        multiOutput.multiindex.setAttributes(value = allValues[2])
-        multiOutput.multiULConfidenceLevel.setAttributes(value= allValues[3])
-        multiOutput.multiSrcLocConfLevel.setAttributes(value = allValues[4])
+        multiAnalysisResult.setParameter("multiName", {"value": allValues[0]})
 
-        multiOutput.multiStartL.setAttributes(value = allValues[5])
-        multiOutput.multiStartB.setAttributes(value = allValues[6])
+        multiAnalysisResult.setParameter("multiFix", {"value": allValues[1]})
+        multiAnalysisResult.setParameter("multiindex", {"value": allValues[2]})
+        multiAnalysisResult.setParameter("multiULConfidenceLevel", {"value": allValues[3]})
+        multiAnalysisResult.setParameter("multiSrcLocConfLevel", {"value": allValues[4]})
 
-        multiOutput.multiStartFlux.setAttributes(value = allValues[7])
-        multiOutput.multiTypefun.setAttributes(value = allValues[12])
-        multiOutput.multipar2.setAttributes(value=allValues[13])
-        multiOutput.multipar3.setAttributes(value = allValues[14])
-        multiOutput.multiGalmode2.setAttributes(value=allValues[15])
-        multiOutput.multiGalmode2fit.setAttributes(value=allValues[16])
-        multiOutput.multiIsomode2.setAttributes(value = allValues[17])
-        multiOutput.multiIsomode2fit.setAttributes(value=allValues[18])
-        multiOutput.multiEdpcor.setAttributes(value = allValues[19])
-        multiOutput.multiFluxcor.setAttributes(value=allValues[20])
-        multiOutput.multiIntegratorType.setAttributes(value=allValues[21])
-        multiOutput.multiExpratioEval.setAttributes(value=allValues[22])
-        multiOutput.multiExpratioMinthr.setAttributes(value = allValues[23])
-        multiOutput.multiExpratioMaxthr.setAttributes(value=allValues[24])
-        multiOutput.multiExpratioSize.setAttributes(value=allValues[25])
+        multiAnalysisResult.setParameter("multiStartL", {"value": allValues[5]})
+        multiAnalysisResult.setParameter("multiStartB", {"value": allValues[6]})
+
+        multiAnalysisResult.setParameter("multiStartFlux", {"value": allValues[7]})
+        multiAnalysisResult.setParameter("multiTypefun", {"value": allValues[12]})
+        multiAnalysisResult.setParameter("multipar2", {"value": allValues[13]})
+        multiAnalysisResult.setParameter("multipar3", {"value": allValues[14]})
+        multiAnalysisResult.setParameter("multiGalmode2", {"value": allValues[15]})
+        multiAnalysisResult.setParameter("multiGalmode2fit", {"value": allValues[16]})
+        multiAnalysisResult.setParameter("multiIsomode2", {"value": allValues[17]})
+        multiAnalysisResult.setParameter("multiIsomode2fit", {"value": allValues[18]})
+        multiAnalysisResult.setParameter("multiEdpcor", {"value": allValues[19]})
+        multiAnalysisResult.setParameter("multiFluxcor", {"value": allValues[20]})
+        multiAnalysisResult.setParameter("multiIntegratorType", {"value": allValues[21]})
+        multiAnalysisResult.setParameter("multiExpratioEval", {"value": allValues[22]})
+        multiAnalysisResult.setParameter("multiExpratioMinthr", {"value": allValues[23]})
+        multiAnalysisResult.setParameter("multiExpratioMaxthr", {"value": allValues[24]})
+        multiAnalysisResult.setParameter("multiExpratioSize", {"value": allValues[25]})
+    
+
+        multiAnalysisResult.setParameter("multiSqrtTS", {"value": allValues[37]})
+
+        multiAnalysisResult.setParameter("multiFlux", {"value": allValues[53]})
+        multiAnalysisResult.setParameter("multiFluxErr", {"value": allValues[54]})
+        multiAnalysisResult.setParameter("multiFluxPosErr", {"value": allValues[55]})
+        multiAnalysisResult.setParameter("multiFluxNegErr", {"value": allValues[56]})
+
+        multiAnalysisResult.setParameter("multiUL", {"value": allValues[57]})
+
+        multiAnalysisResult.setParameter("multiExp", {"value": allValues[59]})
+
+
+        multiAnalysisResult.setParameter("multiErgLog", {"value": allValues[64]})
+        multiAnalysisResult.setParameter("multiErgLogErr", {"value": allValues[65]})
+        multiAnalysisResult.setParameter("multiErgLogUL", {"value": allValues[66]})
+
+        multiAnalysisResult.setParameter("multiLPeak", {"value": allValues[38]})
+        multiAnalysisResult.setParameter("multiBPeak", {"value": allValues[39]})
+        multiAnalysisResult.setParameter("multiDistFromStartPositionPeak", {"value": allValues[40]})
+
+        multiAnalysisResult.setParameter("multiL", {"value": allValues[41]})
+        multiAnalysisResult.setParameter("multiB", {"value": allValues[42]})
+        multiAnalysisResult.setParameter("multiDistFromStartPosition", {"value": allValues[43]})
+        multiAnalysisResult.setParameter("multir", {"value": allValues[44]})
+        multiAnalysisResult.setParameter("multia", {"value": allValues[45]})
+        multiAnalysisResult.setParameter("multib", {"value": allValues[46]})
+        multiAnalysisResult.setParameter("multiphi", {"value": allValues[47]})
+
+        multiAnalysisResult.setParameter("multiCounts", {"value": allValues[48]})
+        multiAnalysisResult.setParameter("multiCountsErr", {"value": allValues[49]})
+
+
+        multiAnalysisResult.setParameter("multiIndex", {"value": allValues[69]})
+        multiAnalysisResult.setParameter("multiIndexErr", {"value": allValues[70]})
         
+        multiAnalysisResult.setParameter("multiPar2", {"value": allValues[71]})
+        multiAnalysisResult.setParameter("multiPar2Err", {"value": allValues[72]})
+
+        multiAnalysisResult.setParameter("multiPar3", {"value": allValues[73]})
+        multiAnalysisResult.setParameter("multiPar3Err", {"value": allValues[74]})
+
+        multiAnalysisResult.setParameter("multiFitCts", {"value": allValues[75]})
+        multiAnalysisResult.setParameter("multiFitFitstatus0", {"value": allValues[76]})
+        multiAnalysisResult.setParameter("multiFitFcn0", {"value":  allValues[77]})
+        multiAnalysisResult.setParameter("multiFitEdm0", {"value": allValues[78]})
+        multiAnalysisResult.setParameter("multiFitNvpar0", {"value": allValues[79]})
+        multiAnalysisResult.setParameter("multiFitNparx0", {"value": allValues[80]})
+        multiAnalysisResult.setParameter("multiFitIter0", {"value": allValues[81]})
+        multiAnalysisResult.setParameter("multiFitFitstatus1", {"value": allValues[82]})
+        multiAnalysisResult.setParameter("multiFitFcn1", {"value": allValues[83]})
+        multiAnalysisResult.setParameter("multiFitEdm1", {"value": allValues[84]})
+        multiAnalysisResult.setParameter("multiFitNvpar1", {"value": allValues[85]})
+        multiAnalysisResult.setParameter("multiFitNparx1", {"value": allValues[86]})
+        multiAnalysisResult.setParameter("multiFitIter1", {"value": allValues[87]})
+        multiAnalysisResult.setParameter("multiFitLikelihood1", {"value": allValues[88]})
+
+        multiAnalysisResult.setParameter("multiGalCoeff", {"value": [eval(val) for val in allValues[89]]})
+        multiAnalysisResult.setParameter("multiGalErr", {"value": [eval(val) for val in allValues[90]]})
+        multiAnalysisResult.setParameter("multiIsoCoeff", {"value": [eval(val) for val in allValues[93]]})
+        multiAnalysisResult.setParameter("multiIsoErr", {"value": [eval(val) for val in allValues[94]]})
+
+        multiAnalysisResult.setParameter("startDataTT", {"value": allValues[99]})
+        multiAnalysisResult.setParameter("endDataTT", {"value": allValues[100]})
 
 
+        multiAnalysisResult.setParameter("multiEmin", {"value": allValues[103]})
+        multiAnalysisResult.setParameter("multiEmax", {"value": allValues[104]})
+        multiAnalysisResult.setParameter("multifovmin", {"value": allValues[105]})
+        multiAnalysisResult.setParameter("multifovmax", {"value": allValues[106]})
+        multiAnalysisResult.setParameter("multialbedo", {"value": allValues[107]})
+        multiAnalysisResult.setParameter("multibinsize", {"value": allValues[108]})
+        multiAnalysisResult.setParameter("multiexpstep", {"value": allValues[109]})
+        multiAnalysisResult.setParameter("multiphasecode", {"value": allValues[110]})
 
-        multiOutput.multiSqrtTS.setAttributes(value = allValues[37])
+        multiAnalysisResult.setParameter("multiExpRatio", {"value": allValues[111]})
 
-        multiOutput.multiFlux.setAttributes(value = allValues[53])
-        multiOutput.multiFluxErr.setAttributes(value = allValues[54])
-        multiOutput.multiFluxPosErr.setAttributes(value = allValues[55])
-        multiOutput.multiFluxNegErr.setAttributes(value = allValues[56])
+        return multiAnalysisResult
 
-        multiOutput.multiUL.setAttributes(value = allValues[57])
-
-        multiOutput.multiExp.setAttributes(value = allValues[59])
-
-
-        multiOutput.multiErgLog.setAttributes(value = allValues[64])
-        multiOutput.multiErgLogErr.setAttributes(value = allValues[65])
-        multiOutput.multiErgLogUL.setAttributes(value = allValues[66])
-
-        multiOutput.multiLPeak.setAttributes(value = allValues[38])
-        multiOutput.multiBPeak.setAttributes(value = allValues[39])
-        multiOutput.multiDistFromStartPositionPeak.setAttributes(value = allValues[40])
-
-        multiOutput.multiL.setAttributes(value = allValues[41])
-        multiOutput.multiB.setAttributes(value = allValues[42])
-        multiOutput.multiDistFromStartPosition.setAttributes(value = allValues[43])
-        multiOutput.multir.setAttributes(value = allValues[44])
-        multiOutput.multia.setAttributes(value = allValues[45])
-        multiOutput.multib.setAttributes(value = allValues[46])
-        multiOutput.multiphi.setAttributes(value = allValues[47])
-
-        multiOutput.multiCounts.setAttributes(value = allValues[48])
-        multiOutput.multiCountsErr.setAttributes(value=allValues[49])
-
-
-        multiOutput.multiIndex.setAttributes(value = allValues[69])
-        multiOutput.multiIndexErr.setAttributes(value = allValues[70])
+    def updateSourceWithMLEResults(self, multiAnalysisResult):
         
-        multiOutput.multiPar2.setAttributes(value = allValues[71])
-        multiOutput.multiPar2Err.setAttributes(value = allValues[72])
+        sourceName = multiAnalysisResult.get("multiName")["value"]
 
-        multiOutput.multiPar3.setAttributes(value = allValues[73])
-        multiOutput.multiPar3Err.setAttributes(value = allValues[74])
+        sources = self.selectSources(lambda name : name == sourceName, show=False)
 
-        multiOutput.multiFitCts.setAttributes(value = allValues[75])
-        multiOutput.multiFitFitstatus0.setAttributes(value = allValues[76])
-        multiOutput.multiFitFcn0.setAttributes(value= allValues[77])
-        multiOutput.multiFitEdm0.setAttributes(value = allValues[78])
-        multiOutput.multiFitNvpar0.setAttributes(value = allValues[79])
-        multiOutput.multiFitNparx0.setAttributes(value=allValues[80])
-        multiOutput.multiFitIter0.setAttributes(value=allValues[81])
-        multiOutput.multiFitFitstatus1.setAttributes(value=allValues[82])
-        multiOutput.multiFitFcn1.setAttributes(value = allValues[83])
-        multiOutput.multiFitEdm1.setAttributes(value=allValues[84])
-        multiOutput.multiFitNvpar1.setAttributes(value=allValues[85])
-        multiOutput.multiFitNparx1.setAttributes(value=allValues[86])
-        multiOutput.multiFitIter1.setAttributes(value=allValues[87])
-        multiOutput.multiFitLikelihood1.setAttributes(value=allValues[88])
+        if len(sources) == 0:
+            raise SourceNotFound(f"Source '{sourceName}' has not been found in the sources library")
+        
+        if len(sources) > 1:
+            self.logger.warning(self, f"Found more than one source:{sources}")
 
+        mapCenterL = float(self.config.getOptionValue("glon"))
+        mapCenterB = float(self.config.getOptionValue("glat"))
 
-        multiOutput.multiGalCoeff.setAttributes(value = allValues[89])
-        multiOutput.multiGalErr.setAttributes(value = allValues[90])
-        multiOutput.multiIsoCoeff.setAttributes(value = allValues[93])
-        multiOutput.multiIsoErr.setAttributes(value = allValues[94])
-
-        multiOutput.startDataTT.setAttributes(value = allValues[99])
-        multiOutput.endDataTT.setAttributes(value = allValues[100])
-
-
-        multiOutput.multiEmin.setAttributes(value=allValues[103])
-        multiOutput.multiEmax.setAttributes(value = allValues[104])
-        multiOutput.multifovmin.setAttributes(value = allValues[105])
-        multiOutput.multifovmax.setAttributes(value=allValues[106])
-        multiOutput.multialbedo.setAttributes(value = allValues[107])
-        multiOutput.multibinsize.setAttributes(value=allValues[108])
-        multiOutput.multiexpstep.setAttributes(value=allValues[109])
-        multiOutput.multiphasecode.setAttributes(value=allValues[110])
-
-        multiOutput.multiExpRatio.setAttributes(value = allValues[111])
-
-
-        return multiOutput
+        sources.pop().updateMultiAnalysis(multiAnalysisResult, mapCenterL, mapCenterB)
 
     def updateSourcePosition(self, sourceName, glon, glat):
         
@@ -503,119 +506,17 @@ class SourcesLibrary:
         if glon < 0 or glon > 360:
             raise ValueError(f"glon={glon}")
 
-        newPos = Parameter("pos", "tuple<float,float>")
-        newPos.setAttributes(value = f"({glon}, {glat})", free = source.spatialModel.pos.free)
-        source.spatialModel.pos = newPos
+        source.set("pos", {"value": (glon, glat)})
 
         mapCenterL = float(self.config.getOptionValue("glon"))
         mapCenterB = float(self.config.getOptionValue("glat"))
-        newDistance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
-        source.spatialModel.set("dist", newDistance)
+        source.setDistanceFromMapCenter(mapCenterL, mapCenterB)
 
-
-    def updatePositionAndDistance(self, source):
-        if source.multi.get("multiL") != -1 and source.multi.get("multiB") != -1:
-            oldPos = source.spatialModel.get("pos")
-            newPos = Parameter("pos", "tuple<float,float>")
-            newPos.setAttributes(value = f"({source.multi.multiL.value}, {source.multi.multiB.value})", free = source.spatialModel.pos.free)
-            source.spatialModel.pos = newPos
-
-            if oldPos != newPos.get():
-                oldDistance = source.spatialModel.get("dist")
-                
-                mapCenterL = float(self.config.getOptionValue("glon"))
-                mapCenterB = float(self.config.getOptionValue("glat"))
-                newDistance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
-                source.spatialModel.dist.setAttributes(value = newDistance)
-                source.multi.set("multiDist", newDistance)
-                self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
-                self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
-            else:
-                self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
-
-        else:
-            self.logger.info(self, f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
-
-
-    def updateSpectrumParam(self,source, multiParamName, spectrumParamName):
-
-        if hasattr(source.spectrum, spectrumParamName):
-
-            newVal = source.multi.get(multiParamName)
-            oldVal = source.spectrum.get(spectrumParamName)
-
-            # print(f"{multiParamName} {spectrumParamName} newVal: '{newVal}' parameter")
-            # print(f"{multiParamName} {spectrumParamName} oldVal: '{oldVal}' parameter")
-
-            if oldVal is None or newVal != oldVal:
-                source.spectrum.set(spectrumParamName, newVal)
-                self.logger.info(self, f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
-                # print(f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
-            else:
-                self.logger.info(self, f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
-                # print(f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
-
-
-    def updateSpectrumParameters(self, source, freeParams):
-
-            mapping = {
-                "flux" : "multiFlux",
-                "fluxErr" : "multiFluxErr",
-                "index" : "multiIndex",
-                "indexErr" : "multiIndexErr",
-                "index1" : "multiIndex",
-                "index1Err" : "multiIndexErr",
-                "cutoffEnergy" : "multiPar2",
-                "cutoffEnergyErr" : "multiPar2Err",
-                "pivotEnergy" : "multiPar2",
-                "pivotEnergyErr" : "multiPar2Err",
-                "index2" : "multiPar3",
-                "index2Err" : "multiPar3Err",
-                "curvature" : "multiPar3",
-                "curvatureErr" : "multiPar3Err"
-            }
-
-            for paramName in freeParams:
-
-                self.updateSpectrumParam(source, mapping[paramName], paramName)
-
-            for paramName in ["fluxErr", "indexErr", "index1Err", "cutoffEnergyErr", "pivotEnergyErr", "index2Err", "curvatureErr"]:
-                
-                self.updateSpectrumParam(source, mapping[paramName], paramName)
-
-
-
-
-    def updateMulti(self, multiOutputData):
-
-        sources = self.selectSources(lambda name : name == multiOutputData.get("name"), show=False)
-
-        if len(sources) == 0:
-            raise SourceNotFound(f"Source '{multiOutputData.get('name')}' has not been found in the sources library")
-        
-        if len(sources) > 1:
-            self.logger.warning(self, f"Found more than one source:{sources}")
-
-        for source in sources:
-
-            mapCenterL = float(self.config.getOptionValue("glon"))
-            mapCenterB = float(self.config.getOptionValue("glat"))
-
-            source.saveMultiAnalysisResults(mapCenterL, mapCenterB) # save last multi output in "Initial" fields
-
-            source.multi = multiOutputData # overriding multi output
-
-            freeParams = source.getFreeParams()
-
-            self.logger.info(self, f"{multiOutputData.get('name')} (free) parameters update after mle: {freeParams}")
-
-            self.updatePositionAndDistance(source)
-
-            if "pos" in freeParams: freeParams.remove("pos")
-
-            self.updateSpectrumParameters(source, freeParams)
-
-
+    def doesSourceAlreadyExist(self, sourceName):
+        for source in self.sources:
+            if sourceName == source.name:
+                return True
+        return False
 
     def addSource(self, sourceName, sourceObject):
 
@@ -623,8 +524,7 @@ class SourcesLibrary:
             self.logger.critical(self, "'sourceName' cannot be None or empty.")
             raise SourceParamNotFoundError("'sourceName' cannot be None or empty.")
 
-        for source in self.sources:
-            if sourceName == source.name:
+        if self.doesSourceAlreadyExist(sourceName):
                 self.logger.warning(self,"The source %s already exists. The 'sourceObject' will not be added to the SourcesLibrary.", sourceName)
                 return None
 
@@ -634,7 +534,7 @@ class SourcesLibrary:
     def _addSource(sourceObject, sourceName, self):
         raise NotImplementedError('Unsupported type: {}'.format(type(sourceObject)))
 
-    @_addSource.register(Source)
+    @_addSource.register(SourceR)
     def _(sourceObject, sourceName, self):
 
         self.logger.debug(self, "Loading source from a Source object..")
@@ -644,52 +544,19 @@ class SourcesLibrary:
         return sourceObject
 
     @_addSource.register(dict)
-    def _(sourceObject, sourceName, self):
+    def _(sourceDict, sourceName, self):
 
         self.logger.debug(self, "Loading source from a dictionary..")
 
-        requiredKeys = ["glon", "glat", "spectrumType"]
-
-        for rK in requiredKeys:
-            if rK not in sourceObject:
-                self.logger.critical(self, "'%s' is a required param. Please add it to the 'sourceObject' input dictionary", rK)
-                raise SourceParamNotFoundError("'{}' is a required param. Please add it to the 'sourceObject' input dictionary".format(rK))
-
-        newSource = Source(sourceName, "PointSource")
-
-        newSource.spatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
-        newSource.spatialModel.set("pos", f'({sourceObject["glon"]}, {sourceObject["glat"]})')
-
-        newSource.initialSpatialModel = SpatialModel.getSpatialModelObject("PointSource", 0)
-        newSource.initialSpatialModel.set("pos", f'({sourceObject["glon"]}, {sourceObject["glat"]})')
-
-        newSource.spectrum = Spectrum.getSpectrumObject(sourceObject["spectrumType"])
-        newSource.initialSpectrum = Spectrum.getSpectrumObject(sourceObject["spectrumType"])
-
-        spectrumKeys = ["flux", "index", "index1", "index2", "cutoffEnergy", "pivotEnergy", "curvature"]
-
-        for sK in spectrumKeys:
-            if sK in vars(newSource.spectrum):
-                getattr(newSource.spectrum, sK).set(0)
-                getattr(newSource.initialSpectrum, sK).set(0)
-            if sK in sourceObject and sK in vars(newSource.spectrum):
-                getattr(newSource.spectrum, sK).set(sourceObject[sK])
-                getattr(newSource.initialSpectrum, sK).set(sourceObject[sK])
+        newSource = SourceR.fromDictionary(sourceName, sourceDict)
 
         mapCenterL = float(self.config.getOptionValue("glon"))
         mapCenterB = float(self.config.getOptionValue("glat"))
-
-        distance = newSource.getSourceDistanceFromLB(mapCenterL, mapCenterB)
-
-        newSource.spatialModel.set("dist", distance)
-        newSource.initialSpatialModel.set("dist", distance)
+        newSource.setDistanceFromMapCenter(mapCenterL, mapCenterB)
 
         self.sources.append(newSource)
 
         return newSource
-
-
-
 
 
 
@@ -706,36 +573,21 @@ class SourcesLibrary:
     def _(selectionLambda):
         return list(signature(selectionLambda).parameters)
 
-    def _getCompatibleSources(self, validatedUserSelectionParams):
+    def _selectSource(self, selection, source, userSelectionParams):
+        
+        selectionParamsValues = []
+        
+        for paramName in userSelectionParams:
+            paramValue = source.getSelectionValue(paramName)
+            if paramValue is not None:
+                selectionParamsValues.append(paramValue)
+            else:
+                self.logger.warning(self, f"The selection parameter '{paramName}' cannot be used for source '{source.name}' since mle() has not been called yet! Skipping source..")
+                return None
 
-        sources = []
+        self.logger.debug(self, f"userSelectionParams: {userSelectionParams} selectionParamsValues: {selectionParamsValues}")
 
-        for source in self.sources:
-
-            sourceCompatible = True
-            for paramName in validatedUserSelectionParams:
-
-
-                if not source.isCompatibleWith(paramName):
-
-                    sourceCompatible = False
-
-                    self.logger.warning(self, "The parameter %s cannot be evaluated on source %s because \
-                                               the mle() analysis has not been performed yet on that source.", \
-                                               paramName, source.name)
-
-            if sourceCompatible:
-
-                sources.append(source)
-
-        return sources
-
-    @staticmethod
-    def _selectSource(selection, source, userSelectionParamsMapping):
-
-        selectionParamsValues = [source.getSelectionValue(paramName) for paramName in list(userSelectionParamsMapping.values())]
-
-        return SourcesLibrary.__selectSource(selection, source, userSelectionParamsMapping, selectionParamsValues)
+        return SourcesLibrary.__selectSource(selection, source, userSelectionParams, selectionParamsValues)
 
     @singledispatch
     def __selectSource(selection, source, userSelectionParamsMapping, selectionParamsValues):
@@ -753,34 +605,17 @@ class SourcesLibrary:
 
     def _loadFromSourcesXml(self, xmlFilePath):
 
-        self.logger.debug(self, "Parsing %s ...", xmlFilePath)
+        self.logger.debug(self, f"Parsing {xmlFilePath} ...")
 
         xmlRoot = parse(xmlFilePath).getroot()
 
         sources = []
 
-        for source in xmlRoot:
+        for sourceRoot in xmlRoot:
 
-            if source.tag != "source":
-                SourcesLibrary._fail("Tag <source> expected, %s found."%(source.tag))
+            source = SourceR.parseSourceXMLFormat(sourceRoot)
 
-            sourceDC = Source(**source.attrib)
-
-            for sourceDescription in source:
-
-                if sourceDescription.tag not in ["spectrum", "spatialModel"]:
-                    SourcesLibrary._fail("Tag <spectrum> or <spatialModel> expected, %s found."%(sourceDescription.tag))
-
-                if sourceDescription.tag == "spectrum":
-                    sourceDescrDC = Spectrum.getSpectrumObject(sourceDescription.attrib["type"])
-                    sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
-                    sourceDC.spectrum = sourceDescrDC
-                else:
-                    sourceDescrDC = SpatialModel.getSpatialModelObject(sourceDescription.attrib["type"], sourceDescription.attrib["locationLimit"])
-                    sourceDescrDC = SourcesLibrary._checkAndAddParameters(sourceDescrDC, sourceDescription)
-                    sourceDC.spatialModel = sourceDescrDC
-
-            sources.append(sourceDC)
+            sources.append(source)
 
         return sources
 
@@ -791,112 +626,17 @@ class SourcesLibrary:
 
         with open(txtFilePath, "r") as txtFile:
 
-             for line in txtFile:
+            for line in txtFile:
 
-                 if line == "\n":
-                     continue
+                if line == "\n":
+                    continue
 
-                 elements = [elem.strip() for elem in line.split(" ") if elem] # each line is a source
+                source = SourceR.parseSourceTXTFormat(line)
 
-                 if len(elements) != 17:
-                     self.logger.critical(self, "The number of elements on the line %s is not 17 but %d", line, len(elements))
-                     raise SourcesAgileFormatParsingError("The number of elements on the line {} is not 17, but {}".format(line, len(elements)))
-
-                 flux = float(elements[0])
-                 glon = elements[1]
-                 glat = elements[2]
-                 index = float(elements[3])
-                 fixflag = int(elements[4])
-                 name = elements[6]
-                 locationLimit = int(float(elements[7]))
-                 spectrumType = int(elements[8])
-
-
-                 if fixflag == 0:
-                     free_bits = [0 for i in range(6)]
-                     free_bits_position = 0
-
-                 elif fixflag == 32:
-                     free_bits = [0,0,0,0,0,2]
-                     free_bits_position = free_bits[5]
-
-                 else:
-                     fixflagBinary = f'{fixflag:06b}'
-                     free_bits = [int(bit) for bit in reversed(fixflagBinary)]
-                     free_bits_position = free_bits[1]
-
-
-                 sourceDC = Source(name=name, type="PointSource")
-
-                 if spectrumType == 0:
-                     sourceDC.spectrum = Spectrum.getSpectrumObject("PowerLaw")
-                 elif spectrumType == 1:
-                     sourceDC.spectrum = Spectrum.getSpectrumObject("PLExpCutoff")
-                 elif spectrumType == 2:
-                     sourceDC.spectrum = Spectrum.getSpectrumObject("PLSuperExpCutoff")
-                 elif spectrumType == 3:
-                     sourceDC.spectrum = Spectrum.getSpectrumObject("LogParabola")
-                 else:
-                     self.logger.critical(self,"spectrumType=%d not supported. Supported: [0,1,2,3]", spectrumType)
-                     raise SourcesAgileFormatParsingError("spectrumType={} not supported. Supported: [0,1,2,3]".format(spectrumType))
-
-
-                 getattr(sourceDC.spectrum, "flux").setAttributes(name="flux", free=free_bits[0], value=flux)
-
-                 if spectrumType == 0:
-                     getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
-                                                                        value=index, min=float(elements[11]), max=float(elements[12]))
-
-
-                 elif spectrumType == 1:
-                     getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
-                                                                        value=index, min=float(elements[11]), max=float(elements[12]))
-
-                     getattr(sourceDC.spectrum, "cutoffEnergy").setAttributes(name="cutoffEnergy", free=free_bits[3], scale=-1.0, \
-                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14]))
-
-                 elif spectrumType == 2:
-                     getattr(sourceDC.spectrum, "index1").setAttributes(name="index1", free=free_bits[2], scale=-1.0, \
-                                                                        value=index, min=float(elements[11]), max=float(elements[12]))
-
-                     getattr(sourceDC.spectrum, "cutoffEnergy").setAttributes(name="cutoffEnergy", free=free_bits[3], scale=-1.0, \
-                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14]))
-
-                     getattr(sourceDC.spectrum, "index2").setAttributes(name="index2", free=free_bits[4], value=float(elements[10]), \
-                                                                        min=float(elements[15]), max=float(elements[16]))
-
-                 elif spectrumType == 3:
-                     getattr(sourceDC.spectrum, "index").setAttributes(name="index", free=free_bits[2], scale=-1.0, \
-                                                                        value=index, min=float(elements[11]), max=float(elements[12]))
-
-                     getattr(sourceDC.spectrum, "pivotEnergy").setAttributes(name="pivotEnergy", free=free_bits[3], scale=-1.0, \
-                                                                        value=float(elements[9]), min=float(elements[13]), max=float(elements[14]))
-
-                     getattr(sourceDC.spectrum, "curvature").setAttributes(name="curvature", free=free_bits[4], value=float(elements[10]), \
-                                                                        min=float(elements[15]), max=float(elements[16]))
-
-
-                 sourceDC.spatialModel = SpatialModel.getSpatialModelObject("PointSource", locationLimit)
-
-                 getattr(sourceDC.spatialModel, "pos").setAttributes(name="pos", value="(%s,%s)"%(glon, glat), free=free_bits_position)
-
-                 sources.append(sourceDC)
+                sources.append(source)
 
         return sources
 
-
-    @staticmethod
-    def _checkAndAddParameters(sourceDescrDC, sourceDescription):
-
-        for parameter in sourceDescription:
-
-            if parameter.tag != "parameter":
-                SourcesLibrary._fail("Tag <parameter> expected, %s found."%(parameter.tag))
-
-            parameterName = parameter.attrib["name"]
-            getattr(sourceDescrDC, parameterName).setAttributes(**parameter.attrib)
-
-        return sourceDescrDC
 
     def _getConf(self, key=None):
         if not key:
@@ -914,83 +654,79 @@ class SourcesLibrary:
         for source in sources:
 
             # get flux value
-            if source.multi:
-                flux = source.multi.get("multiFlux")
+            if source.get("multiDate")["value"]:
+                flux = source.get("multiFlux")["value"]
             else:
-                flux = source.spectrum.get("flux")
+                flux = source.get("flux")["value"]
 
             sourceStr += str(flux)+" "
 
             # glon e glat
-            pos = source.spatialModel.get("pos")
+            pos = source.get("pos")["value"]
             glon = pos[0]
             glat = pos[1]
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "
 
-
-            if source.spectrum.stype == "PLSuperExpCutoff":
-                index1 = source.spectrum.get("index1")
+            if source.spectrum.getType() == "PLSuperExpCutoff":
+                index1 = source.get("index1")["value"]
                 sourceStr += str(index1) + " "
             else:
-                index = source.spectrum.get("index")
+                index = source.get("index")["value"]
                 sourceStr += str(index) + " "
 
-            sourceStr += SourcesLibrary._computeFixFlag(source, source.spectrum.stype)+" "
+            sourceStr += SourcesLibrary._computeFixFlag(source, source.spectrum.getType())+" "
 
             sourceStr += "2 "
 
             sourceStr += source.name + " "
 
-            sourceStr += str(source.spatialModel.locationLimit) + " "
+            sourceStr += str(source.get("locationLimit")["value"]) + " "
 
-
-            if source.spectrum.stype == "PowerLaw":
+            if source.spectrum.getType() == "PowerLaw":
                 sourceStr += "0 0 0 "
 
-            elif source.spectrum.stype == "PLExpCutoff":
-                cutoffenergy = source.spectrum.get("cutoffEnergy", strr=True)
+            elif source.spectrum.getType() == "PLExpCutoff":
+                cutoffenergy = source.get("cutoffEnergy")["value"]
                 sourceStr += "1 "+str(cutoffenergy)+" 0 "
 
-            elif source.spectrum.stype == "PLSuperExpCutoff":
-                cutoffenergy = source.spectrum.get("cutoffEnergy", strr=True)
-                index2 = source.spectrum.get("index2", strr=True)
+            elif source.spectrum.getType() == "PLSuperExpCutoff":
+                cutoffenergy = source.get("cutoffEnergy")["value"]
+                index2 = source.get("index2")["value"]
                 sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
 
             else:
-                pivotenergy = source.spectrum.get("pivotEnergy", strr=True)
-                curvature = source.spectrum.get("curvature", strr=True)
+                pivotenergy = source.get("pivotEnergy")["value"]
+                curvature = source.get("curvature")["value"]
                 sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
 
-
-
-            if source.spectrum.stype == "PLSuperExpCutoff":
-                sourceStr += str(source.spectrum.index1.min) + " " + \
-                             str(source.spectrum.index1.max)+ " "
+            if source.spectrum.getType() == "PLSuperExpCutoff":
+                sourceStr += str(source.get("index1")["min"]) + " " + \
+                             str(source.get("index1")["max"])+ " "
             else:
-                sourceStr += str(source.spectrum.index.min) + " " + \
-                             str(source.spectrum.index.max) + " "
+                sourceStr += str(source.get("index")["min"]) + " " + \
+                             str(source.get("index")["max"]) + " "
 
 
-            if source.spectrum.stype == "PowerLaw":
+            if source.spectrum.getType() == "PowerLaw":
                 sourceStr += "20 10000 0 100"
 
-            elif source.spectrum.stype == "PLExpCutoff":
-                sourceStr += str(source.spectrum.cutoffEnergy.min) +" " \
-                           + str(source.spectrum.cutoffEnergy.max) +" "\
+            elif source.spectrum.getType() == "PLExpCutoff":
+                sourceStr += str(source.get("cutoffEnergy")["min"]) +" " \
+                           + str(source.get("cutoffEnergy")["max"]) +" "\
                            + " 0 100"
 
-            elif source.spectrum.stype == "PLSuperExpCutoff":
-                sourceStr += str(source.spectrum.cutoffEnergy.min) +" "\
-                           + str(source.spectrum.cutoffEnergy.max) +" "\
-                           + str(source.spectrum.index2.min) +" "\
-                           + str(source.spectrum.index2.max)
+            elif source.spectrum.getType() == "PLSuperExpCutoff":
+                sourceStr += str(source.get("cutoffEnergy")["min"]) +" "\
+                           + str(source.get("cutoffEnergy")["max"]) +" "\
+                           + str(source.get("index2")["min"]) +" "\
+                           + str(source.get("index2")["max"])
 
             else:
-                sourceStr += str(source.spectrum.pivotEnergy.min) +" "\
-                           + str(source.spectrum.pivotEnergy.max) +" "\
-                           + str(source.spectrum.curvature.min) +" "\
-                           + str(source.spectrum.curvature.max)
+                sourceStr += str(source.get("pivotEnergy")["min"]) +" "\
+                           + str(source.get("pivotEnergy")["max"]) +" "\
+                           + str(source.get("curvature")["min"]) +" "\
+                           + str(source.get("curvature")["max"])
 
 
             sourceStr += "\n"
@@ -1005,27 +741,32 @@ class SourcesLibrary:
 
         for source in sources:
 
-            source_tag = SubElement(root, "source", {"name": source.name, "type": source.type})
+            source_tag = SubElement(root, "source", {"name": source.name, "type": "PointSource"})
 
+            spectrum_tag = Element("spectrum", {"type": source.spectrum.getType()})
 
-            spectrum_tag = Element("spectrum", {"type": source.spectrum.stype})
-
-            for parameterDict in source.spectrum.getParameterDict():
-
+            for parameterDict in source.spectrum.getAttributes():
+                parameterDict.pop("err", None)
+                parameterDict.pop("datatype", None)
+                parameterDict.pop("um", None)
+                for key,val in parameterDict.items():
+                    parameterDict[key] = str(val)
                 param_tag = Element("parameter", parameterDict)
                 spectrum_tag.append(param_tag)
 
             source_tag.append(spectrum_tag)
 
+            spatial_model_tag = Element("spatialModel", { "type": source.spatialModel.getType(), \
+                                                          "location_limit": str(source.get("locationLimit")["value"]) })
 
+            posParam = source.get("pos")
+            posParam.pop("datatype", None)
+            posParam.pop("um", None)
+            for key,val in posParam.items():
+                    posParam[key] = str(val)
 
-            spatial_model_tag = Element("spatialModel", { "type": source.spatialModel.sptype, \
-                                                          "locationLimit": str(source.spatialModel.locationLimit) })
-
-            for parameterDict in source.spatialModel.getParameterDict():
-
-                param_tag = Element("parameter", parameterDict)
-                spatial_model_tag.append(param_tag)
+            param_tag = Element("parameter", posParam)
+            spatial_model_tag.append(param_tag)
 
             source_tag.append(spatial_model_tag)
 
@@ -1042,21 +783,21 @@ class SourcesLibrary:
 
         for source in sources:
 
-            if source.multi == None:
+            if source.get("multiDate")["value"] is None:
                 self.logger.warning(self, f"Multi attribute is None for {source.name}, skipping source..")
                 continue
 
-            L = source.multi.get("multiL") 
-            B = source.multi.get("multiB") 
-            a = source.multi.get("multia") 
-            b = source.multi.get("multib") 
-            phi = source.multi.get("multiphi")
+            L = source.get("multiL")["value"] 
+            B = source.get("multiB")["value"] 
+            a = source.get("multia")["value"] 
+            b = source.get("multib")["value"] 
+            phi = source.get("multiphi")["value"]
 
             if L == -1 and B == -1 and a == -1 and b == -1 and phi == -1:   
                 self.logger.info(self, f"L=B=a=b=phi={L} for {source.name}, using LPeak and BPeak..")
-                LPeak = source.multi.get("multiLPeak")
-                BPeak = source.multi.get("multiBPeak")
-                sourceStr += f"ellipse({LPeak}, {BPeak}, 0.5, 0.5, 0) #color=green width=2 text={source.name}"            
+                LPeak = source.get("multiLPeak")["value"]
+                BPeak = source.get("multiBPeak")["value"]
+                sourceStr += f"ellipse({LPeak}, {BPeak}, 0.5, 0.5, 0) #color=green width=2 text={source.name}"
             else:
                 sourceStr += f"ellipse({L}, {B}, {a}, {b}, {phi}) #color=green width=2 text={source.name}"
 
@@ -1076,32 +817,20 @@ class SourcesLibrary:
         pivotEnergyFree = ""
         posFree = ""
 
-        posFree = source.spatialModel.getFree("pos", strr=True)
-        fluxFree = source.spectrum.getFree("flux", strr=True)
+        freeParams = source.getFreeParams()
+        
+        posFree = "1" if "pos" in freeParams else "0"
+        fluxFree = "1" if "flux" in freeParams else "0"
+        indexFree = "1" if "index" in freeParams else "0"
+        cutoffEnergyFree = "1" if "cutoffEnergy" in freeParams else "0"
+        index1Free = "1" if "index1" in freeParams else "0"
+        index2Free = "1" if "index2" in freeParams else "0"
+        curvatureFree = "1" if "curvature" in freeParams else "0"
 
-
-        if spectrumType == "PowerLaw":
-            indexFree = source.spectrum.getFree("index", strr=True)
-
-        elif spectrumType == "PLExpCutoff":
-            indexFree = source.spectrum.getFree("index", strr=True)
-
-            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strr=True)
-
-        elif spectrumType == "PLSuperExpCutoff":
-            index1Free = source.spectrum.getFree("index1", strr=True)
-            cutoffEnergyFree = source.spectrum.getFree("cutoffEnergy", strr=True)
-            index2Free = source.spectrum.getFree("index2", strr=True)
-
-        else:
-            indexFree = source.spectrum.getFree("index", strr=True)
-            pivotEnergyFree = source.spectrum.getFree("pivotEnergy", strr=True)
-            curvatureFree = source.spectrum.getFree("curvature", strr=True)
-
-        if source.spectrum.getFree("flux") == 0:
+        if fluxFree == "0":
             return "0"
 
-        if source.spatialModel.getFree("pos") == 2:
+        if source.spatialModel.pos["free"] == 2:
 
             bitmask = posFree + \
                       curvatureFree + index2Free + \
@@ -1118,24 +847,19 @@ class SourcesLibrary:
                       posFree + \
                       fluxFree
 
-        #print("bitmask:\n",bitmask)
-        # '{0:08b}'.format(6)
         fixflag = int(bitmask, 2)
-        #print("fixflag: ",fixflag)
 
         return str(fixflag)
 
-    def _addSourcesGenerator(self, sources):
+    def _discardIfAlreadyExist(self, sources):
         for source in sources:
-            added = self.addSource(source.name, source)
-            if added:
-                yield added
+            if not self.doesSourceAlreadyExist(source.name):
+                yield source
 
-    def _filterByDistance(self, sources, rangeDist, mapCenterL, mapCenterB):
+    def _filterByDistance(self, sources, rangeDist):
         for source in sources:
-            distance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
+            distance = source.get("dist")["value"]
             if distance >= rangeDist[0] and distance <= rangeDist[1]:
-                source.spatialModel.set("dist", distance)
                 yield source
 
     def _scaleSourcesFlux(self, sources):
@@ -1146,9 +870,9 @@ class SourcesLibrary:
 
         for source in sources:
 
-            si = source.getSpectralIndex()
+            si = source.spectrum.getSpectralIndex()
 
-            fl = source.getFlux()
+            fl = source.spectrum.getVal("flux")
 
             c = cat2Emin
             d = cat2Emax
@@ -1159,6 +883,6 @@ class SourcesLibrary:
 
             f1 = (p1 / (si-1)) * ( a ** (1-si) - b ** (1-si) )
 
-            source.setFlux(f1)
+            source.set("flux", {"value": f1})
 
             yield source
