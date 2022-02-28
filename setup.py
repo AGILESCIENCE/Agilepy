@@ -23,7 +23,8 @@ setup( name='agilepy',
                          'testing/unittesting/core/conf/*',
                          'testing/unittesting/core/test_data/*',
                          'testing/unittesting/utils/conf/*',
-                         'testing/unittesting/utils/test_data/*'                         
+                         'testing/unittesting/utils/test_data/*',
+                         'utils/AGILE_datacoverage'                         
                     ]},
        license='GPL-3.0'
      )
