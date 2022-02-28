@@ -1,5 +1,7 @@
 include README.md
 include sciencetools_version.txt
+include agilepy/testing/unittesting/api/data/testcase.maplist4
+include agilepy/testing/unittesting/core/test_data/sourceconf.wrongext
 
 recursive-include * *.py
 recursive-include * *.yaml
@@ -10,6 +12,9 @@ recursive-include * *.txt
 recursive-include * *.ipynb
 recursive-include * *.cts.gz
 recursive-include * *.coveragerc
+recursive-include * *.qfile
+recursive-include * *.index
+recursive-include * AGILE_datacoverage
 
 recursive-exclude * __pycache__
 recursive-exclude * *.egg-info
