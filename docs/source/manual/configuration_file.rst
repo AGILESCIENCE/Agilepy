@@ -18,42 +18,48 @@ It can be created easily, calling the following static method and passing the mi
 ::
 
     AGAnalysis.getConfiguration(
-          "./agconfig.yaml", # the destination path of the configuration file
-          "username", # the name of the flare advocate
-          "OJ287", # the name of the source
-          58930, # tmin
-          58936, # tmax
-          "MJD", # time type
-          206.8121188769472, # glon
-          35.8208923457401, # glat
-          "$HOME/agilepy_analysis", # the destination path of the output directory
-          1, # the verbosity level
-          evtfile="$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index", # optional parameter
-          logfile="$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index" # optional parameter
+          confilepath="./agconfig.yaml", # the destination path of the configuration file
+          userName="username", # the name of the flare advocate
+          sourceName="OJ287", # the name of the source
+          tmin=58930, # tmin
+          tmax=58936, # tmax
+          timetype="MJD", # time type
+          glon=206.8121188769472, # glon
+          glat=35.8208923457401, # glat
+          outputDir="$HOME/agilepy_analysis", # the destination path of the output directory
+          verboselvl=1, # the verbosity level
+          evtfile="evt indexfile", # optional parameter
+          logfile="log indexfile", # optional parameter
+          datapath="datapath",
+          userestapi=True,
+
     )
 
 The method above will create the following configuration file:
 
 .. code-block:: yaml
-
+  
   input:
-    evtfile: $AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index
-    logfile: $AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index
-
+    evtfile: None
+    logfile: None
+    userestapi: True
+    datapath: datapath
   output:
-    outdir: "$HOME/agilepy_analysis"
+    outdir: $HOME/agilepy_analysis
     filenameprefix: analysis_product
     logfilenameprefix: analysis_log
-    sourcename: OJ287
-    username: user-xxx
-    verboselvl: 1
+    sourcename: sourcename
+    username: username
+    verboselvl: 2
 
-  selection:
-    tmin: 58930
-    tmax: 58936
+  selection:  
+    emin: 100
+    emax: 10000
+    tmin: 54935.0
+    tmax: 54936.0
     timetype: MJD
-    glon: 206.8121188769472
-    glat: 35.8208923457401
+    glon: 355.447
+    glat: -0.2689
     proj: ARC
     timelist: None
     filtercode: 5
@@ -69,13 +75,12 @@ The method above will create the following configuration file:
 
   maps:
     mapsize: 40
-    useEDPmatrixforEXP: no
+    useEDPmatrixforEXP: false
     expstep: null
     spectralindex: 2.1
     timestep: 160
     projtype: WCS
     proj: ARC
-    # skytype: 4
     binsize: 0.25
     energybins:
       - 100, 10000
@@ -90,7 +95,6 @@ The method above will create the following configuration file:
     isocoeff: null
     emin_sources: 100
     emax_sources: 10000
-    
     galmode2: 0
     galmode2fit: 0
     isomode2: 0
@@ -99,27 +103,24 @@ The method above will create the following configuration file:
   mle:
     ranal: 10
     ulcl: 2
-    loccl: 
-    
-    expratioevaluation: yes
+    loccl: 95
+    expratioevaluation: true
     expratio_minthr: 0
     expratio_maxthr: 15
     expratio_size: 10
-
     minimizertype: Minuit
     minimizeralg: Migrad
     minimizerdefstrategy: 2
     mindefaulttolerance: 0.01
     integratortype: 1
     contourpoints: 40
-
     edpcorrection: 0.75
-    fluxcorrection: 1
-  
+    fluxcorrection: 0
+
   ap:
     radius: 3
     timeslot: 3600
-  
+
   plotting:
     twocolumns: False
 
@@ -148,14 +149,18 @@ Section: *'input'*
 ==================
 This section defines the input data files. The input data files are indexes: each
 row holds the file system position of an actual event data/log file, together with
-the time interval it refers to.
+the time interval it refers to. If userestapi if True the selection of evtfile and logfile is not required,
+Agilepy creates its own index files automatically.
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
    :widths: 20, 100, 20, 20, 20
 
-   evtfile, "Path to index evt file name", str, no, /AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index
-   logfile, "Path to index log file name", str, no, /AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index
+   evtfile, "Path to index evt file name", str, no, None
+   logfile, "Path to index log file name", str, no, None
+   userestapi, "If true downloads date into datapath", bool, no, "True"
+   datapath, "the position of AGILE data", str, no, "None"
+
 
 
 Section: *'output'*
