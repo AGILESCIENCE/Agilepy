@@ -4,7 +4,7 @@ channels:
  - plotly
  - agilescience
 dependencies:
-  - agiletools
+  - agiletools==BUILD25ai
   - agilepy-dataset
   - astropy==4.*
   - plotly==4.*
