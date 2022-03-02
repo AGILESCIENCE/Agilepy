@@ -23,12 +23,12 @@ The main purpose of the package is to provide an easy to use high-level Python i
   :caption: Manual
 
   manual/configuration_file
-  manual/agile_grid_data
+  manual/Ag_dataset_rest_api
   manual/source_file
   manual/work_with_sources
   manual/products
   manual/advanced_configuration
-  manual/Ag_dataset_rest_api
+  manual/agile_grid_data
 
 .. toctree::
   :caption: API
