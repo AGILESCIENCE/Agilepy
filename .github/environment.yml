@@ -6,18 +6,18 @@ channels:
 dependencies:
   - agiletools==BUILD25ai
   - agilepy-dataset
-  - astropy==4.1
-  - plotly==4.14.3
-  - psutil==5.7.3
-  - matplotlib==3.3.3
-  - pandas==1.1.4
-  - ipympl==0.8.8
-  - numpy==1.19.4
-  - scipy==1.5.3
-  - sphinx==2.4.4
+  - astropy==4.*
+  - plotly==4.*
+  - psutil==5.*
+  - matplotlib==3.*
+  - pandas==1.*
+  - ipympl==0.*
+  - numpy==1.*
+  - scipy==1.*
+  - sphinx==2.*
   - sphinx_rtd_theme==0.4.3
-  - pyyaml==5.3.1
+  - pyyaml==5.*
   - regions
-  - pytest-cov==2.12.1
-  - python-kaleido==0.0.3
-  - tqdm==4.63.0
+  - pytest-cov==2.*
+  - python-kaleido==0.*
+  - tqdm==4.*
