@@ -1,4 +1,5 @@
 import os
+import shutil
 import tarfile
 import calendar
 import datetime
@@ -374,9 +375,9 @@ class AGDataset:
 
         tarFileHandle.extract(tarInfo, path=tmpPath)
 
-        #shutil.move(tmpFilePath, outFile)
-
-        tmpFilePath.rename(outFile)
+        shutil.move(tmpFilePath, outFile)
+        
+        #tmpFilePath.rename(outFile)
 
         self.logger.debug(self, f"Moving {tmpFilePath} to {outFile}.")
 
