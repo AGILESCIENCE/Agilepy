@@ -1,5 +1,8 @@
 # Changelog
 
+## Release 1.5.1 (03/03/22)
+* Minor bugfixes and doc updated
+
 ## Release 1.5.0 (24/02/22)
 * (\#287) New Feature: automatic download of the AGILE public data using a REST API directly from SSDC!
 * (\#234) Internal refactoring of Source class, new set/get interface for Source class. Docs updated.

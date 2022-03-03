@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup( name='agilepy',
-       version='1.5.0',
+       version='1.5.1',
        author='Baroncelli Leonardo, Addis Antonio, Bulgarelli Andrea, Parmiggiani Nicolò',
        author_email='leonardo.baroncelli@inaf.it, antonio.addis@inaf.it, andrea.bulgarelli@inaf.it, nicolo.parmiggiani@inaf.it',
        packages=find_packages(),
