@@ -71,6 +71,8 @@ You can pull the image directly from dockerhub using the following command:
 
     docker pull agilescience/agilepy:release-1.5.1
 
+.. note:: Check the installation instructions for Docker `here <https://docs.docker.com/get-docker/>`_
+
 .. note:: If you want to try agilepy’s new features that are not officially released yet, you need to
           pull a develop image available using **agilepy:develop-latest** tag
 
