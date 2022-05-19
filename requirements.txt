@@ -1,0 +1,15 @@
+astropy==4.*
+plotly==4.*
+psutil==5.*
+matplotlib==3.*
+pandas==1.*
+ipympl==0.8
+numpy==1.*
+scipy==1.*
+sphinx==4.*
+sphinx_rtd_theme
+pyyaml==5.*
+regions
+pytest-cov==2.*
+kaleido
+tqdm==4.*
