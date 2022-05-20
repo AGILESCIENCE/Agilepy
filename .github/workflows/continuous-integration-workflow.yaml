@@ -70,10 +70,10 @@ jobs:
     - name: Installing Anaconda
       run: |
         echo "Install miniconda 2021.11 x86_64"
-        wget -q https://repo.anaconda.com/miniconda/Miniconda3-py37_4.12.0-Linux-x86_64.sh
-        echo "4dc4214839c60b2f5eb3efbdee1ef5d9b45e74f2c09fcae6c8934a13f36ffc3e  Miniconda3-py37_4.12.0-Linux-x86_64.sh" > anaconda_hash_sha256
+        wget -q https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
+        echo "3190da6626f86eee8abf1b2fd7a5af492994eb2667357ee4243975cdbb175d7a  Miniconda3-py38_4.12.0-Linux-x86_64.sh" > anaconda_hash_sha256
         sha256sum -c anaconda_hash_sha256
-        bash Miniconda3-py37_4.12.0-Linux-x86_64.sh -b -p /opt/anaconda3
+        bash Miniconda3-py38_4.12.0-Linux-x86_64.sh -b -p /opt/anaconda3
         echo ". /opt/anaconda3/etc/profile.d/conda.sh" >> ~/.bashrc
         source ~/.bashrc
         conda update -y -n base -c defaults conda
