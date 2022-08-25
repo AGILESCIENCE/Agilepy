@@ -600,7 +600,7 @@ class PointSource(Source):
         strr += f'\n\t- B_peak: {self.multiAnalysis.getVal("multiBPeak")}'
         strr += f'\n\t- Distance from start pos: {self.multiAnalysis.getVal("multiDistFromStartPositionPeak")}'
         
-        strr += f'\n\t- position:'
+        strr += f'\n\t- ellipse position:'
         strr += f'\n\t    - L: {self.multiAnalysis.getVal("multiL")}'
         strr += f'\n\t    - B: {self.multiAnalysis.getVal("multiB")}'
         strr += f'\n\t    - Distance from start pos: {self.multiAnalysis.getVal("multiDistFromStartPosition")}'
