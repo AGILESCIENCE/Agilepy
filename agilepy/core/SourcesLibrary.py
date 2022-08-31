@@ -674,7 +674,7 @@ class SourcesLibrary:
             glon = multiL
             glat = multiB
 
-            self.logger.info(self, f"the parameter are multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
+            self.logger.info(self, f"the parameters are multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
 
             if glon == -1 or glat == -1 or position == "peak" or glon == None or glat == None:
                 glon = multiLPeak
