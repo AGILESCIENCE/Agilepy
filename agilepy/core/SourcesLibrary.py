@@ -667,13 +667,8 @@ class SourcesLibrary:
             glat = pos[1]
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "
-
-            if source.spectrum.getType() == "PLSuperExpCutoff":
-                index1 = source.get("index1")["value"]
-                sourceStr += str(index1) + " "
-            else:
-                index = source.get("index")["value"]
-                sourceStr += str(index) + " "
+            
+            sourceStr += str(source.spectrum.getSpectralIndex()) + " "
 
             sourceStr += SourcesLibrary._computeFixFlag(source, source.spectrum.getType())+" "
 
@@ -695,19 +690,23 @@ class SourcesLibrary:
                 index2 = source.get("index2")["value"]
                 sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
 
-            else:
+            elif source.spectrum.getType() == "LogParabola":
                 pivotenergy = source.get("pivotEnergy")["value"]
                 curvature = source.get("curvature")["value"]
                 sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
 
+            else:
+                raise ValueError("Spectrum type not supported!")
+
+            # Adding index limit min and max values
             if source.spectrum.getType() == "PLSuperExpCutoff":
                 sourceStr += str(source.get("index1")["min"]) + " " + \
-                             str(source.get("index1")["max"])+ " "
+                             str(source.get("index1")["max"]) + " "
             else:
                 sourceStr += str(source.get("index")["min"]) + " " + \
                              str(source.get("index")["max"]) + " "
 
-
+            # Adding par2 and par3 limit min and max values
             if source.spectrum.getType() == "PowerLaw":
                 sourceStr += "20 10000 0 100"
 
@@ -826,26 +825,41 @@ class SourcesLibrary:
         index1Free = "1" if "index1" in freeParams else "0"
         index2Free = "1" if "index2" in freeParams else "0"
         curvatureFree = "1" if "curvature" in freeParams else "0"
+        pivotEnergyFree = "1" if "pivotEnergy" in freeParams else "0"
 
-        if fluxFree == "0":
-            return "0"
+        #if fluxFree == "0":
+        #    return "0"
 
+        bit_1 = fluxFree
+        
+        bit_2 = posFree
         if source.spatialModel.pos["free"] == 2:
+            bit_2 = "0"
+        
+        bit_3 = indexFree
+        if spectrumType == "PLSuperExpCutoff":
+            bit_3 = index1Free
+        
+        bit_4 = "0" # PowerLaw
+        if spectrumType == "PLExpCutoff":
+            bit_4 = cutoffEnergyFree
+        elif spectrumType == "PLSuperExpCutoff":
+            bit_4 = cutoffEnergyFree
+        elif spectrumType == "LogParabola":
+            bit_4 = pivotEnergyFree
 
-            bitmask = posFree + \
-                      curvatureFree + index2Free + \
-                      cutoffEnergyFree + pivotEnergyFree + \
-                      indexFree + index1Free + \
-                      "0" + \
-                      fluxFree
+        bit_5 = "0" # PowerLaw
+        if spectrumType == "PLSuperExpCutoff":
+            bit_5 = index2Free
+        elif spectrumType == "LogParabola":
+            bit_5 = curvatureFree
 
-        else:
+        bit_6 = "0"
+        if source.spatialModel.pos["free"] == 2:
+            bit_6 = "1"
 
-            bitmask = curvatureFree + index2Free + \
-                      cutoffEnergyFree + pivotEnergyFree + \
-                      indexFree + index1Free + \
-                      posFree + \
-                      fluxFree
+        # create the bitmask in reverse order
+        bitmask = bit_6 + bit_5 + bit_4 + bit_3 + bit_2 + bit_1
 
         fixflag = int(bitmask, 2)
 
