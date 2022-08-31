@@ -790,7 +790,7 @@ plotting:
 
         return galCoeff, isoCoeff, maplistFilePath
 
-    def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True):
+    def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True, position="ellipse"):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -849,7 +849,7 @@ plotting:
 
         # The multi tools needs to know which which sources (in AGILE format) it will consider during the analysis.
         sourceListFilename = "sourceLibrary"+(str(self.multiTool.callCounter).zfill(5))
-        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=outputDir.joinpath(sourceListFilename), fileformat="txt")
+        sourceListAgileFormatFilePath = self.sourcesLibrary.writeToFile(outfileNamePrefix=outputDir.joinpath(sourceListFilename), fileformat="txt", position=position)
         configBKP.addOptions("selection", sourcelist=sourceListAgileFormatFilePath)
 
         # The multi tools needs to know the name of the sources it will consider during the analysis.
@@ -881,7 +881,7 @@ plotting:
 
         return sourceFiles
 
-    def lightCurveMLE(self, sourceName, tmin = None, tmax = None, timetype = None, binsize = 86400):
+    def lightCurveMLE(self, sourceName, tmin = None, tmax = None, timetype = None, binsize = 86400, position="ellipse"):
         """It generates a cvs file containing the data for a light curve plot.
 
         Args:
@@ -890,6 +890,7 @@ plotting:
             tmax (float, optional): ending point of the light curve. It defaults to None. If None the 'tmax' value of the configuration file will be used.
             timetype (str, optional): the time format ('MJD' or 'TT'). It defaults to None. If None the 'timetype' value of the configuration file will be used.
             binsize (int, optional): temporal bin size. It defaults to 86400.
+            position (str, optional): the position of the source: {"ellipse", "peak", "initial"}
 
         Returns:
             The absolute path to the light curve data output file.
@@ -971,7 +972,7 @@ plotting:
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
-            _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
+            _ = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False, position=position)
 
             idx += 1
         """

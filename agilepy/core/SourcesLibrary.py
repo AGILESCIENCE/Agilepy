@@ -170,7 +170,7 @@ class SourcesLibrary:
 
         return self.writeToFile(filename, fileformat="xml", sources=newSources)
 
-    def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=None):
+    def writeToFile(self, outfileNamePrefix, fileformat="txt", sources=None, position="ellipse"):
 
         if fileformat not in ["txt", "xml", "reg"]:
             raise SourceModelFormatNotSupported("Format {} not supported. Supported formats: txt, xml, reg".format(format))
@@ -185,7 +185,7 @@ class SourcesLibrary:
             return ""
 
         if fileformat == "txt":
-            sourceLibraryToWrite = self._convertToAgileFormat(sources)
+            sourceLibraryToWrite = self._convertToAgileFormat(sources, position=position)
             outputFilePath = outputFilePath.with_suffix('.txt')
 
         elif fileformat == "xml":
@@ -647,7 +647,7 @@ class SourcesLibrary:
     def _fail(msg):
         raise FileSourceParsingError("File source parsing failed: {}".format(msg))
 
-    def _convertToAgileFormat(self, sources):
+    def _convertToAgileFormat(self, sources, position="ellipse"):
 
         sourceStr = ""
 
@@ -661,10 +661,31 @@ class SourcesLibrary:
 
             sourceStr += str(flux)+" "
 
-            # glon e glat
+            # set l and b according to card #335
+            #
+            multiL = source.get("multiL")["value"] 
+            multiB = source.get("multiB")["value"] 
+            multiLPeak = source.get("multiLPeak")["value"]
+            multiBPeak = source.get("multiBPeak")["value"]
             pos = source.get("pos")["value"]
-            glon = pos[0]
-            glat = pos[1]
+            startL = pos[0]
+            startB = pos[1]
+
+            glon = multiL
+            glat = multiB
+
+            self.logger.info(self, f"the parameter are multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
+
+            if glon == -1 or glat == -1 or position == "peak" or glon == None or glat == None:
+                glon = multiLPeak
+                glat = multiBPeak
+                self.logger.info(self, f"ellipse values not available, I got peak values")
+            
+            if glon == -1 or glat == -1 or position == "initial" or glon == None or glat == None:
+                glon = startL
+                glat = startB
+                self.logger.info(self, f"ellipse and peak values not available, I got initial values")
+           
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "
             
