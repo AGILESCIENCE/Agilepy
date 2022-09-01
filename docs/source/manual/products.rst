@@ -71,30 +71,30 @@ Aperture photometry provides a raw measure of the flux of a sigle source and is 
 
 The likelihood light curve file contains the results of the generation of a light curve. The columns are the following:
 
-    - time_start_mjd: time start (MJD)
-    - time_end_mjd: time end (MJD)
-    - sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
-    - flux (ph/cm2/s/sr)
-    - flux_err (ph/cm2/s/sr)
-    - flux_ul (ph/cm2/s/sr)
-    - gal: the value of the galactic diffuse emission (gal) parameter
-    - gal_error: the error of the galactic diffuse emission (gal) parameter
-    - iso: the value of the isotropic emission (iso) parameter
-    - iso_error: the error of the isotropic emission (iso) parameter
-    - (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
-    - dist_peak: distance between current l_peak, b_peak and previous position
-    - (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
-    - r: radius of 95% c.l. circular confidence region, deg. Statistical error only
-    - ell_dist: the distance between (l,b) and the initial position
-    - a: the semimajer axis of the elliptical confidence region
-    - b: the semiminor axis of the elliptical confidence region
-    - phi: rotation of the elliptical confidence region
-    - exposure
-    - ExpRatio: TBW
-    - time start (UTC)
-    - time end (UTC) 
-    - time start (TT)
-    - time end (TT)
+- time_start_mjd: time start (MJD)
+- time_end_mjd: time end (MJD)
+- sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
+- flux (ph/cm2/s/sr)
+- flux_err (ph/cm2/s/sr)
+- flux_ul (ph/cm2/s/sr)
+- gal: the value of the galactic diffuse emission (gal) parameter
+- gal_error: the error of the galactic diffuse emission (gal) parameter
+- iso: the value of the isotropic emission (iso) parameter
+- iso_error: the error of the isotropic emission (iso) parameter
+- (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
+- dist_peak: distance between current l_peak, b_peak and previous position
+- (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
+- r: radius of 95% c.l. circular confidence region, deg. Statistical error only
+- ell_dist: the distance between (l,b) and the initial position
+- a: the semimajer axis of the elliptical confidence region
+- b: the semiminor axis of the elliptical confidence region
+- phi: rotation of the elliptical confidence region
+- exposure
+- ExpRatio: TBW
+- time start (UTC)
+- time end (UTC) 
+- time start (TT)
+- time end (TT)
 
 ::
 
