@@ -313,7 +313,11 @@ Determination of the ellipse. If AG_multi was able to find a source contour, an 
 
 ExpRatio
 ^^^^^^^^
-TBW
+Owing to the non-homogeneous sky coverage of the AGILE observations, it is possible that sources lie near the borders of certain pointings. In order to have an unbiased estimate of the coeffcients of the Galactic diffuse emission and isotropic background that could lead to to an incorrect evaluation of the flux and position of the source, exposure uniformity within the region of the analysis is required.
+We applied a specific check to verify the uniformity of the exposure within the 10-degree radius of the AGILE MLE analysis centred at each source candidate position, over the considered timescale. The fraction of pixels of the exposure map within the region of analysis having a value below a pre-defined threshold was calculated, and if it was more than 10% the region was considered unreliable and the candidate was discarded. The exposure threshold value is evaluated by calculating the mean exposure of the observation over the full FoV area and comparing this exposure with the values of some reference good exposures.
+
+The parameters expratioevaluation, expratio_minthr, expratio_maxthr, expratio_size described `here <configuration_file.html>`_.
+
 
 HTML output. Additional details
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
