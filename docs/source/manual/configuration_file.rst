@@ -324,7 +324,11 @@ The *'fovbinnumber'* option sets the number of bins between *'fovradmin'* and *'
    | 3) SKY001 (old galcenter, binsize 0.1, full sky),
    | 4) SKY002 (new galcenter, binsize 0.1, full sky) ", "int", "4", "no"
    "binsize", "Spatial bin size in degrees", "float", 0.25, "no"
-   "energybin", "------- completare -----------", "List<String>", "[100, 10000]", "no"
+   "energybin", "The enegy bins of analysis. A list of value. 
+   | To configure: 
+   | 1) directly in the yaml configuration file; 
+   | 2) Use the method e.g. ag.setOptions(energybins=[[100, 300], [500, 1000]]) 
+   | 3) Use the method ag.setOptionEnergybin(value)",  "List<String>", "[100, 10000]", "no"
    "fovbinnumber", "| Number of bins between fovradmin and fovradmax.
    | Dim = (fovradmax-fovradmin)/fovbinnumber", "int", 1, "no"
 

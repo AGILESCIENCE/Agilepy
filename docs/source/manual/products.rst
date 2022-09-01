@@ -71,18 +71,26 @@ Aperture photometry provides a raw measure of the flux of a sigle source and is 
 
 The likelihood light curve file contains the results of the generation of a light curve. The columns are the following:
 
-    - time start (MJD)
-    - time end (MJD)
+    - time_start_mjd: time start (MJD)
+    - time_end_mjd: time end (MJD)
     - sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
     - flux (ph/cm2/s/sr)
     - flux_err (ph/cm2/s/sr)
     - flux_ul (ph/cm2/s/sr)
-    - the value of the galactic diffuse emission (gal) parameter
-    - the value of the isotropic emission (iso) parameter
-    - position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
-    - position in Galactic coordinate (l, b): evaluated by mle with the determination of the 95% confidence level elliptical confidence region
-    - Radius (r) of 95% c.l. circular confidence region, deg. Statistical error only
+    - gal: the value of the galactic diffuse emission (gal) parameter
+    - gal_error: the error of the galactic diffuse emission (gal) parameter
+    - iso: the value of the isotropic emission (iso) parameter
+    - iso_error: the error of the isotropic emission (iso) parameter
+    - (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
+    - dist_peak: distance between current l_peak, b_peak and previous position
+    - (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
+    - r: radius of 95% c.l. circular confidence region, deg. Statistical error only
     - ell_dist: the distance between (l,b) and the initial position
+    - a: the semimajer axis of the elliptical confidence region
+    - b: the semiminor axis of the elliptical confidence region
+    - phi: rotation of the elliptical confidence region
+    - exposure
+    - ExpRatio: TBW
     - time start (UTC)
     - time end (UTC) 
     - time start (TT)
@@ -90,12 +98,12 @@ The likelihood light curve file contains the results of the generation of a ligh
 
 ::
 
-    time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal iso l_peak b_peak dist l b r ell_dist time_start_utc time_end_utc time_start_tt time_end_tt
-    58026.49921296296 58027.49921296296 7.34802 944.077e-08 213.086e-08 1418.53e-08 0.7,0.7 4.08416,3.84041 263.647 -2.8547 0.0 -1.0 -1.0 -1.0 -1.0 2017-09-30T11:58:52 2017-10-01T11:58:52 433857532.0 433943932.0
-    58027.49921296296 58028.49921296296 8.88107 1054.87e-08 211.633e-08 1523.64e-08 0.7,0.7 4.08416,3.84041 263.647 -2.8547 0.0 -1.0 -1.0 -1.0 -1.0 2017-10-01T11:58:52 2017-10-02T11:58:52 433943932.0 434030332.0
-    58028.49921296296 58029.49921296296 7.31826 820.89e-08 198.193e-08 1266.73e-08 0.7,0.7 4.08416,3.84041 263.647 -2.8547 0.0 -1.0 -1.0 -1.0 -1.0 2017-10-02T11:58:52 2017-10-03T11:58:52 434030332.0 434116732.0
-    58029.49921296296 58030.49921296296 6.7938 840.137e-08 208.073e-08 1306.49e-08 0.7,0.7 4.08416,3.84041 263.647 -2.8547 0.0 -1.0 -1.0 -1.0 -1.0 2017-10-03T11:58:52 2017-10-04T11:58:52 434116732.0 434203132.0
-    58030.49921296296 58031.49921296296 7.62835 820.045e-08 190.836e-08 1249.26e-08 0.7,0.7 4.08416,3.84041 263.647 -2.8547 0.0 -1.0 -1.0 -1.0 -1.0 2017-10-04T11:58:52 2017-10-05T11:58:52 434203132.0 434289532.0
+    time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist_peak l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0 fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1
+    58026.49921296296 58027.49921296296 7.3538 944.812e-08 213.193e-08 1419.5e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3718660.0 1.99923 35.1344 7.92794 1.71345 0 3913.06 0 1.34774 0 1.67967e-09 3.7901e-10 2.52355e-09 2017-09-30T11:58:52.000 2017-10-01T11:58:52.000 433857532.0 433943932.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 92 -1 344.873 0.5 0 52 3 0 317.834 5.85172e-17 1 52 3 404.289
+    58027.49921296296 58028.49921296296 8.87831 1055.24e-08 211.709e-08 1524.18e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3843970.0 3.11419 40.5633 8.13802 1.71345 0 3913.06 0 1.34774 0 1.87599e-09 3.76372e-10 2.70965e-09 2017-10-01T11:58:52.000 2017-10-02T11:58:52.000 433943932.0 434030332.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 91 -1 341.314 0.5 0 52 3 0 301.902 5.88891e-17 1 52 3 391.515
+    58028.49921296296 58029.49921296296 7.31495 820.826e-08 198.261e-08 1266.82e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3788250.0 1.99923 31.095 7.51063 1.71345 0 3913.06 0 1.34774 0 1.45925e-09 3.52464e-10 2.25212e-09 2017-10-02T11:58:52.000 2017-10-03T11:58:52.000 434030332.0 434116732.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 96 -1 357.958 0.5 0 52 3 0 331.204 1.01185e-16 1 52 3 423.045
+    58029.49921296296 58030.49921296296 6.78978 840.67e-08 208.19e-08 1307.27e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3806190.0 3.11419 31.9975 7.92411 1.71345 0 3913.06 0 1.34774 0 1.49452e-09 3.70116e-10 2.32404e-09 2017-10-03T11:58:52.000 2017-10-04T11:58:52.000 434116732.0 434203132.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 110 -1 404.846 0.5 0 52 3 0 381.795 1.35163e-15 1 52 3 486.25
+    58030.49921296296 58031.49921296296 7.63221 820.4e-08 190.928e-08 1249.81e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3793810.0 2.9604 31.1244 7.24344 1.71345 0 3913.06 0 1.34774 0 1.45849e-09 3.39428e-10 2.22189e-09 2017-10-04T11:58:52.000 2017-10-05T11:58:52.000 434203132.0 434289532.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 97 -1 365.286 0.5 0 52 3 0 336.161 1.10047e-16 1 52 3 426.229
 
 Result of the Maximum Likelihood Estimator
 ===========================================
@@ -302,6 +310,10 @@ If a confidence contour was found, the parameters on the following line describe
 If source location was requested for a given source and a source location contour was found, then three additional files are generated for that source. These files are written using galactic coordinates in degrees and can be loaded by applications such as ds9 and overlaid on the maps provided as input to AG_multi to visualize the source location contours. One of the three files, with extension .con, contains the source contour as found by the ROOT functions, expressed as a list of galactic coordinates, one point per line, where the last line is a repetition of the first. It may depict any shape. The other two files describe the ellipse that best fits the contour. One has extension .ellipse.con and represents the ellipse as a contour in a format analogous to that of the .con file. The other has extension .reg and describes same ellipse by its axes and orientation. 
 
 Determination of the ellipse. If AG_multi was able to find a source contour, an ellipse is fit to the contour. The source contour is a list of points which defines a polygon by connecting each point sequentially. The value of Radius found in the HTML output is the radius in degrees of a circle with the same area as the polygon. AG_multi determines the ellipse which best fits the contour. This ellipse will have the same area as the polygon, and the distance between each contour point and the intersection between the ellipse and the line connecting that point to the centre will be minimized. The ellipse is completely described by three parameters: the two axes and the rotation (in degrees) of the first axis around the centre, as expected by the ds9 application. If the ellipse is a circle, its axes will both be equal to the Radius found in the HTML output. The ellipse is described by two files that are readable by ds9: one is a .reg file which contains the centre, the axes and the rotation of the ellipse, while the other describes the same ellipse as a list of points in galactic coordinates, thus using the same syntax of a contour file, and has extension .ellipse.con. This is an example of ellipse .reg file:
+
+ExpRatio
+^^^^^^^^
+TBW
 
 HTML output. Additional details
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
