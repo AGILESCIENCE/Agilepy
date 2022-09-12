@@ -693,7 +693,7 @@ plotting:
             galcoeff (List, optional): the galactic background coefficients (one for each map).
             pastTimeWindow (float, optional): the number of days previous tmin. It defaults to 14. If \
                 it's 0, the background coefficients will be estimated within the [tmin, tmax] interval.
-            excludeTmaxTmin (bool, optional) = if this value is True (defalut: False) and pasttimewindow > 0 the calcbkg method computes coeffs \
+            excludeTmaxTmin (bool, optional): if this value is True (defalut=False) and pasttimewindow > 0 the calcbkg method computes coeffs \
                 between [tmin-pastTimeWindow, tmin] instead of [tmin-pastTimeWindow, tmax]
 
         Returns:
