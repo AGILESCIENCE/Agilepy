@@ -685,7 +685,7 @@ plotting:
     def calcBkg(self, sourceName, galcoeff = None, pastTimeWindow = 14.0, excludeTmaxTmin=False):
         """It estimates the isotropic and galactic background coefficients.
 
-        NOTE: The current value of the isotropic and galactic bkg coeffs will be set to -1 in order
+        Note: The current value of the isotropic and galactic bkg coeffs will be set to -1 in order \
             to be free to vary during the fit. It automatically updates the configuration.
 
         Args:
