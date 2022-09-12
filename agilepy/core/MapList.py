@@ -87,6 +87,8 @@ class MapList(Observer):
 
         return self.writeToFile()
 
+    
+
     def setFile(self, outputFilePath):
         self.outputFilePath = Path(outputFilePath).with_suffix(".maplist4")
 

@@ -881,7 +881,6 @@ class SourcesLibrary:
 
         # create the bitmask in reverse order
         bitmask = bit_6 + bit_5 + bit_4 + bit_3 + bit_2 + bit_1
-
         fixflag = int(bitmask, 2)
 
         return str(fixflag)

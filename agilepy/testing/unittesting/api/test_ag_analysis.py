@@ -34,6 +34,7 @@ from time import sleep
 from filecmp import cmp 
 
 from agilepy.api.AGAnalysis import AGAnalysis
+from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import SourceModelFormatNotSupported, MaplistIsNone, SourcesLibraryIsEmpty, ValueOutOfRange, ConfigurationsNotValidError, CannotSetNotUpdatableOptionError
 
@@ -49,6 +50,7 @@ class AGAnalysisUT(unittest.TestCase):
         self.sourcesConfTxt = os.path.join(self.currentDirPath,"conf/sourcesconf_1.txt")
         self.sourcesConfXml = os.path.join(self.currentDirPath,"conf/sourcesconf_1.xml")
         self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+        self.agilepybkgConf = os.path.join(self.currentDirPath,"conf/agilepyconfbkg.yaml")
         self.agilepyRestConf = os.path.join(self.currentDirPath,"conf/agilepyconfREST.yaml")
 
         #outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/api")
@@ -453,33 +455,73 @@ class AGAnalysisUT(unittest.TestCase):
 
         test_out_dir = self.set_outputfolder("test_calc_bkg")
 
+        ag = AGAnalysis(self.agilepybkgConf, self.sourcesConfTxt)
 
-        ag = AGAnalysis(self.agilepyConf, self.sourcesConfTxt)
+        
+        # First test: coeffs are fixed in the configuration files, galcoeff is not passed
+        ag.setOptions(energybins=[[100, 300], [300, 1000]], fovbinnumber=2)
+        ag.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8], isocoeff=[10, 15, 10, 15])
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=0)
+        print("first test:", galCoeff, isoCoeff)
+        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
+        # The configuration file has been updated
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
+        # TODO: The maplistfile has been updated
+        #self.assertEqual(..., expectedGal)
+        #self.assertEqual(..., expectedIso)
 
-        ag.setOptions(  timetype="TT",
-                        galcoeff=[-1, -1, -1, -1],
-                        isocoeff=[10, 12, 10, 12]
-                     )
 
-        """
-        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', pastTimeWindow=0)
-        print("\ngalBkg:",galBkg)
-        print("isoBkg:",isoBkg)
+        # Second test: coeffs are fixed in the configuration files, galcoeff is passed
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, galcoeff=[0.6, 0.8, 0.6, 0.8], pastTimeWindow=0)
+        print("second test:", galCoeff, isoCoeff)
+        expectedGal = [0.6, 0.8, 0.6, 0.8]
+        expectedIso = [2.58443, 2.15484, 7.29793, 1.41975]   
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
+        # The configuration file has been updated
+        self.assertEqual(ag.getOption("galcoeff"), expectedGal)
+        self.assertEqual(ag.getOption("isocoeff"), expectedIso)
 
-        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[-1,-1,-1,-1], pastTimeWindow=0)
-        print("\ngalBkg:",galBkg)
-        print("isoBkg:",isoBkg)
+        # Third test: let's let galcoeff and isocoeff to vary
+        ag.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8], isocoeff=[10, 15, 10, 15])
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, galcoeff=[-1, -1, -1, -1], pastTimeWindow=0)
+        print("third test:", galCoeff, isoCoeff)
+        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
+        # The configuration file has been updated
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
+        
 
+        # Fourth test: change the past window
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=0)
+        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        print("fourth test:", galCoeff, isoCoeff)
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
 
-        galBkg, isoBkg, maplistfile = ag.calcBkg('CYGX3', galcoeff=[0,0,0,0], pastTimeWindow=0)
-        print("\ngalBkg:",galBkg)
-        print("isoBkg:",isoBkg)
-        """
+        ag.setOptions(galcoeff=[-1, -1, -1, -1], isocoeff=[-1, -1, -1, -1])
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=2)
+        print("fourth test at -1:", galCoeff, isoCoeff)
+        
+        self.assertNotEqual(galCoeff, expectedGal)
+        self.assertNotEqual(isoCoeff, expectedIso)
 
-        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, galcoeff=[0.8, 0.6, 0.8, 0.6], pastTimeWindow=0)
-       
-        self.assertEqual([10, 12, 10, 12], isoCoeff)
-        self.assertEqual([0.8, 0.6, 0.8, 0.6], galCoeff)
+        #fifth test: using excludeTminTmax
+        galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=2, excludeTmaxTmin=True)
+        expectedGal = [0.390795, 0.0514367, 5.70305e-07, 0.704953] 
+        expectedIso = [2.84118, 1.98053, 9.81539, 1.33822]
+        print("fifth test", galCoeff, isoCoeff)
+
+        self.assertEqual(galCoeff, expectedGal)
+        self.assertEqual(isoCoeff, expectedIso)
 
         ag.destroy()
 

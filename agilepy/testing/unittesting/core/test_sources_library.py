@@ -180,6 +180,22 @@ class SourcesLibraryUT(unittest.TestCase):
 
             self.assertDictEqual(fs[i], SourcesLibraryUT.get_free_params(self.sl.sources[i]))
 
+    def test_fixflag(self):
+
+        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.txt"))
+        results_fixflag = []
+
+        for source in self.sl.sources:
+            fixflag = SourcesLibrary._computeFixFlag(source, source.spectrum.getType())
+
+            results_fixflag.append(fixflag)
+        print(results_fixflag)
+        #input("..")
+        self.assertEqual(results_fixflag, ['0','1','2','3','4','5','7','28','30','32'])
+
+        
+
+
     def test_source_file_parsing(self):
 
         sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ0835-4514.source")
