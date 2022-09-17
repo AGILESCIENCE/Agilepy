@@ -50,7 +50,7 @@ from agilepy.utils.Utils import Utils
 from agilepy.core.CustomExceptions import   AGILENotFoundError, \
                                             PFILESNotFoundError, \
                                             ScienceToolInputArgMissing, \
-                                            MaplistIsNone, \
+                                            MaplistIsNone, SelectionParamNotSupported, \
                                             SourceNotFound, \
                                             SourcesLibraryIsEmpty, \
                                             ValueOutOfRange
@@ -562,6 +562,7 @@ plotting:
 
         fovbinnumber = configBKP.getOptionValue("fovbinnumber")
         energybins = configBKP.getOptionValue("energybins")
+            
 
         initialFovmin = configBKP.getOptionValue("fovradmin")
         initialFovmax = configBKP.getOptionValue("fovradmax")
@@ -681,15 +682,20 @@ plotting:
 
         return maplistFilePath
 
-    def calcBkg(self, sourceName, galcoeff = None, pastTimeWindow = 14.0):
+    def calcBkg(self, sourceName, galcoeff = None, pastTimeWindow = 14.0, excludeTmaxTmin=False):
         """It estimates the isotropic and galactic background coefficients.
-           It automatically updates the configuration.
+
+        Note: 
+            The current value of the isotropic and galactic bkg coeffs will be set to -1 in order \
+            to be free to vary during the fit. It automatically updates the configuration.
 
         Args:
             sourceName (str): the name of the source under analysis.
             galcoeff (List, optional): the galactic background coefficients (one for each map).
             pastTimeWindow (float, optional): the number of days previous tmin. It defaults to 14. If \
                 it's 0, the background coefficients will be estimated within the [tmin, tmax] interval.
+            excludeTmaxTmin (bool, optional): if this value is True (defalut=False) and pasttimewindow > 0 the calcbkg method computes coeffs \
+                between [tmin-pastTimeWindow, tmin] instead of [tmin-pastTimeWindow, tmax]
 
         Returns:
             galactic coefficients, isotropic coefficients, maplist file (List, List, str): the estimates of the background coefficients and the \
@@ -720,10 +726,24 @@ plotting:
         configBKP = AgilepyConfig.getCopy(self.config)
         configBKP.setOptions(filenameprefix="calcBkg", outdir=str(analysisDataDir))
 
+
+        numberOfBkgCoeffs = len(configBKP.getOptionValue("energybins"))*configBKP.getOptionValue("fovbinnumber")
+
+        # isocoeff is always resetted to -1 in order to be free to vary during the fit
+        configBKP.setOptions(isocoeff=[-1 for _ in range(numberOfBkgCoeffs)])
+
+        # is galcoeff is None, it is set to -1 in order to be free to vary during the fit
+        if galcoeff is None:
+            configBKP.setOptions(galcoeff=[-1 for _ in range(numberOfBkgCoeffs)])
+
+        
+
         ######################################################## Own MapList
         maplistObj = MapList(self.logger)
         configBKP.attach(maplistObj, "galcoeff")
         configBKP.attach(maplistObj, "isocoeff")
+
+        print(maplistObj)
 
 
 
@@ -736,11 +756,16 @@ plotting:
             tmin = AstroUtils.time_mjd_to_agile_seconds(tmin)
             tmax = AstroUtils.time_mjd_to_agile_seconds(tmax)
 
-        if pastTimeWindow == 0:
+        if pastTimeWindow == 0 and not excludeTmaxTmin:
             tmin = tmin
-        else:
+        elif pastTimeWindow > 0 and not excludeTmaxTmin:
             tmin = tmin - 86400*abs(pastTimeWindow)
-        
+        elif pastTimeWindow > 0 and excludeTmaxTmin:
+            tmax = tmin
+            tmin = tmin - 86400*abs(pastTimeWindow)
+        elif pastTimeWindow == 0 and excludeTmaxTmin:
+            raise SelectionParamNotSupported("Cannot compute coeffs with pasttimewindow 0 and excludetmaxtmin True")
+
         self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
