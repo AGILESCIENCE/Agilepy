@@ -1,29 +1,26 @@
 # DESCRIPTION
-#       Agilepy software
-#
+#       Agileap: AGILE Observatory Aperture Photometry Analysis
 # NOTICE
 #      Any information contained in this software
 #      is property of the AGILE TEAM and is strictly
 #      private and confidential.
 #      Copyright (C) 2005-2020 AGILE Team.
-#          Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
-#          Addis Antonio <antonio.addis@inaf.it>
 #          Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
+#          Antonio Addis <antonio.addis@inaf.it>
+#          Valentina Fioretti <valentina.fioretti@inaf.it>
 #          Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
 #      All rights reserved.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
-
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
-
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -58,8 +55,6 @@ class APDisplayAGILEFermiComparison:
         return result
 
     def plot(self, ax, agile_data, fermi_data, arg_lines, plotrate):
-        """It plots aperture photometry data
-        """
 
         #---AGILE----
 
@@ -98,7 +93,7 @@ class APDisplayAGILEFermiComparison:
 
         #---Fermi----
 
-        tmFermi = (AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + AstroUtils.time_tt_to_mjd(fermi_data["tstop"])) / 2
+        tmFermi = (AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"])) / 2
         #fermi_data.loc[fermi_data['cts'] == 0, 'rateError'] = 0
         if plotrate:
             fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rateError'] = 0
@@ -153,11 +148,10 @@ class APDisplayAGILEFermiComparison:
 
     def plot_offaxis(self, ax1, ax2, path, tstart, tstop, zmax, step, t0, arg_lines):
 
-        #try:
-        agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
-        #except:
-        #    return
-
+        try:
+            agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
+        except:
+            return
 
         agl_filt = agl_meantime[(agl_meantime > tstart) & (agl_meantime < tstop)]
         agl_sep_filt = agl_separation[(agl_meantime > tstart) & (agl_meantime < tstop)]
@@ -165,7 +159,6 @@ class APDisplayAGILEFermiComparison:
 
         lat_meantime, lat_separation = np.loadtxt(path+'/time_vs_separation_fermi.txt', unpack=True)
 
-        
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
 
@@ -288,9 +281,7 @@ class APDisplayAGILEFermiComparison:
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, lines=[], plotrate=False):
-        """Main function, it loads and plots the data
-        """
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False):
 
         #---- Loading data -----
         agile_data = pd.read_csv(agile, header=0, sep=" ")
@@ -314,4 +305,3 @@ class APDisplayAGILEFermiComparison:
 
         plt.show()
         f.savefig('merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf'), format="pdf")
-        
