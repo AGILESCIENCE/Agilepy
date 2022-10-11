@@ -58,57 +58,15 @@ solely as a visualization tool.
 
 .. image:: ../static/analysis_product_EMIN00100_EMAX10000_01.int.png
 
-Light curves
-============
-AGILE-GRID light curves can be created in two different ways:
 
-* using a maximum likelihood estimator analysis 
-* using aperture photometry. 
-
-The likelihood analysis reach better sensitivity, more accurate flux measurement, better evaluation of the backgrounds and can work with a detailed source models where more sources can be considered at the same time. 
-
-Aperture photometry provides a raw measure of the flux of a sigle source and is less computing demanding.
-
-The likelihood light curve file contains the results of the generation of a light curve. The columns are the following:
-
-- time_start_mjd: time start (MJD)
-- time_end_mjd: time end (MJD)
-- sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
-- flux (ph/cm2/s/sr)
-- flux_err (ph/cm2/s/sr)
-- flux_ul (ph/cm2/s/sr)
-- gal: the value of the galactic diffuse emission (gal) parameter
-- gal_error: the error of the galactic diffuse emission (gal) parameter
-- iso: the value of the isotropic emission (iso) parameter
-- iso_error: the error of the isotropic emission (iso) parameter
-- (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
-- dist_peak: distance between current l_peak, b_peak and previous position
-- (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
-- r: radius of 95% c.l. circular confidence region, deg. Statistical error only
-- ell_dist: the distance between (l,b) and the initial position
-- a: the semimajer axis of the elliptical confidence region
-- b: the semiminor axis of the elliptical confidence region
-- phi: rotation of the elliptical confidence region
-- exposure
-- ExpRatio: TBW
-- time start (UTC)
-- time end (UTC) 
-- time start (TT)
-- time end (TT)
-
-::
-
-    time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist_peak l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0 fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1
-    58026.49921296296 58027.49921296296 7.3538 944.812e-08 213.193e-08 1419.5e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3718660.0 1.99923 35.1344 7.92794 1.71345 0 3913.06 0 1.34774 0 1.67967e-09 3.7901e-10 2.52355e-09 2017-09-30T11:58:52.000 2017-10-01T11:58:52.000 433857532.0 433943932.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 92 -1 344.873 0.5 0 52 3 0 317.834 5.85172e-17 1 52 3 404.289
-    58027.49921296296 58028.49921296296 8.87831 1055.24e-08 211.709e-08 1524.18e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3843970.0 3.11419 40.5633 8.13802 1.71345 0 3913.06 0 1.34774 0 1.87599e-09 3.76372e-10 2.70965e-09 2017-10-01T11:58:52.000 2017-10-02T11:58:52.000 433943932.0 434030332.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 91 -1 341.314 0.5 0 52 3 0 301.902 5.88891e-17 1 52 3 391.515
-    58028.49921296296 58029.49921296296 7.31495 820.826e-08 198.261e-08 1266.82e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3788250.0 1.99923 31.095 7.51063 1.71345 0 3913.06 0 1.34774 0 1.45925e-09 3.52464e-10 2.25212e-09 2017-10-02T11:58:52.000 2017-10-03T11:58:52.000 434030332.0 434116732.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 96 -1 357.958 0.5 0 52 3 0 331.204 1.01185e-16 1 52 3 423.045
-    58029.49921296296 58030.49921296296 6.78978 840.67e-08 208.19e-08 1307.27e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3806190.0 3.11419 31.9975 7.92411 1.71345 0 3913.06 0 1.34774 0 1.49452e-09 3.70116e-10 2.32404e-09 2017-10-03T11:58:52.000 2017-10-04T11:58:52.000 434116732.0 434203132.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 110 -1 404.846 0.5 0 52 3 0 381.795 1.35163e-15 1 52 3 486.25
-    58030.49921296296 58031.49921296296 7.63221 820.4e-08 190.928e-08 1249.81e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3793810.0 2.9604 31.1244 7.24344 1.71345 0 3913.06 0 1.34774 0 1.45849e-09 3.39428e-10 2.22189e-09 2017-10-04T11:58:52.000 2017-10-05T11:58:52.000 434203132.0 434289532.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 97 -1 365.286 0.5 0 52 3 0 336.161 1.10047e-16 1 52 3 426.229
 
 Result of the Maximum Likelihood Estimator
 ===========================================
 
-Agilepy shows a high-level view of the results of the maximum likelihood estimator. The details of the output of the science tool AG_multi that performs the likelihood procedure is still accessible. This section describes the "low level" results of the AG_multi procedure. The results are available in the $HOME/agilepy_analysis/<sourcename>_<username>_<date>-<time>/mle directory, where <sourcename> and <username> are defined in the yaml configuration file, <date> and <time> are defined by the system when the analysis starts.
+Agilepy shows a high-level view of the results of the maximum likelihood estimator. See `this link <work_with_sources.html#the-multi-description-of-a-source-object>`_ for more details.
+
+
+The details of the output of the science tool AG_multi that performs the likelihood procedure is still accessible. This section describes the "low level" results of the AG_multi procedure. The results are available in the $HOME/agilepy_analysis/<sourcename>_<username>_<date>-<time>/mle directory, where <sourcename> and <username> are defined in the yaml configuration file, <date> and <time> are defined by the system when the analysis starts.
 
 At the end of the fitting process AG_multi generates two main files, describing the most relevant results for all the sources, and a set of source-specific files containing more detailed data about that source. 
 
@@ -325,6 +283,53 @@ HTML output. Additional details
 The HTML output file is divided into two sections, input and output.
 The input section contains three subsections: the command line options, the map list and the source list contents. The command line options are listed in two tables, one with the names of the IRFs (PSD, SAR and EDP) files, the other with the rest of the command line. The maplist subsection also contains two tables. The first lists the mapfile contents and the second contains the data from the map files themselves. This table contains one map per row, and each column contains one value only if it is the same for all the maps. The last table of the input section contains the source list contents.
 The output section is also divided into three subsections. The first is a table showing the Galactic and isotropic coefficients and their errors. Also in this table some cells may be grouped together when the values are all the same. The second is a table showing the fit results for the sources and their errors. One of the listed values is the contour equivalent radius, explained in the next section. The last table shows the source flux per energy channel, and it is present only when different energy channels are considered. This table has one row for each source and one column for each energy channel.
+
+Light curves
+============
+AGILE-GRID light curves can be created in two different ways:
+
+* using a maximum likelihood estimator analysis 
+* using aperture photometry. 
+
+The likelihood analysis reach better sensitivity, more accurate flux measurement, better evaluation of the backgrounds and can work with a detailed source models where more sources can be considered at the same time. 
+
+Aperture photometry provides a raw measure of the flux of a sigle source and is less computing demanding.
+
+The likelihood light curve file contains the results of the generation of a light curve. The columns are the following:
+
+- time_start_mjd: time start (MJD)
+- time_end_mjd: time end (MJD)
+- sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
+- flux (ph/cm2/s/sr)
+- flux_err (ph/cm2/s/sr)
+- flux_ul (ph/cm2/s/sr)
+- gal: the value of the galactic diffuse emission (gal) parameter
+- gal_error: the error of the galactic diffuse emission (gal) parameter
+- iso: the value of the isotropic emission (iso) parameter
+- iso_error: the error of the isotropic emission (iso) parameter
+- (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
+- dist_peak: distance between current l_peak, b_peak and previous position
+- (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
+- r: radius of 95% c.l. circular confidence region, deg. Statistical error only
+- ell_dist: the distance between (l,b) and the initial position
+- a: the semimajer axis of the elliptical confidence region
+- b: the semiminor axis of the elliptical confidence region
+- phi: rotation of the elliptical confidence region
+- exposure
+- ExpRatio: TBW
+- time start (UTC)
+- time end (UTC) 
+- time start (TT)
+- time end (TT)
+
+::
+
+    time_start_mjd time_end_mjd sqrt(ts) flux flux_err flux_ul gal gal_error iso iso_error l_peak b_peak dist_peak l b r ell_dist a b phi exposure ExpRatio counts counts_err Index Index_Err Par2 Par2_Err Par3 Par3_Err Erglog Erglog_Err Erglog_UL time_start_utc time_end_utc time_start_tt time_end_tt Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr expratio_size Emin emax fovmin fovmax albedo binsize expstep phasecode fit_cts fit_fitstatus0 fit_fcn0 fit_edm0 fit_nvpar0 fit_nparx0 fit_iter0 fit_fitstatus1 fit_fcn1 fit_edm1 fit_nvpar1 fit_nparx1 fit_iter1 fit_Likelihood1
+    58026.49921296296 58027.49921296296 7.3538 944.812e-08 213.193e-08 1419.5e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3718660.0 1.99923 35.1344 7.92794 1.71345 0 3913.06 0 1.34774 0 1.67967e-09 3.7901e-10 2.52355e-09 2017-09-30T11:58:52.000 2017-10-01T11:58:52.000 433857532.0 433943932.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 92 -1 344.873 0.5 0 52 3 0 317.834 5.85172e-17 1 52 3 404.289
+    58027.49921296296 58028.49921296296 8.87831 1055.24e-08 211.709e-08 1524.18e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3843970.0 3.11419 40.5633 8.13802 1.71345 0 3913.06 0 1.34774 0 1.87599e-09 3.76372e-10 2.70965e-09 2017-10-01T11:58:52.000 2017-10-02T11:58:52.000 433943932.0 434030332.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 91 -1 341.314 0.5 0 52 3 0 301.902 5.88891e-17 1 52 3 391.515
+    58028.49921296296 58029.49921296296 7.31495 820.826e-08 198.261e-08 1266.82e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3788250.0 1.99923 31.095 7.51063 1.71345 0 3913.06 0 1.34774 0 1.45925e-09 3.52464e-10 2.25212e-09 2017-10-02T11:58:52.000 2017-10-03T11:58:52.000 434030332.0 434116732.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 96 -1 357.958 0.5 0 52 3 0 331.204 1.01185e-16 1 52 3 423.045
+    58029.49921296296 58030.49921296296 6.78978 840.67e-08 208.19e-08 1307.27e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3806190.0 3.11419 31.9975 7.92411 1.71345 0 3913.06 0 1.34774 0 1.49452e-09 3.70116e-10 2.32404e-09 2017-10-03T11:58:52.000 2017-10-04T11:58:52.000 434116732.0 434203132.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 110 -1 404.846 0.5 0 52 3 0 381.795 1.35163e-15 1 52 3 486.25
+    58030.49921296296 58031.49921296296 7.63221 820.4e-08 190.928e-08 1249.81e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3793810.0 2.9604 31.1244 7.24344 1.71345 0 3913.06 0 1.34774 0 1.45849e-09 3.39428e-10 2.22189e-09 2017-10-04T11:58:52.000 2017-10-05T11:58:52.000 434203132.0 434289532.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 97 -1 365.286 0.5 0 52 3 0 336.161 1.10047e-16 1 52 3 426.229
 
 Data files
 ==========
