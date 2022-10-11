@@ -307,9 +307,10 @@ class APDisplayAGILEFermiComparison:
         fermi_data = fermi_data[fermi_data.tstop <= tstop_tt]
 
         #------Plotting data
-        f, (ax1, ax2) = plt.subplots(2, figsize=(12.18,10))
+        f, (ax1, ax2) = plt.subplots(2, figsize=(12.18,10), sharex=True)
         self.plot_offaxis(ax1, ax2, path, tstart, tstop, 60, 1, 0, lines)
         self.plot(ax2, agile_data, fermi_data, lines, plotrate)
+        ax1.tick_params(labelbottom=True)
 
         plt.show()
         f.savefig('merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf'), format="pdf")
