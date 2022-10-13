@@ -1429,6 +1429,10 @@ plotting:
         return out
 
     def _fixToNegativeExponent(self, number, fixedExponent=-8):
+
+        if number == "-nan": #if the produced value is -nan return 0 according to #347
+            return "0"
+
         if fixedExponent > 0:
             return str(number)
 
