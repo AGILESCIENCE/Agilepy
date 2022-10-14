@@ -47,6 +47,8 @@ class AGAnalysisWavelet(AGBaseAnalysis):
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
 
+    WARNING: This class is deprecated due to the new Python wavelet tool in development
+
     """
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
