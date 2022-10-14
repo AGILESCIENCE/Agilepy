@@ -32,27 +32,27 @@ import scipy
 import ntpath
 import datetime
 import numpy as np
-from os.path import join
-from pathlib import Path
-import scipy.ndimage as ndimage
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from astropy.wcs import WCS
-from astropy.io import fits
-from astropy.visualization import simple_norm
-from regions import read_ds9
-from scipy.stats import norm
-from time import strftime
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.figure_factory as ff
 import pandas as pd
 from math import ceil
+from pathlib import Path
+from os.path import join
+from time import strftime
+from astropy.io import fits
+from astropy.wcs import WCS
+from regions import Regions
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+import scipy.ndimage as ndimage
+import plotly.graph_objects as go
+import matplotlib.dates as mdates
+import plotly.figure_factory as ff
 from agilepy.utils.Utils import Utils
-from agilepy.core.CustomExceptions import ConfigurationsNotValidError
-from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Singleton
+from plotly.subplots import make_subplots
+from astropy.visualization import simple_norm
+from agilepy.utils.AstroUtils import AstroUtils
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError
 
 
 class PlottingUtils(metaclass=Singleton):
@@ -367,7 +367,7 @@ class PlottingUtils(metaclass=Singleton):
         # interpolation = "gaussian",
         for idx, regionFile in enumerate(regionFiles):
             if regionFile is not None:
-                regions = read_ds9(regionFile)
+                regions = Regions.read(regionFile)
                 for region in regions:
                     pixelRegion = region.to_pixel(wcs=wcs)
                     pixelRegion.plot(ax=ax, edgecolor=regionsColors[idx])
@@ -420,6 +420,8 @@ class PlottingUtils(metaclass=Singleton):
 
         data = pd.read_csv(filename, header=0, sep=" ")
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data["x_plus"] = data["time_end_mjd"] - data["tm"]
+        data["x_minus"] = data["tm"] - data["time_start_mjd"]
         data = data.sort_values(by="tm")
 
         nrows = len(columns) +1
@@ -439,7 +441,8 @@ class PlottingUtils(metaclass=Singleton):
         for i in range(len(columns)):
             
             fig.add_trace(go.Scatter(
-                x=data["tm"], y=data[columns[i]], name=columns[i]), row=i+2, col=1)
+                x=data["tm"], y=data[columns[i]], name=columns[i], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                         arrayminus=data["x_minus"]), mode='markers'), row=i+2, col=1)
             
             fig.update_yaxes(showline=True, linecolor="black",
                              title=um[i], row=i+2, col=1)
