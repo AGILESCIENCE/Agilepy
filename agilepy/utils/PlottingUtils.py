@@ -448,15 +448,6 @@ class PlottingUtils(metaclass=Singleton):
                              title=um[i], row=i+2, col=1)
             fig.update_xaxes(showline=True, linecolor="black",
                              title="Time(MJD)", tickformat="g", row=i+2, col=1, showticklabels=True)
-        """fig = go.Figure()
-
-        fig.add_traces(go.Scatter(x=data["tm"], y=data[columns]))
-
-        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
-
-        fig.update_yaxes(showline=True, linecolor="black",
-                         title=um)
-        fig.update_layout(xaxis=dict(tickformat="g"))"""
 
         fig.update_layout(height=500+(len(columns)*500))
         
@@ -563,33 +554,17 @@ class PlottingUtils(metaclass=Singleton):
 
 
 
-        fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
 
         fig.add_trace(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"), row=1, col=1)
 
         fig.add_trace(go.Scatter(x=tmean, y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
 
-        #fig.add_trace(go.Histogram(y=data["exp"], histnorm='probability'), row=2, col=2)
-
-        #fig.add_trace(ff.create_distplot([data["exp"]], ["label"], curve_type="normal"), row=2, col=2)
-        
-        counts, bins = np.histogram(data["exp"], bins=40)
-
-        bins = 0.5 * (bins[:-1] + bins[1:])
-
-        mu, sigma = scipy.stats.norm.fit(data["exp"])
-        # print(mu, sigma)
-        best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
-
-        fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)
-
-        fig.add_trace(go.Scatter(x=bins, y=best_fit_line), row=2, col=2)
-
         fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
         fig.update_yaxes(showline=True, linecolor="black", title="Counts", row=1, col=1)
         fig.update_yaxes(showline=True, linecolor="black", title="Exp", row=2, col=1)
 
-        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"), height=800, width=1600, xaxis_showticklabels=True)
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis1=dict(tickformat="f"), xaxis2=dict(tickformat="f"), height=800, width=1000, xaxis_showticklabels=True)
 
         if saveImage:
             outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"
