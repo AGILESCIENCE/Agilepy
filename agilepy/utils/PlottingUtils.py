@@ -548,7 +548,10 @@ class PlottingUtils(metaclass=Singleton):
         # reading and setting dataframe
         data = pd.read_csv(filename, index_col=False, header=0, names=["tmin_tt","tmax_tt","exp","cts"], sep=" ")
 
-        tmean = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+        data["tm"] = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+
+        data["x_plus"] = data["tmax_tt"] - data["tm"]
+        data["x_minus"] = data["tm"] - data["tmin_tt"]
 
         #Plotting
 
@@ -556,9 +559,11 @@ class PlottingUtils(metaclass=Singleton):
 
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
 
-        fig.add_trace(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"), row=1, col=1)
+        fig.add_trace(go.Scatter(x=data["tm"], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                                   arrayminus=data["x_minus"]), y=data["cts"],  error_y=dict(type="data", symmetric=True, array=data["cts"]**(1/2)), name="counts", mode="markers"), row=1, col=1)
 
-        fig.add_trace(go.Scatter(x=tmean, y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
+        fig.add_trace(go.Scatter(x=data["tm"], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                                   arrayminus=data["x_minus"]), y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
 
         fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
         fig.update_yaxes(showline=True, linecolor="black", title="Counts", row=1, col=1)
