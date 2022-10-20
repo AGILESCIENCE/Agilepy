@@ -660,6 +660,18 @@ class SourcesLibrary:
 
             # set l and b according to card #335
             #
+
+            """
+            Multi parameter mapping
+            "flux" : "multiFlux",
+            "index" : "multiIndex",
+            "index1" : "multiIndex",
+            "cutoffEnergy" : "multiPar2",
+            "pivotEnergy" : "multiPar2",
+            "index2" : "multiPar3",
+            "curvature" : "multiPar3",
+            """
+            
             multiL = source.get("multiL")["value"] 
             multiB = source.get("multiB")["value"] 
             multiLPeak = source.get("multiLPeak")["value"]
@@ -704,17 +716,32 @@ class SourcesLibrary:
                 sourceStr += "0 0 0 "
 
             elif source.spectrum.getType() == "PLExpCutoff":
-                cutoffenergy = source.get("cutoffEnergy")["value"]
+                cutoffenergy = source.get("multiPar2")["value"] 
+                if cutoffenergy is None:
+                    cutoffenergy = source.get("cutoffEnergy")["value"]
                 sourceStr += "1 "+str(cutoffenergy)+" 0 "
 
             elif source.spectrum.getType() == "PLSuperExpCutoff":
-                cutoffenergy = source.get("cutoffEnergy")["value"]
-                index2 = source.get("index2")["value"]
+                
+                cutoffenergy = source.get("multiPar2")["value"] 
+                if cutoffenergy is None:
+                    cutoffenergy = source.get("cutoffEnergy")["value"]
+                
+                index2 = source.get("multiPar3")["value"]
+                if index2 is None:
+                    index2 = source.get("index2")["value"]
+                
                 sourceStr += "2 "+str(cutoffenergy)+" "+str(index2)+" "
 
             elif source.spectrum.getType() == "LogParabola":
-                pivotenergy = source.get("pivotEnergy")["value"]
-                curvature = source.get("curvature")["value"]
+                
+                pivotenergy = source.get("multiPar2")["value"] 
+                if pivotenergy is None:
+                    pivotenergy = source.get("pivotEnergy")["value"]
+
+                curvature = source.get("multiPar3")["value"] 
+                if curvature is None:
+                    curvature = source.get("curvature")["value"]
                 sourceStr += "3 "+str(pivotenergy)+" "+str(curvature)+" "
 
             else:
