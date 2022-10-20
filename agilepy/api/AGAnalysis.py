@@ -227,7 +227,7 @@ mle:
   mindefaulttolerance: 0.01
   integratortype: 1
   contourpoints: 40
-  edpcorrection: 0.75
+  edpcorrection: 1
   fluxcorrection: 0
 
 ap:
@@ -882,6 +882,8 @@ plotting:
         configBKP.addOptions("selection", multisources=multisources)
 
 
+
+
         self.multiTool.configureTool(configBKP)
 
         products = self.multiTool.call()
@@ -990,6 +992,7 @@ plotting:
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir=binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
+            
 
             maplistObj = MapList(self.logger)
 
