@@ -54,9 +54,6 @@ from agilepy.utils.AstroUtils import AstroUtils
 class SourcesLibrary:
 
     def __init__(self, agilepyConfig, agilepyLogger):
-        """
-        This method ... blabla ...
-        """
         self.logger = agilepyLogger
 
         self.config = agilepyConfig
@@ -667,6 +664,7 @@ class SourcesLibrary:
             multiB = source.get("multiB")["value"] 
             multiLPeak = source.get("multiLPeak")["value"]
             multiBPeak = source.get("multiBPeak")["value"]
+            index = source.get("multiIndex")["value"]
             pos = source.get("pos")["value"]
             startL = pos[0]
             startB = pos[1]
@@ -689,7 +687,10 @@ class SourcesLibrary:
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "
             
-            sourceStr += str(source.spectrum.getSpectralIndex()) + " "
+            if index is not None:
+                sourceStr += str(index) + " "
+            else:
+                sourceStr += str(source.spectrum.getSpectralIndex()) + " "
 
             sourceStr += SourcesLibrary._computeFixFlag(source, source.spectrum.getType())+" "
 
