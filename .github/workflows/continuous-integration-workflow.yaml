@@ -61,7 +61,6 @@ jobs:
 
     - name: Running unit tests and code coverage
       run: |
-        source ~/.bashrc
         source /opt/venv/agilepy/bin/activate
         python setup.py develop
         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
@@ -76,7 +75,6 @@ jobs:
         CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
         CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
       run: |
-        source ~/.bashrc	
         source /opt/venv/agilepy/bin/activate	
         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
         curl -Ls https://coverage.codacy.com/get.sh -o get.sh
