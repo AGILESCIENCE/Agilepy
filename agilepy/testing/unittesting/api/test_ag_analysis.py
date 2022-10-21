@@ -463,8 +463,8 @@ class AGAnalysisUT(unittest.TestCase):
         ag.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8], isocoeff=[10, 15, 10, 15])
         galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=0)
         print("first test:", galCoeff, isoCoeff)
-        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
-        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        expectedGal = [0.650145, 0.687911, 0.105915, 0.161874] 
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60618]
         self.assertEqual(galCoeff, expectedGal)
         self.assertEqual(isoCoeff, expectedIso)
         # The configuration file has been updated
@@ -490,8 +490,8 @@ class AGAnalysisUT(unittest.TestCase):
         ag.setOptions(galcoeff=[0.6, 0.8, 0.6, 0.8], isocoeff=[10, 15, 10, 15])
         galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, galcoeff=[-1, -1, -1, -1], pastTimeWindow=0)
         print("third test:", galCoeff, isoCoeff)
-        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
-        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        expectedGal = [0.650145, 0.687911, 0.105915, 0.161874] 
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60618]
         self.assertEqual(galCoeff, expectedGal)
         self.assertEqual(isoCoeff, expectedIso)
         # The configuration file has been updated
@@ -501,8 +501,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         # Fourth test: change the past window
         galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=0)
-        expectedGal = [0.650146, 0.68791, 0.105914, 0.161871] 
-        expectedIso = [2.06451, 2.48712, 12.0703, 3.60619]
+        expectedGal = [0.650145, 0.687911, 0.105915, 0.161874]
+        expectedIso = [2.06451, 2.48712, 12.0703, 3.60618]
         print("fourth test:", galCoeff, isoCoeff)
         self.assertEqual(galCoeff, expectedGal)
         self.assertEqual(isoCoeff, expectedIso)
@@ -516,8 +516,8 @@ class AGAnalysisUT(unittest.TestCase):
 
         #fifth test: using excludeTminTmax
         galCoeff, isoCoeff, maplistfile = ag.calcBkg(self.VELA, pastTimeWindow=2, excludeTmaxTmin=True)
-        expectedGal = [0.390795, 0.0514367, 5.70305e-07, 0.704953] 
-        expectedIso = [2.84118, 1.98053, 9.81539, 1.33822]
+        expectedGal = [0.390775, 0.0514248, 6.27864e-09, 0.704969] 
+        expectedIso = [2.84136, 1.98057, 9.81532, 1.33809]
         print("fifth test", galCoeff, isoCoeff)
 
         self.assertEqual(galCoeff, expectedGal)
