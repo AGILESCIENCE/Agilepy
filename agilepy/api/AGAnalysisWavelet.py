@@ -133,13 +133,13 @@ wavelet:
     """
 
       ####-------CWT2------------------
-      cwt2 = Cwt2("python PYWTOOLS/cwt2d.py", self.logger)
+      cwt2 = Cwt2("python $AGILE/scripts/PYWTOOLS/cwt2d.py", self.logger)
       cwt2.configureTool(self.config)
       f1 = cwt2.call()
 
       ####-------MET--------------
 
-      met = Met("python PYWTOOLS/met2d.py", self.logger)
+      met = Met("python $AGILE/scripts/PYWTOOLS/met2d.py", self.logger)
       extraParams = {"Cwt2OutfilePath":f1}
       met.configureTool(self.config, extraParams=extraParams)
       f2 = met.call()
@@ -147,7 +147,7 @@ wavelet:
 
       ####------CCL----------
         
-      ccl = Ccl("python /PYWTOOLS/ccl2d.py", self.logger)
+      ccl = Ccl("python $AGILE/scripts/PYWTOOLS/ccl2d.py", self.logger)
       extraParams = {"MetOutfilePath":f2}
       ccl.configureTool(self.config, extraParams=extraParams)
       f3 = ccl.call()
