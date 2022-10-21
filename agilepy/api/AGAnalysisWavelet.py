@@ -81,7 +81,7 @@ class AGAnalysisWavelet(AGBaseAnalysis):
             scaletype (str):
             scalemin (float):
             scalemax (float):
-            scalenum (float):
+            scalenum (int):
             methistsize (float):
             cclsizemin (float)
             cclsizemax (float)
@@ -110,8 +110,8 @@ wavelet:
   scaletype: %s
   scalemin: %f
   scalemax: %f
-  scalenum: %f
-  methistsize: %f
+  scalenum: %d
+  methistsize: %d
   cclsizemin: %f
   cclsizemax: %f
   cclradmin: %f
@@ -133,13 +133,13 @@ wavelet:
     """
 
       ####-------CWT2------------------
-      cwt2 = Cwt2("cwt2", self.logger)
+      cwt2 = Cwt2("python PYWTOOLS/cwt2d.py", self.logger)
       cwt2.configureTool(self.config)
       f1 = cwt2.call()
 
       ####-------MET--------------
 
-      met = Met("met", self.logger)
+      met = Met("python PYWTOOLS/met2d.py", self.logger)
       extraParams = {"Cwt2OutfilePath":f1}
       met.configureTool(self.config, extraParams=extraParams)
       f2 = met.call()
@@ -147,7 +147,7 @@ wavelet:
 
       ####------CCL----------
         
-      ccl = Ccl("ccl", self.logger)
+      ccl = Ccl("python /PYWTOOLS/ccl2d.py", self.logger)
       extraParams = {"MetOutfilePath":f2}
       ccl.configureTool(self.config, extraParams=extraParams)
       f3 = ccl.call()
