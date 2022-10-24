@@ -45,7 +45,6 @@ from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.CustomExceptions import  ConfigurationsNotValidError, \
                                            OptionNotFoundInConfigFileError, \
-                                           CannotSetHiddenOptionError, \
                                            CannotSetNotUpdatableOptionError, \
                                            AnalysisClassNotSupported
 
