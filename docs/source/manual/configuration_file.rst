@@ -150,7 +150,7 @@ Section: *'input'*
 This section defines the input data files. The input data files are indexes: each
 row holds the file system position of an actual event data/log file, together with
 the time interval it refers to. If userestapi if True the selection of evtfile and logfile is not required,
-Agilepy creates its own index files automatically.
+Agilepy creates its own index files automatically. See more details in `this link <Ag_dataset_rest_api.html>`_.
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
@@ -424,6 +424,7 @@ The maximum likelihood estimation analysis is configured by the following option
 
 Exp-ratio evaluation options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+See details in `this link <products.html#expratio>`_.
 
 .. csv-table::
    :header: "Option", "Type", "Default", "Required", "Description"

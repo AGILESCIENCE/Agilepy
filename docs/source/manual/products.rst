@@ -65,200 +65,7 @@ Result of the Maximum Likelihood Estimator
 
 Agilepy shows a high-level view of the results of the maximum likelihood estimator. See `this link <work_with_sources.html#the-multi-description-of-a-source-object>`_ for more details.
 
-
-The details of the output of the science tool AG_multi that performs the likelihood procedure is still accessible. This section describes the "low level" results of the AG_multi procedure. The results are available in the $HOME/agilepy_analysis/<sourcename>_<username>_<date>-<time>/mle directory, where <sourcename> and <username> are defined in the yaml configuration file, <date> and <time> are defined by the system when the analysis starts.
-
-At the end of the fitting process AG_multi generates two main files, describing the most relevant results for all the sources, and a set of source-specific files containing more detailed data about that source. 
-
-One of the two main files is in HTML format, and it includes both the input and output data grouped in tables. Having a look at this file the user should quickly understand the outcome of the fitting process and its main results. The next section describes the HTML output in more detail.
-
-The second of the two main files contains the same data printed in text format. This file is divided in two sections. The first contains one line for each diffuse component and the second one line for each source. The first line of each section begins with an exclamation mark (a comment line for many applications) labeling the values printed beneath. In each line the values are separated by a space. This is an example of the text output of the analysis of the 2AGLJ2254+1609 (3C454.3) with the test dataset provided. For this analysis, only one set of maps and one source is used. The iotropic emission components coefficients are kep free and symmetric errors are provided. The flux and position of the source are allowed to vary, while the spectral index is fixed. The name, significance of the source detection, position, source counts with error, source flux with error, and spectral index with error are provided. 
-
-::
-
-    ! DiffName, Flux, Err, +Err, -Err
-    Galactic 0.7 0 0 0
-    Isotropic 8.79898 0.969867 0.984804 -0.955381
-    ! SrcName, sqrt(TS), L_peak, B_peak, Counts, Err, Flux, Err, Index, Err, Par2, Par2Err, Par3, Par3Err, TypeFun
-    2AGLJ2254+1609 35.5482 86.0638 -38.1753 719.369 35.2059 2.63371e-05 1.28894e-06 2.20942 0 0 0 0 0 0
-
-index, par2, par3 and related errors depend by the spectral mode used.
-
-The counts and fluxes are provided, as well as their errors if the flux is allowed to vary.  Finally, the spectral index and its error, if applicable, are provided.
-
-.. note:: If a source is outside the Galactic plane, fix the diffuse emission coefficient parameter (gal) to 0.7 with ag.setOptions(galcoeff=[0.7]) 
-
-'*.source*' file
-^^^^^^^^^^^^^^^^
-The .source file is an internal technical file produced by the maximum likelihood estimator mle() procedure for each source. It contains all the analysis results for each source that is part of the ensemble of models. Agilepy extract from this .source file the most important parameters useful for the final user.
-
-When possible, two additional files describing the source contour (possibile only if position is kept free). 
-
-The text file contains some comment-like lines (first character is an exclamation mark) labeling the values printed beneath. This is an example of text output, consistent with the example given above:
-
-::
-
-    ! Label Fix index ULConfidenceLevel SrcLocConfLevel start_l start_b start_flux [ lmin,  lmax ] [ bmin, bmax ] typefun par2 par3 galmode2 galmode2fit isomode2 isomode2fit edpcor fluxcor integratortype expratioEval expratio_minthr expratio_maxthr expratio_size [ index_min , index_max ] [ par2_min , par2_max ] [ par3_min , par3_max ] contourpoints minimizertype minimizeralg minimizerdefstrategy minimizerdeftol
-    ! sqrt(TS)
-    ! L_peak B_peak Dist_from_start_position
-    ! L B Dist_from_start_position r a b phi
-    ! Counts Err +Err -Err UL
-    ! Flux(ph/cm2s) [0 , 1e+07] Err +Err -Err UL(ph/cm2s) ULbayes(ph/cm2s) Exp(cm2s) ExpSpectraCorFactor null null null Erglog(erg/cm2s) Erglog_Err Erglog_UL(erg/cm2s) Sensitivity FluxPerChannel(ph/cm2s)
-    ! Index [0.5 , 5] Index_Err Par2 [20 , 10000] Par2_Err Par3 [0 , 100] Par3_Err
-    ! cts fitstatus0 fcn0 edm0 nvpar0 nparx0 iter0 fitstatus1 fcn1 edm1 nvpar1 nparx1 iter1 Likelihood1
-    ! Gal coeffs [0 , 100] and errs
-    ! Gal zero coeffs and errs
-    ! Iso coeffs [0 , 100] and errs
-    ! Iso zero coeffs and errs
-    ! Start_date(UTC) End_date(UTC) Start_date(TT) End_date(TT) Start_date(MJD) End_date(MJD)
-    ! Emin..emax(MeV) fovmin..fovmax(deg) albedo(deg) binsize(deg) expstep phasecode ExpRatio
-    ! Fit status of steps ext1, step1, ext2, step2, contour, index, ul [-1 step skipped, 0 ok, 1 errors]
-    ! Number of counts for each step (to evaluate hypothesis)
-    ! skytypeL.filter_irf skytypeH.filter_irf
-    2AGLJ2254+1609 1 2.20942 2 5.99147 86.1236 -38.1824 2.64387e-05 [ -1 , -1 ]  [ -1 , -1 ]  0 0 0 0 0 0 0 0.75 0 1 1 0 15 10 [ 0.5 , 5 ] [ 20 , 10000 ] [ 0 , 100 ] 40 Minuit Migrad 2 0.01
-    47.8468
-    86.1236 -38.1824 0
-    -1 -1 -1 -1 -1 -1 -1 
-    718.633 31.0247 31.4119 -30.6392 782.234
-    2.64387e-05 1.14141e-06 1.15565e-06 -1.12722e-06 2.87787e-05 2.01487e-05 2.71811e+07 1 0 0 0 4.27293e-09 1.8447e-10 4.6511e-09 0.0 2.64387e-05
-    2.20942 0 0 0 0 0
-    909 -1 2456.44 0.5 0 8 3 0 1311.78 7.28513e-16 1 8 3 1828.16
-    0.7 0
-    0.7 0
-    8.83231 0
-    8.83231 0
-    2010-11-13T00:01:06 2010-11-21T00:01:06 216691200.0000000 217382400.0000000 55513.0000000 55521.0000000
-    100..10000 0..60 80 0.25 0 6 0
-    -1 -1 -1 0 -1 -1 0 
-    -1 2124 -1 2124 -1 -1 2124 
-    SKY002.SFMG_H0025 SKY002.SFMG_H0025
-
-The counts and fluxes are provided, as well as their symmetric, positive, and negative errors if the flux is allowed to vary. For convenience, the exposure of the source, used to calculate the source counts from the flux, is also provided. Finally, the spectral index and its error, if applicable, are provided.
-
-'*.source*' Attributes
-^^^^^^^^^^^^^^^^^^^^^^
-.. csv-table::
-   :header: "Parameter name", "Um", "rante", "Description"
-   :widths: 20, 20, 20, 100
-
-   Label, , , 
-   Fix, , , 
-   index, , ,
-   ULConfidenceLevel, , ,
-   SrcLocConfLevel, , ,
-   start_l, , ,
-   start_flux , , ,
-   [ lmin lmax ], , ,
-   [ bmin bmax ], , ,
-   typefun, , ,
-   par2, , ,
-   par3, , ,
-   galmode2, , ,
-   galmode2fit, , ,
-   isomode2, , ,
-   isomode2fit, , ,
-   edpcor, , ,
-   fluxcor, , ,
-   integratortype, , ,
-   expratioEval, , ,
-   expratio_minthr, , ,
-   expratio_maxthr, , ,
-   expratio_size, , ,
-   [ index_min index_max ], , ,
-   [ par2_min par2_max ], , ,
-   [ par3_min  par3_max ], , ,
-   contourpoints, , ,
-   minimizertype, , ,
-   minimizeralg, , ,
-   minimizerdefstrategy, , ,
-   minimizerdeftol, , ,
-   sqrt(TS), , ,
-   L_peak, , ,
-   B_peak, , ,
-   Dist_from_start_position, , ,
-   L, , ,
-   B, , ,
-   Dist_from_start_position, , ,
-   r, , ,
-   a, , ,
-   b, , ,
-   phi, , ,
-   Counts, , ,
-   Err, , ,
-   +Err, , ,
-   -Err, , ,
-   UL, , ,
-   Flux,(ph/cm2s), ,
-   Err, , ,
-   +Err, , ,
-   -Err, , ,
-   UL, (ph/cm2s), ,
-   ULbayes, (ph/cm2s), ,
-   Exp, (cm2s), ,
-   ExpSpectraCorFactor, , ,
-   Erglog, (erg/cm2s), ,
-   Erglog_Err, , ,
-   Erglog_UL, (erg/cm2s) , ,
-   Sensitivity, , ,
-   FluxPerChannel, (ph/cm2s) , ,
-   Index, , ,
-   Index_Err, , ,
-   Par2, , ,
-   Par2_Err, , ,
-   Par3, , ,
-   Par3_Err, , ,
-   cts, , ,
-   fitstatus0, , ,
-   fcn0, , ,
-   edm0, , ,
-   nvpar0, , ,
-   nparx0, , ,
-   iter0, , ,
-   fitstatus1, , ,
-   fcn1, , ,
-   edm1, , ,
-   nvpar1, , ,
-   nparx1, , ,
-   iter1, , ,
-   Likelihood1, , ,
-   Gal coeffs, , ,
-   errs, , ,
-   Gal zero coeffs, , ,
-   errs, , ,
-   Iso coeffs, , ,
-   errs, , ,
-   Iso zero coeffs, , ,
-   errs, , ,
-   Start_date(UTC), , ,
-   End_date(UTC), , ,
-   Start_date(TT), , ,
-   End_date(TT), , ,
-   Start_date(MJD), , ,
-   End_date(MJD), , ,
-   Emin..emax , MeV , ,
-   fovmin..fovmax, deg , ,
-   albedo, deg , ,
-   binsize, deg , ,
-   expstep, , , 
-   phasecode, , ,
-   ExpRatio, , ,
-   Fit status of steps ext1,  , ,
-   Fit status of steps step1, , ,
-   Fit status of steps ext2, , ,
-   Fit status of steps step2, , ,
-   Fit status of steps contour, , ,
-   Fit status of steps index, , ,
-   Fit status of steps ul, , ,
-   Number of counts for ext1, , ,
-   Number of counts for step1, , ,
-   Number of counts for ext2, , ,
-   Number of counts for step2, , ,
-   Number of counts for contour, , ,
-   Number of counts for index, , ,
-   Number of counts for ul, , ,
-   skytypeL.filter_irf, , ,
-   skytypeH.filter_irf, , ,
-
+The details of the output of the science tool AG_multi that performs the likelihood procedure is still accessible. `This section <../sciencetools/mle.html>`_ describe the output of the AG_multi science tool, that performs a Maximum Likelyhood Estimator analysis to find the best position, flux and spectral parameters of a list of sources  given set of count maps.
 
 Confidence Contour files
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -277,12 +84,7 @@ We applied a specific check to verify the uniformity of the exposure within the 
 The parameters expratioevaluation, expratio_minthr, expratio_maxthr, expratio_size described `here <configuration_file.html>`_.
 
 
-HTML output. Additional details
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The HTML output file is divided into two sections, input and output.
-The input section contains three subsections: the command line options, the map list and the source list contents. The command line options are listed in two tables, one with the names of the IRFs (PSD, SAR and EDP) files, the other with the rest of the command line. The maplist subsection also contains two tables. The first lists the mapfile contents and the second contains the data from the map files themselves. This table contains one map per row, and each column contains one value only if it is the same for all the maps. The last table of the input section contains the source list contents.
-The output section is also divided into three subsections. The first is a table showing the Galactic and isotropic coefficients and their errors. Also in this table some cells may be grouped together when the values are all the same. The second is a table showing the fit results for the sources and their errors. One of the listed values is the contour equivalent radius, explained in the next section. The last table shows the source flux per energy channel, and it is present only when different energy channels are considered. This table has one row for each source and one column for each energy channel.
 
 Light curves
 ============
@@ -295,32 +97,106 @@ The likelihood analysis reach better sensitivity, more accurate flux measurement
 
 Aperture photometry provides a raw measure of the flux of a sigle source and is less computing demanding.
 
-The likelihood light curve file contains the results of the generation of a light curve. The columns are the following:
+The likelihood light curve file contains the results of the generation of a light curve. The columns described are the following sections.
 
-- time_start_mjd: time start (MJD)
-- time_end_mjd: time end (MJD)
-- sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
-- flux (ph/cm2/s/sr)
-- flux_err (ph/cm2/s/sr)
-- flux_ul (ph/cm2/s/sr)
-- gal: the value of the galactic diffuse emission (gal) parameter
-- gal_error: the error of the galactic diffuse emission (gal) parameter
-- iso: the value of the isotropic emission (iso) parameter
-- iso_error: the error of the isotropic emission (iso) parameter
-- (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
-- dist_peak: distance between current l_peak, b_peak and previous position
-- (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
-- r: radius of 95% c.l. circular confidence region, deg. Statistical error only
-- ell_dist: the distance between (l,b) and the initial position
-- a: the semimajer axis of the elliptical confidence region
-- b: the semiminor axis of the elliptical confidence region
-- phi: rotation of the elliptical confidence region
-- exposure
-- ExpRatio: TBW
-- time start (UTC)
-- time end (UTC) 
-- time start (TT)
-- time end (TT)
+Time of the analysis in MJD:
+
+* time_start_mjd: time start (MJD)
+* time_end_mjd: time end (MJD)
+
+Result of the analysis of the single source:
+
+* sqrt(ts): the square root of the Test Statistic value of the results of the maximum likelihood estimator (mle)
+* flux (ph/cm2/s/sr)
+* flux_err (ph/cm2/s/sr)
+* flux_ul (ph/cm2/s/sr)
+* gal: the value of the galactic diffuse emission (gal) parameter
+* gal_error: the error of the galactic diffuse emission (gal) parameter
+* iso: the value of the isotropic emission (iso) parameter
+* iso_error: the error of the isotropic emission (iso) parameter
+* (l_peak, b_peak): position in Galactic coordinate (l_peak, b_peak): peak coordinates. If it is allowed to vary then they are set to the position for which the TS is maximized.
+* dist_peak: distance between current l_peak, b_peak and previous position
+* (l, b): position in Galactic coordinate evaluated by mle with the determination of the 95% confidence level elliptical confidence region
+* r: radius of 95% c.l. circular confidence region, deg. Statistical error only
+* ell_dist: the distance between (l,b) and the initial position
+* a: the semimajer axis of the elliptical confidence region
+* b: the semiminor axis of the elliptical confidence region
+* phi: rotation of the elliptical confidence region
+* exposure
+* ExpRatio: see above section
+* counts 
+* counts_err 
+* Index 
+* Index_Err 
+* Par2 
+* Par2_Err 
+* Par3 
+* Par3_Err 
+* Erglog 
+* Erglog_Err 
+* Erglog_UL 
+
+Time of the analysis in UTC and TT:
+
+* time_start_utc 
+* time_end_utc 
+* time_start_tt 
+* time_end_tt 
+
+The following are the initial parameters of the analysis of the source:
+
+* Fix: initial fixflag 
+* index: initial spectral index 
+* ULConfidenceLevel 
+* SrcLocConfLevel 
+* start_l: initial Galactic coordinate l 
+* start_b: initial Galactic coordinate b  
+* start_flux: inital flux for the MLKE 
+* typefun: type of spectral model 
+* par2: initial value of par2 
+* par3: initial value of par3 
+
+The following are the parameters of the MLE analysis:
+
+* galmode2 
+* galmode2fit 
+* isomode2 
+* isomode2fit 
+* edpcor 
+* fluxcor 
+* integratortype 
+* expratioEval 
+* expratio_minthr 
+* expratio_maxthr 
+* expratio_size 
+
+Parameters of the maps:
+
+* Emin 
+* emax 
+* fovmin 
+* fovmax 
+* albedo 
+* binsize 
+* expstep 
+* phasecode 
+
+Technical results of the fitting:
+
+* fit_cts 
+* fit_fitstatus0 
+* fit_fcn0 
+* fit_edm0 
+* fit_nvpar0 
+* fit_nparx0 
+* fit_iter0 
+* fit_fitstatus1 
+* fit_fcn1 
+* fit_edm1 
+* fit_nvpar1 
+* fit_nparx1 
+* fit_iter1 
+* fit_Likelihood1
 
 ::
 
@@ -331,23 +207,6 @@ The likelihood light curve file contains the results of the generation of a ligh
     58029.49921296296 58030.49921296296 6.78978 840.67e-08 208.19e-08 1307.27e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3806190.0 3.11419 31.9975 7.92411 1.71345 0 3913.06 0 1.34774 0 1.49452e-09 3.70116e-10 2.32404e-09 2017-10-03T11:58:52.000 2017-10-04T11:58:52.000 434116732.0 434203132.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 110 -1 404.846 0.5 0 52 3 0 381.795 1.35163e-15 1 52 3 486.25
     58030.49921296296 58031.49921296296 7.63221 820.4e-08 190.928e-08 1249.81e-08 0.7,0.7 0,0 4.08416,3.84041 0,0 263.638 -2.85605 0 -1 -1 -1 -1 -1 -1 -1 3793810.0 2.9604 31.1244 7.24344 1.71345 0 3913.06 0 1.34774 0 1.45849e-09 3.39428e-10 2.22189e-09 2017-10-04T11:58:52.000 2017-10-05T11:58:52.000 434203132.0 434289532.0 1 1.71345 2 5.99147 263.638 -2.85605 8.98066e-06 2 3913.06 1.34774 0 0 0 0 0.75 0 1 1 0 15 10 100,300 300,1000 0,0 60,60 80 0.4 0 6 97 -1 365.286 0.5 0 52 3 0 336.161 1.10047e-16 1 52 3 426.229
 
-Data files
-==========
 
-*'.maplist4'* file
-^^^^^^^^^^^^^^^^^^
-The map list is a text file listing containing at least one line of text. Each line of text describes one set of maps and it is possible to include empty lines or comment lines. The comment lines begin with an exclamation mark.
-
-Each line contains a set of maps:
-
-.. code-block::
-
-    <countsMap> <exposureMap> <gasMap> <offaxisangle> <galcoeff> <isocoeff>
-
-where:
-
- * countsMap, exposureMap and gasMap are file system paths pointing to the corresponding sky maps (see SkyMaps section)   
- * offaxisangle is in degrees;
- * galcoeff and isocoeff are the coefficients for the galactic and isotropic diffuse components. If positive they will be considered fixed (but see galmode and isomode section).
 
 
