@@ -47,6 +47,8 @@ class AGAnalysisWavelet(AGBaseAnalysis):
 
     This class requires you to setup a ``yaml configuration file`` to specify the software's behaviour.
 
+    WARNING: This class is deprecated due to the new Python wavelet tool in development
+
     """
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
@@ -79,7 +81,7 @@ class AGAnalysisWavelet(AGBaseAnalysis):
             scaletype (str):
             scalemin (float):
             scalemax (float):
-            scalenum (float):
+            scalenum (int):
             methistsize (float):
             cclsizemin (float)
             cclsizemax (float)
@@ -108,8 +110,8 @@ wavelet:
   scaletype: %s
   scalemin: %f
   scalemax: %f
-  scalenum: %f
-  methistsize: %f
+  scalenum: %d
+  methistsize: %d
   cclsizemin: %f
   cclsizemax: %f
   cclradmin: %f
@@ -131,13 +133,13 @@ wavelet:
     """
 
       ####-------CWT2------------------
-      cwt2 = Cwt2("cwt2", self.logger)
+      cwt2 = Cwt2("python $AGILE/scripts/PYWTOOLS/cwt2d.py", self.logger)
       cwt2.configureTool(self.config)
       f1 = cwt2.call()
 
       ####-------MET--------------
 
-      met = Met("met", self.logger)
+      met = Met("python $AGILE/scripts/PYWTOOLS/met2d.py", self.logger)
       extraParams = {"Cwt2OutfilePath":f1}
       met.configureTool(self.config, extraParams=extraParams)
       f2 = met.call()
@@ -145,7 +147,7 @@ wavelet:
 
       ####------CCL----------
         
-      ccl = Ccl("ccl", self.logger)
+      ccl = Ccl("python $AGILE/scripts/PYWTOOLS/ccl2d.py", self.logger)
       extraParams = {"MetOutfilePath":f2}
       ccl.configureTool(self.config, extraParams=extraParams)
       f3 = ccl.call()

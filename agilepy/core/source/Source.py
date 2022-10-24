@@ -530,11 +530,11 @@ class PointSource(Source):
             
             if param["name"] == "flux":
                 strr += f"\n\t- {param['name']} ({param['um']}): {param['value']:.4e}"
-                if param['err'] is not None:
+                if param['err'] is not None and param['err'] != 0:
                     strr += f" +/- {param['err']:.4e}"
             else:
                 strr += f"\n\t- {param['name']} {param['um']}: {param['value']}"
-                if param['err'] is not None:
+                if param['err'] is not None and param['err'] != 0:
                     strr += f" +/- {param['err']}"
 
         
@@ -569,21 +569,21 @@ class PointSource(Source):
                 paramErr = self.multiAnalysis.get(multiSpectrumParamName+"Err")
                 if spectrumParamName == "flux":
                     strr += f"\n\t- {spectrumParamName} ({param['um']}): {param['value']:.4e}"
-                    if paramErr['value'] is not None:
+                    if paramErr['value'] is not None and paramErr['value'] != 0:
                         strr += f" +/- {paramErr['value']:.4e}"
                 else:
                     strr += f"\n\t- {spectrumParamName} {param['um']}: {param['value']}"
-                    if paramErr['value'] is not None:
+                    if paramErr['value'] is not None and paramErr['value'] != 0:
                         strr += f" +/- {paramErr['value']}"
 
         # ag_multi parameters
         strr += f'\n\t- counts: {self.multiAnalysis.getVal("multiCounts")}'
-        if self.multiAnalysis.getVal("multiCountsErr") is not None:
+        if self.multiAnalysis.getVal("multiCountsErr") is not None and self.multiAnalysis.getVal("multiCountsErr") != 0:
             strr += f' +/- {self.multiAnalysis.get("multiCountsErr")["value"]}'
         strr += f'\n\t- upper limit({self.multiAnalysis.get("multiUL")["um"]}): {self.multiAnalysis.getVal("multiUL")}'
 
         strr += f'\n\t- ergLog(erg/cm2s): {self.multiAnalysis.getVal("multiErgLog")}'
-        if self.multiAnalysis.getVal("multiErgLogErr") is not None:
+        if self.multiAnalysis.getVal("multiErgLogErr") is not None and self.multiAnalysis.getVal("multiErgLogErr") !=0:
             strr += f' +/- {self.multiAnalysis.getVal("multiErgLogErr")}'
         
         strr += f'\n\t- galCoeff: {self.multiAnalysis.getVal("multiGalCoeff")}'

@@ -108,14 +108,14 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
         self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")
 
-        self.assertRaises(OptionNotFoundInConfigFileError, self.config.setOptions(), pdor="kmer")
+        self.assertRaises(OptionNotFoundInConfigFileError, self.config.setOptions, pdor="kmer")
 
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), minimizertype=666)
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins=[1,2,3])
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins=666)
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions(), energybins="100, 300")
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, minimizertype=666)
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=[1,2,3])
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=666)
+        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins="100, 300")
 
-        self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions(), lonpole=100)
+        #self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions, lonpole=100) depreacated
 
         self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, galcoeff=0.617196)
         self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=0.617196)

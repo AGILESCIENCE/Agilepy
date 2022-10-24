@@ -1,5 +1,16 @@
 # Changelog
 
+## Release 1.6.0
+* (\#296) Now calcbkg updates the results if called multiple times
+* (\#331) Docs updated
+* (\#334) Minor fixes in print source
+* (\#335) New parameter position in lightcurveMLE, default ellipse
+* (\#336) Bugfix when computing fixflag   
+* (\#342) Now it is possible to select [tmin - pastimewindow, tmax - tmin] as parameter om calcbkg
+* (\#346) Minor fix in plots
+* (\#347) Handling -nan parameter in multi tool
+New anaconda recipes and docker container, environment and dependencies updated
+
 ## Release 1.5.1 (03/03/22)
 * Minor bugfixes and doc updated
 

@@ -134,7 +134,7 @@ class Create_offaxis_plot:
 
             #create dir
             #new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
-            new_dir = self.outdir+"/dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
+            new_dir = str(self.outdir)+"/dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
             
             dirs.append(new_dir)
 

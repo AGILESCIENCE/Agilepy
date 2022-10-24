@@ -513,6 +513,6 @@ class Ccl(ProcessWrapper):
         self.args.extend([
             "-i",
             extraParams["MetOutfilePath"][0],
-            ">",
+            "-o",
             outfilePath
         ])

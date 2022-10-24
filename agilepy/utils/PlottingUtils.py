@@ -32,27 +32,27 @@ import scipy
 import ntpath
 import datetime
 import numpy as np
-from os.path import join
-from pathlib import Path
-import scipy.ndimage as ndimage
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from astropy.wcs import WCS
-from astropy.io import fits
-from astropy.visualization import simple_norm
-from regions import read_ds9
-from scipy.stats import norm
-from time import strftime
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.figure_factory as ff
 import pandas as pd
 from math import ceil
+from pathlib import Path
+from os.path import join
+from time import strftime
+from astropy.io import fits
+from astropy.wcs import WCS
+from regions import Regions
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+import scipy.ndimage as ndimage
+import plotly.graph_objects as go
+import matplotlib.dates as mdates
+import plotly.figure_factory as ff
 from agilepy.utils.Utils import Utils
-from agilepy.core.CustomExceptions import ConfigurationsNotValidError
-from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Singleton
+from plotly.subplots import make_subplots
+from astropy.visualization import simple_norm
+from agilepy.utils.AstroUtils import AstroUtils
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError
 
 
 class PlottingUtils(metaclass=Singleton):
@@ -367,7 +367,7 @@ class PlottingUtils(metaclass=Singleton):
         # interpolation = "gaussian",
         for idx, regionFile in enumerate(regionFiles):
             if regionFile is not None:
-                regions = read_ds9(regionFile)
+                regions = Regions.read(regionFile)
                 for region in regions:
                     pixelRegion = region.to_pixel(wcs=wcs)
                     pixelRegion.plot(ax=ax, edgecolor=regionsColors[idx])
@@ -420,6 +420,8 @@ class PlottingUtils(metaclass=Singleton):
 
         data = pd.read_csv(filename, header=0, sep=" ")
         data["tm"] = data[["time_start_mjd", "time_end_mjd"]].mean(axis=1)
+        data["x_plus"] = data["time_end_mjd"] - data["tm"]
+        data["x_minus"] = data["tm"] - data["time_start_mjd"]
         data = data.sort_values(by="tm")
 
         nrows = len(columns) +1
@@ -439,21 +441,13 @@ class PlottingUtils(metaclass=Singleton):
         for i in range(len(columns)):
             
             fig.add_trace(go.Scatter(
-                x=data["tm"], y=data[columns[i]], name=columns[i]), row=i+2, col=1)
+                x=data["tm"], y=data[columns[i]], name=columns[i], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                         arrayminus=data["x_minus"]), mode='markers'), row=i+2, col=1)
             
             fig.update_yaxes(showline=True, linecolor="black",
                              title=um[i], row=i+2, col=1)
             fig.update_xaxes(showline=True, linecolor="black",
                              title="Time(MJD)", tickformat="g", row=i+2, col=1, showticklabels=True)
-        """fig = go.Figure()
-
-        fig.add_traces(go.Scatter(x=data["tm"], y=data[columns]))
-
-        fig.update_xaxes(showline=True, linecolor="black", title="Time(MJD)")
-
-        fig.update_yaxes(showline=True, linecolor="black",
-                         title=um)
-        fig.update_layout(xaxis=dict(tickformat="g"))"""
 
         fig.update_layout(height=500+(len(columns)*500))
         
@@ -554,39 +548,28 @@ class PlottingUtils(metaclass=Singleton):
         # reading and setting dataframe
         data = pd.read_csv(filename, index_col=False, header=0, names=["tmin_tt","tmax_tt","exp","cts"], sep=" ")
 
-        tmean = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+        data["tm"] = data[["tmin_tt", "tmax_tt"]].mean(axis=1)
+
+        data["x_plus"] = data["tmax_tt"] - data["tm"]
+        data["x_minus"] = data["tm"] - data["tmin_tt"]
 
         #Plotting
 
 
 
-        fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
 
-        fig.add_trace(go.Scatter(x=tmean, y=data["cts"], name="counts", mode="markers"), row=1, col=1)
+        fig.add_trace(go.Scatter(x=data["tm"], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                                   arrayminus=data["x_minus"]), y=data["cts"],  error_y=dict(type="data", symmetric=True, array=data["cts"]**(1/2)), name="counts", mode="markers"), row=1, col=1)
 
-        fig.add_trace(go.Scatter(x=tmean, y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
-
-        #fig.add_trace(go.Histogram(y=data["exp"], histnorm='probability'), row=2, col=2)
-
-        #fig.add_trace(ff.create_distplot([data["exp"]], ["label"], curve_type="normal"), row=2, col=2)
-        
-        counts, bins = np.histogram(data["exp"], bins=40)
-
-        bins = 0.5 * (bins[:-1] + bins[1:])
-
-        mu, sigma = scipy.stats.norm.fit(data["exp"])
-        # print(mu, sigma)
-        best_fit_line = scipy.stats.norm.pdf(bins, mu, sigma) * 10**9
-
-        fig.add_trace(go.Bar(x=bins, y=counts), row=2, col=2)
-
-        fig.add_trace(go.Scatter(x=bins, y=best_fit_line), row=2, col=2)
+        fig.add_trace(go.Scatter(x=data["tm"], error_x=dict(type="data", symmetric=False, array=data["x_plus"],
+                                                   arrayminus=data["x_minus"]), y=data["exp"], name="exposure", mode="markers"), row=2, col=1)
 
         fig.update_xaxes(showline=True, linecolor="black", title="Time(tt)")
         fig.update_yaxes(showline=True, linecolor="black", title="Counts", row=1, col=1)
         fig.update_yaxes(showline=True, linecolor="black", title="Exp", row=2, col=1)
 
-        fig.update_layout(legend=dict(font=dict(size=20)), xaxis=dict(tickformat="g"), height=800, width=1600, xaxis_showticklabels=True)
+        fig.update_layout(legend=dict(font=dict(size=20)), xaxis1=dict(tickformat="f"), xaxis2=dict(tickformat="f"), height=800, width=1000, xaxis_showticklabels=True)
 
         if saveImage:
             outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"
