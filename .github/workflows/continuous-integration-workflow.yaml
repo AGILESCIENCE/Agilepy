@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["macos-10.15"] #, "macos-11.0" (not yet supported) "ubuntu-20.04", "ubuntu-18.04" (miniconda solving environment issue)]
+        os: ["macos-10.15"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
@@ -76,7 +76,7 @@ jobs:
 
   building-testing-on-os-centos7:
 
-    name: Build+Test with agilescience container
+    name: Build+Test Docker container
 
     runs-on: ubuntu-20.04
 
