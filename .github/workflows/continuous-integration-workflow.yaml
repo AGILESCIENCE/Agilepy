@@ -26,8 +26,8 @@ jobs:
       - name: Installing Agilepy
         shell: bash -l {0}
         run: |
-        source /opt/venv/agilepy/bin/activate
-        python setup.py develop
+          source /opt/venv/agilepy/bin/activate
+          python setup.py develop
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
