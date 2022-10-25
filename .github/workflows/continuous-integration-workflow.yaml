@@ -28,11 +28,13 @@ jobs:
         run: |
           source /opt/venv/agilepy/bin/activate
           python setup.py develop
+          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: |
-          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+          source /opt/venv/agilepy/bin/activate
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
           bash $agilepy_path/scripts/start_coverage.sh
 
