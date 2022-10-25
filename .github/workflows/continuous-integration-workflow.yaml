@@ -9,12 +9,12 @@ on:
 
 jobs:
 
-  building-testing-on-os-matrix:
+  building-testing-on-ubuntu-matrix:
     name: Build+Test ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["macos-10.15", "ubuntu-20.04", "ubuntu-18.04"] #, "macos-11.0" (not yet supported) "ubuntu-20.04", "ubuntu-18.04" (miniconda solving environment issue)]
+        os: ["ubuntu-20.04", "ubuntu-18.04"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
@@ -35,6 +35,41 @@ jobs:
         shell: bash -l {0}
         run: |
           source /opt/venv/agilepy/bin/activate
+          agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+          bash $agilepy_path/scripts/start_coverage.sh
+  
+  building-testing-on-os-matrix:
+    name: Build+Test ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["macos-10.15"] #, "macos-11.0" (not yet supported) "ubuntu-20.04", "ubuntu-18.04" (miniconda solving environment issue)]
+        python-version: ["3.8.13"]
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: false
+          python-version: ${{ matrix.python-version }}
+          environment-file: .github/environment.yml
+          activate-environment: agilepydevops
+
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: python setup.py develop
+
+      - name: Conda info
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+      - name: Running unit tests and code coverage
+        shell: bash -l {0}
+        run: |
+          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
           agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
           bash $agilepy_path/scripts/start_coverage.sh
 
