@@ -131,7 +131,7 @@ Zlib
 
 `AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install is on sciencetools_version.txt in the repository main directory)
 
-`Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`
+`Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`_
 
 
 Uninstalling
