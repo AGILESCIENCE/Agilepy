@@ -3,7 +3,7 @@ Installation
 
 Agilepy is available as Anaconda package or into a ready-to-use Docker container (from 1.4.0)
 
-.. note:: Release 1.5.0 is now available through dockerhub and anaconda cloud! 
+.. note:: AGILE DATASET DOWNLOAD 
           Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 
           Agilepy automatically handles the data and no actions are required from the user.
           For more information visit `this page <../manual/Ag_dataset_rest_api.html>`_.
@@ -69,7 +69,7 @@ You can pull the image directly from dockerhub using the following command:
 
 ::
 
-    docker pull agilescience/agilepy:release-1.5.1
+    docker pull agilescience/agilepy:release-<version>
 
 .. note:: Check the installation instructions for Docker `here <https://docs.docker.com/get-docker/>`_
 
@@ -86,7 +86,7 @@ Using this command you can launch the container and automatically start jupyter 
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
     -v $PWD/shared_dir:/shared_dir \
-    agilescience/agilepy:release-1.5.1 /bin/bash -c \
+    agilescience/agilepy:release-<version> /bin/bash -c \
     "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
     jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
 
@@ -119,6 +119,19 @@ Tested on:
           and docker `here <https://docs.docker.com/docker-for-windows/wsl/>`_
 
 
+Manual Installation
+^^^^^^^^^^^^^^^^^^^
+
+If the isntallation does not work with the instructions above, it is recommended to install agilepy and its dependencies from scratch.
+The dependencies required by Agilepy are:
+
+Root 6.26
+Cfitsio 4.1
+Zlib
+
+`AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install is on sciencetools_version.txt in the repository main directory)
+
+`Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`
 
 
 Uninstalling
@@ -131,7 +144,7 @@ Anaconda
 Docker
 ::
 
-    docker rmi agilescience/agilepy:release-1.5.1
+    docker rmi agilescience/agilepy:release-<version>
 
 
 Package distribution structure
