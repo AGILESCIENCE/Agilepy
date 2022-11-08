@@ -7,7 +7,6 @@ Develop: ![Continuous integration workflow](https://github.com/AGILESCIENCE/Agil
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Coverage)
 
-[![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/installer/conda.svg)](https://conda.anaconda.org/agilescience)
 [![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/version.svg)](https://anaconda.org/agilescience/agilepy)
 [![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/latest_release_date.svg)](https://anaconda.org/agilescience/agilepy)
 [![Anaconda-Server Badge](https://anaconda.org/agilescience/agilepy/badges/platforms.svg)](https://anaconda.org/agilescience/agilepy)
