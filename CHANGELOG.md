@@ -1,5 +1,8 @@
 # Changelog
 
+## Release 1.6.1
+* Minor fixes
+
 ## Release 1.6.0
 * (\#296) Now calcbkg updates the results if called multiple times
 * (\#331) Docs updated
