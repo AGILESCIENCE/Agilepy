@@ -281,7 +281,7 @@ class APDisplayAGILEFermiComparison:
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False, zmax=60):
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False):
 
         #---- Loading data -----
         agile_data = pd.read_csv(agile, header=0, sep=" ")
