@@ -281,7 +281,7 @@ class APDisplayAGILEFermiComparison:
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False):
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False, zmax=60):
 
         #---- Loading data -----
         agile_data = pd.read_csv(agile, header=0, sep=" ")
@@ -299,7 +299,7 @@ class APDisplayAGILEFermiComparison:
 
         #------Plotting data
         f, (ax1, ax2) = plt.subplots(2, figsize=(12.18,10), sharex=True)
-        self.plot_offaxis(ax1, ax2, path, tstart, tstop, 60, 1, 0, lines)
+        self.plot_offaxis(ax1, ax2, path, tstart, tstop, zmax, 1, 0, lines)
         self.plot(ax2, agile_data, fermi_data, lines, plotrate)
         ax1.tick_params(labelbottom=True)
 
