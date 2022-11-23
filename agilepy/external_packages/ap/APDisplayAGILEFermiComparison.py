@@ -68,7 +68,7 @@ class APDisplayAGILEFermiComparison:
             ax.errorbar(tm, agile_data["rate"]*1e8, color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
 
             self.logger.info(self, f"AGILE mean {agile_data['rate'].mean()*1e8}")
-            self.logger.info(f"AGILE median {agile_data['rate'].median()*1e8}")
+            self.logger.info(self, f"AGILE median {agile_data['rate'].median()*1e8}")
             self.logger.info(self, f"AGILE std {agile_data['rate'].std()*1e8}")
 
             agilemean = agile_data["rate"].median()*1e8
@@ -188,7 +188,7 @@ class APDisplayAGILEFermiComparison:
         total_s_in_gti = 0
         gti_list = []
         for l, s in zip(lat_filt, lat_sep_filt):
-
+            print(s, zmax)
             if not found and s <= zmax:
                 found = True
                 gti_time = l * 86400
