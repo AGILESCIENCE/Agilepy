@@ -321,12 +321,14 @@ class agilecheck:
             ax.set_xlabel('MJD')
             ax.set_ylabel('off-axis angle [$^{\\circ}$]')
 
-            self.logger.info(self, 'Saving figure...')
+
             ax.set_xlim(np.min(meantime), np.max(meantime))
             if show==True:
                 f.show()
             else:
-                f.savefig('agile_visibility_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt))
+                outfile_name = 'agile_visibility_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
+                self.logger.info(self, f'Saving figure in {outfile_name}')
+                f.savefig(outfile_name)
 
         if histogram == True:
             self.logger.info(self, "Plotting histogram...")
@@ -363,9 +365,10 @@ class agilecheck:
                 print(center2[i], hist2[i]*deltat1/ttotal_obs*100., width2, file=fil)
             fil.close()
 
-            self.logger.info(self, 'Saving figure...')
             if show==True:
                 f2.show()
             else:
-                f2.savefig('agile_histogram_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt))
+                outfile_name = 'agile_histogram_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
+                self.logger.info(self, f'Saving figure in {outfile_name}')
+                f2.savefig(outfile_name)
             return ttotal_obs, np.concatenate((hist,hist2))

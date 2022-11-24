@@ -304,4 +304,11 @@ class APDisplayAGILEFermiComparison:
         ax1.tick_params(labelbottom=True)
 
         plt.show()
-        f.savefig('merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf'), format="pdf")
+
+        outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
+        self.logger.info(self, f"Plot: {outfilename_pdf}")
+        f.savefig(outfilename_pdf, format="pdf")
+
+        outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
+        self.logger.info(self, f"Plot: {outfilename_png}")
+        f.savefig(outfilename_png, format="png")        

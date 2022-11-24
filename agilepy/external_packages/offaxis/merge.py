@@ -37,7 +37,6 @@ class merge:
             lat_filt = lat_meantime[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
             lat_sep_filt = lat_separation[(lat_meantime > self.timelimiti) & (lat_meantime < self.timelimitf)]
 
-        self.logger.info(self, 'Plotting figure...')
         f = plt.figure()
         ax = f.add_subplot(111)
 #ax.plot(agl_meantime, agl_separation, '-r', lat_meantime, lat_separation, 'gs')
@@ -63,7 +62,6 @@ class merge:
 
         #legend = plt.legend(loc='lower right', shadow=True, fontsize='xx-small')
 
-        print('Saving figure...')
 #        ax.set_xlim(np.min(agl_filt)-self.t0, np.max(agl_filt)-self.t0)
         ax.set_xlim(np.min(agl_filt-self.t0), np.max(agl_filt-self.t0))
         ax.set_title(str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf))
@@ -72,8 +70,14 @@ class merge:
         if show==True:
             f.show()
         else:
-            f.savefig('merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png'))
-            f.savefig('merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf'), format="pdf")
+
+            outfile_name_png = 'merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png')
+            self.logger.info(self, f'Saving figure in {outfile_name_png}')
+            f.savefig(outfile_name_png)
+
+            outfile_name_pdf = 'merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf')
+            self.logger.info(self, f'Saving figure in {outfile_name_pdf}')
+            f.savefig(outfile_name_pdf, format="pdf")
 
     def histogram_merge(self, show=False, mode="all"):
 
