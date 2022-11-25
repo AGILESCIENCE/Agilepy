@@ -53,7 +53,7 @@ class APDisplayAGILEFermiComparison:
                 j += 1
         return result
 
-    def plot_aperture_photometry(self, ax, agile_data, fermi_data, vertical_boxes, timetype="MJD", data_column_name="cts"):
+    def plot_aperture_photometry(self, ax, agile_data, fermi_data, vertical_boxes, timetype="MJD", data_column_name="cts", time_range=None):
 
         #---AGILE----
 
@@ -79,7 +79,7 @@ class APDisplayAGILEFermiComparison:
             AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"]) - 
             AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])) / 2
         # print("agile tm: ",tm)
-        ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", linewidth=0.8, label="AGILE")
+        ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", markersize=1.0, linewidth=0.8, label="AGILE")
 
         self.logger.info(self, f"AGILE mean, {agile_data[data_column_name].mean()}")
         self.logger.info(self, f"AGILE median {agile_data[data_column_name].median()}")
@@ -144,7 +144,10 @@ class APDisplayAGILEFermiComparison:
         
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
-    def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, trigger_time_tt=None, timetype="MJD", tstart_tt = None, tstop_tt = None):
+
+
+
+    def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, trigger_time_tt=None, timetype="MJD", tstart_tt = None, tstop_tt = None, time_range=None):
 
         try:
             agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
@@ -268,6 +271,8 @@ class APDisplayAGILEFermiComparison:
         #ax.set_xlim(np.min(agl_filt-t0), np.max(agl_filt-t0))
         axes[0].set_title(str(zmax)+'_'+str(tstart)+'_'+str(tstop))
 
+
+
     def checkSignificance(self, fermi, tstart, tstop):
         fermi_data = pd.read_csv(fermi, header=0, sep=" ")
         ntrials = 0
@@ -299,7 +304,7 @@ class APDisplayAGILEFermiComparison:
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts"):
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts", time_range=None):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
@@ -325,11 +330,18 @@ class APDisplayAGILEFermiComparison:
 
         #------Plotting data
         f, axes = plt.subplots(3, 1, figsize=(12.18,15), sharex=True)
-        self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt) 
-        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name="exp")
-        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name=data_column_name)
+        self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt, time_range=time_range) 
+        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name="exp", time_range=time_range)
+        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name=data_column_name, time_range=time_range)
 
-        axes[0].tick_params(labelbottom=True)
+        # TODO: convert it to TT ..
+        if time_range is not None:
+            for ax in axes:
+                ax.set_xlim(time_range)
+            
+
+        for ax in axes:
+            ax.tick_params(labelbottom=True)
 
         plt.show()
 

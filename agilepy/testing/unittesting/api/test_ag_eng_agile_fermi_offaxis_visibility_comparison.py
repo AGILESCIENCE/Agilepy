@@ -59,7 +59,7 @@ class TestAGEngAgileFermiOffAxisVisibilityComparison:
         
 
         t0 = 59861.55346063
-        time_windows = [[t0-120/86400, t0+1000/86400]]
+        time_windows = [(t0-120/86400, t0+1000/86400)]
         ra = 288.338178
         dec = 19.771496
         fermi_path = data_dir.joinpath("SC00.fits")
@@ -74,7 +74,7 @@ class TestAGEngAgileFermiOffAxisVisibilityComparison:
         ap_fermi = data_dir.joinpath("lc_grb10sr5t0GRBconv.out")
         tstart = time_windows[0][0]
         tstop = time_windows[0][1]
- 
+        time_range=time_windows[0]
         ageng = AGEngAgileFermiOffAxisVisibilityComparison(conf)
 
         output_dirs = ageng.visibilityPlot(time_windows, ra, dec, str(fermi_path), str(agile_path), run, zmax, mode, step)
@@ -83,7 +83,7 @@ class TestAGEngAgileFermiOffAxisVisibilityComparison:
  
         print(ap_agile, ap_fermi, tstart, tstop, path_offaxis, vertical_boxes_mjd)
 
-        ageng.apOffaxisComparation(str(ap_agile), str(ap_fermi), tstart, tstop, path_offaxis, vertical_boxes_mjd=vertical_boxes_mjd, zmax=zmax, timetype="MJD", data_column_name=data_column_name)        
+        ageng.apOffaxisComparation(str(ap_agile), str(ap_fermi), tstart, tstop, path_offaxis, vertical_boxes_mjd=vertical_boxes_mjd, zmax=zmax, timetype="MJD", data_column_name=data_column_name, time_range=time_range)        
         
         
         
