@@ -66,8 +66,8 @@ class APDisplayAGILEFermiComparison:
         elif "Sign" in data_column_name or data_column_name == "exp":
             yerr = 0
         elif "flux" in data_column_name or "rate" in data_column_name:
-            yerr = agile_data[data_column_name+"Error"] * 1e8
-            agile_data[data_column_name] *= 1e8
+            yerr = agile_data[data_column_name+"Error"] #* 1e8
+            agile_data[data_column_name] #*= 1e8
         
         ## ---- times ---
 
@@ -113,9 +113,11 @@ class APDisplayAGILEFermiComparison:
             yerr = np.sqrt(fermi_data[data_column_name])
         elif "Sign" in data_column_name or data_column_name == "exp":
             yerr = 0
+
         elif "flux" in data_column_name or "rate" in data_column_name:
-            yerr = fermi_data[data_column_name+"Error"] * 1e8
-            fermi_data[data_column_name] *= 1e8
+            yerr = fermi_data[data_column_name+"Error"]# * 1e8
+            fermi_data[data_column_name] #*= 1e8
+            ax.set_yscale("log")
         
         #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
         twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
@@ -144,7 +146,7 @@ class APDisplayAGILEFermiComparison:
         
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
-
+        
 
 
     def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, trigger_time_tt=None, timetype="MJD", tstart_tt = None, tstop_tt = None, time_range=None):
