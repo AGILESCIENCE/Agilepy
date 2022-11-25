@@ -78,7 +78,7 @@ class APDisplayAGILEFermiComparison:
         tw = (
             AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"]) - 
             AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])) / 2
-        print("agile tm: ",tm)
+        # print("agile tm: ",tm)
         ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", linewidth=0.8, label="AGILE")
 
         self.logger.info(self, f"AGILE mean, {agile_data[data_column_name].mean()}")
@@ -204,7 +204,7 @@ class APDisplayAGILEFermiComparison:
         total_s_in_gti = 0
         gti_list = []
         for l, s in zip(lat_filt, lat_sep_filt):
-            print(s, zmax)
+
             if not found and s <= zmax:
                 found = True
                 gti_time = l
