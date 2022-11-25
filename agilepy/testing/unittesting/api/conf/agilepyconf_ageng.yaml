@@ -4,4 +4,4 @@ output:
   logfilenameprefix: logtestcase
   sourcename: eng
   username: user-test
-  verboselvl: 1
+  verboselvl: 0

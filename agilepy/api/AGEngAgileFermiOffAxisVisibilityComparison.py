@@ -87,7 +87,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         return dir
 
-    def apOffaxisComparation(self, agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, lines = [], plotrate=False, zmax=60):
+    def apOffaxisComparation(self, agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, vertical_boxes_mjd = [], zmax=60, timetype="MJD", data_column_name="cts"):
         """ It compares and shows aperture photometry data with offaxis results
 
         Args:
@@ -98,6 +98,8 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
             path_offaxis (str): directory path to offaxis results
             lines (list): 
             plotrate (bool): if true select column rate instead of counts
+            zmax (float): maximum offaxis degrees
+            timetype (str): time type to plot [MJD, TT]
 
         return:
             void
@@ -106,7 +108,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         comparison = APDisplayAGILEFermiComparison(self.logger)
 
-        comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, zmax=zmax, lines=lines, plotrate=plotrate)
+        comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, zmax=zmax, vertical_boxes_mjd=vertical_boxes_mjd, timetype=timetype, data_column_name=data_column_name)
 
 
 

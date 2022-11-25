@@ -180,12 +180,12 @@ class AstroUtils:
     
     @staticmethod
     def time_agile_seconds_to_unix(time_agile_seconds):
-        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        time_unix = np.array(time_agile_seconds) + AstroUtils.UNIX_AGILE_DELTA
         return np.round(time_unix)
 
     @staticmethod
     def time_agile_seconds_to_mjd(time_agile_seconds):
-        time_unix = time_agile_seconds + AstroUtils.UNIX_AGILE_DELTA
+        time_unix = np.array(time_agile_seconds) + AstroUtils.UNIX_AGILE_DELTA
         t = Time(time_unix, format="unix")
         return t.mjd
 
