@@ -383,11 +383,15 @@ class AP(ProcessWrapper):
             outfilePath+".ph" : ProcessWrapper.OPTIONAL_PRODUCT
         }
 
+        edpmatrix = "None"
+        if config.getOptionValue("useEDPmatrixforEXP"):
+            edpmatrix = Parameters.edpmatrix
+
         self.args = [ outfilePath,  \
                       config.getOptionValue("logfile"), # = indexlog
                       config.getOptionValue("evtfile"), # = indexfiler
                       Parameters.sarmatrix, \
-                      Parameters.edpmatrix, \
+                      edpmatrix, \
                       config.getOptionValue("timelist"), \
                       config.getOptionValue("binsize"), \
                       config.getOptionValue("radius"), \
