@@ -53,7 +53,7 @@ class APDisplayAGILEFermiComparison:
                 j += 1
         return result
 
-    def plot_aperture_photometry(self, ax, agile_data, fermi_data, vertical_boxes, timetype="MJD", data_column_name="cts", time_range=None):
+    def plot_aperture_photometry(self, ax, agile_data, fermi_data, timetype="MJD", data_column_name="cts", trigger_time_tt=None):
 
         #---AGILE----
 
@@ -69,16 +69,20 @@ class APDisplayAGILEFermiComparison:
             yerr = agile_data[data_column_name+"Error"] #* 1e8
             agile_data[data_column_name] #*= 1e8
         
-        ## ---- times ---
+        # ---- times ---
+        if timetype == "MJD":
+            tm = (
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"]) + 
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"])) / 2
+            tw = (
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"]) - 
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])) / 2
+        else:
+            tm = (agile_data["tstart"] + agile_data["tstop"]) / 2
+            tw = (agile_data["tstop"] - agile_data["tstart"]) / 2
+            if trigger_time_tt is not None:
+                tm -= trigger_time_tt
 
-        # TODO: only if MJD
-        tm = (
-            AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"]) + 
-            AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"])) / 2
-        tw = (
-            AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"]) - 
-            AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])) / 2
-        # print("agile tm: ",tm)
         ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", markersize=1.0, linewidth=0.8, label="AGILE")
 
         self.logger.info(self, f"AGILE mean, {agile_data[data_column_name].mean()}")
@@ -94,17 +98,20 @@ class APDisplayAGILEFermiComparison:
         ax.axhline(agilemean + 3 * agilestd, linestyle='dashdot', color='b', linewidth=1)#,  label="3 sigma")
 
         #---Fermi----
-
-        tmFermi = (
-            AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + 
-            AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"])) / 2
-        twFermi = (
-            AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"]) - 
-            AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])) / 2      
-
+        if timetype == "MJD":
+            tmFermi = (
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + 
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"])) / 2
+            twFermi = (
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"]) - 
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])) / 2      
+        else:
+            tmFermi = (fermi_data["tstart"] + fermi_data["tstop"]) / 2
+            twFermi = (fermi_data["tstop"] - fermi_data["tstart"]) / 2
+            if trigger_time_tt is not None:
+                tmFermi -= trigger_time_tt
 
         # Casistiche FERMI
-
         if "Sign" in data_column_name or "flux" in data_column_name:
             self.logger.warning(self, f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
             data_column_name = "rate"
@@ -119,9 +126,6 @@ class APDisplayAGILEFermiComparison:
             fermi_data[data_column_name] #*= 1e8
             ax.set_yscale("log")
         
-        #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
-        twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
-        #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
         ax.errorbar(tmFermi, fermi_data[data_column_name], xerr=twFermi, yerr=yerr, color="r", marker="s", ls="none", markersize=1.0, linewidth=0.8, label="FERMI")
 
         self.logger.info(self, f"Fermi mean {fermi_data[data_column_name].mean()}")
@@ -141,23 +145,17 @@ class APDisplayAGILEFermiComparison:
             
         ax.set_xlabel(timetype)
         ax.set_ylabel(data_column_name)
-        
         ax.ticklabel_format(axis="x", useOffset=False)
-        
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
         
-
-
-    def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, trigger_time_tt=None, timetype="MJD", tstart_tt = None, tstop_tt = None, time_range=None):
+    def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, timetype="MJD", tstart_tt = None, tstop_tt = None, trigger_time_tt=None):
 
         try:
             agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
             lat_meantime, lat_separation = np.loadtxt(path+'/time_vs_separation_fermi.txt', unpack=True)
-
         except:
             return
-
 
         if timetype =="MJD":
             tstart = tstart_mjd
@@ -170,39 +168,33 @@ class APDisplayAGILEFermiComparison:
             five_minutes = 300
             agl_meantime = AstroUtils.time_mjd_to_agile_seconds(agl_meantime)
             lat_meantime = AstroUtils.time_mjd_to_agile_seconds(lat_meantime)
-        
+            if trigger_time_tt is not None:
+                tstart -= trigger_time_tt
+                tstop -= trigger_time_tt
+                agl_meantime -= trigger_time_tt
+                lat_meantime -= trigger_time_tt
+                vertical_boxes -= trigger_time_tt
         else:
             raise Exception("Wrong timetype or missing TT times")
 
-
         agl_filt = agl_meantime[(agl_meantime > tstart) & (agl_meantime < tstop)]
         agl_sep_filt = agl_separation[(agl_meantime > tstart) & (agl_meantime < tstop)]
-
-
 
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
 
         self.logger.info(self, f"{tstart}, {tstop}")
-
         axes[0].plot(agl_filt, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
-
         axes[0].plot(lat_filt, lat_sep_filt, color='red', label='Fermi', linewidth=1.5)
 
-        #-----green boxes----
+        ###### GREEN BOXES
         lat_filt2 = []
         for i in range(len(lat_filt) - 1):
-            
             if (lat_filt[i+1] - lat_filt[i]) >= five_minutes:  
-
                 self.logger.debug(self, f"Green box in: {lat_filt[i]}, {lat_filt[i+1]}")
-
                 lat_filt2.append([lat_filt[i], lat_filt[i+1]])
-                
-                axes[0].axvline(lat_filt[i], linestyle='--', color='g', linewidth=0.5)
-                axes[0].axvline(lat_filt[i+1], linestyle='--', color='g', linewidth=0.5)
-        ######
-
+                axes[0].axvline(lat_filt[i], linestyle='--', color='green', linewidth=0.5)
+                axes[0].axvline(lat_filt[i+1], linestyle='--', color='green', linewidth=0.5)
 
         #######------GTI------###
         found = False
@@ -222,10 +214,7 @@ class APDisplayAGILEFermiComparison:
                 total_s_in_gti += gti_time
                 #ax.axvline(l, linestyle='--', color='k', linewidth=0.5)
                 l2 = l
-                gti_list.append([l1,l2])
-        ######
-
-        
+                gti_list.append([l1,l2])        
         
         #####-----cleaning------
         result = self.search_interval(lat_filt2, gti_list)
@@ -233,46 +222,59 @@ class APDisplayAGILEFermiComparison:
         for l in result:
             #ax.axvline(l[0], linestyle='--', color='k', linewidth=1)
             #ax.axvline(l[1], linestyle='--', color='k', linewidth=1)
-
             seconds = (l[1] - l[0]) * 86400
-
             total_s_in_gti = total_s_in_gti - seconds
 
         for lines in gti_list:
             for ax in axes:
                 ax.axvspan(xmin=lines[0], xmax=lines[1], facecolor='k', alpha=0.1)
 
-
         for lines in result:
             for ax in axes:
                 ax.axvspan(xmin=lines[0], xmax=lines[1], facecolor='white')
 
-
-        ######
-
+        ###### YELLOW BOXES
         self.logger.info(self, f"Total time in GTI {total_s_in_gti}")
-
         try:
             for i in range(0,len(vertical_boxes),2):
                 for ax in axes:
                     ax.axvspan(xmin=vertical_boxes[i], xmax=vertical_boxes[i+1], facecolor='y', alpha=0.1)
         except:
             self.logger.info(self, "No lines")
-        
 
         axes[0].set_ylim(0., zmax+5.0)
         #ax.set_xlim((tstart - t0)-0.2, (tstop-t0)+0.2)
         axes[0].set_xlabel(timetype)
-
         axes[0].ticklabel_format(axis="x", useOffset=False)
-
         axes[0].legend(loc='lower right', shadow=True, fontsize='xx-small')
-
         axes[0].set_ylabel('off-axis angle [$^{\\circ}$]')
-
         #ax.set_xlim(np.min(agl_filt-t0), np.max(agl_filt-t0))
         axes[0].set_title(str(zmax)+'_'+str(tstart)+'_'+str(tstop))
 
+
+    def plot_ratemeters(self, ax, rm_files=[], rm_labels=[], timetype="MJD", trigger_time_tt=None):
+
+        # load data
+        colnames = ['col1', 'TIME', 'col2','COUNTS', 'col3', 'COUNTS_D']
+        for f, label in zip(rm_files, rm_labels):
+            data = pd.read_csv(f, header=None, names=colnames, sep='\s', 
+                 engine='python')
+            data = data.drop(['col1', 'col2', 'col3'], axis=1)
+
+            # times (ratemeters are in TT)
+            if timetype == 'MJD':
+                data['TIME'] = AstroUtils.time_agile_seconds_to_mjd(data['TIME'])
+            elif timetype == 'TT' and trigger_time_tt is not None:
+                    data['TIME'] -= trigger_time_tt
+
+            # plot data
+            ax.plot(data['TIME'], data['COUNTS'], label=label)
+
+        # plot decorations
+        ax.set_xlabel(timetype)
+        ax.set_ylabel('counts')
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
 
     def checkSignificance(self, fermi, tstart, tstop):
@@ -306,7 +308,7 @@ class APDisplayAGILEFermiComparison:
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts", time_range=None):
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts", time_range=None, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
@@ -329,19 +331,30 @@ class APDisplayAGILEFermiComparison:
             vertical_boxes = vertical_boxes_mjd
         else:
             vertical_boxes = AstroUtils.time_mjd_to_agile_seconds(vertical_boxes_mjd)
+            
+        # number of plots
+        n_plots = 3
+        if add_rm:
+            n_plots += 1
+        h_plot = 5*n_plots
 
         #------Plotting data
-        f, axes = plt.subplots(3, 1, figsize=(12.18,15), sharex=True)
-        self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt, time_range=time_range) 
-        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name="exp", time_range=time_range)
-        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, vertical_boxes, timetype=timetype, data_column_name=data_column_name, time_range=time_range)
+        f, axes = plt.subplots(n_plots, 1, figsize=(12.18,h_plot), sharex=True)
+        self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt, trigger_time_tt=trigger_time_tt) 
+        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, timetype=timetype, data_column_name="exp", trigger_time_tt=trigger_time_tt)
+        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, timetype=timetype, data_column_name=data_column_name, trigger_time_tt=trigger_time_tt)
+        # add ratemeters option
+        if add_rm and rm_labels != None and rm_files != None:
+            assert rm_files != None, 'if "add_rm" is True then "rm_files" cannot be None'
+            assert rm_labels != None, 'if "add_rm" is True then "rm_files" cannot be None'
+            self.plot_ratemeters(axes[3], rm_files=rm_files, rm_labels=rm_labels, timetype=timetype, trigger_time_tt=trigger_time_tt)
 
-        # TODO: convert it to TT ..
         if time_range is not None:
+            if timetype == 'TT' and trigger_time_tt is not None:
+                    time_range -= trigger_time_tt
             for ax in axes:
                 ax.set_xlim(time_range)
             
-
         for ax in axes:
             ax.tick_params(labelbottom=True)
 
