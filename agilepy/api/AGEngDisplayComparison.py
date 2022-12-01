@@ -21,13 +21,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 from os.path import join, isfile
-from agilepy.utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.external_packages.offaxis.create_offaxis_plot import Create_offaxis_plot
+from matplotlib.lines import Line2D
 
 # plt revert to font defaults
 plt.rc('font', family='sans-serif') 
@@ -89,6 +88,13 @@ class AGEngDisplayComparison:
         data = pd.read_csv(file, header=0, sep=' ')
         return data
 
+    def get_agile_rm_data(self, file):
+        # header to reformat unevenly spaced columns
+        colnames=['col1', 'time', 'col2','counts', 'col3', 'counts_d']
+        data = pd.read_csv(file, header=None, names=colnames, sep='\s', 
+                 engine='python')
+        return data.drop(['col1', 'col2', 'col3'], axis=1)
+
     def get_gti_list(self, times, angles, zmax=60):
         found = False
         total_s_in_gti = 0
@@ -125,149 +131,235 @@ class AGEngDisplayComparison:
             for i in range(0,len(agile_time_windows),2):
                 ax.axvspan(xmin=agile_time_windows[i], xmax=agile_time_windows[i+1], facecolor='y', alpha=0.1)
         except:
-            self.logger.info(self, "No GTI provided")
+            self.logger.info(self, "Empty 'agile_time_windows' list")
         return self
 
     def add_fermi_gti(self, ax, fermi_times, fermi_angles, zmax, threshold):
+        # get fermi GTI
+        fermi_gti_list = self.get_gti_list(times=fermi_times, angles=fermi_angles, zmax=zmax) 
+        for l in fermi_gti_list:
+            ax.axvspan(xmin=l[0], xmax=l[1], facecolor='k', alpha=0.1)
         # add interval green lines with 5 min threshold
         fermi_intervals = self.get_intervals_larger_than_threshold(ax=ax, times=fermi_times, threshold=threshold)      
         # get good intervals
         fermi_good_intervals = self.search_interval(fermi_intervals, fermi_gti_list)
         for l in fermi_good_intervals:
             ax.axvspan(xmin=l[0], xmax=l[1], facecolor='white')
-        # get fermi GTI
-        fermi_gti_list = self.get_gti_list(times=fermi_times, angles=fermi_angles, zmax=zmax) 
-        for l in fermi_gti_list:
-            ax.axvspan(xmin=l[0], xmax=l[1], facecolor='k', alpha=0.1)
+
         return self
 
     def plot_offaxis(self, ax, agile_data, timerange, fermi_data=None, zmax=60, agile_time_windows=[], timetype="MJD", trigger_time_tt=None):
 
         # define tstart and tstop
-        tstart = tstart
-        tstop = tstop
+        tstart = timerange[0]
+        tstop = timerange[1]
         self.logger.info(self, f"Time range = [{tstart}, {tstop}] {timetype}")
 
         # manage time frame and trigger time shift
-        if timetype =="MJD":
-            five_minutes = 5/1440
-        elif timetype =="TT":
-            five_minutes = 300
-            if trigger_time_tt is not None:
+        assert timetype in ['TT', 'MJD'], ValueError(f'{timetype} must be TT or MJD')
+        if timetype == "TT" and trigger_time_tt is not None:
                 tstart -= trigger_time_tt
                 tstop -= trigger_time_tt
                 agile_data -= trigger_time_tt
-                if fermi_data != None:
+                if fermi_data is not None:
                     fermi_data -= trigger_time_tt
                 agile_time_windows -= trigger_time_tt
-        else:
-            raise Exception("Wrong timetype or missing TT times")
 
         # filter time range
         agile_data = agile_data[(agile_data['time'] > tstart) & (agile_data['time'] < tstop)]
         # plot agile offaxis
         ax.plot(agile_data['time'], agile_data['angle'], color='blue', label='AGILE', linewidth=0.5)
-        # add agile GTI
-        self.add_agile_gti(ax=ax, agile_time_windows=agile_time_windows)
 
         # plot fermi optionally
-        if fermi_data != None:
+        if fermi_data is not None:
             # filter time range
             fermi_data = fermi_data[(fermi_data['time'] > tstart) & (fermi_data['time'] < tstop)]
             # plot fermi offaxis
             ax.plot(fermi_data['time'], fermi_data['angle'], color='red', label='Fermi', linewidth=1.5)
-            # fermi GTI
-            self.add_fermi_gti(ax=ax, fermi_times=fermi_data['time'], fermi_angles=fermi_data['angle'], zmax=zmax, threshold=five_minutes)
 
         # decorate axis
         ax.set_ylim(0., zmax+5.0)
         ax.set_xlabel(timetype)
+        ax.set_ylabel('off-axis angle (deg)')
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.legend(loc='lower right', shadow=True, fontsize='xx-small')
-        ax.set_ylabel('off-axis angle (deg)')
-        ax.set_title(f'{tstart} - {tstop} {timetype} (zmax={zmax})')
         return self
 
+    def plot_analyses_comparison(self, ax, dataframes, datainfo, timetype="MJD", trigger_time_tt=None, add_stats_lines=True):
 
+        # extract from data dictionary
+        markers = Line2D.markers
+        assert len(dataframes) <= len(markers), Exception(f'Too many dataframes ({len(dataframes)}) in a one plot: {len(markers)} max allowed')
+            
+        # loop over dataframes
+        for d, data, m in zip(datainfo, dataframes, markers):
+            label = d['label']
+            column = d['column']
+            error_column = d['error_column']
 
+            # get x, y, xerr
+            y = data[column]
+            x = (data['tstart'] + data['tstop']) / 2
+            xerr = (data['tstop'] - data['tstart']) / 2
 
-    def agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, data_column_name="cts", trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
+            # get yerr
+            if error_column is None:
+                yerr = 0
+            elif 'cts' in error_column.lower() or 'counts' in error_column.lower():
+                yerr = np.sqrt(data[data])
+            else:
+                yerr = data[error_column]
+
+            # option trigger time shift
+            if timetype == 'TT' and trigger_time_tt is not None:
+                x -= trigger_time_tt
+
+            # plot data
+            ax.errorbar(x, y, xerr=xerr, yerr=yerr, marker=m, ls="none", markersize=5.0, linewidth=0.8, label=label)
+
+            # statistics
+            if add_stats_lines:
+                mean = data[column].mean()
+                std = data[column].std()
+                ax.axhline(mean, linestyle='solid', color='b', linewidth=0.5)
+                ax.axhline(mean + 1 * std, linestyle='dotted', color='b', linewidth=0.5)#, label="1 sigma")
+                ax.axhline(mean + 2 * std, linestyle='dashed', color='b', linewidth=0.5)#, label="2 sigma")
+                ax.axhline(mean + 3 * std, linestyle='dashdot', color='b', linewidth=1)#,  label="3 sigma")
+
+        # decorations
+        ax.set_xlabel(timetype)
+        ax.set_ylabel(column)
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
+        return self
+
+    def plot_ratemeters(self, ax, rm_dataframes=[], rm_labels=[], timetype="MJD", trigger_time_tt=None):
+        # plot each RM 
+        for data, label in zip(rm_dataframes, rm_labels):
+            # option trigger time shift
+            if timetype == 'TT' and trigger_time_tt is not None:
+                data['time'] -= trigger_time_tt
+
+            # plot data
+            ax.plot(data['time'], data['counts'], label=label)
+
+        # plot decorations
+        ax.set_xlabel(timetype)
+        ax.set_ylabel('counts')
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
+        return self
+
+    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
 
-        # loag data
+        # load data
         agile_data = self.get_analysis_data(agile_data_file) # TT
         fermi_data = self.get_analysis_data(fermi_data_file) # TT
         agile_offaxis_data = self.get_agile_offaxis_data(path=offaxis_path) # MJD
         fermi_offaxis_data = self.get_fermi_offaxis_data(path=offaxis_path) # MJD
+        rm_dataframes = []
+        for f in rm_files:
+            rm_dataframes.append(self.get_agile_rm_data(f)) # TT
 
         # time conversion
         if timetype == 'MJD':
+            five_minutes = 5/1440
             agile_data['tstart'] = AstroUtils.time_agile_seconds_to_mjd(agile_data['tstart'])
             agile_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(agile_data['tstop'])
             fermi_data['tstart'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstart'])
             fermi_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstop'])
         elif timetype == 'TT':
+            five_minutes = 300
             agile_offaxis_data['time'] = AstroUtils.time_mjd_to_agile_seconds(agile_offaxis_data['time'])
             fermi_offaxis_data['time'] = AstroUtils.time_mjd_to_agile_seconds(fermi_offaxis_data['time'])
 
         # define tstart and tstop
-        if timerange != None:
+        if timerange is not None:
             tstart = timerange[0]
-            tstart = timerange[1]
+            tstop = timerange[1]
         else:
             tstart = agile_data['tsart'][0]
             tstop = agile_data['tstop'][-1]
+            timerange = np.array([tstart, tstop])
 
-        # time selection
-        if timerange != None:
-            agile_data = agile_data[(agile_data.tstart >= tstart) & (agile_data.tstop <= tstop)]
-            fermi_data = fermi_data[(fermi_data.tstart >= tstart) & (fermi_data.tstop <= tstop)]
-            agile_offaxis_data = agile_offaxis_data[(agile_offaxis_data.time >= tstart) & (agile_offaxis_data.time <= tstop)]
-            fermi_offaxis_data = fermi_offaxis_data[(fermi_offaxis_data.time >= tstart) & (fermi_offaxis_data.time <= tstop)]
+        # optional trigger time shift
+        if timetype == 'TT' and trigger_time_tt is not None:
+            timerange = np.array(timerange) - trigger_time_tt
+            tstart -= trigger_time_tt
+            tstop -= trigger_time_tt
+            agile_time_windows = np.array(agile_time_windows) - trigger_time_tt
+            agile_data['tstart'] -= trigger_time_tt
+            agile_data['tstop'] -= trigger_time_tt
+            agile_offaxis_data['time'] -= trigger_time_tt
+            fermi_data['tstart'] -= trigger_time_tt
+            fermi_data['tstop'] -= trigger_time_tt
+            fermi_offaxis_data['time'] -= trigger_time_tt
+            if add_rm:
+                for df in rm_dataframes:
+                    df['time'] -= trigger_time_tt
 
-        if timetype == "MJD":
-            agile_time_windows = agile_time_windows
-        else:
-            agile_time_windows = AstroUtils.time_mjd_to_agile_seconds(agile_time_windows)
-            
+        # time selection filter
+        if timerange is not None:
+            agile_data = agile_data[(agile_data['tstart'] >= tstart) & (agile_data['tstop'] <= tstop)]
+            fermi_data = fermi_data[(fermi_data['tstart'] >= tstart) & (fermi_data['tstop'] <= tstop)]
+            agile_offaxis_data = agile_offaxis_data[(agile_offaxis_data['time'] >= tstart) & (agile_offaxis_data['time'] <= tstop)]
+            fermi_offaxis_data = fermi_offaxis_data[(fermi_offaxis_data['time'] >= tstart) & (fermi_offaxis_data['time'] <= tstop)]
+            for df in rm_dataframes:
+                df = df[(df['time'] >= tstart) & (df['time'] <= tstop)]
+
         # number of plots
         n_plots = 3
         if add_rm:
             n_plots += 1
         h_plot = 5 * n_plots
+        fig, axes = plt.subplots(n_plots, 1, figsize=(12,h_plot), sharex=True)
+        axes[0].set_title(f'{tstart} - {tstop} {timetype} (zmax={zmax})')
 
-        # plotting
-        f, axes = plt.subplots(n_plots, 1, figsize=(12,h_plot), sharex=True)
         # add offaxis
-        self.plot_offaxis(ax=axes[0], agile_data=agile_data, fermi_data=fermi_data, timetype=timetype, timerange=timerange, zmax=zmax, agile_git_list=agile_time_windows, trigger_time_tt=trigger_time_tt) 
+        self.plot_offaxis(ax=axes[0], agile_data=agile_offaxis_data, fermi_data=fermi_offaxis_data, timetype=timetype, timerange=timerange, zmax=zmax, agile_time_windows=agile_time_windows) 
+
         # add exposure
-        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, timetype=timetype, data_column_name="exp", trigger_time_tt=trigger_time_tt)
+        exposure_datainfo = [
+            {'label': 'AGILE', 'column': 'exp', 'error_column': None},
+            {'label': 'FERMI', 'column': 'exp', 'error_column': None},
+        ]
+        self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=add_stats_lines)
+
         # add third plot choice
-        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, timetype=timetype, data_column_name=data_column_name, trigger_time_tt=trigger_time_tt)
+        self.plot_analyses_comparison(ax=axes[2], dataframes=[agile_data, fermi_data], datainfo=[agile_datainfo, fermi_datainfo], timetype=timetype, add_stats_lines=add_stats_lines)
+
         # add ratemeters option
-        if add_rm and rm_labels != None and rm_files != None:
+        if add_rm:
             assert rm_files != None, 'if "add_rm" is True then "rm_files" cannot be None'
             assert rm_labels != None, 'if "add_rm" is True then "rm_files" cannot be None'
-            self.plot_ratemeters(axes[3], rm_files=rm_files, rm_labels=rm_labels, timetype=timetype, trigger_time_tt=trigger_time_tt)
+            self.plot_ratemeters(axes[3], rm_dataframes=rm_dataframes, rm_labels=rm_labels, timetype=timetype)
 
+        # x-axis range
         if timerange is not None:
-            if timetype == 'TT' and trigger_time_tt is not None:
-                    timerange -= trigger_time_tt
             for ax in axes:
                 ax.set_xlim(timerange)
-            
+        
+        # for all axes
         for ax in axes:
+            # add GTI
+            self.add_agile_gti(ax=ax, agile_time_windows=agile_time_windows)
+            # fermi GTI
+            self.add_fermi_gti(ax=ax, fermi_times=fermi_offaxis_data['time'], fermi_angles=fermi_offaxis_data['angle'], zmax=zmax, threshold=five_minutes)
+            # add decorations
             ax.tick_params(labelbottom=True)
             ax.grid()
 
+        # show
         plt.show()
-
+        # save pdf
         outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
         self.logger.info(self, f"Plot: {outfilename_pdf}")
-        f.savefig(outfilename_pdf, format="pdf")
-
+        fig.savefig(outfilename_pdf, format="pdf")
+        # save png
         outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
         self.logger.info(self, f"Plot: {outfilename_png}")
-        f.savefig(outfilename_png, format="png")        
+        fig.savefig(outfilename_png, format="png")        
+        return self

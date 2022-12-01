@@ -27,15 +27,14 @@
 
 import os
 import pytest
-from os.path import Path
-from agilepy.utils.Utils import Utils
+from pathlib import Path
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.api.AGEngDisplayComparison import AGEngDisplayComparison
-
+from agilepy.api.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
 class TestAGEngDisplayComparison:
 
     @pytest.fixture
-    def get_log_dir(self):
+    def log_dir(self):
         currentDirPath = Path(__file__).parent.absolute()
         test_logs_dir = Path(currentDirPath).joinpath("test_logs", "TestAGEngAgileFermiOffAxisVisibilityComparison")
         test_logs_dir.mkdir(parents=True, exist_ok=True)
@@ -43,12 +42,12 @@ class TestAGEngDisplayComparison:
         return test_logs_dir
 
     @pytest.fixture
-    def get_conf(self):
+    def conf(self):
         currentDirPath = Path(__file__).parent.absolute()
         return str(currentDirPath.joinpath("conf/agilepyconf_ageng.yaml"))
 
     @pytest.fixture
-    def get_data_dir(self):
+    def data_dir(self):
         currentDirPath = Path(__file__).parent.absolute()
         return currentDirPath.joinpath("data/test_ag_eng_agile_fermi_offaxis_visibility_comparison")
 
@@ -78,30 +77,37 @@ class TestAGEngDisplayComparison:
 
     
         
-    def test_display_comparison_tt(self, data_dir, conf):
-        t0 = 59861.55346063
-        time_windows = [(t0-120/86400, t0+1000/86400)]
+    def test_plot_agile_fermi_comparison_tt(self, data_dir, conf):
+        # params for AGEngAgileFermiOffAxisVisibilityComparison()
+        t0_mjd = 59861.55346063
+        time_windows = [(t0_mjd-120/86400, t0_mjd+1000/86400)]
         ra = 288.338178
         dec = 19.771496
-        fermi_path = data_dir.joinpath("SC00.fits")
-        agile_path = "/ASDC_PROC2/DATA_2/INDEX/LOG.log.index"
         run = 50
         zmax = 80
         mode = "all"
         step = 1
-        data_column_name = "rate"
-        vertical_boxes_mjd = [t0, t0+200/86400]
+        fermi_path = data_dir.joinpath("SC00.fits")
+        agile_path = "/ASDC_PROC2/DATA_2/INDEX/LOG.log.index"
+        # get offaxis path by runnig visibilityPlot()
+        vis = AGEngAgileFermiOffAxisVisibilityComparison(conf)
+        offaxis_path = vis.visibilityPlot(time_windows, ra, dec, str(fermi_path), str(agile_path), run, zmax, mode, step)[0]
+
+        # params for AGEngDisplayComparison()
+        t0_tt = AstroUtils.time_mjd_to_agile_seconds(t0_mjd)
+        agile_datainfo = {'label': 'AGILE', 'column': 'cts', 'error_column': None}
+        fermi_datainfo = {'label': 'AGILE', 'column': 'cts', 'error_column': None}        
+        agile_time_windows = [t0_tt, t0_tt+200]
         ap_agile = data_dir.joinpath("ALL_10s_emin100_emax10000_r5_DQ0_FOV70.ap.ap4")
         ap_fermi = data_dir.joinpath("lc_grb10sr5t0GRBconv.out")
-        tstart = time_windows[0][0]
-        tstop = time_windows[0][1]
-        time_range=AstroUtils.time_mjd_to_agile_seconds(time_windows[0])
-        trigger_time_tt = AstroUtils.time_mjd_to_agile_seconds(tstart)
+        timerange = [t0_tt-120, t0_tt+1000]
         add_rm = True
         rm_files = [data_dir.joinpath("080412_RM-GRID_LC.txt"), data_dir.joinpath("080412_RM-AC0_LC.txt")]
         rm_labels = ['GRID', 'AC0']
 
-        ageng = AGEngDisplayComparison()
+        # test
+        ageng = AGEngDisplayComparison(logger=vis.logger)
+        ageng.plot_agile_fermi_comparison(agile_data_file=ap_agile, fermi_data_file=ap_fermi, offaxis_path=offaxis_path, timetype="TT", timerange=timerange, agile_time_windows=agile_time_windows, zmax=zmax,  trigger_time_tt=t0_tt, add_rm=add_rm, rm_files=rm_files, rm_labels=rm_labels, agile_datainfo=agile_datainfo, fermi_datainfo=fermi_datainfo, add_stats_lines=True)
 
        
         
