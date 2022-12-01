@@ -357,6 +357,7 @@ class APDisplayAGILEFermiComparison:
             
         for ax in axes:
             ax.tick_params(labelbottom=True)
+            ax.grid()
 
         plt.show()
 
