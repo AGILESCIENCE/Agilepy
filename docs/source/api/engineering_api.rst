@@ -10,4 +10,4 @@ AGEngAgileOffaxisVisibility
 AGEngAgileFermiOffAxisVisibilityComparison
 ******************************************
 .. autoclass:: api.AGEngAgileFermiOffAxisVisibilityComparison.AGEngAgileFermiOffAxisVisibilityComparison
-    :members: __init__, getConfiguration, visibilityPlot, apOffaxisComparation
+    :members: __init__, getConfiguration, visibilityPlot, apOffaxisComparison
