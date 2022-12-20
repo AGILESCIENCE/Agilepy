@@ -220,9 +220,11 @@ class agilecheck:
             #'text.usetex': True,
             'ps.usedistiller': False,
             'figure.figsize': fig_size,
-            'font.family': 'Times New Roman',
-            'font.serif': ['Bitstream Vera Serif']}
+            #'font.family': 'Times New Roman',
+            #'font.serif': ['Bitstream Vera Serif']
+            }
         pylab.rcParams.update(params)
+
 #================== end of plotting settings =====================
 
         separation, tTTi, tTTf = self.calc_separation()
