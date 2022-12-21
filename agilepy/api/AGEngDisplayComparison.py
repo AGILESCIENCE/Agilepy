@@ -185,7 +185,7 @@ class AGEngDisplayComparison:
         ax.legend(loc='lower right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_analyses_comparison(self, ax, dataframes, datainfo, timetype="MJD", trigger_time_tt=None, add_stats_lines=True):
+    def plot_analyses_comparison(self, ax, dataframes, datainfo, timetype="MJD", trigger_time_tt=None, add_stats_lines=True, yscale='linear'):
 
         # extract from data dictionary
         markers = Line2D.markers
@@ -227,6 +227,7 @@ class AGEngDisplayComparison:
                 ax.axhline(mean + 3 * std, linestyle='dashdot', color='b', linewidth=1)#,  label="3 sigma")
 
         # decorations
+        ax.set_yscale(yscale)
         ax.set_xlabel(timetype)
         ax.set_ylabel(column)
         ax.ticklabel_format(axis="x", useOffset=False)
@@ -250,7 +251,8 @@ class AGEngDisplayComparison:
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}):
+    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}, 
+    yscale_third_panel='linear', yscale_exp='log'):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
@@ -331,10 +333,10 @@ class AGEngDisplayComparison:
             {'label': 'AGILE', 'column': 'exp', 'error_column': None},
             {'label': 'FERMI', 'column': 'exp', 'error_column': None},
         ]
-        self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=add_stats_lines)
+        self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=add_stats_lines, yscale=yscale_exp)
 
         # add third plot choice
-        self.plot_analyses_comparison(ax=axes[2], dataframes=[agile_data, fermi_data], datainfo=[agile_datainfo, fermi_datainfo], timetype=timetype, add_stats_lines=add_stats_lines)
+        self.plot_analyses_comparison(ax=axes[2], dataframes=[agile_data, fermi_data], datainfo=[agile_datainfo, fermi_datainfo], timetype=timetype, add_stats_lines=add_stats_lines, yscale=yscale_third_panel)
 
         # add ratemeters option
         if add_rm:
