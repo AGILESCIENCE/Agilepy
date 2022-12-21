@@ -83,9 +83,9 @@ class AGEngDisplayComparison:
         data = pd.read_csv(f, names=['time','angle'], header=None, sep=' ')
         return data
 
-    def get_analysis_data(self, file):
+    def get_analysis_data(self, file, sep=' '):
         # times in TT
-        data = pd.read_csv(file, header=0, sep=' ')
+        data = pd.read_csv(file, header=0, sep=sep)
         return data
 
     def get_agile_rm_data(self, file):
@@ -250,19 +250,20 @@ class AGEngDisplayComparison:
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True):
+    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
 
         # load data
-        agile_data = self.get_analysis_data(agile_data_file) # TT
-        fermi_data = self.get_analysis_data(fermi_data_file) # TT
+        agile_data = self.get_analysis_data(file=agile_data_file, sep=sep['agile']) # TT
+        fermi_data = self.get_analysis_data(file=fermi_data_file, sep=sep['fermi']) # TT
         agile_offaxis_data = self.get_agile_offaxis_data(path=offaxis_path) # MJD
         fermi_offaxis_data = self.get_fermi_offaxis_data(path=offaxis_path) # MJD
         rm_dataframes = []
-        for f in rm_files:
-            rm_dataframes.append(self.get_agile_rm_data(f)) # TT
+        if rm_files is not None:
+            for f in rm_files:
+                rm_dataframes.append(self.get_agile_rm_data(f)) # TT
 
         # time conversion
         if timetype == 'MJD':
