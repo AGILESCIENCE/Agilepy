@@ -45,7 +45,6 @@ class APDisplayAGILEFermiComparison:
             l = max(arr1[i][0], arr2[j][0])
             r = min(arr1[i][1], arr2[j][1])
             if l < r:
-                #print('{', l, ',', r, '}')
                 result.append([l,r])
             if arr1[i][1] < arr2[j][1]:
                 i += 1
@@ -148,6 +147,8 @@ class APDisplayAGILEFermiComparison:
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
+        del agile_data, fermi_data, tm, tmFermi
+
         
     def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, timetype="MJD", tstart_tt = None, tstop_tt = None, trigger_time_tt=None):
 
@@ -205,14 +206,12 @@ class APDisplayAGILEFermiComparison:
             if not found and s <= zmax:
                 found = True
                 gti_time = l
-                #ax.axvline(l, linestyle='--', color='k', linewidth=0.5)
                 l1 = l
 
             if found and s >= zmax:
                 found = False
                 gti_time = (l) - gti_time
                 total_s_in_gti += gti_time
-                #ax.axvline(l, linestyle='--', color='k', linewidth=0.5)
                 l2 = l
                 gti_list.append([l1,l2])        
         
@@ -220,8 +219,6 @@ class APDisplayAGILEFermiComparison:
         result = self.search_interval(lat_filt2, gti_list)
 
         for l in result:
-            #ax.axvline(l[0], linestyle='--', color='k', linewidth=1)
-            #ax.axvline(l[1], linestyle='--', color='k', linewidth=1)
             seconds = (l[1] - l[0]) * 86400
             total_s_in_gti = total_s_in_gti - seconds
 
@@ -243,13 +240,14 @@ class APDisplayAGILEFermiComparison:
             self.logger.info(self, "No lines")
 
         axes[0].set_ylim(0., zmax+5.0)
-        #ax.set_xlim((tstart - t0)-0.2, (tstop-t0)+0.2)
+        axes[0].set_title(f"T=[{tstart}, {tstop}] {timetype} Zmax={zmax}  ")
         axes[0].set_xlabel(timetype)
         axes[0].ticklabel_format(axis="x", useOffset=False)
         axes[0].legend(loc='lower right', shadow=True, fontsize='xx-small')
         axes[0].set_ylabel('off-axis angle [$^{\\circ}$]')
-        #ax.set_xlim(np.min(agl_filt-t0), np.max(agl_filt-t0))
-        axes[0].set_title(str(zmax)+'_'+str(tstart)+'_'+str(tstop))
+
+        #print(f'!!! times plot_offaxis {tstart} {trigger_time_tt}')
+        del tstart, tstop, agl_meantime, lat_meantime, vertical_boxes
 
 
     def plot_ratemeters(self, ax, rm_files=[], rm_labels=[], timetype="MJD", trigger_time_tt=None):
@@ -269,6 +267,8 @@ class APDisplayAGILEFermiComparison:
 
             # plot data
             ax.plot(data['TIME'], data['COUNTS'], label=label)
+            #print(f'!!! times plot_ratemeters {data["TIME"].iloc[0]} {trigger_time_tt}')
+            del data
 
         # plot decorations
         ax.set_xlabel(timetype)
@@ -283,7 +283,6 @@ class APDisplayAGILEFermiComparison:
         nsig = 0
 
         for time in range(int(tstart), int(tstop)):
-            #print(time)
             tstart_tt = AstroUtils.time_mjd_to_agile_seconds(time)
             tstop_tt = AstroUtils.time_mjd_to_agile_seconds(time+1)
             fermi_data2 = fermi_data[fermi_data.tstart >= tstart_tt]
@@ -294,16 +293,12 @@ class APDisplayAGILEFermiComparison:
             n=0
             for cts in fermi_data2["cts"]:
                 ntrials = ntrials + 1
-                #print(time, time+1, cts, fermimean, fermistd, fermimean + 3 * fermistd, cts >= (fermimean + 3 * fermistd))
                 if cts >= (fermimean + 5 * fermistd):
                     self.logger.info(self, "####")
                     self.logger.info(self, f"{fermi_data2['tstart']}")
-                    #print(fermi_data2["tstart"][n])
                     nsig = nsig + 1
                     break
                 n = n + 1
-
-            
 
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
@@ -315,7 +310,7 @@ class APDisplayAGILEFermiComparison:
 
         #---- Loading data -----
         agile_data = pd.read_csv(agile, header=0, sep=" ") # TT
-        fermi_data = pd.read_csv(fermi, header=0, sep=" ") ## TT
+        fermi_data = pd.read_csv(fermi, header=0, sep=" ") # TT
 
         #---Converting times
         tstart_tt = AstroUtils.time_mjd_to_agile_seconds(tstart)
@@ -339,7 +334,8 @@ class APDisplayAGILEFermiComparison:
         h_plot = 5*n_plots
 
         #------Plotting data
-        f, axes = plt.subplots(n_plots, 1, figsize=(12.18,h_plot), sharex=True)
+        #print(f'!!! times load_and_plot {tstart} {trigger_time_tt}')
+        fig, axes = plt.subplots(n_plots, 1, figsize=(12.18,h_plot), sharex=True)
         self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt, trigger_time_tt=trigger_time_tt) 
         self.plot_aperture_photometry(axes[1], agile_data, fermi_data, timetype=timetype, data_column_name="exp", trigger_time_tt=trigger_time_tt)
         self.plot_aperture_photometry(axes[2], agile_data, fermi_data, timetype=timetype, data_column_name=data_column_name, trigger_time_tt=trigger_time_tt)
@@ -354,7 +350,8 @@ class APDisplayAGILEFermiComparison:
                     time_range -= trigger_time_tt
             for ax in axes:
                 ax.set_xlim(time_range)
-            
+        #print(f'!!! time range {time_range} {trigger_time_tt}')
+
         for ax in axes:
             ax.tick_params(labelbottom=True)
             ax.grid()
@@ -363,8 +360,14 @@ class APDisplayAGILEFermiComparison:
 
         outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
         self.logger.info(self, f"Plot: {outfilename_pdf}")
-        f.savefig(outfilename_pdf, format="pdf")
+        fig.savefig(outfilename_pdf, format="pdf")
 
         outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
         self.logger.info(self, f"Plot: {outfilename_png}")
-        f.savefig(outfilename_png, format="png")        
+        fig.savefig(outfilename_png, format="png")  
+
+        plt.close()      
+        del agile_data, fermi_data
+        del time_range, vertical_boxes_mjd
+        del tstart, tstop, trigger_time_tt
+        del fig, axes

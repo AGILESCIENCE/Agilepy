@@ -88,7 +88,9 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
         return dir
 
     def apOffaxisComparation(self, agile_pathAP, fermi_pathAP, tstart_mjd, tstop_mjd, path_offaxis, vertical_boxes_mjd = [], zmax=60, timetype="MJD", data_column_name="cts", time_range=None, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
-        """ It compares and shows aperture photometry data with offaxis results
+        """ It compares and shows aperture photometry data with offaxis results. 
+        
+        WARNING: This class should be instanced anew any time a new plot is generated, to ensure its correctness.
 
         Args:
             agile_pathAP (str): agile ap filepath
@@ -113,6 +115,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         comparison = APDisplayAGILEFermiComparison(self.logger)
 
+        #print(f'!!! times apOffAxisComparation {tstart_mjd} {trigger_time_tt}')
         comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart_mjd, tstop_mjd, path_offaxis, zmax=zmax, vertical_boxes_mjd=vertical_boxes_mjd, timetype=timetype, data_column_name=data_column_name, time_range=time_range, trigger_time_tt=trigger_time_tt, add_rm=add_rm, rm_files=rm_files, rm_labels=rm_labels)
 
 
