@@ -272,6 +272,10 @@ class AGEngDisplayComparison:
             agile_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(agile_data['tstop'])
             fermi_data['tstart'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstart'])
             fermi_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstop'])
+            if rm_files is not None:
+                for df in rm_dataframes:
+                    df['time'] = AstroUtils.time_agile_seconds_to_mjd(df['time']) 
+
         elif timetype == 'TT':
             five_minutes = 300
             agile_offaxis_data['time'] = AstroUtils.time_mjd_to_agile_seconds(agile_offaxis_data['time'])
