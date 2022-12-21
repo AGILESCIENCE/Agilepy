@@ -368,3 +368,7 @@ class AGEngDisplayComparison:
         self.logger.info(self, f"Plot: {outfilename_png}")
         fig.savefig(outfilename_png, format="png")        
         return self
+
+#TODO
+def plot_agile_comparison(self):
+    return
