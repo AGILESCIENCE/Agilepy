@@ -1,0 +1,25 @@
+
+        
+output:
+  outdir: /Agilepy/agilepy/testing/unittesting/api/conf/
+  filenameprefix: ratemeters_product
+  logfilenameprefix: ratemeters_log
+  sourcename: GRB221023A
+  username: userName
+  verboselvl: 0 
+
+selection:
+  timetype: MJD
+  contact: 080618
+  T0: 59875.86219907
+  tmin: -100.0
+  tmax: 100.0
+  tmin_bkg: -100.0
+  tmax_bkg: -75.0
+  tmin_src: 0.0
+  tmax_src: 30.0
+  flag_detrending: ND
+  sourcename: GRB221023A
+  flag_N_RM: 8RM
+
+        

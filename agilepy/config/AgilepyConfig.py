@@ -38,6 +38,7 @@ from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
 from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
 from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
 from agilepy.config.AGAnalysisWaveletConfig import AGAnalysisWaveletConfig
+from agilepy.config.AGRatemetersConfig import AGRatemetersConfig
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
@@ -122,6 +123,10 @@ class AgilepyConfig(Observable):
         elif className == "AGAnalysisWavelet":
             
             self.analysisConfig = AGAnalysisWaveletConfig()
+            
+        elif className == "AGRatemeters":
+            
+            self.analysisConfig = AGRatemetersConfig()
 
         else:
             raise AnalysisClassNotSupported("The class: {} is not supported".format(className))
