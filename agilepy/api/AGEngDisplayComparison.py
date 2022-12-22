@@ -251,8 +251,7 @@ class AGEngDisplayComparison:
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}, 
-    yscale_third_panel='linear', yscale_exp='log'):
+    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None, 'ylabel': 'counts', 'color': 'blue'}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None, 'ylabel': 'counts', 'color': 'red'}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, yscale_third_panel='linear', yscale_exp='log', sep={'agile': ',', 'fermi': ' '}):
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
@@ -330,8 +329,8 @@ class AGEngDisplayComparison:
 
         # add exposure
         exposure_datainfo = [
-            {'label': 'AGILE', 'column': 'exp', 'error_column': None},
-            {'label': 'FERMI', 'column': 'exp', 'error_column': None},
+            {'label': 'AGILE', 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': agile_datainfo['color']},
+            {'label': 'FERMI', 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': fermi_datainfo['color']},
         ]
         self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=add_stats_lines, yscale=yscale_exp)
 
