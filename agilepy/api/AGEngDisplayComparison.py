@@ -37,13 +37,22 @@ plt.rc('text', usetex='false')
 ## this is intended as a generalised refactoring of APDisplayAgileFermiComparison
 
 class AGEngDisplayComparison:
-    """This class compares and plots results from different AGILE analyses and/or from AGILE and FERMI analyses. 
+    """This class compares and plots results from different AGILE analyses and/or from AGILE and FERMI analyses. It is meant to be easily expandible.
     """
 
     def __init__(self, logger):
         self.logger = logger
 
     def search_interval(self, arr1, arr2):
+        '''Given two array of time values, this method finds the good time intervals.
+        
+        args:
+            arr1 (array): first array of time values
+            arr2 (array): second array of time values
+
+        return:
+            intervals (array): array of time intervals
+        '''
         intervals = []
         i = 0
         j = 0
@@ -62,33 +71,82 @@ class AGEngDisplayComparison:
         return intervals
 
     def get_agile_offaxis_file(self, path, file='time_vs_separation_agile.txt'):
+        '''This method returns the AGILE offaxis datafile.
+        
+        args:
+            path (str): output directory of AGEngAgileFermiOffAxisVisibilityComparison.visibilityPlot()
+
+        return:
+            f (str): absolute path to AGILE offaxis datafile
+        '''
         f = join(path, file)
         assert isfile(f), FileNotFoundError()
         return f
 
     def get_fermi_offaxis_file(self, path, file='time_vs_separation_fermi.txt'):
+        '''This method returns the FERMI offaxis datafile.
+        
+        args:
+            path (str): output directory of AGEngAgileFermiOffAxisVisibilityComparison.visibilityPlot()
+
+        return:
+            f (str): absolute path to FERMI offaxis datafile
+        '''
         f = join(path, file)
         assert isfile(f), FileNotFoundError()
         return f
 
     def get_agile_offaxis_data(self, path, file='time_vs_separation_agile.txt'):
+        '''This method loads data from the AGILE offaxis datafile.
+        
+        args:
+            path (str): output directory of AGEngAgileFermiOffAxisVisibilityComparison.visibilityPlot()
+
+        return:
+            data (DataFrame): pandas DataFrame 
+        '''
         f = self.get_agile_offaxis_file(path=path, file=file)
         # times are in MJD
         data = pd.read_csv(f, names=['time','angle'], header=None, sep=' ')
         return data
 
     def get_fermi_offaxis_data(self, path, file='time_vs_separation_fermi.txt'):
+        '''This method loads data from the AGILE offaxis datafile.
+        
+        args:
+            path (str): output directory of AGEngAgileFermiOffAxisVisibilityComparison.visibilityPlot()
+
+        return:
+            data (DataFrame): pandas DataFrame 
+        '''
         f = self.get_fermi_offaxis_file(path=path, file=file)
         # times are in MJD
         data = pd.read_csv(f, names=['time','angle'], header=None, sep=' ')
         return data
 
     def get_analysis_data(self, file, sep=' '):
+        '''This method loads data from any analysis output file provided with an header.
+        
+        args:
+            file (str): absolute path to datafile
+            sep (str): column separator
+
+        return:
+            data (DataFrame): pandas DataFrame 
+        '''
         # times in TT
         data = pd.read_csv(file, header=0, sep=sep)
         return data
 
     def get_agile_rm_data(self, file):
+        '''This method loads data from AGILE ratemeters.
+        
+        args:
+            file (str): absolute path to datafile
+
+        return:
+            data (DataFrame): pandas DataFrame 
+        '''
         # header to reformat unevenly spaced columns
         colnames=['col1', 'time', 'col2','counts', 'col3', 'counts_d']
         data = pd.read_csv(file, header=None, names=colnames, sep='\s', 
@@ -96,6 +154,16 @@ class AGEngDisplayComparison:
         return data.drop(['col1', 'col2', 'col3'], axis=1)
 
     def get_gti_list(self, times, angles, zmax=60):
+        '''This method provides a list of GTI.
+
+        args:
+            times (array): array of times
+            angles (array): array of angles
+            zmax (int): max value of z
+
+        return:
+            gti_list (array): array of GTIs
+        '''
         found = False
         total_s_in_gti = 0
         gti_list = []
@@ -114,9 +182,19 @@ class AGEngDisplayComparison:
                 gti_list.append([t1, t2]) 
 
         self.logger.info(self, f"Total time in GTI = {total_s_in_gti} s")
-        return gti_list
+        return np.array(gti_list)
 
     def get_intervals_larger_than_threshold(self, ax, times, threshold):
+        '''This method filters intervals larger than a give threshold and plots them.
+
+        args:
+            ax (obj): matplotlib.pyplot axis
+            times (array): array of time values
+            threshold (float): required minimum time interval
+
+        return:
+            intervals (array): array of filtered intervals
+        '''
         intervals = []
         for i in range(len(times) - 1):
             if (times[i+1] - times[i]) >= threshold:  
@@ -124,9 +202,18 @@ class AGEngDisplayComparison:
                 intervals.append([times[i], times[i+1]])
                 ax.axvline(times[i], linestyle='--', color='green', linewidth=0.5)
                 ax.axvline(times[i+1], linestyle='--', color='green', linewidth=0.5)
-        return intervals
+        return np.array(intervals)
 
     def add_agile_gti(self, ax, agile_time_windows):
+        '''This methods plots AGILE GTIs.
+
+        args: 
+            ax (obj): matplotlib.pyplot axis
+            agile_time_windows (list): list time interval given as [[tmin1, tmax1], [tmin2, tmax2] ... ]
+
+        return:
+            self
+        '''
         try:
             for i in range(0,len(agile_time_windows),2):
                 ax.axvspan(xmin=agile_time_windows[i], xmax=agile_time_windows[i+1], facecolor='y', alpha=0.1)
@@ -135,6 +222,18 @@ class AGEngDisplayComparison:
         return self
 
     def add_fermi_gti(self, ax, fermi_times, fermi_angles, zmax, threshold):
+        '''This method plots FERMI GTIs.
+
+        args:
+            ax (obj): matplotlib.pyplot axis
+            fermi_times (array): array of times
+            fermi_angles (array): array of angles
+            zmax (int): max value of z
+            threshold (float): minimum time interval
+
+        return:
+            self
+        '''
         # get fermi GTI
         fermi_gti_list = self.get_gti_list(times=fermi_times, angles=fermi_angles, zmax=zmax) 
         for l in fermi_gti_list:
@@ -149,6 +248,20 @@ class AGEngDisplayComparison:
         return self
 
     def plot_offaxis(self, ax, agile_data, timerange, fermi_data=None, zmax=60, agile_time_windows=[], timetype="MJD", trigger_time_tt=None):
+        '''This method creates the off-axis angle panel plot. It can be used for AGILE alone or to compare the AGILE and FERMI data.
+
+        args:
+            ax (obj): matplotlib.pyplot axis
+            agile_data (DataFrame): AGILE data in pandas DF format
+            fermi_data (DataFrame): FERMI data in pandas DF format, set to None if only AGILE is required
+            zmax (int): max value of z
+            agile_time_windows (list): list of AGILE intervals given as [[tmin1, tmax1], [tmin2, tmax2] ... ]
+            timetype (str): time system of reference, must be MJD or TT
+            trigger_time_tt (float): trigger time in TT (optional time shift feature for timetype=TT)
+
+        return: 
+            self
+        '''
 
         # define tstart and tstop
         tstart = timerange[0]
@@ -175,7 +288,7 @@ class AGEngDisplayComparison:
             # filter time range
             fermi_data = fermi_data[(fermi_data['time'] > tstart) & (fermi_data['time'] < tstop)]
             # plot fermi offaxis
-            ax.plot(fermi_data['time'], fermi_data['angle'], color='red', label='Fermi', linewidth=1.5)
+            ax.plot(fermi_data['time'], fermi_data['angle'], color='red', label='FERMI', linewidth=1.5)
 
         # decorate axis
         ax.set_ylim(0., zmax+5.0)
@@ -186,7 +299,20 @@ class AGEngDisplayComparison:
         return self
 
     def plot_analyses_comparison(self, ax, dataframes, datainfo, timetype="MJD", trigger_time_tt=None, add_stats_lines=True, yscale='linear'):
+        '''This method creates the analysis result panel plots. It can be used for AGILE alone, to compare different AGILE analysis and methods or to compare AGILE and FERMI data.
 
+        args:
+            ax (obj): matplotlib.pyplot axis
+            dataframe (list): list of pandas DataFrames containing data
+            datainfo (dict):  dictionary of dataframes given as {'label': 'string for legend label', 'column': 'string for data column name', 'error_column': 'string for error data column name if any or None', 'ylabel': 'string for y-axis label', 'color': 'string for color'} in the same order of dataframe list
+            timetype (str): time system of reference, must be MJD or TT
+            trigger_time_tt (float): trigger time in TT (optional time shift feature for timetype=TT)
+            add_stats_lines (bool): plot horizontal lines for mean and stdv
+            yscale (str): scale of y-axis
+
+        return: 
+            self
+        '''
         # extract from data dictionary
         markers = Line2D.markers
         assert len(dataframes) <= len(markers), Exception(f'Too many dataframes ({len(dataframes)}) in a one plot: {len(markers)} max allowed')
@@ -196,6 +322,8 @@ class AGEngDisplayComparison:
             label = d['label']
             column = d['column']
             error_column = d['error_column']
+            color = d['color']
+            ylabel = d['ylabel']
 
             # get x, y, xerr
             y = data[column]
@@ -215,7 +343,7 @@ class AGEngDisplayComparison:
                 x -= trigger_time_tt
 
             # plot data
-            ax.errorbar(x, y, xerr=xerr, yerr=yerr, marker=m, ls="none", markersize=5.0, linewidth=0.8, label=label)
+            ax.errorbar(x, y, xerr=xerr, yerr=yerr, marker=m, ls="none", markersize=5.0, linewidth=0.8, label=label, color=color)
 
             # statistics
             if add_stats_lines:
@@ -229,30 +357,66 @@ class AGEngDisplayComparison:
         # decorations
         ax.set_yscale(yscale)
         ax.set_xlabel(timetype)
-        ax.set_ylabel(column)
+        ax.set_ylabel(ylabel)
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_ratemeters(self, ax, rm_dataframes=[], rm_labels=[], timetype="MJD", trigger_time_tt=None):
+    def plot_ratemeters(self, ax, dataframes={'data': None, 'label': None, 'color': None}, timetype="MJD", trigger_time_tt=None):
+        '''This method creates the ratemeters panel plot. It can be used for AGILE alone, to compare different RM data.
+
+        args:
+            ax (obj): matplotlib.pyplot axis
+            dataframes (dict): dictionary of dataframes given as {'data': [list of RM DataFrames in pandas format], 'label': [list of string for legend labels], 'color': [list of colors]}
+            timetype (str): time system of reference, must be MJD or TT
+            trigger_time_tt (float): trigger time in TT (optional time shift feature for timetype=TT)
+            add_stats_lines (bool): plot horizontal lines for mean and stdv
+
+        return: 
+            self
+        '''
         # plot each RM 
-        for data, label in zip(rm_dataframes, rm_labels):
+        for data, label, color in zip(dataframes['data'], dataframes['label'], dataframes['color']):
+
             # option trigger time shift
             if timetype == 'TT' and trigger_time_tt is not None:
                 data['time'] -= trigger_time_tt
 
             # plot data
-            ax.plot(data['time'], data['counts'], label=label)
+            ax.plot(data['time'], data['counts'], label=label, c=color)
 
         # plot decorations
         ax.set_xlabel(timetype)
-        ax.set_ylabel('counts')
+        ax.set_ylabel('ratemeters')
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
         return self
 
-    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None}, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}, 
-    yscale_third_panel='linear', yscale_exp='log'):
+    def plot_agile_fermi_comparison(self, agile_data_file, fermi_data_file, offaxis_path,  timetype="MJD", timerange=None, agile_time_windows=[], zmax=60, agile_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None, 'ylabel': 'counts', 'color': 'blue'}, fermi_datainfo={'label': 'AGILE', 'column': 'cts', 'error_column': None, 'ylabel': 'counts', 'color': 'red'}, trigger_time_tt=None, add_rm=False, rm_info={'rm_files': None, 'rm_labels': None, 'rm_colors': None}, add_stats_lines=True, sep={'agile': ',', 'fermi': ' '}, yscale_third_panel='linear', yscale_exp='log'):
+        '''This method is a high level wrapping API. It can be used to compare AGILE and FERMI data, allowing for panel costumisation. The first panel always plots the off-axis angle comparison. The second panel always plots the exposure comparison. The third panel is costumisable by the user. The fourth panel is optional and always plots the AGILE ratemeters.
+
+        args:
+            agile_data_file (str): absolute path to AGILE data file
+            fermi_data_file (str): absolute path to FERMI data file
+            offaxis_path (str): output directory of AGEngAgileFermiOffAxisVisibilityComparison.visibilityPlot()
+            timetype (str): time system of reference, must be MJD or TT
+            time_range (list): time range of the plot given as [tmin, tmax], if None plots all data
+            agile_time_windows (list): list time interval given as [[tmin1, tmax1], [tmin2, tmax2] ... ]
+            zmax (int): max value of z
+            agile_datainfo (dict): AGILE dictionary for third panel given as {'label': 'string for legend label', 'column': 'string for data column name', 'error_column': 'string for error data column name if any or None', 'ylabel': 'string for y-axis label', 'color': 'string for color'}
+            fermi_datainfo (dict): FERMI dictionary for third panel given as {'label': 'string for legend label', 'column': 'string for data column name', 'error_column': 'string for error data column name if any or None', 'ylabel': 'string for y-axis label', 'color': 'string for color'}
+            trigger_time_tt (float): trigger time in TT (optional time shift feature for timetype=TT)
+            add_rm (bool): add optional ratemeters plot
+            rm_info (dict): ratemeter dictionary if add_rm=True, given as {'rm_files': [list of RM files], 'rm_labels': [list of legend labels], 'rm_colors': [list of colors]}
+            add_stats_lines (bool): plot horizontal lines for mean and stdv
+            sep (dict): dictionary of separators for input file, given as sep={'agile': 'pandas sep, default is ","', 'fermi': 'pandas sep, default is " "'}
+            yscale_third_panel (str): y-axis scale of third panel (user choice)
+            yscale_exp (str): y-axis scale of second panel (exposure)
+
+        return: 
+            self
+        '''
+
 
         if timetype not in ["MJD", "TT"]:
             raise Exception("timetype must be MJD or TT")
@@ -263,8 +427,9 @@ class AGEngDisplayComparison:
         agile_offaxis_data = self.get_agile_offaxis_data(path=offaxis_path) # MJD
         fermi_offaxis_data = self.get_fermi_offaxis_data(path=offaxis_path) # MJD
         rm_dataframes = []
-        if rm_files is not None:
-            for f in rm_files:
+        if add_rm:
+            assert rm_info['rm_files'] is not None, 'RM files not provided'
+            for f in rm_info['rm_files']:
                 rm_dataframes.append(self.get_agile_rm_data(f)) # TT
 
         # time conversion
@@ -274,7 +439,7 @@ class AGEngDisplayComparison:
             agile_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(agile_data['tstop'])
             fermi_data['tstart'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstart'])
             fermi_data['tstop'] = AstroUtils.time_agile_seconds_to_mjd(fermi_data['tstop'])
-            if rm_files is not None:
+            if add_rm:
                 for df in rm_dataframes:
                     df['time'] = AstroUtils.time_agile_seconds_to_mjd(df['time']) 
 
@@ -314,8 +479,9 @@ class AGEngDisplayComparison:
             fermi_data = fermi_data[(fermi_data['tstart'] >= tstart) & (fermi_data['tstop'] <= tstop)]
             agile_offaxis_data = agile_offaxis_data[(agile_offaxis_data['time'] >= tstart) & (agile_offaxis_data['time'] <= tstop)]
             fermi_offaxis_data = fermi_offaxis_data[(fermi_offaxis_data['time'] >= tstart) & (fermi_offaxis_data['time'] <= tstop)]
-            for df in rm_dataframes:
-                df = df[(df['time'] >= tstart) & (df['time'] <= tstop)]
+            if add_rm:
+                for df in rm_dataframes:
+                    df = df[(df['time'] >= tstart) & (df['time'] <= tstop)]
 
         # number of plots
         n_plots = 3
@@ -330,27 +496,26 @@ class AGEngDisplayComparison:
 
         # add exposure
         exposure_datainfo = [
-            {'label': 'AGILE', 'column': 'exp', 'error_column': None},
-            {'label': 'FERMI', 'column': 'exp', 'error_column': None},
+            {'label': agile_datainfo['label'], 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': agile_datainfo['color']},
+            {'label': agile_datainfo['label'], 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': fermi_datainfo['color']},
         ]
-        self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=add_stats_lines, yscale=yscale_exp)
+        self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=False, yscale=yscale_exp)
 
         # add third plot choice
         self.plot_analyses_comparison(ax=axes[2], dataframes=[agile_data, fermi_data], datainfo=[agile_datainfo, fermi_datainfo], timetype=timetype, add_stats_lines=add_stats_lines, yscale=yscale_third_panel)
 
         # add ratemeters option
         if add_rm:
-            assert rm_files != None, 'if "add_rm" is True then "rm_files" cannot be None'
-            assert rm_labels != None, 'if "add_rm" is True then "rm_files" cannot be None'
-            self.plot_ratemeters(axes[3], rm_dataframes=rm_dataframes, rm_labels=rm_labels, timetype=timetype)
+            dataframes = {'data': rm_dataframes, 'label': rm_info['rm_labels'], 'color': rm_info['rm_colors']}
+            self.plot_ratemeters(axes[3], dataframes=dataframes, timetype=timetype)
 
         # x-axis range
         if timerange is not None:
             for ax in axes:
                 ax.set_xlim(timerange)
         
-        # for all axes
-        for ax in axes:
+        # for 
+        for idx, ax in enumerate(axes):
             # add GTI
             self.add_agile_gti(ax=ax, agile_time_windows=agile_time_windows)
             # fermi GTI
