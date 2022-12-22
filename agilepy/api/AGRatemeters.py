@@ -82,6 +82,7 @@ class AGRatemeters(AGBaseAnalysis):
                          outputDir,
                          verboselvl,
                          timetype,
+                         indexfile,
                          # evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
                          # logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
                          contact,
@@ -103,6 +104,7 @@ class AGRatemeters(AGBaseAnalysis):
             userName (str): the username of who is running the software.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
+            indexfile (str): the index file to be used to search for AGILE cor3913 files.
             timetype (str): timetype format.
             contact (str): contact number.
             T0 (str): reference time of the analysis.
@@ -121,7 +123,9 @@ class AGRatemeters(AGBaseAnalysis):
         """
 
         configuration = f"""
-        
+input:
+  indexfile: {indexfile}
+          
 output:
   outdir: {outputDir}
   filenameprefix: ratemeters_product
@@ -169,6 +173,7 @@ selection:
         flag_detrending=self.getOption('flag_detrending')
         flag_dir=self.getOption('sourcename')
         flag_N_RM=self.getOption('flag_N_RM')
+        indexfile=self.getOption('indexfile')
         
         # Agilepy works with MJD and TT. RM_LC.py with TT and UTC.
         # Convert MJD to TT
@@ -183,6 +188,7 @@ selection:
         
         # Move to output directory and run command from there.
         print(f"\nNow Run Script from {self.outdir}\n")
+        os.system(f"echo {indexfile} ")
         os.chdir(self.outdir)
         os.system(cmd)
         

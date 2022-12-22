@@ -85,7 +85,7 @@ class AGRatemetersConfig():
 
 
             # String
-            elif optionName in ["evtfile", "logfile", "outdir", "timetype"]:
+            elif optionName in ["evtfile", "logfile", "outdir", "timetype", "indexfile"]:
 
                 validType = (str, 0)
 

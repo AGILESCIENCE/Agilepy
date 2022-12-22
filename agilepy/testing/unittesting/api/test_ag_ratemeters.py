@@ -12,6 +12,7 @@ AGRatemeters.getConfiguration(confFilePath=confFilePath,
                               userName="userName",
                               outputDir="/Agilepy/agilepy/testing/unittesting/api/conf/",
                               verboselvl=0,
+                              indexfile='PATH/TO/INDEX',
                               timetype='MJD',
                               contact="080618",
                               T0=59875.86219907,# 593642494.0,
@@ -39,6 +40,10 @@ print(f"T0: {ag.getOption('T0')}")
 ag.setOptions(T0=59875.86219907,timetype='MJD')
 print(f"T0: {ag.getOption('T0')}")
 ag.printOptions()
+
+# Test nex indexfile argument
+print(f"Indexfile: {ag.getOption('indexfile')}")
+# Add Completion strategies for indexfile?
 
 # Test class methods
 ag.run_ratemeters_script()
