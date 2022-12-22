@@ -288,7 +288,7 @@ class AGEngDisplayComparison:
             # filter time range
             fermi_data = fermi_data[(fermi_data['time'] > tstart) & (fermi_data['time'] < tstop)]
             # plot fermi offaxis
-            ax.plot(fermi_data['time'], fermi_data['angle'], color='red', label='Fermi', linewidth=1.5)
+            ax.plot(fermi_data['time'], fermi_data['angle'], color='red', label='FERMI', linewidth=1.5)
 
         # decorate axis
         ax.set_ylim(0., zmax+5.0)
@@ -496,8 +496,8 @@ class AGEngDisplayComparison:
 
         # add exposure
         exposure_datainfo = [
-            {'label': 'AGILE', 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': agile_datainfo['color']},
-            {'label': 'FERMI', 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': fermi_datainfo['color']},
+            {'label': agile_datainfo['label'], 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': agile_datainfo['color']},
+            {'label': agile_datainfo['label'], 'column': 'exp', 'error_column': None, 'ylabel': 'exposure', 'color': fermi_datainfo['color']},
         ]
         self.plot_analyses_comparison(ax=axes[1], dataframes=[agile_data, fermi_data], datainfo=exposure_datainfo, timetype=timetype, add_stats_lines=False, yscale=yscale_exp)
 
