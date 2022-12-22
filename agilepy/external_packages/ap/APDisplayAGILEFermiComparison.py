@@ -20,7 +20,6 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -46,7 +45,6 @@ class APDisplayAGILEFermiComparison:
             l = max(arr1[i][0], arr2[j][0])
             r = min(arr1[i][1], arr2[j][1])
             if l < r:
-                #print('{', l, ',', r, '}')
                 result.append([l,r])
             if arr1[i][1] < arr2[j][1]:
                 i += 1
@@ -54,78 +52,87 @@ class APDisplayAGILEFermiComparison:
                 j += 1
         return result
 
-    def plot(self, ax, agile_data, fermi_data, arg_lines, plotrate):
+    def plot_aperture_photometry(self, ax, agile_data, fermi_data, timetype="MJD", data_column_name="cts", trigger_time_tt=None):
 
         #---AGILE----
 
-        tm = (AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"]) + AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"])) / 2
-        #agile_data.loc[agile_data['cts'] == 0, 'rateError'] = 0
-        #yerr = agile_data["rateError"]*1e8
-        if plotrate:
-            yerr = agile_data["rateError"]*1e8
-            #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
-            tw = tm -  AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])
-            ax.errorbar(tm, agile_data["rate"]*1e8, color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
-
-            self.logger.info(self, f"AGILE mean {agile_data['rate'].mean()*1e8}")
-            self.logger.info(f"AGILE median {agile_data['rate'].median()*1e8}")
-            self.logger.info(self, f"AGILE std {agile_data['rate'].std()*1e8}")
-
-            agilemean = agile_data["rate"].median()*1e8
-            agilestd = agile_data["rate"].std()*1e8
+        # Casistiche AGILE
+        # 1° data_column_name = conteggi
+        # 2° data_column_name = sigma, exposure
+        # 3° data_column_name = rate, flussi, ..
+        if data_column_name == "cts":
+            yerr = np.sqrt(agile_data[data_column_name])
+        elif "Sign" in data_column_name or data_column_name == "exp":
+            yerr = 0
+        elif "flux" in data_column_name or "rate" in data_column_name:
+            yerr = agile_data[data_column_name+"Error"] #* 1e8
+            agile_data[data_column_name] #*= 1e8
+        
+        # ---- times ---
+        if timetype == "MJD":
+            tm = (
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"]) + 
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"])) / 2
+            tw = (
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstop"]) - 
+                AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])) / 2
         else:
-            yerr = agile_data["rateError"]*agile_data["exp"]
-            #print(agile_data["tstart"], agile_data["tstop"], agile_data["cts"], agile_data["exp"], agile_data["rate"]*1e8, agile_data["rateError"]*1e8)
-            tw = tm -  AstroUtils.time_agile_seconds_to_mjd(agile_data["tstart"])
-            ax.errorbar(tm, agile_data["cts"], color="b", label="AGILE", fmt='.', yerr=yerr, xerr=tw, linewidth=0.8)
+            tm = (agile_data["tstart"] + agile_data["tstop"]) / 2
+            tw = (agile_data["tstop"] - agile_data["tstart"]) / 2
+            if trigger_time_tt is not None:
+                tm -= trigger_time_tt
 
-            self.logger.info(self, f"AGILE mean, {agile_data['cts'].mean()}")
-            self.logger.info(self, f"AGILE median {agile_data['cts'].median()}")
-            self.logger.info(self, f"AGILE std {agile_data['cts'].std()}")
+        ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", markersize=1.0, linewidth=0.8, label="AGILE")
 
-            agilemean = agile_data["cts"].median()
-            agilestd = agile_data["cts"].std()
+        self.logger.info(self, f"AGILE mean, {agile_data[data_column_name].mean()}")
+        self.logger.info(self, f"AGILE median {agile_data[data_column_name].median()}")
+        self.logger.info(self, f"AGILE std {agile_data[data_column_name].std()}")
+
+        agilemean = agile_data[data_column_name].median()
+        agilestd = agile_data[data_column_name].std()
 
         ax.axhline(agilemean, linestyle='solid', color='b', linewidth=0.5)
-        ax.axhline(agilemean + 1 * agilestd, linestyle='dotted', color='b', linewidth=0.5)
-        ax.axhline(agilemean + 2 * agilestd, linestyle='dashed', color='b', linewidth=0.5)
-        ax.axhline(agilemean + 3 * agilestd, linestyle='dashdot', color='b', linewidth=1)
+        ax.axhline(agilemean + 1 * agilestd, linestyle='dotted', color='b', linewidth=0.5)#, label="1 sigma")
+        ax.axhline(agilemean + 2 * agilestd, linestyle='dashed', color='b', linewidth=0.5)#, label="2 sigma")
+        ax.axhline(agilemean + 3 * agilestd, linestyle='dashdot', color='b', linewidth=1)#,  label="3 sigma")
 
         #---Fermi----
-
-        tmFermi = (AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"])) / 2
-        #fermi_data.loc[fermi_data['cts'] == 0, 'rateError'] = 0
-        if plotrate:
-            fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rateError'] = 0
-            #fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rate'] = 0
-            fermi_data.loc[fermi_data['rate'] > 10000e-08, 'rate'] = 0
-            yerrFermi = fermi_data["rateError"]*1e8
-            #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
-            twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
-            #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
-            ax.errorbar(tmFermi, fermi_data["rate"]*1e8, color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
-
-            self.logger.info(self, f"Fermi mean {fermi_data['rate'].mean()*1e8}")
-            self.logger.info(self, f"Fermi median {fermi_data['rate'].median()*1e8}")
-            self.logger.info(self, f"Fermi std {fermi_data['rate'].std()*1e8}")
-
-            fermimean = fermi_data["rate"].median()*1e8
-            fermistd = fermi_data["rate"].std()*1e8
+        if timetype == "MJD":
+            tmFermi = (
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"]) + 
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"])) / 2
+            twFermi = (
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstop"]) - 
+                AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])) / 2      
         else:
-            #fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rateError'] = 0
-            #fermi_data.loc[fermi_data['rateError'] > 1000e-08, 'rate'] = 0
-            yerrFermi = fermi_data["rateError"]*fermi_data["exp"]
-            #print(fermi_data["tstart"], fermi_data["tstop"], fermi_data["rateError"], fermi_data["rate"])
-            twFermi = tmFermi -  AstroUtils.time_agile_seconds_to_mjd(fermi_data["tstart"])
-            #ax.errorbar(fermi_data["Time_MJD"], fermi_data["count_rate_(cts/s)"]*1e8, color="r", label="FERMI", fmt="none", xerr=[fermi_data["Time_MJD"] - tstart,tstop - fermi_data["Time_MJD"]], yerr=fermi_yerr)
-            ax.errorbar(tmFermi, fermi_data["cts"], color="r", label="FERMI", fmt="none", yerr=yerrFermi, xerr=twFermi, linewidth=0.8)
+            tmFermi = (fermi_data["tstart"] + fermi_data["tstop"]) / 2
+            twFermi = (fermi_data["tstop"] - fermi_data["tstart"]) / 2
+            if trigger_time_tt is not None:
+                tmFermi -= trigger_time_tt
 
-            self.logger.info(self, f"Fermi mean {fermi_data['cts'].mean()}")
-            self.logger.info(self, f"Fermi median {fermi_data['cts'].median()}")
-            self.logger.info(self, f"Fermi std' {fermi_data['cts'].std()}")
+        # Casistiche FERMI
+        if "Sign" in data_column_name or "flux" in data_column_name:
+            self.logger.warning(self, f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
+            data_column_name = "rate"
 
-            fermimean = fermi_data["cts"].mean()
-            fermistd = fermi_data["cts"].std()
+        if data_column_name == "cts":
+            yerr = np.sqrt(fermi_data[data_column_name])
+        elif "Sign" in data_column_name or data_column_name == "exp":
+            yerr = 0
+
+        elif "flux" in data_column_name or "rate" in data_column_name:
+            yerr = fermi_data[data_column_name+"Error"]# * 1e8
+            fermi_data[data_column_name] #*= 1e8
+            ax.set_yscale("log")
+        
+        ax.errorbar(tmFermi, fermi_data[data_column_name], xerr=twFermi, yerr=yerr, color="r", marker="s", ls="none", markersize=1.0, linewidth=0.8, label="FERMI")
+
+        self.logger.info(self, f"Fermi mean {fermi_data[data_column_name].mean()}")
+        self.logger.info(self, f"Fermi median {fermi_data[data_column_name].median()}")
+        self.logger.info(self, f"Fermi std' {fermi_data[data_column_name].std()}")
+
+        fermimean = fermi_data[data_column_name].mean()
+        fermistd = fermi_data[data_column_name].std()
 
         ax.axhline(fermimean, linestyle='solid', color='r', linewidth=0.5)
         ax.axhline(fermimean + 1 * fermistd, linestyle='dotted', color='r', linewidth=0.5)
@@ -135,53 +142,60 @@ class APDisplayAGILEFermiComparison:
         time_diff = fermi_data["tstop"] - fermi_data["tstart"]
         self.logger.info(self, f"Total time in GTI(bottom plot) {time_diff.sum()}")
             
-
-
-
+        ax.set_xlabel(timetype)
+        ax.set_ylabel(data_column_name)
         ax.ticklabel_format(axis="x", useOffset=False)
-        if plotrate:
-            ax.set_ylabel('Photon counts')
-        else:
-            ax.set_ylabel('Rate') 
-        ax.set_xlabel("MJD")
         ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
 
-    def plot_offaxis(self, ax1, ax2, path, tstart, tstop, zmax, step, t0, arg_lines):
+        del agile_data, fermi_data, tm, tmFermi
+
+        
+    def plot_offaxis(self, axes, path, tstart_mjd, tstop_mjd, zmax, step, vertical_boxes, timetype="MJD", tstart_tt = None, tstop_tt = None, trigger_time_tt=None):
 
         try:
             agl_meantime, agl_separation = np.loadtxt(path+'/time_vs_separation_agile.txt', unpack=True)
+            lat_meantime, lat_separation = np.loadtxt(path+'/time_vs_separation_fermi.txt', unpack=True)
         except:
             return
 
+        if timetype =="MJD":
+            tstart = tstart_mjd
+            tstop = tstop_mjd
+            five_minutes = 5/1440
+
+        elif timetype =="TT" and tstart_tt is not None and tstop_tt is not None:
+            tstart = tstart_tt
+            tstop = tstop_tt
+            five_minutes = 300
+            agl_meantime = AstroUtils.time_mjd_to_agile_seconds(agl_meantime)
+            lat_meantime = AstroUtils.time_mjd_to_agile_seconds(lat_meantime)
+            if trigger_time_tt is not None:
+                tstart -= trigger_time_tt
+                tstop -= trigger_time_tt
+                agl_meantime -= trigger_time_tt
+                lat_meantime -= trigger_time_tt
+                vertical_boxes -= trigger_time_tt
+        else:
+            raise Exception("Wrong timetype or missing TT times")
+
         agl_filt = agl_meantime[(agl_meantime > tstart) & (agl_meantime < tstop)]
         agl_sep_filt = agl_separation[(agl_meantime > tstart) & (agl_meantime < tstop)]
-
-
-        lat_meantime, lat_separation = np.loadtxt(path+'/time_vs_separation_fermi.txt', unpack=True)
 
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
 
         self.logger.info(self, f"{tstart}, {tstop}")
+        axes[0].plot(agl_filt, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
+        axes[0].plot(lat_filt, lat_sep_filt, color='red', label='Fermi', linewidth=1.5)
 
-        ax1.plot(agl_filt - t0, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
-
-        ax1.plot(lat_filt - t0, lat_sep_filt, color='red', label='Fermi', linewidth=1.5)
-
-        #-----green boxes----
+        ###### GREEN BOXES
         lat_filt2 = []
         for i in range(len(lat_filt) - 1):
-
-            if (lat_filt[i+1] - lat_filt[i]) * 86400 >= 300:
-
+            if (lat_filt[i+1] - lat_filt[i]) >= five_minutes:  
                 self.logger.debug(self, f"Green box in: {lat_filt[i]}, {lat_filt[i+1]}")
-
                 lat_filt2.append([lat_filt[i], lat_filt[i+1]])
-
-                ax1.axvline(lat_filt[i], linestyle='--', color='g', linewidth=0.5)
-                ax1.axvline(lat_filt[i+1], linestyle='--', color='g', linewidth=0.5)
-        ######
-
+                axes[0].axvline(lat_filt[i], linestyle='--', color='green', linewidth=0.5)
+                axes[0].axvline(lat_filt[i+1], linestyle='--', color='green', linewidth=0.5)
 
         #######------GTI------###
         found = False
@@ -191,64 +205,77 @@ class APDisplayAGILEFermiComparison:
 
             if not found and s <= zmax:
                 found = True
-                gti_time = l * 86400
-                #ax.axvline(l, linestyle='--', color='k', linewidth=0.5)
+                gti_time = l
                 l1 = l
 
             if found and s >= zmax:
                 found = False
-                gti_time = (l*86400) - gti_time
+                gti_time = (l) - gti_time
                 total_s_in_gti += gti_time
-                #ax.axvline(l, linestyle='--', color='k', linewidth=0.5)
                 l2 = l
-                gti_list.append([l1,l2])
-        ######
-
-        
+                gti_list.append([l1,l2])        
         
         #####-----cleaning------
         result = self.search_interval(lat_filt2, gti_list)
 
         for l in result:
-            #ax.axvline(l[0], linestyle='--', color='k', linewidth=1)
-            #ax.axvline(l[1], linestyle='--', color='k', linewidth=1)
-
             seconds = (l[1] - l[0]) * 86400
-
             total_s_in_gti = total_s_in_gti - seconds
 
         for lines in gti_list:
-            ax1.axvspan(xmin=lines[0], xmax=lines[1], facecolor='k', alpha=0.1)
-            ax2.axvspan(xmin=lines[0], xmax=lines[1], facecolor='k', alpha=0.1) #bottom plot
+            for ax in axes:
+                ax.axvspan(xmin=lines[0], xmax=lines[1], facecolor='k', alpha=0.1)
 
         for lines in result:
-            ax1.axvspan(xmin=lines[0], xmax=lines[1], facecolor='white')
-            ax2.axvspan(xmin=lines[0], xmax=lines[1], facecolor='white') #bottom plot
+            for ax in axes:
+                ax.axvspan(xmin=lines[0], xmax=lines[1], facecolor='white')
 
-        ######
-
+        ###### YELLOW BOXES
         self.logger.info(self, f"Total time in GTI {total_s_in_gti}")
-
         try:
-            for i in range(0,len(arg_lines),2):
-                ax1.axvspan(xmin=arg_lines[i], xmax=arg_lines[i+1], facecolor='y', alpha=0.1)
-                ax2.axvspan(xmin=arg_lines[i], xmax=arg_lines[i+1], facecolor='y', alpha=0.1)
+            for i in range(0,len(vertical_boxes),2):
+                for ax in axes:
+                    ax.axvspan(xmin=vertical_boxes[i], xmax=vertical_boxes[i+1], facecolor='y', alpha=0.1)
         except:
             self.logger.info(self, "No lines")
-        
 
-        ax1.set_ylim(0., zmax+5.0)
-        #ax.set_xlim((tstart - t0)-0.2, (tstop-t0)+0.2)
-        ax1.set_xlabel('MJD')
+        axes[0].set_ylim(0., zmax+5.0)
+        axes[0].set_title(f"T=[{tstart}, {tstop}] {timetype} Zmax={zmax}  ")
+        axes[0].set_xlabel(timetype)
+        axes[0].ticklabel_format(axis="x", useOffset=False)
+        axes[0].legend(loc='lower right', shadow=True, fontsize='xx-small')
+        axes[0].set_ylabel('off-axis angle [$^{\\circ}$]')
 
-        ax1.ticklabel_format(axis="x", useOffset=False)
+        #print(f'!!! times plot_offaxis {tstart} {trigger_time_tt}')
+        del tstart, tstop, agl_meantime, lat_meantime, vertical_boxes
 
-        ax1.legend(loc='lower right', shadow=True, fontsize='xx-small')
 
-        ax1.set_ylabel('off-axis angle [$^{\\circ}$]')
+    def plot_ratemeters(self, ax, rm_files=[], rm_labels=[], timetype="MJD", trigger_time_tt=None):
 
-        #ax.set_xlim(np.min(agl_filt-t0), np.max(agl_filt-t0))
-        ax1.set_title(str(zmax)+'_'+str(tstart)+'_'+str(tstop))
+        # load data
+        colnames = ['col1', 'TIME', 'col2','COUNTS', 'col3', 'COUNTS_D']
+        for f, label in zip(rm_files, rm_labels):
+            data = pd.read_csv(f, header=None, names=colnames, sep='\s', 
+                 engine='python')
+            data = data.drop(['col1', 'col2', 'col3'], axis=1)
+
+            # times (ratemeters are in TT)
+            if timetype == 'MJD':
+                data['TIME'] = AstroUtils.time_agile_seconds_to_mjd(data['TIME'])
+            elif timetype == 'TT' and trigger_time_tt is not None:
+                    data['TIME'] -= trigger_time_tt
+
+            # plot data
+            ax.plot(data['TIME'], data['COUNTS'], label=label)
+            #print(f'!!! times plot_ratemeters {data["TIME"].iloc[0]} {trigger_time_tt}')
+            del data
+
+        # plot decorations
+        ax.set_xlabel(timetype)
+        ax.set_ylabel('counts')
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.legend(loc='upper right', shadow=True, fontsize='xx-small')
+
 
     def checkSignificance(self, fermi, tstart, tstop):
         fermi_data = pd.read_csv(fermi, header=0, sep=" ")
@@ -256,7 +283,6 @@ class APDisplayAGILEFermiComparison:
         nsig = 0
 
         for time in range(int(tstart), int(tstop)):
-            #print(time)
             tstart_tt = AstroUtils.time_mjd_to_agile_seconds(time)
             tstop_tt = AstroUtils.time_mjd_to_agile_seconds(time+1)
             fermi_data2 = fermi_data[fermi_data.tstart >= tstart_tt]
@@ -267,25 +293,24 @@ class APDisplayAGILEFermiComparison:
             n=0
             for cts in fermi_data2["cts"]:
                 ntrials = ntrials + 1
-                #print(time, time+1, cts, fermimean, fermistd, fermimean + 3 * fermistd, cts >= (fermimean + 3 * fermistd))
                 if cts >= (fermimean + 5 * fermistd):
                     self.logger.info(self, "####")
                     self.logger.info(self, f"{fermi_data2['tstart']}")
-                    #print(fermi_data2["tstart"][n])
                     nsig = nsig + 1
                     break
                 n = n + 1
 
-            
-
         self.logger.info(self, f"ntrials {ntrials}")
         self.logger.info(self, f"nsig {nsig}")
 
-    def load_and_plot(self, agile, fermi, tstart, tstop, path, zmax=60, lines=[], plotrate=False):
+    def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts", time_range=None, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
+
+        if timetype not in ["MJD", "TT"]:
+            raise Exception("timetype must be MJD or TT")
 
         #---- Loading data -----
-        agile_data = pd.read_csv(agile, header=0, sep=" ")
-        fermi_data = pd.read_csv(fermi, header=0, sep=" ")
+        agile_data = pd.read_csv(agile, header=0, sep=" ") # TT
+        fermi_data = pd.read_csv(fermi, header=0, sep=" ") # TT
 
         #---Converting times
         tstart_tt = AstroUtils.time_mjd_to_agile_seconds(tstart)
@@ -297,11 +322,52 @@ class APDisplayAGILEFermiComparison:
         fermi_data = fermi_data[fermi_data.tstart >= tstart_tt]
         fermi_data = fermi_data[fermi_data.tstop <= tstop_tt]
 
+        if timetype == "MJD":
+            vertical_boxes = vertical_boxes_mjd
+        else:
+            vertical_boxes = AstroUtils.time_mjd_to_agile_seconds(vertical_boxes_mjd)
+            
+        # number of plots
+        n_plots = 3
+        if add_rm:
+            n_plots += 1
+        h_plot = 5*n_plots
+
         #------Plotting data
-        f, (ax1, ax2) = plt.subplots(2, figsize=(12.18,10), sharex=True)
-        self.plot_offaxis(ax1, ax2, path, tstart, tstop, 60, 1, 0, lines)
-        self.plot(ax2, agile_data, fermi_data, lines, plotrate)
-        ax1.tick_params(labelbottom=True)
+        #print(f'!!! times load_and_plot {tstart} {trigger_time_tt}')
+        fig, axes = plt.subplots(n_plots, 1, figsize=(12.18,h_plot), sharex=True)
+        self.plot_offaxis(axes, path, tstart, tstop, zmax, 1, vertical_boxes, timetype=timetype, tstart_tt=tstart_tt, tstop_tt=tstop_tt, trigger_time_tt=trigger_time_tt) 
+        self.plot_aperture_photometry(axes[1], agile_data, fermi_data, timetype=timetype, data_column_name="exp", trigger_time_tt=trigger_time_tt)
+        self.plot_aperture_photometry(axes[2], agile_data, fermi_data, timetype=timetype, data_column_name=data_column_name, trigger_time_tt=trigger_time_tt)
+        # add ratemeters option
+        if add_rm and rm_labels != None and rm_files != None:
+            assert rm_files != None, 'if "add_rm" is True then "rm_files" cannot be None'
+            assert rm_labels != None, 'if "add_rm" is True then "rm_files" cannot be None'
+            self.plot_ratemeters(axes[3], rm_files=rm_files, rm_labels=rm_labels, timetype=timetype, trigger_time_tt=trigger_time_tt)
+
+        if time_range is not None:
+            if timetype == 'TT' and trigger_time_tt is not None:
+                    time_range -= trigger_time_tt
+            for ax in axes:
+                ax.set_xlim(time_range)
+        #print(f'!!! time range {time_range} {trigger_time_tt}')
+
+        for ax in axes:
+            ax.tick_params(labelbottom=True)
+            ax.grid()
 
         plt.show()
-        f.savefig('merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf'), format="pdf")
+
+        outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
+        self.logger.info(self, f"Plot: {outfilename_pdf}")
+        fig.savefig(outfilename_pdf, format="pdf")
+
+        outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
+        self.logger.info(self, f"Plot: {outfilename_png}")
+        fig.savefig(outfilename_png, format="png")  
+
+        plt.close()      
+        del agile_data, fermi_data
+        del time_range, vertical_boxes_mjd
+        del tstart, tstop, trigger_time_tt
+        del fig, axes

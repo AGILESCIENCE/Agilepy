@@ -23,4 +23,6 @@ tag.sh
 *.npy
 agilepy/testing/unittesting/utils/data/1640082532426.tar
 agilepy/testing/unittesting/utils/data/1640082575163.tar
-
+agilepy/testing/unittesting/api/data/test_ag_eng_agile_fermi_offaxis_visibility_comparison
+agilepy/testing/unittesting/api/tt_test.sh
+agilepy/testing/unittesting/api/mjd_test.sh

@@ -87,17 +87,26 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         return dir
 
-    def apOffaxisComparation(self, agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis,lines = [], plotrate=False):
-        """ It compares and shows aperture photometry data with offaxis results
+    def apOffaxisComparation(self, agile_pathAP, fermi_pathAP, tstart_mjd, tstop_mjd, path_offaxis, vertical_boxes_mjd = [], zmax=60, timetype="MJD", data_column_name="cts", time_range=None, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
+        """ It compares and shows aperture photometry data with offaxis results. 
+        
+        WARNING: This class should be instanced anew any time a new plot is generated, to ensure its correctness.
 
         Args:
             agile_pathAP (str): agile ap filepath
             fermi_pathAP (str): fermi ap filepath
-            tstart (float): time start in MJD
-            tstop (float): time stop in MJD
+            tstart_mjd (float): time start in MJD
+            tstop_mjd (float): time stop in MJD
             path_offaxis (str): directory path to offaxis results
-            lines (list): 
-            plotrate (bool): if true select column rate instead of counts
+            vertical_boxes_mjd (list): time in MJD
+            zmax (float): maximum offaxis degrees
+            timetype (str): time type to plot [MJD, TT]
+            data_column_name (str): name of column to plot
+            time_range (list): time xrange in MJD or TT depending on "timetype"
+            trigger_time_tt (float or None): trigger time in TT
+            add_rm (bool): add fourth plot with AGILE ratemeters
+            rm_files (list): list of absolute paths for all RM to plot
+            rm_lables (list): list of labels to pair to RM files
 
         return:
             void
@@ -106,7 +115,8 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         comparison = APDisplayAGILEFermiComparison(self.logger)
 
-        comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart, tstop, path_offaxis, lines, plotrate)
+        #print(f'!!! times apOffAxisComparation {tstart_mjd} {trigger_time_tt}')
+        comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart_mjd, tstop_mjd, path_offaxis, zmax=zmax, vertical_boxes_mjd=vertical_boxes_mjd, timetype=timetype, data_column_name=data_column_name, time_range=time_range, trigger_time_tt=trigger_time_tt, add_rm=add_rm, rm_files=rm_files, rm_labels=rm_labels)
 
 
 
