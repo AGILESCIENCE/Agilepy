@@ -1,7 +1,12 @@
 # Changelog
+## Release 1.6.2
+* display off-axis comparison refined for GRB analysis
+* minor fixes for aperture photometry
 
 ## Release 1.6.1
 * Minor fixes
+* root 6.26
+* compilation with c++17
 
 ## Release 1.6.0
 * (\#296) Now calcbkg updates the results if called multiple times
