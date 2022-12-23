@@ -1,4 +1,8 @@
 # Changelog
+
+## Release 1.6.3
+* Science Tools BUILD25b6, with changes on scripts to make them compatible with Python 3
+
 ## Release 1.6.2
 * display off-axis comparison refined for GRB analysis
 * minor fixes for aperture photometry
