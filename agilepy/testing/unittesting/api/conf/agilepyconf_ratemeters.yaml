@@ -3,7 +3,7 @@ input:
   indexfile: PATH/TO/INDEX
           
 output:
-  outdir: /Agilepy/agilepy/testing/unittesting/api/conf/
+  outdir: /agile/Agilepy/agilepy/testing/unittesting/api/conf
   filenameprefix: ratemeters_product
   logfilenameprefix: ratemeters_log
   sourcename: GRB221023A

@@ -4,13 +4,16 @@
 
 from agilepy.api.AGRatemeters import AGRatemeters
 from agilepy.utils.AstroUtils import AstroUtils
+from pathlib import Path
+from os.path import join
 
-confFilePath="/Agilepy/agilepy/testing/unittesting/api/conf/agilepyconf_ratemeters.yaml"
+currentDirPath = Path(__file__).parent.absolute() # This points to agilepy/testing/unittesting/api
+confFilePath=join(currentDirPath,"conf/agilepyconf_ratemeters.yaml")
 
 # Test Static Method to write YAML configuration file
 AGRatemeters.getConfiguration(confFilePath=confFilePath,
                               userName="userName",
-                              outputDir="/Agilepy/agilepy/testing/unittesting/api/conf/",
+                              outputDir=join(currentDirPath,"conf"),
                               verboselvl=0,
                               indexfile='PATH/TO/INDEX',
                               timetype='MJD',
