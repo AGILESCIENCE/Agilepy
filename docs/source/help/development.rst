@@ -2,50 +2,107 @@
 Development
 ***********
 
-Install the development environment
-===================================
+Install the development environment with Docker
+===============================================
 
-If you want to try agilepy's new features that are not officially released yet, 
-a develpoment environment called agilepy-environment is available into Anaconda cloud. 
-It contains all the dependencies unless agilepy, which must be installed by hand cloning the repository.
+If you want to develop new agilepy features or try the newest yet unreleased ones,
+a development Docker image called agilepy-recipe is availabe on dockerhub.
+It contains all the dependencies but agilepy, which must be installed by hand by cloning the repository.
 
-Anaconda
---------
-::
+Agilepy's development containers can be found at dockerhub `agilescience/agilepy-recipe <https://hub.docker.com/repository/docker/agilescience/agilepy-recipe>`_ page,
+please check it for the latest tag.
 
-    
-    conda config --add channels conda-forge
-    conda config --add channels plotly
-    conda create -n agilepydev -c agilescience agiletools agilepy-dataset
-    conda activate agilepydev
-    git clone https://github.com/AGILESCIENCE/Agilepy.git
-    cd Agilepy && git checkout develop
-    conda env update -f environment.yml
-    python setup.py develop
+Instructions
+------------
 
-Docker
-------
+1. Prepare your workspace by creating a directory :code:`agile` at
+path :code:`$PATH_TO_AGILE`.
+It is going to be shared between your local file system tree and the developement container's one.
 
-::
+.. code-block::
 
-    docker pull agilescience/agilepy-recipe:latest
-    mkdir shared_dir && cd shared_dir && git clone https://github.com/AGILESCIENCE/Agilepy.git \
-    && cd Agilepy && git checkout develop
-    
-    docker run --rm -it -p 8888:8888 \
+    $ mkdir agile && cd agile
+
+2. Clone the GitHub Agilepy repository, switch to the development branch you are interested to work on
+(e.g. :code:`develop` or any other branch with a given feature).
+
+.. code-block::
+
+    $ git clone https://github.com/AGILESCIENCE/Agilepy.git && cd Agilepy
+    $ git switch develop
+
+3. Pull the development Docker image, replace :code:`<LATEST-TAG>` with the
+latest tag available at `agilepy-recipe/tags <https://hub.docker.com/r/agilescience/agilepy-recipe/tags>`_.
+
+.. code-block::
+
+    $ docker pull agilescience/agilepy-recipe:<LATEST-TAG>
+
+4. Build the Docker Container with name :code:`agilepy_dev` from the Docker Image.
+The following command binds port :code:`8888` of the container to port :code:`8090` of your local host,
+change it if already occupated.
+It shares the :code:`agile` directory between host and container.
+
+.. code-block::
+
+    $ docker run --rm -t -d -p 8090:8888 --name agilepy_dev \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    -v $SHARED_DIR_PATH:/shared_dir \
-    agilescience/agilepy-recipe:latest
-    
-    ## -- Inside the container --
-    conda activate agilepydev
-    cd /shared_dir/Agilepy python setup.py develop
-
-    jupyter notebook --port 8889 --ip 0.0.0.0  --allow-root
+    -v $PATH_TO_AGILE:/agile \
+    agilescience/agilepy-recipe:<LATEST-TAG>
 
 
-Now you have the agilepy's latest version installed in your environment.
+5. Enter container with:
+
+.. code-block::
+
+    $ docker exec -it agilepy_dev bash -l
+
+6. Inside the container activate virtual environment,
+move to repository location and install the code in *editable* mode:
+
+.. code-block::
+
+    $ source /opt/venv/agilepy/bin/activate
+    $ cd /agile/Agilepy
+    $ pip install -e .
+
+Now you have the agilepy's latest development version installed in your environment.
+You can also edit it to implement your own agilepy features!
+
+- When you need to exit the container just enter :code:`$ exit`.
+- To stop the container use
+
+.. code-block::
+
+    $ docker stop agilepy_dev
+
+- If you need to run a jupyter notebook you can run it in the binded port :code:`8888` from within the container. Take note of the token set by jupyter, search for **http://localhost:8090/** in your browser and insert the token. The command to run jupyter notebook is:
+
+::
+
+    $ jupyter notebook --port 8888 --ip 0.0.0.0  --allow-root
+
+.. note::
+
+    Currently the user inside the container is root.
+    Modifying files from within the container might change the user proprietary of the files in your local system too.
+    We suggest to modify files from *outside* the container with a text editor and use the container
+    to run your scripts.
+
+
+.. Anaconda
+.. --------
+.. ::
+..     conda config --add channels conda-forge
+..     conda config --add channels plotly
+..     conda create -n agilepydev -c agilescience agiletools agilepy-dataset
+..     conda activate agilepydev
+..     git clone https://github.com/AGILESCIENCE/Agilepy.git
+..     cd Agilepy && git checkout develop
+..     conda env update -f environment.yml
+..     python setup.py develop
+
 
 
 Git flow
