@@ -15,13 +15,14 @@ please check it for the latest tag.
 Instructions
 ------------
 
-1. Prepare your workspace by creating a directory :code:`agile` at
-path :code:`$PATH_TO_AGILE`.
-It is going to be shared between your local file system tree and the developement container's one.
+1. Prepare your workspace by creating a directory :code:`agile`
+and store its path in a variable :code:`$PATH_TO_AGILE`.
+The :code:`agile` directory is going to be shared between your local file system tree and the developement container's one.
 
 .. code-block::
 
     $ mkdir agile && cd agile
+    $ export PATH_TO_AGILE=$PWD
 
 2. Clone the GitHub Agilepy repository, switch to the development branch you are interested to work on
 (e.g. :code:`develop` or any other branch with a given feature).
