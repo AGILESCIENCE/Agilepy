@@ -20,12 +20,6 @@ need to decide the name of the virtual environment that will be created by anaco
     conda config --add channels plotly
     conda create -n <virtualenv_name> -c agilescience agilepy
 
-.. note:: If you want to try agilepy's new features that are not officially released yet, 
-           a develpoment environment called agilepy-environment is available into Anaconda cloud. 
-           It contains all the dependencies unless agilepy, 
-           which must be installed by hand cloning the repository.
-           Check the installation instructions `here <../help/development.html#install-the-development-environment>`_
-
 Supported platforms:
 
   - linux-64
@@ -73,8 +67,12 @@ You can pull the image directly from dockerhub using the following command:
 
 .. note:: Check the installation instructions for Docker `here <https://docs.docker.com/get-docker/>`_
 
-.. note:: If you want to try agilepy’s new features that are not officially released yet, you need to
-          pull a develop image available using **agilepy:develop-latest** tag
+.. note:: The agilepy version installed inside the container cannot be modified.
+          If you want to try agilepy's new features that are not officially released yet,
+          you need to pull a development image called agilepy-recipe.
+          It contains all the dependencies but agilepy, 
+          which must be installed by hand by cloning the repository.
+          Check the `Development <../help/development.html>`_ page for installation instructions.
 
 
 Using this command you can launch the container and automatically start jupyter notebook.
@@ -94,7 +92,7 @@ shared_dir must be created before launching the command, it is not necessary, bu
 
 Jupyter server is at localhost:8888
 
-Agilepy's containers can be found at dockerhub `page <https://hub.docker.com/repository/docker/agilescience/agilepy>`_
+Agilepy's containers can be found at dockerhub `agilescience/agilepy <https://hub.docker.com/repository/docker/agilescience/agilepy>`_ page.
 
 Supported platforms:
 
