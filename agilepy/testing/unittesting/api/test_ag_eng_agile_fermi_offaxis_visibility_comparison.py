@@ -54,7 +54,7 @@ class TestAGEngAgileFermiOffAxisVisibilityComparison:
         currentDirPath = Path(__file__).parent.absolute()
         return currentDirPath.joinpath("data/test_ag_eng_agile_fermi_offaxis_visibility_comparison")
 
-
+    @pytest.mark.skip(reason="This test needs to access to /ASDC_PROC2/DATA_2/INDEX/LOG.log.index")
     def test_ap_offaxis_comparation_mjd(self, data_dir, log_dir, conf):
         t0 = 59861.55346063
         time_windows = [(t0-120/86400, t0+1000/86400)]
@@ -85,7 +85,7 @@ class TestAGEngAgileFermiOffAxisVisibilityComparison:
  
         ageng.apOffaxisComparation(str(ap_agile), str(ap_fermi), tstart, tstop, path_offaxis, vertical_boxes_mjd=vertical_boxes_mjd, zmax=zmax, timetype="MJD", data_column_name=data_column_name, time_range=time_range, add_rm=add_rm, rm_files=rm_files, rm_labels=rm_labels)        
     
-        
+    @pytest.mark.skip(reason="This test needs to access to /ASDC_PROC2/DATA_2/INDEX/LOG.log.index")
     def test_ap_offaxis_comparation_tt(self, data_dir, log_dir, conf):
         t0 = 59861.55346063
         time_windows = [(t0-120/86400, t0+1000/86400)]
