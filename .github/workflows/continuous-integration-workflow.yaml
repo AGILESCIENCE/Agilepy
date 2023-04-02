@@ -82,15 +82,13 @@ jobs:
     - name: Checking out code
       uses: actions/checkout@v2
 
-      - name: Installing Agilepy
-        shell: bash -l {0}
-        run: |
-          source $HOME/venv/agilepy/bin/activate && pip install .
+    - name: Installing Agilepy
+      shell: bash -l {0}
+      run: source $HOME/venv/agilepy/bin/activate && pip install .
 
-      - name: Running unit tests and code coverage
-        shell: bash -l {0}
-        run: |
-          source $HOME/venv/agilepy/bin/activate && start_coverage.sh
+    - name: Running unit tests and code coverage
+      shell: bash -l {0}
+      run: source $HOME/venv/agilepy/bin/activate && start_coverage.sh
 
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
