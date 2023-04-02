@@ -39,5 +39,7 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/api"
-  
+
+  printf "\n\33[32mCopying coverage report into $HOME\33[0m\n"
+  cp -r "$agilepy_path/testing/unittesting/coverage/cov_xml_report" "$HOME/cov_xml_report"
 fi

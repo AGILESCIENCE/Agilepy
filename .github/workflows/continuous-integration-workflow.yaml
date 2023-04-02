@@ -14,11 +14,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-20.04", "ubuntu-18.04"]
+        os: ["ubuntu-22.04", "ubuntu-20.04", "ubuntu-18.04"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
-    container: agilescience/agilepy-recipe:BUILD25b3626
+    container: agilescience/agilepy-recipe:BUILD25b6-v2
 
     steps:
       - uses: actions/checkout@v2
@@ -26,52 +26,47 @@ jobs:
       - name: Installing Agilepy
         shell: bash -l {0}
         run: |
-          source /opt/venv/agilepy/bin/activate
-          python setup.py develop
-          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-
+          source $HOME/venv/agilepy/bin/activate && pip install .
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: |
-          source /opt/venv/agilepy/bin/activate
-          agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-          bash $agilepy_path/scripts/start_coverage.sh
+          source $HOME/venv/agilepy/bin/activate && start_coverage.sh
   
-  building-testing-on-os-matrix:
-    name: Build+Test ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ["macos-10.15"]
-        python-version: ["3.8.13"]
-    runs-on: ${{matrix.os}}
+  # building-testing-on-os-matrix:
+  #   name: Build+Test ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: ["macos-10.15"]
+  #       python-version: ["3.8.13"]
+  #   runs-on: ${{matrix.os}}
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: false
-          python-version: ${{ matrix.python-version }}
-          environment-file: .github/environment.yml
-          activate-environment: agilepydevops
+  #     - uses: conda-incubator/setup-miniconda@v2
+  #       with:
+  #         auto-update-conda: false
+  #         python-version: ${{ matrix.python-version }}
+  #         environment-file: .github/environment.yml
+  #         activate-environment: agilepydevops
 
-      - name: Installing Agilepy
-        shell: bash -l {0}
-        run: python setup.py develop
+  #     - name: Installing Agilepy
+  #       shell: bash -l {0}
+  #       run: python setup.py develop
 
-      - name: Conda info
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-      - name: Running unit tests and code coverage
-        shell: bash -l {0}
-        run: |
-          printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-          agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-          bash $agilepy_path/scripts/start_coverage.sh
+  #     - name: Conda info
+  #       shell: bash -l {0}
+  #       run: |
+  #         conda info
+  #         conda list
+  #     - name: Running unit tests and code coverage
+  #       shell: bash -l {0}
+  #       run: |
+  #         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+  #         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+  #         bash $agilepy_path/scripts/start_coverage.sh
 
 
   building-testing-on-os-centos7:
@@ -80,20 +75,22 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    container: agilescience/agilepy-recipe:BUILD25b3626
+    container: agilescience/agilepy-recipe:BUILD25b6-v2
 
     steps:
 
     - name: Checking out code
       uses: actions/checkout@v2
 
-    - name: Running unit tests and code coverage
-      run: |
-        source /opt/venv/agilepy/bin/activate
-        python setup.py develop
-        printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-        agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-        bash $agilepy_path/scripts/start_coverage.sh
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: |
+          source $HOME/venv/agilepy/bin/activate && pip install .
+
+      - name: Running unit tests and code coverage
+        shell: bash -l {0}
+        run: |
+          source $HOME/venv/agilepy/bin/activate && start_coverage.sh
 
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
@@ -103,15 +100,14 @@ jobs:
         CODACY_PROJECT_NAME: ${{ secrets.CODACY_PROJECT_NAME }}
         CODACY_USERNAME: ${{ secrets.CODACY_USERNAME }}
       run: |
-        source /opt/venv/agilepy/bin/activate	
-        agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
         curl -Ls https://coverage.codacy.com/get.sh -o get.sh
         chmod +x get.sh
-        ./get.sh report -r $agilepy_path/testing/unittesting/coverage/cov_xml_report --commit-uuid "$GITHUB_SHA"
+        ./get.sh report -r $HOME/cov_xml_report --commit-uuid "$GITHUB_SHA"
     
-    - name: Triggering dockerhub for container building
-      shell: bash -l {0}
-      run: |
-        curl -H "Content-Type: application/json" \
-        --data '{"source_type": "Branch", "source_name": "develop"}' \
-        -X POST "https://hub.docker.com/api/build/v1/source/2e3f2827-4912-486e-9353-43f2e540c25b/trigger/6b916551-0929-46b7-bc2b-74115a63017b/call/"
+    
+    #- name: Triggering dockerhub for container building
+    #  shell: bash -l {0}
+    #  run: |
+    #    curl -H "Content-Type: application/json" \
+    #    --data '{"source_type": "Branch", "source_name": "develop"}' \
+    #    -X POST "https://hub.docker.com/api/build/v1/source/2e3f2827-4912-486e-9353-43f2e540c25b/trigger/6b916551-0929-46b7-bc2b-74115a63017b/call/"
