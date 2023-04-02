@@ -18,8 +18,10 @@ jobs:
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
-    container: agilescience/agilepy-recipe:BUILD25b6-v2
-
+    container: 
+      image: agilescience/agilepy-recipe:BUILD25b6-v2
+      options: --user root
+  
     steps:
       - uses: actions/checkout@v3
 
@@ -75,7 +77,9 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    container: agilescience/agilepy-recipe:BUILD25b6-v2
+    container: 
+      image: agilescience/agilepy-recipe:BUILD25b6-v2
+      options: --user root
 
     steps:
 
