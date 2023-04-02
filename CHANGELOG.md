@@ -1,5 +1,11 @@
 # Changelog
 
+## Release 1.6.4 (not released yet)
+* BUILD25b6-v2, the base image has been refactored. The user inside the container can be set to the user on the host to 
+avoid file permission issues.
+* Documentation improved.
+* The Agilepy's python dependencies are now locked. 
+
 ## Release 1.6.3
 * Science Tools BUILD25b6, with changes on scripts to make them compatible with Python 3
 

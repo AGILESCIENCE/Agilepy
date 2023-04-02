@@ -9,11 +9,7 @@ setup( name='agilepy',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
        scripts=[
-          'agilepy/scripts/start_agilepy_notebooks.sh',
-          'agilepy/scripts/start_container.sh',
-          'agilepy/scripts/start_coverage_local.sh',
-          'agilepy/scripts/start_coverage.sh',
-          'agilepy/scripts/start_notebooks_docker.sh'
+          'agilepy/scripts/start_coverage.sh'
        ],
        include_package_data=True,
        package_data={'mypkg': [
