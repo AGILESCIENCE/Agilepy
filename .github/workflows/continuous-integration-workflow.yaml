@@ -28,12 +28,12 @@ jobs:
       - name: Installing Agilepy
         shell: bash -l {0}
         run: |
-          source $HOME/venv/agilepy/bin/activate && pip install .
+          source venv/agilepy/bin/activate && pip install .
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: |
-          source $HOME/venv/agilepy/bin/activate && start_coverage.sh
+          source venv/agilepy/bin/activate && start_coverage.sh
   
   # building-testing-on-os-matrix:
   #   name: Build+Test ${{ matrix.os }}
@@ -88,11 +88,11 @@ jobs:
 
     - name: Installing Agilepy
       shell: bash -l {0}
-      run: source $HOME/venv/agilepy/bin/activate && pip install .
+      run: source venv/agilepy/bin/activate && pip install .
 
     - name: Running unit tests and code coverage
       shell: bash -l {0}
-      run: source $HOME/venv/agilepy/bin/activate && start_coverage.sh
+      run: source venv/agilepy/bin/activate && start_coverage.sh
 
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
