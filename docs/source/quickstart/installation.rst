@@ -1,100 +1,64 @@
 Installation
 ============
 
-Agilepy is available as Anaconda package or into a ready-to-use Docker container (from 1.4.0)
+Agilepy is available as a ready-to-use Docker container.
 
-.. note:: AGILE DATASET DOWNLOAD 
+.. warning:: The Anaconda package is no longer mantained. 
+
+.. note:: **AGILE DATASET DOWNLOAD**: 
           Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 
           Agilepy automatically handles the data and no actions are required from the user.
-          For more information visit `this page <../manual/Ag_dataset_rest_api.html>`_.
-          This major release includes many new important features and a general refactoring.
-
-Installation with Anaconda
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Agilepy (and its dependencies) can be easily installed using Anaconda. You just
-need to decide the name of the virtual environment that will be created by anaconda.
-::
-
-    conda config --add channels conda-forge
-    conda config --add channels plotly
-    conda create -n <virtualenv_name> -c agilescience agilepy
-
-Supported platforms:
-
-  - linux-64
-  - osx-64
-
-.. note:: An experimental package for IBM POWER architecture(ppc64le) is available on Anaconda cloud. Due to some incompability this package does not contain
-          ROOT and AGILE science tools that need to be installed from source. Check the instructions to install AGILE science tools
-          `here <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup>`_
-
-Tested on:
-
-  - CentOs 7.6
-  - Ubuntu 18.04
-  - Ubuntu 19.10
-  - Ubuntu 20.04
-  - macOs 10.14
-  - macOs 10.15
-  - macOS 12.0.1
-
-In order to use the software you need to activate the virtual environment first:
-::
-
-    conda activate <virtualenv_name>
-
-or
-
-::
-
-    source activate <virtualenv_name>
-
-Running jupyter server:
-::
-
-    start_agilepy_notebooks.sh
-
+          For more information visit `this page <../manual/agile_grid_data.html>`_.
 
 Installation with Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can pull the image directly from dockerhub using the following command:
+.. note:: If you don't have Docker: 
+          `docs.docker.com/get-docker <https://docs.docker.com/get-docker/>`_
 
-::
+1. Pull the Agilepy Docker image, using the latest tag available at `agilepy/tags <https://hub.docker.com/r/agilescience/agilepy/tags>`_.
+The example below use release 1.6.4 (April 2023).
 
-    docker pull agilescience/agilepy:release-<version>
+.. code-block::
 
-.. note:: Check the installation instructions for Docker `here <https://docs.docker.com/get-docker/>`_
+    export AGILEPY_RELEASE=release-1.6.4
+    docker pull agilescience/agilepy:release-$AGILEPY_RELEASE
 
-.. note:: The agilepy version installed inside the container cannot be modified.
-          If you want to try agilepy's new features that are not officially released yet,
-          you need to pull a development image called agilepy-recipe.
-          It contains all the dependencies but agilepy, 
-          which must be installed by hand by cloning the repository.
+.. note:: If you want to try new features that are not officially released yet, you need to install the development environment. 
           Check the `Development <../help/development.html>`_ page for installation instructions.
 
+2. Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. The script will change the user ID inside the container to match the ID of your local user.
+   Run it follows:
 
-Using this command you can launch the container and automatically start jupyter notebook.
+.. code-block::
+
+    wget https://raw.githubusercontent.com/AGILESCIENCE/Agilepy/master/agilepy/scripts/bootstrap.sh
+    source bootstrap.sh release-$AGILEPY_RELEASE
+
+3. Start the Agilepy container. If you want a shared directory between the host and the container, create a folder in the host machine and use the -v option to mount it in the container as shown below.
+It is not necessary to create a shared directory, but it's useful for several cases (exporting analysis outside the container, link another dataset etc.).
+Using the command below you can launch the container and automatically start jupyter notebook.
+
+.. code-block::
+  
+    mkdir shared_dir
+    docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l
+    
+.. note:: Jupyter server will listen at localhost:9999, change the port if you want to use a different one. 
+    
+.. note:: If Agilepy is running or a remote machine, you need to setup an ssh tunnel to access the jupyter server: `ssh -L 9999:localhost:9999 <user>@<host>`
+
+You can find the token to access the Jupyter server with:
+
+.. code-block::
+
+    docker exec -it agilepy-$AGILEPY_RELEASE bash -l -c "jupyter notebook list"
+
+You can omit the "-c" option to enter the container with a bash shell.
 
 
-::
-
-    docker run --rm -it -p 8888:8888 \
-    -e DISPLAY=$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    -v $PWD/shared_dir:/shared_dir \
-    agilescience/agilepy:release-<version> /bin/bash -c \
-    "source /opt/anaconda3/etc/profile.d/conda.sh && conda activate agilepydev && \
-    jupyter notebook --ip='*' --port=8888 --no-browser --allow-root --notebook-dir="/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''"
-
-shared_dir must be created before launching the command, it is not necessary, but useful for several cases (exporting analysis outside the container, link another dataset etc.)
-
-Jupyter server is at localhost:8888
-
-Agilepy's containers can be found at dockerhub `agilescience/agilepy <https://hub.docker.com/repository/docker/agilescience/agilepy>`_ page.
-
-Supported platforms:
+Supported platforms
+^^^^^^^^^^^^^^^^^^^
 
   - linux-64
   - osx-64
@@ -110,22 +74,20 @@ Tested on:
   - macOs 10.15
   - Windows 10 v2004 (May 2020 Update)
 
-.. note:: It's possible to run Agilepy's container in Windows10(still not supported by Anaconda installation),
-          in order to do that, you need to install WSL2 and docker first.
+.. note:: It's possible to run Agilepy's container in Windows10, you'll need to install WSL2.
 
           Check the installation instructions for WSL2 `here <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_
-          and docker `here <https://docs.docker.com/docker-for-windows/wsl/>`_
 
 
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^
 
-If the isntallation does not work with the instructions above, it is recommended to install agilepy and its dependencies from scratch.
+If the isntallation does not work with the instructions above, it is recommended to install Agilepy and its dependencies from scratch.
 The dependencies required by Agilepy are:
 
-Root 6.26
-Cfitsio 4.1
-Zlib
+  - Root 6.26
+  - Cfitsio 4.1
+  - Zlib
 
 `AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install is on sciencetools_version.txt in the repository main directory)
 
@@ -134,21 +96,13 @@ Zlib
 
 Uninstalling
 ^^^^^^^^^^^^
-Anaconda
+
+Stop the container with:
+
 ::
 
-    conda env remove --name <virtualenv_name>
+    docker stop agilepy-$AGILEPY_RELEASE
 
-Docker
 ::
 
-    docker rmi agilescience/agilepy:release-<version>
-
-
-Package distribution structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The virtual environment <virtualenv_name> folder is under the "envs" folder within
-the root folder of your anaconda installation.
-
-It contains all the dependencies Agilepy requires. Here, there is the "agiletools"
-directory, containing AGILE's scientific software.
+    docker rmi agilescience/agilepy:release-$AGILEPY_RELEASE
