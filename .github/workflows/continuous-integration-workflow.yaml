@@ -25,6 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Debug
+        shell: bash -l {0}
+        run: |
+          pwd
+          ls -la
+
       - name: Installing Agilepy
         shell: bash -l {0}
         run: |
