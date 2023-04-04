@@ -88,7 +88,9 @@ class SourcesLibrary:
                 catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.multi")
 
             cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-            uEmin = self.config.getOptionValue("emin_sources")
+
+            # TODO: emin emax instead of emin_sources/emax_sources
+            uEmin = self.config.getOptionValue("emin_sources") # emin_source is relative to a custom catalog
             uEmax = self.config.getOptionValue("emax_sources")
 
             if cat2Emin != uEmin or cat2Emax != uEmax:
@@ -924,11 +926,12 @@ class SourcesLibrary:
             if distance >= rangeDist[0] and distance <= rangeDist[1]:
                 yield source
 
-    def _scaleSourcesFlux(self, sources):
+    # TODO: replace yield with reutnr
+    def _scaleSourcesFlux(self, sources): # (self, source, emin, emax, catEmin, catEmax)
 
         cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-        uEmin = self.config.getOptionValue("emin_sources")
-        uEmax = self.config.getOptionValue("emax_sources")
+        uEmin = self.config.getOptionValue("emin_sources") # emin 
+        uEmax = self.config.getOptionValue("emax_sources") # emax
 
         for source in sources:
 

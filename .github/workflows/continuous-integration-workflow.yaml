@@ -85,13 +85,19 @@ jobs:
 
     container: 
       image: agilescience/agilepy-recipe:BUILD25b6-v2
-      options: --user root
+      options: --user 1000
 
     steps:
 
     - name: Checking out code
       uses: actions/checkout@v3
 
+    - name: Debug
+      shell: bash -l {0}
+      run: |
+        pwd
+        ls -la
+        
     - name: Installing Agilepy
       shell: bash -l {0}
       run: source $HOME/venv/agilepy/bin/activate && pip install .
