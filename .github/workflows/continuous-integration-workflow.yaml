@@ -20,7 +20,7 @@ jobs:
 
     container: 
       image: agilescience/agilepy-recipe:BUILD25b6-v2
-      options: --user 1000
+      options: --user 1023
   
     steps:
       - uses: actions/checkout@v3
@@ -85,7 +85,7 @@ jobs:
 
     container: 
       image: agilescience/agilepy-recipe:BUILD25b6-v2
-      options: --user 1000
+      options: --user 1023
 
     steps:
 
