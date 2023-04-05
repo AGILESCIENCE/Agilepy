@@ -5,10 +5,8 @@ Agilepy is available as a ready-to-use Docker container.
 
 .. warning:: The Anaconda package is no longer mantained. 
 
-.. note:: **AGILE DATASET DOWNLOAD**: 
-          Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 
-          Agilepy automatically handles the data and no actions are required from the user.
-          For more information visit `this page <../manual/agile_grid_data.html>`_.
+.. note:: If you want to try new features that are not officially released yet, you need to install the development environment. 
+          Check the `Development <../help/development.html>`_ page for installation instructions.
 
 Installation with Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -24,11 +22,10 @@ The example below use release 1.6.4 (April 2023).
     export AGILEPY_RELEASE=release-1.6.4
     docker pull agilescience/agilepy:release-$AGILEPY_RELEASE
 
-.. note:: If you want to try new features that are not officially released yet, you need to install the development environment. 
-          Check the `Development <../help/development.html>`_ page for installation instructions.
 
-2. Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. The script will change the user ID inside the container to match the ID of your local user.
-   Run it follows:
+2. Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. 
+The script will change the user ID inside the container to match the ID of your local user. If you want to use the same image for multiple user
+in a shared machine, pass the `-d` option to duplicate the image instead of overwriting it. In the latter case, the username will be appended to the image name.
 
 .. code-block::
 

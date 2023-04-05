@@ -43,6 +43,7 @@ The :code:`agile` directory is going to be shared between your local file system
 .. code-block::
 
     ./Agilepy/agilepy/scripts/bootstrap_dev.sh $LATEST_TAG
+    export CONTAINER_NAME="${LATEST_TAG}_$(whoami)"
 
 5. Create a Docker container with name :code:`agilepy_dev` from the Docker image.
 The following command binds port :code:`8888` of the container to port :code:`8090` of your local host,
@@ -51,14 +52,14 @@ It shares the :code:`agile` directory between host and container.
 
 .. code-block::
 
-    docker run --rm -t -d -p 8090:8888 --name agilepy_dev -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$LATEST_TAG
+    docker run --rm -t -d -p 8090:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$CONTAINER_NAME
 
 
 6. Enter the container with:
 
 .. code-block::
 
-    docker exec -it agilepy_dev bash -l
+    docker exec -it $CONTAINER_NAME bash -l
 
 7. Inside the container activate the :code:`agilepy` virtual environment,
 move to the repository location and install the code in *editable* mode:
@@ -85,25 +86,32 @@ Run the following command and then go to `localhost:8090 <http://localhost:8090>
 
 ::
 
-    jupyter notebook --ip='*' --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''
+    nohup jupyter notebook --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
 
  
 You can disable the authentication with :code:`--NotebookApp.token='' --NotebookApp.password=''` but it is not recommended.
 
 ::
 
-    jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --ip='*' --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks"
+    nohup jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
 
 If you are working in a remote machine, add the :code:`--no-browser` option.
 
 ::
 
-    jupyter notebook --no-browser --ip='*' --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" --NotebookApp.token='' --NotebookApp.password=''
+    nohup jupyter notebook --no-browser --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
+
+11. The unit tests can be started with the following command:
+
+::
+
+    start_coverage.sh
 
 
-10. When you need to exit the container just enter :code:`exit`.
+12. When you need to exit the container just enter :code:`exit`.
 
-11. To stop the container use
+
+13. To stop the container use
 
 .. code-block::
 

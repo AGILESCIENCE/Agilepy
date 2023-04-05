@@ -11,6 +11,11 @@ Agilepy provides the last version of the available Science Tools (BUILD25), the 
 
 Agilepy (and its dependencies) can be easily installed using Anaconda (https://www.anaconda.com/).
 
+.. note:: **AGILE DATASET DOWNLOAD**: 
+          Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 
+          Agilepy automatically handles the data and no actions are required from the user.
+          For more information visit `this page <../manual/agile_grid_data.html>`_.
+          
 AGILE
 ^^^^^^
 
