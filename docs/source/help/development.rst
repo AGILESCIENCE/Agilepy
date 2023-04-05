@@ -19,7 +19,7 @@ Instructions
 latest tag available at `agilepy-recipe/tags <https://hub.docker.com/r/agilescience/agilepy-recipe/tags>`_.
 
 .. code-block::
-    
+
     export LATEST_TAG=BUILD25b6-v2
     docker pull agilescience/agilepy-recipe:$LATEST_TAG
 
@@ -43,7 +43,8 @@ The :code:`agile` directory is going to be shared between your local file system
 .. code-block::
 
     ./Agilepy/agilepy/scripts/bootstrap_dev.sh $LATEST_TAG
-    export CONTAINER_NAME="${LATEST_TAG}_$(whoami)"
+    export IMAGE_NAME="${LATEST_TAG}_$(whoami)"
+    export CONTAINER_NAME="agilepy_dev_$(whoami)"
 
 5. Create a Docker container with name :code:`agilepy_dev` from the Docker image.
 The following command binds port :code:`8888` of the container to port :code:`8090` of your local host,
@@ -52,7 +53,7 @@ It shares the :code:`agile` directory between host and container.
 
 .. code-block::
 
-    docker run --rm -t -d -p 8090:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$CONTAINER_NAME
+    docker run --rm -t -d -p 8090:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$IMAGE_NAME
 
 
 6. Enter the container with:
