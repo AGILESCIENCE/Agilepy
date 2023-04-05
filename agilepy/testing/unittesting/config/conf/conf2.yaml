@@ -56,8 +56,6 @@ model:
   isomode: 1
   galcoeff: 0.6, 0.8, 0.6, 0.8
   isocoeff: 10, 15, 10, 15
-  emin_sources: 100
-  emax_sources: 10000
   galmode2: 0
   galmode2fit: 0
   isomode2: 0

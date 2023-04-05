@@ -115,8 +115,7 @@ class AGAnalysisConfig():
             # int
             if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
-                                "fovbinnumber", "galmode", "isomode", "emin_sources", \
-                                "emax_sources", "loccl", "timeslot", "fluxcorrection", \
+                                "fovbinnumber", "galmode", "isomode", "loccl", "timeslot", "fluxcorrection", \
                                 "minimizerdefstrategy", "integratortype", "contourpoints",
                                 "galmode2", "galmode2fit", "isomode2", "isomode2fit", "lonpole" \
                                 ]:

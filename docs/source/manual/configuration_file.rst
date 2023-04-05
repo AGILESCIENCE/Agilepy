@@ -93,8 +93,6 @@ The method above will create the following configuration file:
     isomode: 1
     galcoeff: null
     isocoeff: null
-    emin_sources: 100
-    emax_sources: 10000
     galmode2: 0
     galmode2fit: 0
     isomode2: 0
@@ -386,8 +384,6 @@ following example show which iso/gal coefficients are assigned to which map.
    "isomode", "int", 1, "no",
    "galcoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
    "isocoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
-   "emin_sources", "energy min of the modelfile", "int", 100, "no"
-   "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
 galcoeff and isocoeff
 ^^^^^^^^^^^^^^^^^^^^^^

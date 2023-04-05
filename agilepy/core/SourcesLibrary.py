@@ -90,7 +90,7 @@ class SourcesLibrary:
         """
         Load sources from a catalog. For now it supports only the 2AGL catalog.
         TODO: support custom catalogs. In this scenario the user should provide 
-        the emin_sources and emax_sources values.
+        the emin_sources and emax_sources values as input args.
         """
         supportedCatalogs = ["2AGL"]
         
@@ -103,6 +103,7 @@ class SourcesLibrary:
         catEmin, catEmax = Parameters.getCatEminEmax(catalogName)
         uEmin = self.config.getOptionValue("emin")
         uEmax = self.config.getOptionValue("emax")
+        scaleFlux = False
         if catEmin != uEmin or catEmax != uEmax:
             scaleFlux = True
             self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
