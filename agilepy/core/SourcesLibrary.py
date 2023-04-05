@@ -77,38 +77,39 @@ class SourcesLibrary:
         self.sourcesBKP = None
         self.outdirPath = None
 
-    def loadSourcesFromCatalog(self, catalogName, rangeDist = (0, float("inf")), show=False):
-
-        supportedCatalogs = ["2AGL"]
-        scaleFlux = False
-
-        if catalogName == "2AGL":
-            catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.xml")
+    def searchCatalog(self, catalogName):
+        catPath = Utils._expandEnvVar(f"$AGILE/catalogs/{catalogName}.xml")
+        if not Path(catPath).exists():
+            catPath = Utils._expandEnvVar(f"$AGILE/catalogs/{catalogName}.multi")
             if not Path(catPath).exists():
-                catPath = Utils._expandEnvVar("$AGILE/catalogs/2AGL.multi")
+                self.logger.critical(self, f"The 2AGL catalog is not available. Please check the $AGILE environment variable.")
+                raise FileNotFoundError(f"The 2AGL catalog is not available. Please check the $AGILE environment variable.")
+        return catPath
 
-            cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-
-            # TODO: emin emax instead of emin_sources/emax_sources
-            uEmin = self.config.getOptionValue("emin_sources") # emin_source is relative to a custom catalog
-            uEmax = self.config.getOptionValue("emax_sources")
-
-            if cat2Emin != uEmin or cat2Emax != uEmax:
-                scaleFlux = True
-                self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({cat2Emin},{cat2Emax}). A scaling of the sources flux will be performed.")
-
-        elif catalogName == "4FGL":
-
-            scaleFlux = False
-            raise FileNotFoundError(f"The catalog {catalogName} is going to be supported soon. Supported catalogs: {supportedCatalogs}")
-
-        else:
-            self.logger.critical(self, "The catalog %s is not supported. Supported catalogs: %s", catalogName, ' '.join(supportedCatalogs))
+    def loadSourcesFromCatalog(self, catalogName, rangeDist=(0, float("inf")), show=False):
+        """
+        Load sources from a catalog. For now it supports only the 2AGL catalog.
+        TODO: support custom catalogs. In this scenario the user should provide 
+        the emin_sources and emax_sources values.
+        """
+        supportedCatalogs = ["2AGL"]
+        
+        if catalogName not in supportedCatalogs:
+            self.logger.critical(self, f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
             raise FileNotFoundError(f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
 
-        return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux = scaleFlux, show = show)
+        catPath = self.searchCatalog(catalogName)
 
-    def loadSourcesFromFile(self, filePath, rangeDist = (0, float("inf")), scaleFlux = False, show=False):
+        catEmin, catEmax = Parameters.getCatEminEmax(catalogName)
+        uEmin = self.config.getOptionValue("emin")
+        uEmax = self.config.getOptionValue("emax")
+        if catEmin != uEmin or catEmax != uEmax:
+            scaleFlux = True
+            self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
+
+        return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux=scaleFlux, catEmin=catEmin, catEmax=catEmax, show=show)
+
+    def loadSourcesFromFile(self, filePath, rangeDist=(0, float("inf")), scaleFlux=False, catEmin=None, catEmax=None, show=False):
 
         filePath = Utils._expandEnvVar(filePath)
 
@@ -140,8 +141,9 @@ class SourcesLibrary:
         filteredSources = [source for source in self._discardIfAlreadyExist(filteredSources)]
 
         if scaleFlux:
-
-            filteredSources = [source for source in self._scaleSourcesFlux(filteredSources)]
+            if catEmax is None or catEmin is None:
+                raise ValueError("catEmax and catEmin must be provided if scaleFlux is True.")
+            filteredSources = [self._scaleSourcesFlux(source, self.config.getOptionValue("emin"), self.config.getOptionValue("emax"), catEmin, catEmax) for source in filteredSources]
 
         if show:
             for s in filteredSources:
@@ -926,28 +928,17 @@ class SourcesLibrary:
             if distance >= rangeDist[0] and distance <= rangeDist[1]:
                 yield source
 
-    # TODO: replace yield with reutnr
-    def _scaleSourcesFlux(self, sources): # (self, source, emin, emax, catEmin, catEmax)
+    def _scaleSourcesFlux(self, source, emin, emax, catEmin, catEmax):
 
-        cat2Emin, cat2Emax = Parameters.getCat2EminEmax()
-        uEmin = self.config.getOptionValue("emin_sources") # emin 
-        uEmax = self.config.getOptionValue("emax_sources") # emax
+        si = source.spectrum.getSpectralIndex()
+        fl = source.spectrum.getVal("flux")
+        c = catEmin
+        d = catEmax
+        a = emin
+        b = emax
 
-        for source in sources:
+        p1 = fl * (si-1) / ( c ** (1-si) - d ** (1-si) )
+        f1 = (p1 / (si-1)) * ( a ** (1-si) - b ** (1-si) )
+        source.set("flux", {"value": f1})
 
-            si = source.spectrum.getSpectralIndex()
-
-            fl = source.spectrum.getVal("flux")
-
-            c = cat2Emin
-            d = cat2Emax
-            a = uEmin
-            b = uEmax
-
-            p1 = fl * (si-1) / ( c ** (1-si) - d ** (1-si) )
-
-            f1 = (p1 / (si-1)) * ( a ** (1-si) - b ** (1-si) )
-
-            source.set("flux", {"value": f1})
-
-            yield source
+        return source

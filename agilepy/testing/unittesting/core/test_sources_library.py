@@ -220,7 +220,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_load_source_from_catalog_with_scaling(self):
 
-        self.config.setOptions(emin_sources=10, emax_sources=1000)
+        self.config.setOptions(emin=10, emax=1000)
 
         sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
 

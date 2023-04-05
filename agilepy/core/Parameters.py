@@ -74,8 +74,11 @@ class Parameters:
 
 
     @staticmethod
-    def getCat2EminEmax():
-        return (100, 10000)
+    def getCatEminEmax(catalogName):
+        if catalogName == "2AGL":
+            return (100, 10000)
+        else:
+            raise Exception(f"Catalog {catalogName} is not supported")
 
     @staticmethod
     def checkEnergyBin(energyBin):
