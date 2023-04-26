@@ -1,10 +1,12 @@
 # Changelog
 
 ## Release 1.6.4 (not released yet)
-* BUILD25b6-v2, the base image has been refactored. The user inside the container can be set to the user on the host to 
-avoid file permission issues.
+* JupyterLab (notebook v7)
+* BUILD25b6-v3, the base image has been refactored. The user inside the container can be set to the user on the host to avoid file permission issues. The Root's python bindings are fixed. The unnecessary virtual environment has been removed. Ruby has been installed.
 * Documentation improved.
 * The Agilepy's python dependencies are now locked. 
+* The docker recipes are moved inside this repository. 
+
 
 ## Release 1.6.3
 * Science Tools BUILD25b6, with changes on scripts to make them compatible with Python 3
