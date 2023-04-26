@@ -62,14 +62,13 @@ It shares the :code:`agile` directory between host and container.
 
     docker exec -it $CONTAINER_NAME bash -l
 
-7. Inside the container activate the :code:`agilepy` virtual environment,
-move to the repository location and install the code in *editable* mode:
+7. Inside the container move to the repository location and install the depenencies and Agilepy in *editable* mode:
 
 .. code-block::
 
-    source $HOME/venv/agilepy/bin/activate
     cd $HOME/agile/Agilepy
-    pip install -e .
+    python3 -m pip install -r requirements.lock
+    python3 -m pip install -e .
 
 Now you have the Agilepy's latest development version installed in your environment.
 You can also edit it to implement your own agilepy features!
@@ -78,7 +77,6 @@ You can also edit it to implement your own agilepy features!
 
 .. code-block::
 
-    source $HOME/venv/agilepy/bin/activate
     cd $HOME/agile/Agilepy/docs
     make html
 
@@ -118,26 +116,19 @@ If you are working in a remote machine, add the :code:`--no-browser` option.
 
     docker stop agilepy_dev
 
+
+Example of development deployment
+=================================
+[This document](https://docs.google.com/document/d/1HSmHy6FeoKIlG9SX0YU8fuJSROswhCg3xsC94mgvnLo/edit) describes an example of development deployment of Agilepy on agilehost3. 
+
+
 Docker images
 =============
 To build the docker image of Agilepy clone the [Agilepy-recipe repository](https://github.com/AGILESCIENCE/Agilepy-recipe)
 
-.. Anaconda
-.. --------
-.. ::
-..     conda config --add channels conda-forge
-..     conda config --add channels plotly
-..     conda create -n agilepydev -c agilescience agiletools agilepy-dataset
-..     conda activate agilepydev
-..     git clone https://github.com/AGILESCIENCE/Agilepy.git
-..     cd Agilepy && git checkout develop
-..     conda env update -f environment.yml
-..     python setup.py develop
-
 
 Git flow
 ========
-
 
 Branches
 --------
