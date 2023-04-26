@@ -87,12 +87,13 @@ You can also edit it to implement your own agilepy features!
 
 ::
 
-    nohup jupyter notebook --ip="*" --port 8888 --no-browser --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
+    nohup jupyter-lab --ip="*" --port 8888 --no-browser --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyterlab_start.log 2>&1 &
+
 
 a. Use :code:`--NotebookApp.token='CUSTOM TOKEN'` or :code:`--NotebookApp.password='CUSTOM PASSWORD'` to set a custom authentication token or password.  
 b. The notebook will be available at `localhost:8090 <http://localhost:8090>`_
 c. If the remote machine needs authentication you can set an ssh tunnel with: :code:`ssh -N -f -L localhost:8090:localhost:8090 <user>@<remote_machine>`
-d. To obtain the Jupter access token from outside the container: :code:`docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter notebook list`
+d. To obtain the Jupter access token from outside the container: :code:`docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter server list`
 
 
 
