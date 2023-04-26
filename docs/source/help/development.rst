@@ -57,10 +57,9 @@ The :code:`agilepy_development` directory is going to be shared between your loc
 a. The command above shares the :code:`agilepy_development` directory between host and container.
 b. Mount any additional volumes you need to share with the container with the :code:`-v` option.
 c. The command above binds port :code:`8888` of the container to port :code:`$CONTAINER_JUPYTER_PORT` of your local host, change it if already in use.
-d. If you are working in a remote machine, add the :code:`--no-browser` option.
-e. If you have problem with the network connection, add the :code:`--network=host` option.
+d. If you have problem with the network connection, add the :code:`--network=host` option.
 
-6. Enter the container with:
+1. Enter the container with:
 
 .. code-block::
 
@@ -88,12 +87,12 @@ You can also edit it to implement your own agilepy features!
 
 ::
 
-    nohup jupyter notebook --ip="*" --port 8888 --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
+    nohup jupyter notebook --ip="*" --port 8888 --no-browser --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
 
 
 a. The notebook will be available at `localhost:8090 <http://localhost:8090>`_
 b. If the remote machine needs authentication you can set an ssh tunnel with: :code:`ssh -N -f -L localhost:8090:localhost:8090 <user>@<remote_machine>`
-c. You can obtain the Jupter access token with: `docker exec -it $CONTAINER_NAME bash -c "jupyter notebook list"` (outside the container)
+c. You can obtain the Jupter access token with: :code:`docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter notebook list` (outside the container)
 d. You can disable the authentication with :code:`--NotebookApp.token='' --NotebookApp.password=''` but it is not recommended.
 
 
