@@ -33,7 +33,7 @@ docker build \
 - <<EOF
 FROM ${INTERMEDIATE_TAG}
 USER root
-RUN usermod -u "${MY_UID}" flareadvocate && groupmod -g "${MY_GID}" flareadvocate
+RUN usermod -u "${MY_UID}" flareadvocate && groupmod -g --non-unique "${MY_GID}" flareadvocate
 USER flareadvocate
 EOF
 docker rmi $INTERMEDIATE_TAG
