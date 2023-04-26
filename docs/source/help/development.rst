@@ -23,9 +23,9 @@ latest tag available at `agilepy-recipe/tags <https://hub.docker.com/r/agilescie
     export LATEST_TAG=BUILD25b6-v2
     docker pull agilescience/agilepy-recipe:$LATEST_TAG
 
-2. Prepare your workspace by creating a directory :code:`agile`
+2. Prepare your workspace by creating a directory :code:`agilepy_development`
 and store its path in a variable :code:`$PATH_TO_AGILE`.
-The :code:`agile` directory is going to be shared between your local file system tree and the developement container's one.
+The :code:`agilepy_development` directory is going to be shared between your local file system tree and the developement container's one.
 
 .. code-block::
 
@@ -38,23 +38,27 @@ The :code:`agile` directory is going to be shared between your local file system
 
     git clone https://github.com/AGILESCIENCE/Agilepy.git && cd Agilepy && git switch develop && cd ..
 
-4. Execute the `boostrap_dev` script to change the user inside the container to your local user.
+4. Execute the `boostrap_dev.sh` script to change the user inside the container to your local user.
 
 .. code-block::
 
     ./Agilepy/agilepy/scripts/bootstrap_dev.sh $LATEST_TAG
     export IMAGE_NAME="${LATEST_TAG}_$(whoami)"
     export CONTAINER_NAME="agilepy_dev_$(whoami)"
+    export CONTAINER_JUPYTER_PORT=8090
 
-5. Create a Docker container with name :code:`agilepy_dev` from the Docker image.
-The following command binds port :code:`8888` of the container to port :code:`8090` of your local host,
-change it if already occupated.
-It shares the :code:`agile` directory between host and container.
+5. Create a Docker container with name :code:`$CONTAINER_NAME` from the Docker image.
 
 .. code-block::
 
-    docker run --rm -t -d -p 8090:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$IMAGE_NAME
+    docker run --rm -t -d -p $CONTAINER_JUPYTER_PORT:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$IMAGE_NAME
 
+
+    a. The command above shares the :code:`agilepy_development` directory between host and container.
+    b. Mount any additional volumes you need to share with the container with the :code:`-v` option.
+    c. The command above binds port :code:`8888` of the container to port :code:`$CONTAINER_JUPYTER_PORT` of your local host, change it if already in use.
+    d. If you are working in a remote machine, add the :code:`--no-browser` option.
+    e. If you have problem with the network connection, add the :code:`--network=host` option.
 
 6. Enter the container with:
 
@@ -62,11 +66,11 @@ It shares the :code:`agile` directory between host and container.
 
     docker exec -it $CONTAINER_NAME bash -l
 
-7. Inside the container move to the repository location and install the depenencies and Agilepy in *editable* mode:
+7. Inside the container move to the repository location and install Agilepy's Python dependencies and Agilepy in *editable* mode:
 
 .. code-block::
 
-    cd $HOME/agile/Agilepy
+    cd $HOME/agilepy_development/Agilepy
     python3 -m pip install -r requirements.lock
     python3 -m pip install -e .
 
@@ -80,46 +84,40 @@ You can also edit it to implement your own agilepy features!
     cd $HOME/agile/Agilepy/docs
     make html
 
-9. If you need to run a jupyter notebook you can run it in the binded port :code:`8888` from within the container. 
-Run the following command and then go to `localhost:8090 <http://localhost:8090>`_:
+9. If you need to start a Jupyter server run the following command:
 
 ::
 
-    nohup jupyter notebook --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
+    nohup jupyter notebook --ip="*" --port 8888 --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
 
- 
-You can disable the authentication with :code:`--NotebookApp.token='' --NotebookApp.password=''` but it is not recommended.
+    
+    a. The notebook will be available at `localhost:8090 <http://localhost:8090>`_
+    b. If the remote machine needs authentication you can set an ssh tunnel with: :code:`ssh -N -f -L localhost:8090:localhost:8090 <user>@<remote_machine>`
+    c. You can obtain the Jupter access token with: `docker exec -it $CONTAINER_NAME bash -c "jupyter notebook list"` (outside the container)
+    d. You can disable the authentication with :code:`--NotebookApp.token='' --NotebookApp.password=''` but it is not recommended.
 
-::
 
-    nohup jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
 
-If you are working in a remote machine, add the :code:`--no-browser` option.
-
-::
-
-    nohup jupyter notebook --no-browser --ip="*" --port 8888 --notebook-dir="$HOME/agile/Agilepy/agilepy/notebooks" > jupyter_notebook_start.log 2>&1 &
-
-11. The unit tests can be started with the following command:
+10. The unit tests can be started with the following command:
 
 ::
 
     start_coverage.sh
 
 
-12. When you need to exit the container just enter :code:`exit`.
+11. When you need to exit the container just enter :code:`exit`.
 
 
-13. To stop the container use
+12. To stop the container use
 
 .. code-block::
 
-    docker stop agilepy_dev
+    docker stop $CONTAINER_NAME
 
 
 Example of development deployment
 =================================
-[This document](https://docs.google.com/document/d/1HSmHy6FeoKIlG9SX0YU8fuJSROswhCg3xsC94mgvnLo/edit) describes an example of development deployment of Agilepy on agilehost3. 
+`This document <https://docs.google.com/document/d/1HSmHy6FeoKIlG9SX0YU8fuJSROswhCg3xsC94mgvnLo/edit>`_ describes an example of development deployment of Agilepy on agilehost3. 
 
 
 Docker images
