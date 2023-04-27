@@ -28,6 +28,7 @@
 
 import os
 import re
+import numpy as np
 # from tqdm import tqdm, trange  
 from tqdm.notebook import trange, tqdm
 from time import time
@@ -928,8 +929,7 @@ plotting:
             tmin = self.config.getOptionValue("tmin")
             tmax = self.config.getOptionValue("tmax")
             timetype = self.config.getOptionValue("timetype")
-            self.logger.info(self, f"Using the tmin {tmin}, tmax {tmax}, timetype {timetype} from the configuration file.")
-
+        
         if timetype == "MJD":
             if self.config.getOptionValue("userestapi"):
                 self.agdataset.downloadData(tmin, tmax, self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
@@ -940,15 +940,12 @@ plotting:
         if self.config.getOptionValue("userestapi"):    
             self.agdataset.downloadData(AstroUtils.time_agile_seconds_to_mjd(tmin), AstroUtils.time_agile_seconds_to_mjd(tmax), self.config.getOptionValue("datapath"), self.config.getOptionValue("evtfile"), self.config.getOptionValue("logfile"))
             
-        tmin = int(tmin)
-        tmax = int(tmax)
+        bins = [(t1, t1 + binsize) for t1 in np.arange(tmin, tmax, binsize)]
 
-        bins = [ (t1, t1+binsize) for t1 in range(tmin, tmax, binsize) ]
         tstart = bins[0][0]
         tstop = bins[-1][1]
 
-
-        self.logger.info(self,"[LC] Number of temporal bins: %d. tstart=%f tstop=%f", len(bins), tstart, tstop)
+        self.logger.info(self,f"[LC] Using the tmin {tmin}, tmax {tmax}, number of temporal bins: {len(bins)}.")
 
 
         processes = 1
@@ -968,7 +965,7 @@ plotting:
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
 
-        self.logger.info(self, "[LC] Number of processes: %d, Number of bins per process %d", processes, len(binsForProcesses[0]))
+        self.logger.info(self, f"[LC] Number of processes: {processes}, Number of bins per process {len(binsForProcesses[0])}")
 
         idx = 0
         for bin in tqdm(bins, desc="Temporal bin loop"):
@@ -981,7 +978,7 @@ plotting:
                 self.logger.warning(self, f"[LC] The last bin [{t1}, {t2}] of the light curve analysis falls outside the range of the available data [.. , {idxTmax}]. The binsize is reduced to {newbinsize} seconds, the new bin is [{t1}, {idxTmax}]")
                 t2 = idxTmax
 
-            self.logger.info(self,"[LC] Analysis of temporal bin: [%f,%f] %d/%d", t1, t2, idx+1, len(bins))
+            self.logger.warning(self,f"[LC] Analysis of temporal bin: [{t1},{t2}] {idx+1}/{len(bins)}")
 
             #binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
 
