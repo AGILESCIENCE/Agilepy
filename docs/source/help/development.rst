@@ -20,7 +20,7 @@ latest tag available at `agilepy-recipe/tags <https://hub.docker.com/r/agilescie
 
 .. code-block::
 
-    export LATEST_TAG=BUILD25b6-v2
+    export LATEST_TAG=BUILD25b6-v3
     docker pull agilescience/agilepy-recipe:$LATEST_TAG
 
 2. Prepare your workspace by creating a directory :code:`agilepy_development`
@@ -38,12 +38,20 @@ The :code:`agilepy_development` directory is going to be shared between your loc
 
     git clone https://github.com/AGILESCIENCE/Agilepy.git && cd Agilepy && git switch develop && cd ..
 
-4. Execute the `boostrap_dev.sh` script to change the user inside the container to your local user.
+4.a For Linux users. Execute the `boostrap_dev.sh` script to change the user inside the container to your local user.
 
 .. code-block::
 
     ./Agilepy/agilepy/scripts/bootstrap_dev.sh $LATEST_TAG
     export IMAGE_NAME="${LATEST_TAG}_$(whoami)"
+    export CONTAINER_NAME="agilepy_dev_$(whoami)"
+    export CONTAINER_JUPYTER_PORT=8090
+
+4.b. For Mac users. 
+
+.. code-block::
+
+    export IMAGE_NAME="${LATEST_TAG}"
     export CONTAINER_NAME="agilepy_dev_$(whoami)"
     export CONTAINER_JUPYTER_PORT=8090
 
