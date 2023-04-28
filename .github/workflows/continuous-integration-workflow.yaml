@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - master
-      #- feature-*
+      - deprecation_of_emin_emax
 
 jobs:
 
