@@ -167,8 +167,6 @@ output:
   verboselvl: {verboselvl}
 
 selection:  
-  emin: 100
-  emax: 10000
   tmin: {tmin}
   tmax: {tmax}
   timetype: {timetype}
@@ -253,7 +251,7 @@ plotting:
 
         You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
 
-        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file is different from the catalog's energy range,
+        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file (energybins parameter) is different from the catalog's energy range,
         the flux of every source will be scaled.
 
         Args:
@@ -627,7 +625,7 @@ plotting:
 
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
-                    configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
+
                     configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
 

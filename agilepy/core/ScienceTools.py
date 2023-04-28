@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import numpy as np
 from pathlib import Path
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
@@ -36,7 +37,7 @@ class CtsMapGenerator(ProcessWrapper):
         super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
-        return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
+        return ["evtfile", "outdir", "filenameprefix", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
 
@@ -64,8 +65,8 @@ class CtsMapGenerator(ProcessWrapper):
                       config.getOptionValue("proj"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                     ]
@@ -81,7 +82,7 @@ class ExpMapGenerator(ProcessWrapper):
 
 
     def getRequiredOptions(self):
-        return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "outdir", "filenameprefix", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
 
@@ -122,8 +123,8 @@ class ExpMapGenerator(ProcessWrapper):
                       config.getOptionValue("spectralindex"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                     ]
@@ -366,7 +367,7 @@ class AP(ProcessWrapper):
         super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
-        return ["logfile", "evtfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "evtfile", "outdir", "filenameprefix", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
         """
@@ -407,8 +408,8 @@ class AP(ProcessWrapper):
                       config.getOptionValue("spectralindex"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                       config.getOptionValue("filtercode"), \

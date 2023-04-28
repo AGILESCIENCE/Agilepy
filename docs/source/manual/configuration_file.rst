@@ -53,8 +53,6 @@ The method above will create the following configuration file:
     verboselvl: 2
 
   selection:  
-    emin: 100
-    emax: 10000
     tmin: 54935.0
     tmax: 54936.0
     timetype: MJD
@@ -201,8 +199,6 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    :header: "Option", "Description", "Type", "Default", "Required"
    :widths: 20, 100, 20, 20, 20
 
-   "emin", "Energy min in MeV", "int", 100, "no"
-   "emax", "Energy max in MeV", "int", 10000, "no"
    "glat", "Center of the ROI ('*latitude*' or *'b'*)", "float", "null", "yes"
    "glon", "Center of the ROI ('*longitude*' or *'l'*)", "float", "null", "yes"
    "tmin", "Minimum time (in MJD or TT)", "float", "null", "yes"

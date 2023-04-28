@@ -66,7 +66,6 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
         errors.update( ValidationStrategies._validateLOCCL(confDict) )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
-        errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
         errors.update( ValidationStrategies._validateTimetype(confDict))
         errors.update( ValidationStrategies._validateFluxcorrection(confDict) )
         #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
@@ -113,7 +112,7 @@ class AGAnalysisConfig():
             validType = ()
 
             # int
-            if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
+            if optionName in [  "verboselvl", "filtercode", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                                 "fovbinnumber", "galmode", "isomode", "loccl", "timeslot", "fluxcorrection", \
                                 "minimizerdefstrategy", "integratortype", "contourpoints",
