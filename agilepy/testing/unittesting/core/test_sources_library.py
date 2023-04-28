@@ -212,6 +212,8 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_load_source_from_catalog_without_scaling(self):
 
+        self.config.setOptions(energybins=[[100,300],[300,10000]])
+
         sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
 
         self.assertEqual(175, len(sources))
@@ -220,7 +222,7 @@ class SourcesLibraryUT(unittest.TestCase):
 
     def test_load_source_from_catalog_with_scaling(self):
 
-        self.config.setOptions(energybins=[[100,300],[300,1000]])
+        self.config.setOptions(energybins=[[10,300],[300,1000]])
 
         sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
 

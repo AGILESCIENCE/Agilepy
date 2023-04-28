@@ -150,7 +150,6 @@ class SourcesLibrary:
                 raise ValueError("catEmax and catEmin must be provided if scaleFlux is True.")
             scaledSources = []
             for source in filteredSources:
-                self.logger.warning(self, f"Scaling flux of {source.name} with emin={catEmin} and emax={catEmax} to emin={uEmin} and emax={uEmax}")
                 scaledSources.append(self._scaleSourcesFlux(source, uEmin, uEmax, catEmin, catEmax))
             filteredSources = scaledSources
 
