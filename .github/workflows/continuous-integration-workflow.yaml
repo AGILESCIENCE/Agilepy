@@ -20,7 +20,7 @@ jobs:
 
     container: 
       image: agilescience/agilepy-recipe:BUILD25b6-v3
-      options: --user 1023
+      options: --user 0
   
     steps:
       - uses: actions/checkout@v3
@@ -85,8 +85,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     container: 
-      image: agilescience/agilepy-recipe:BUILD25b6-v2
-      options: --user 1023
+      image: agilescience/agilepy-recipe:BUILD25b6-v3
+      options: --user 0
 
     steps:
 
