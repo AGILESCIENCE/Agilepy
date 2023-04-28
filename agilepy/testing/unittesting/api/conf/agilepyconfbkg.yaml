@@ -13,8 +13,7 @@ output:
   verboselvl: 2
 
 selection:
-  emin: 100
-  emax: 10000
+
   tmin: 434116800
   tmax: 434289532
   timetype: TT

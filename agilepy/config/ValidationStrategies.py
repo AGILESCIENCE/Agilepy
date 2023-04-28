@@ -270,7 +270,7 @@ class ValidationStrategies:
                 raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
             
             # int is a Number...
-            if (type(optionValue) in [int, float, np.float64]) and validType[0]==Number:
+            if (type(optionValue) in [int, float, np.int64, np.float64]) and validType[0]==Number:
                 pass
             
             elif type(optionValue) != validType[0]:

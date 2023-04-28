@@ -25,6 +25,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import numpy as np
 from pathlib import Path
 from inspect import signature
 from os.path import splitext
@@ -101,12 +102,12 @@ class SourcesLibrary:
         catPath = self.searchCatalog(catalogName)
 
         catEmin, catEmax = Parameters.getCatEminEmax(catalogName)
-        uEmin = self.config.getOptionValue("emin")
-        uEmax = self.config.getOptionValue("emax")
+        uEmin = np.matrix(self.config.getOptionValue("energybins")).min()
+        uEmax = np.matrix(self.config.getOptionValue("energybins")).max()
         scaleFlux = False
         if catEmin != uEmin or catEmax != uEmax:
             scaleFlux = True
-            self.logger.info(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
+            self.logger.warning(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
 
         return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux=scaleFlux, catEmin=catEmin, catEmax=catEmax, show=show)
 
@@ -141,10 +142,17 @@ class SourcesLibrary:
 
         filteredSources = [source for source in self._discardIfAlreadyExist(filteredSources)]
 
+        uEmin = np.matrix(self.config.getOptionValue("energybins")).min()
+        uEmax = np.matrix(self.config.getOptionValue("energybins")).max()
+
         if scaleFlux:
             if catEmax is None or catEmin is None:
                 raise ValueError("catEmax and catEmin must be provided if scaleFlux is True.")
-            filteredSources = [self._scaleSourcesFlux(source, self.config.getOptionValue("emin"), self.config.getOptionValue("emax"), catEmin, catEmax) for source in filteredSources]
+            scaledSources = []
+            for source in filteredSources:
+                scaledSources.append(self._scaleSourcesFlux(source, uEmin, uEmax, catEmin, catEmax))
+            filteredSources = scaledSources
+
 
         if show:
             for s in filteredSources:
