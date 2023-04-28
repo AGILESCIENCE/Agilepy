@@ -330,7 +330,7 @@ class ValidationStrategies:
         if confDict[section][option] is None:
             errors["selection/irf"] = "irf is None"
 
-        if confDict[section][option] not in Parameters.supported_irfs:
-            errors["selection/irf"] = f"irf = {confDict[section][option]} -> invalid value. Possible values {Parameters.supported_irfs}" 
+        if confDict[section][option] not in Parameters.getSupportedIRFs():
+            errors["selection/irf"] = f"irf = {confDict[section][option]} -> invalid value. Possible values {Parameters.getSupportedIRFs()}" 
 
         return errors    

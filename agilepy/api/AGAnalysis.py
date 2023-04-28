@@ -618,8 +618,8 @@ plotting:
                     emin = stepe[0]
                     emax = stepe[1]
 
-                    skymapL = Parameters.getSkyMap(emin, emax)
-                    skymapH = Parameters.getSkyMap(emin, emax)
+                    skymapL = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
+                    skymapH = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
                     fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
 
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
