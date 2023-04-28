@@ -40,6 +40,8 @@ class Parameters:
     edpmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.edp.gz")
     psdmatrix = os.path.join(datapath, "AG_GRID_G0017_SFMG_H0025.psd.gz")
 
+    supported_irfs = ["H0025"]
+
     matrixconf = sarmatrix + " " + edpmatrix + " " + psdmatrix
 
     energybins = [[10000,50000],

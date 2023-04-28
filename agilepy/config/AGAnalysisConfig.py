@@ -73,6 +73,7 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateFovradmax(confDict) )
         errors.update( ValidationStrategies._validateDQ(confDict) )
         errors.update(ValidationStrategies._validateDatapath(confDict))
+        errors.update(ValidationStrategies._validateIrf(confDict, "selection", "irf"))
 
 
         return errors
@@ -135,7 +136,7 @@ class AGAnalysisConfig():
             # String
             elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
                                 "timetype", "timelist", "projtype", "proj", "modelfile", "minimizertype", \
-                                "minimizeralg", "maplistgen"]:
+                                "minimizeralg", "maplistgen", "irf"]:
 
                 validType = (str, 0)
 

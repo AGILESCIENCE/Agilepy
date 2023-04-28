@@ -176,6 +176,7 @@ selection:
   glat: {glat}
   proj: ARC
   timelist: None
+  irf: H0025
   filtercode: 5
   fovradmin: 0
   fovradmax: 60
