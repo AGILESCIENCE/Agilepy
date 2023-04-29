@@ -82,12 +82,14 @@ class AGAnalysis(AGBaseAnalysis):
         """
         super().__init__(configurationFilePath)
         
+        self.logger = self.agilepyLogger.getLogger(__name__)
+
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
         if sourcesFilePath:
-
+            self.logger.info(f"Loading sources from file: {sourcesFilePath}")
             self.sourcesLibrary.loadSourcesFromFile(sourcesFilePath)
 
         # MapList Observes the observable AgilepyConfig
@@ -103,9 +105,11 @@ class AGAnalysis(AGBaseAnalysis):
         self.multiTool = Multi("AG_multi", self.logger)
 
         if self.config.getOptionValue("userestapi"):
+            self.logger.info("Using REST API")
             self.agdataset = AGDataset(self.logger)
             self.agdataset.agilecoverage()
 
+        self.logger.info("AGAnalysis initialized")
 
     def destroy(self):
         """ It clears the list of sources and the current maplist file.
@@ -520,7 +524,7 @@ plotting:
     # analysis                                                                 #
     ############################################################################
 
-    def generateMaps(self, config = None, maplistObj = None, dqdmOff = False):
+    def generateMaps(self, config = None, maplistObj = None, tqdmOff = False):
         """It generates (one or more) counts, exposure, gas and int maps and a ``maplist file``.
 
         The method's behaviour varies according to several configuration options (see docs :ref:`configuration-file`).
@@ -591,10 +595,10 @@ plotting:
         # Change the maplist file path
         maplistObjBKP.setFile(outputDir)
 
-        if not dqdmOff:
-            print("Generating maps..please wait.")
+        if not tqdmOff:
+            self.logger.info("Generating maps..please wait.")
     
-        for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=dqdmOff, leave=dqdmOff):
+        for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=tqdmOff, leave=tqdmOff):
 
             if fovbinnumber == 1:
                 bincenter = 30
@@ -604,7 +608,7 @@ plotting:
                 bincenter, fovmin, fovmax = AGAnalysis._updateFovMinMaxValues(fovbinnumber, initialFovmin, initialFovmax, stepi+1)
 
 
-            for bgCoeffIdx, stepe in tqdm(enumerate(energybins), desc=f"Energy bins loop", disable=dqdmOff, leave=dqdmOff):
+            for bgCoeffIdx, stepe in tqdm(enumerate(energybins), desc=f"Energy bins loop", disable=tqdmOff, leave=tqdmOff):
 
                 if Parameters.checkEnergyBin(stepe):
 
@@ -661,7 +665,7 @@ plotting:
                                             str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
                                         )
                 else:
-                    self.logger.warning(self,"Energy bin [%s, %s] is not supported. Map generation skipped.", stepe[0], stepe[1])
+                    self.logger.warning(f"Energy bin [{stepe[0]}, {stepe[1]}] is not supported. Map generation skipped.")
 
 
         outdir = configBKP.getOptionValue("outdir")
@@ -670,9 +674,9 @@ plotting:
 
         maplistFilePath = maplistObjBKP.writeToFile()
 
-        self.logger.info( "Maplist file created in %s", maplistFilePath)
+        self.logger.info(f"Maplist file created in {maplistFilePath}")
 
-        self.logger.info( "Took %f seconds.", time() - timeStart)
+        self.logger.info(f"Took {time() - timeStart} seconds.")
 
         return maplistFilePath
 
@@ -697,7 +701,7 @@ plotting:
 
 
         """
-        print("Computing background coefficients..please wait.")
+        self.logger.info("Computing background coefficients..please wait.")
 
         timeStart = time()
 
@@ -737,9 +741,6 @@ plotting:
         configBKP.attach(maplistObj, "galcoeff")
         configBKP.attach(maplistObj, "isocoeff")
 
-        print(maplistObj)
-
-
 
         ################################################################# times
         tmin = self.config.getOptionValue("tmin")
@@ -760,7 +761,8 @@ plotting:
         elif pastTimeWindow == 0 and excludeTmaxTmin:
             raise SelectionParamNotSupported("Cannot compute coeffs with pasttimewindow 0 and excludetmaxtmin True")
 
-        self.logger.info( "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
+        self.logger.info(f"Temporal interval -> tmin: {tmin} tmax: {tmax} type: {timetype}")
+
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
 
@@ -880,7 +882,7 @@ plotting:
         sourceFiles = [product for product in products if product and ".source" in product]
 
         if len(sourceFiles) == 0:
-            self.logger.warning(self, "The number of .source files is 0.")
+            self.logger.warning( "The number of .source files is 0.")
 
         self.logger.info("AG_multi produced: %s", sourceFiles)
 
@@ -910,7 +912,7 @@ plotting:
         Returns:
             The absolute path to the light curve data output file.
         """
-        print("Computing light curve bins..please wait.")
+        self.logger.info("Computing light curve bins..please wait.")
 
         timeStart = time()
 
@@ -964,10 +966,10 @@ plotting:
 
             if t2 > idxTmax:
                 newbinsize = idxTmax - t1
-                self.logger.warning(self, f"[LC] The last bin [{t1}, {t2}] of the light curve analysis falls outside the range of the available data [.. , {idxTmax}]. The binsize is reduced to {newbinsize} seconds, the new bin is [{t1}, {idxTmax}]")
+                self.logger.warning( f"[LC] The last bin [{t1}, {t2}] of the light curve analysis falls outside the range of the available data [.. , {idxTmax}]. The binsize is reduced to {newbinsize} seconds, the new bin is [{t1}, {idxTmax}]")
                 t2 = idxTmax
 
-            self.logger.warning(self,f"[LC] Analysis of temporal bin: [{t1},{t2}] {idx+1}/{len(bins)}")
+            self.logger.warning(f"[LC] Analysis of temporal bin: [{t1},{t2}] {idx+1}/{len(bins)}")
 
             #binOutDir = str(lcAnalysisDataDir.joinpath(f"bin_{t1}_{t2}"))
 
@@ -980,7 +982,7 @@ plotting:
 
             maplistObj = MapList(self.logger)
 
-            maplistFilePath = self.generateMaps(config=configBKP, maplistObj=maplistObj, dqdmOff=False)
+            maplistFilePath = self.generateMaps(config=configBKP, maplistObj=maplistObj, tqdmOff=False)
 
             configBKP.setOptions(filenameprefix="lc_analysis", outdir = binOutDir)
             configBKP.setOptions(tmin = t1, tmax = t2, timetype = "TT")
@@ -991,7 +993,7 @@ plotting:
         processes = []
         for pID, pInputs in enumerate(binsForProcesses):
             logFilenamePrefix += f"_thread_{pID}"
-            print("generating process...(%d). Chunk size for process: %d"%(pID, len(pInputs)))
+            self.logger.info("generating process...(%d). Chunk size for process: %d"%(pID, len(pInputs)))
             p = Process(target=self._computeLcBin, args=(pID, pInputs, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl))
             processes.append((pID,p,len(pInputs)))
 
@@ -1069,7 +1071,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating plot..please wait.")
+        self.logger.info("Generating plot..please wait.")
 
         return self._displaySkyMaps("CTS",  singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1094,7 +1096,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating plot..please wait.")
+        self.logger.info("Generating plot..please wait.")
 
         return self._displaySkyMaps("EXP", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1119,7 +1121,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating plot..please wait.")
+        self.logger.info("Generating plot..please wait.")
 
         return self._displaySkyMaps("GAS", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1144,7 +1146,7 @@ plotting:
         Returns:
             It returns the paths to the image files written on disk.
         """
-        print("Generating plot..please wait.")
+        self.logger.info("Generating plot..please wait.")
 
         return self._displaySkyMaps("INT", singleMode, maplistFile, smooth, saveImage, fileFormat, title, cmap, regFiles, regFileColors, catalogRegions, catalogRegionsColor, normType)
 
@@ -1165,18 +1167,16 @@ plotting:
             It returns the lightcurve plot
 
         """
-        print("Generating plot..please wait.")
-
         if analysisName is None:
-            self.logger.warning(self, "analysisName cannot be null.")
+            self.logger.warning( "analysisName cannot be null.")
             return False
 
         if analysisName not in ["mle", "ap"]:
-            self.logger.warning(self, "The analysisName={} is not supported. You can choose between 'mle' and 'ap'.")
+            self.logger.warning( "The analysisName={} is not supported. You can choose between 'mle' and 'ap'.")
             return False
 
         if (filename is None) and (self.lightCurveData["mle"] is None) and (self.lightCurveData["ap"] is None):
-            self.logger.warning(self, "The light curve has not been generated yet and the filename is None. Please, call lightCurveMLE() or aperturePhotometry() or pass a valid filename")
+            self.logger.warning( "The light curve has not been generated yet and the filename is None. Please, call lightCurveMLE() or aperturePhotometry() or pass a valid filename")
             return False
 
 
@@ -1188,11 +1188,11 @@ plotting:
 
 
         if analysisName == "mle" and self.lightCurveData["mle"] is None:
-            self.logger.warning(self, "The light curve has not been generated yet. Please, lightCurveMLE().")
+            self.logger.warning( "The light curve has not been generated yet. Please, lightCurveMLE().")
             return False
 
         if analysisName == "ap" and self.lightCurveData["ap"] is None:
-            self.logger.warning(self, "The light curve has not been generated yet. Please, aperturePhotometry().")
+            self.logger.warning( "The light curve has not been generated yet. Please, aperturePhotometry().")
             return False
 
         if self.lightCurveData[analysisName] is not None and analysisName=="mle":
@@ -1356,13 +1356,12 @@ plotting:
 
                     timecounter += 1
 
-        self.logger.info( f"\n{lcData}")
 
         return lcData
 
     @staticmethod
     def _updateFovMinMaxValues(fovbinnumber, fovradmin, fovradmax, stepi):
-        # print("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
+        # self.logger.info("\nfovbinnumber {}, fovradmin {}, fovradmax {}, stepi {}".format(fovbinnumber, fovradmin, fovradmax, stepi))
         A = float(fovradmax) - float(fovradmin)
         B = float(fovbinnumber)
         C = stepi
@@ -1373,7 +1372,7 @@ plotting:
         fovmin = bincenter - ( A / B ) / 2.0
         fovmax = bincenter + ( A / B ) / 2.0
 
-        # print("bincenter {}, fovmin {}, fovmax {}".format(bincenter, fovmin, fovmax))
+        # self.logger.info("bincenter {}, fovmin {}, fovmax {}".format(bincenter, fovmin, fovmax))
 
         return bincenter, fovmin, fovmax
 
@@ -1428,9 +1427,7 @@ plotting:
 
         number_str = str(number)
         exponent = pattern.findall(number_str)
-        #print("\nNumber: ", number)
-        #print("Number_str: ", number_str)
-        #print("Exponent:",exponent)
+
         fixExponentString = f"e-0{abs(fixedExponent)}"
 
         #print("fixExponentString:",fixExponentString)
@@ -1591,7 +1588,7 @@ plotting:
     def _displaySkyMaps(self, skyMapType, singleMode, maplistFile=None, smooth=4.0, saveImage=False, fileFormat=".png", title=None, cmap="CMRmap", regFiles=None, regFileColors=[], catalogRegions=None, catalogRegionsColor=None, normType="linear"):
 
         if self.currentMapList.getFile() is None and maplistFile is None:
-            self.logger.warning(self, "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
+            self.logger.warning( "No sky maps have already been generated yet and maplistFile is None. Please, call generateMaps() or pass a valid maplistFile.")
             return False
 
         elif self.currentMapList.getFile() is None and maplistFile is not None:
@@ -1634,7 +1631,7 @@ plotting:
 
 
         if len(files) == 1 and singleMode is True:
-            self.logger.warning(self, "singleMode has been turned off because only one map is going to be displayed.")
+            self.logger.warning( "singleMode has been turned off because only one map is going to be displayed.")
             singleMode = False
 
 

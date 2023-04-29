@@ -193,7 +193,7 @@ output:
         self.logger.info( "%d log files satisfy the interval %f-%f", len(logFiles), tmin, tmax)
 
         if not logFiles:
-            self.logger.warning(self, "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
+            self.logger.warning( "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
             return [], [], [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, None
 
 

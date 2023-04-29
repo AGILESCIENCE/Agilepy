@@ -24,8 +24,8 @@
 
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from colorama import Fore, Back, Style
 
-from agilepy.core.AgilepyLogger import ColoredFormatter 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.source.Spectrum import Spectrum
 from agilepy.core.source.SpatialModel import SpatialModel
@@ -495,19 +495,26 @@ class PointSource(Source):
         return willChange
 
     def bold(self, ss):
-        return ColoredFormatter.BOLD + ss + ColoredFormatter.reset
+        return '\033[1m' + ss + '\033[0m'
 
     def colorRed(self, ss):
-        return ColoredFormatter.RED + ss + ColoredFormatter.reset
+        return Fore.RED + ss + Fore.RESET
 
     def colorBlue(self, ss):
-        return ColoredFormatter.BLUE + ss + ColoredFormatter.reset
+        return Fore.BLUE + ss + Fore.RESET
+    
+    def important(self, ss):
+        return Style.BRIGHT + Fore.RED + ss + Style.RESET_ALL
 
     def __str__title(self):
         strr = '\n-----------------------------------------------------------'
         strr += self.bold(f'\n Source name: {self.name} ({type(self).__name__})')
-        if self.multiAnalysis.getVal("multiSqrtTS") is not None:
-            strr += self.bold(" => sqrt(ts): "+str(self.multiAnalysis.getVal("multiSqrtTS")))
+        multiSqrtTs = self.multiAnalysis.getVal("multiSqrtTS")
+        if multiSqrtTs is not None:
+            if multiSqrtTs > 4:
+                strr += self.important(" => sqrt(ts): "+str(multiSqrtTs))            
+            else:
+                strr += self.bold(" => sqrt(ts): "+str(multiSqrtTs))
         return strr        
     
     def __str__spectrumType(self):

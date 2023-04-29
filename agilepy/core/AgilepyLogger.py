@@ -24,14 +24,12 @@
 
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import sys
 import logging
 from pathlib import Path
 from time import strftime
 from os.path import expandvars
-
-from agilepy.core.CustomExceptions import LoggerTypeNotFound
+from colorama import Fore, Back, Style
 
 class Singleton(type):
     '''Make sure there is a single instance of the logger class at any time.'''
@@ -42,39 +40,25 @@ class Singleton(type):
                 Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
     
-
-class AgilepyFormatter:
-    
-    format = "%(asctime)s [%(name)s] %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    
        
-# https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
+# https://gist.github.com/joshbode/58fac7ababc700f51e2a9ecdebe563ad
 class ColoredFormatter(logging.Formatter):
 
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    def __init__(self, *args, colors=None, **kwargs):
+        """Initialize the formatter with specified format strings."""
 
-    reset = '\033[0m'
-    
+        super().__init__(*args, **kwargs)
 
-    FORMATS = {
-        logging.DEBUG: OKBLUE + AgilepyFormatter.format + reset,
-        logging.INFO: AgilepyFormatter.format,
-        logging.WARNING: WARNING + AgilepyFormatter.format + reset,
-        logging.ERROR: FAIL + AgilepyFormatter.format + reset,
-        logging.CRITICAL: FAIL + AgilepyFormatter.format + reset
-    }
+        self.colors = colors if colors else {}
 
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)    
+    def format(self, record) -> str:
+        """Format the specified record as text."""
+
+        record.color = self.colors.get(record.levelname, '')
+        record.reset = Style.RESET_ALL
+
+        return super().format(record)
+
 
 
 
@@ -82,27 +66,51 @@ class AgilepyLogger(metaclass=Singleton):
     '''This class defines the logging format, level and output.'''
 
     def __init__(self):
-        self.formatter = None
+        self.formatter = ColoredFormatter(
+            '{asctime} |{color} {levelname:8} {reset}| {name} | {message} | ({filename}:{lineno})',
+            style='{', datefmt='%Y-%m-%d %H:%M:%S',
+            colors={
+                'DEBUG': Fore.CYAN,
+                'INFO': Fore.GREEN,
+                'WARNING': Fore.YELLOW,
+                'ERROR': Fore.RED,
+                'CRITICAL': Fore.RED + Back.WHITE + Style.BRIGHT,
+            }
+        )
         self.logLevel = None
         self.rootLogsDir = None
         self.today = strftime('%Y%m%d')
         self.now = strftime('%H%M%S')
-    
-    def setLogger(self, rootPath=None, logLevel="DEBUG"):
+
+    @staticmethod
+    def mapLogLevel(verboseLvl):
+        if verboseLvl == 0:
+            return logging.ERROR
+        elif verboseLvl == 1:
+            return logging.WARNING
+        elif verboseLvl == 2:
+            return logging.INFO
+        elif verboseLvl == 3:
+            return logging.DEBUG
+        else:
+            raise ValueError(f"Invalid value for verboseLvl ({verboseLvl}). Allowed values are 0 (ERROR), 1 (WARNING), 2 (INFO), 3 (DEBUG)")
+
+
+    def setLogger(self, rootPath=None, logLevel=3):
         """
         Must be called once, before getLogger()
         It sets the root directory of the logs, the log level and the formatter. 
         It defines a common stream handler for all the loggers. (TODO: think about it in a multiprocessing/multithread context)
         """
         if rootPath is not None:
-            self.rootLogsDir = Path(expandvars(rootPath))
+            self.rootLogsDir = Path(expandvars(rootPath)).joinpath("logs")
             self.rootLogsDir.mkdir(parents=True, exist_ok=True)
         
-        self.logLevel = logLevel
+        self.logLevel = AgilepyLogger.mapLogLevel(logLevel)
         
-        self.sh = logging.StreamHandler()
+        self.sh = logging.StreamHandler(sys.stdout)
         self.sh.setLevel(self.logLevel)
-        self.sh.setFormatter(ColoredFormatter())
+        self.sh.setFormatter(self.formatter)
 
         print(f"Log level set to {self.logLevel} and output to {self.rootLogsDir}")
         return self
@@ -147,11 +155,11 @@ class AgilepyLogger(metaclass=Singleton):
                 loggerName += f"_{id}"
 
             loggerOutputDir = str(self.rootLogsDir.joinpath(loggerName+".log"))
-            print("Log file: ", loggerOutputDir)
+
             fh = logging.FileHandler(loggerOutputDir)
                 
             fh.setLevel(self.logLevel)
-            fh.setFormatter(logging.Formatter(AgilepyFormatter.format))
+            fh.setFormatter(self.formatter)
 
             # avoid duplicating handlers 
             if fh in logger.handlers:

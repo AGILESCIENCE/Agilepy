@@ -147,6 +147,6 @@ class AGRest:
             raise FileNotFoundError
 
         if outpath_size == 0:
-            self.logger.warning(self, f"The downloaded data {outpath} is empty.")
+            self.logger.warning( f"The downloaded data {outpath} is empty.")
 
         return outpath

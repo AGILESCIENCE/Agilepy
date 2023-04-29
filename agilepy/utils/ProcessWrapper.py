@@ -81,7 +81,7 @@ class ProcessWrapper(ABC):
         requiredProductsNumber = len(requiredProducts)
 
         if count == requiredProductsNumber:
-            self.logger.warning(self, f"{count} required products already exist.")
+            self.logger.warning( f"{count} required products already exist.")
             return True
         elif count == 0:
             self.logger.debug( "No products exist yet")
@@ -94,14 +94,14 @@ class ProcessWrapper(ABC):
     
     def call(self):
 
-        self.logger.info( "Science tool called!")
+        self.logger.debug( "Science tool called!")
 
         if not self.args:
-            self.logger.warning(self, "The 'args' attribute has not been set! Please, call setArguments() before call()! ")
+            self.logger.warning( "The 'args' attribute has not been set! Please, call setArguments() before call()! ")
             return []
 
         if self.checkIfRequiredProductsAlreadyExist():
-            self.logger.warning(self, f"The {self.exeName} will not be called. Products already exists: \n{self.products}")
+            self.logger.warning( f"The {self.exeName} will not be called. Products already exists: \n{self.products}")
             return self.products
 
         self.logger.debug( f"outputDir={self.outputDir}")
@@ -144,7 +144,7 @@ class ProcessWrapper(ABC):
                 products.append(product)
 
 
-        self.logger.info( f"Science tool {self.exeName} produced:\n {products}")
+        self.logger.debug( f"Science tool {self.exeName} produced:\n {products}")
 
         return products
 

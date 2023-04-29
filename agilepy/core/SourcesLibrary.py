@@ -696,17 +696,17 @@ class SourcesLibrary:
             glon = multiL
             glat = multiB
 
-            self.logger.info( f"the parameters are multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
+            self.logger.debug(f"Parameters: multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
 
             if glon == -1 or glat == -1 or position == "peak" or glon == None or glat == None:
                 glon = multiLPeak
                 glat = multiBPeak
-                self.logger.info( f"ellipse values not available, I got peak values")
+                self.logger.debug(f"Ellipse values not available, I got peak values")
             
             if glon == -1 or glat == -1 or position == "initial" or glon == None or glat == None:
                 glon = startL
                 glat = startB
-                self.logger.info( f"ellipse and peak values not available, I got initial values")
+                self.logger.debug(f"Ellipse and peak values not available, I got initial values")
            
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "

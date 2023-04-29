@@ -189,7 +189,7 @@ class PlottingUtils(metaclass=Singleton):
         """
 
         if len(separations) == 0:
-            self.logger.warning(self, "No data to plot")
+            self.logger.warning( "No data to plot")
             return None
 
         self.logger.info( "Loading visibility plot...")
@@ -247,7 +247,7 @@ class PlottingUtils(metaclass=Singleton):
         # self._updateRC()
 
         if len(separations) == 0:
-            self.logger.warning(self, "No data to plot")
+            self.logger.warning( "No data to plot")
             return None
 
         deltat = tf_tt - ti_tt
@@ -381,7 +381,7 @@ class PlottingUtils(metaclass=Singleton):
             ax.set_ylabel('Declination' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         else:
-            self.logger.warning(self, f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
+            self.logger.warning( f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
 
         ax.grid(b=True, color='white', ls='solid')
 
@@ -590,7 +590,6 @@ class PlottingUtils(metaclass=Singleton):
         indexDatesDF = pd.read_csv(indexFilePath, header=None, sep=" ", names=["name","tmin", "tmax", "type"])
 
         dateformat = "%Y-%m-%d"
-        print(indexDatesDF)
 
         indexDatesDF["tmin"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmin"])
         indexDatesDF["tmax"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmax"])
@@ -603,8 +602,6 @@ class PlottingUtils(metaclass=Singleton):
                 datetime.datetime.strptime(
                         tmax, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmax in indexDatesDF["tmax"]]
         
-        print(indexDatesDF["tmin"], indexDatesDF["tmax"])
-
 
         fig, ax = plt.subplots(1, 1)
         #ax2 = ax.twinx()
@@ -633,7 +630,6 @@ class PlottingUtils(metaclass=Singleton):
         
         if saveImage:
             filePath = join(self.outdir, "data_availability.png")
-            print("filePath",filePath)
             self.logger.info(f"Plot at: {filePath}")
             fig.savefig(filePath)
             return filePath

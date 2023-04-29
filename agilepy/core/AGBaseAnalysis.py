@@ -55,10 +55,10 @@ class AGBaseAnalysis:
 
         Path(self.outdir).mkdir(parents=True, exist_ok=True)
 
-        logger = AgilepyLogger()
-        logger.setLogger(self.outdir, self.config.getConf("output","verboselvl"))
+        self.agilepyLogger = AgilepyLogger()
+        self.agilepyLogger.setLogger(self.outdir, self.config.getConf("output","verboselvl"))
 
-        self.plottingUtils = PlottingUtils(self.config, self.logger)
+        self.plottingUtils = PlottingUtils(self.config, self.agilepyLogger.getLogger(__name__, "PlottingUtils"))
 
         if "AGILE" not in os.environ:
             raise AGILENotFoundError("$AGILE is not set.")
@@ -77,7 +77,7 @@ class AGBaseAnalysis:
             return str(self.outdir)
         
         else:
-            self.logger.warning(self, "OutputDirectory not found")
+            self.logger.warning( "OutputDirectory not found")
     
 
 
@@ -99,7 +99,7 @@ class AGBaseAnalysis:
             self.logger.reset()
             rmtree(outDir)
         else:
-            self.logger.warning(self,"Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
+            self.logger.warning("Output directory %s exists? %r is dir? %r", str(outDir), outDir.exists(), outDir.is_dir())
             return False
 
         return True

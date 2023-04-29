@@ -206,7 +206,7 @@ class AGDataset:
         This method can be extended to handle the case of partial missing data
         """
         if not queryFilepath.exists():
-            self.logger.warning(self, f"Query file {queryFilepath} does not exists")
+            self.logger.warning( f"Query file {queryFilepath} does not exists")
             return DataStatus.MISSING
 
         tminUtc = AstroUtils.time_mjd_to_fits(tmin) # YYYY-MM-DDTHH:mm:ss

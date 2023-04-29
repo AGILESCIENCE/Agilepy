@@ -112,7 +112,7 @@ class APDisplayAGILEFermiComparison:
 
         # Casistiche FERMI
         if "Sign" in data_column_name or "flux" in data_column_name:
-            self.logger.warning(self, f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
+            self.logger.warning( f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
             data_column_name = "rate"
 
         if data_column_name == "cts":
