@@ -60,6 +60,7 @@ The method above will create the following configuration file:
     glat: -0.2689
     proj: ARC
     timelist: None
+    irf: H0025
     filtercode: 5
     fovradmin: 0
     fovradmax: 60
@@ -209,6 +210,7 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | format to generate maps
    | integrated within a time window.
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
+   "irf", "The IRF to be used for the analysis.", "str", "H0025", "no"
    "filtercode", "filtercode = 5 select G filtercode = 0 select G+L+S", "int", 5, "no"
    "fovradmin", "fovradmin < fovradmax", "int", 0, "no"
    "fovradmax", "fovradmax > fovradmin (dq = 0 is necessary for setting)", "int", 60, "no"

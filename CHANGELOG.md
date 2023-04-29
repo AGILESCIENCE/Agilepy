@@ -6,6 +6,8 @@
 * Documentation improved.
 * The Agilepy's python dependencies are now locked. 
 * The docker recipes are moved inside this repository. 
+* The "emin" and "emax" configuration parameters under "selection" have been deprecated. They are automatically calculated from the "energybins" configuration parameter.
+* The "irf" configuration parameter has been introduced. It is used to select the IRF to be used in the analysis. The default value is "default".
 
 
 ## Release 1.6.3

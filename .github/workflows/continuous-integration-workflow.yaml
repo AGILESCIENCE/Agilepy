@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - selection_of_response_matrices
       - deprecation_of_emin_emax
 
 jobs:

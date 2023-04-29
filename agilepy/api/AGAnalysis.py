@@ -174,6 +174,7 @@ selection:
   glat: {glat}
   proj: ARC
   timelist: None
+  irf: H0025
   filtercode: 5
   fovradmin: 0
   fovradmax: 60
@@ -615,8 +616,8 @@ plotting:
                     emin = stepe[0]
                     emax = stepe[1]
 
-                    skymapL = Parameters.getSkyMap(emin, emax)
-                    skymapH = Parameters.getSkyMap(emin, emax)
+                    skymapL = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
+                    skymapH = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
                     fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
 
                     self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
