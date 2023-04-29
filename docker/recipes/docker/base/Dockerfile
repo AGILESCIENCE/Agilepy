@@ -78,11 +78,12 @@ RUN mkdir $PREFIX/agiletools && cd $PREFIX/agiletools && \
     && git checkout BUILD25b3 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
     && rm -rf $AGILE/AGILE-GRID-ScienceTools-Setup
 
-RUN cd $AGILE/scripts && python3 -m pip install .
+#RUN cd $AGILE/scripts && python3 -m pip install .
 
 ENV PATH=$AGILE/scripts/extendesources:$PATH 
-ENV LD_LIBRARY_PATH=$AGILE/lib:$LD_LIBRARY_PATH
-
+ENV LD_LIBRARY_PATH=$AGILE/lib:$MCALSW/lib:$LD_LIBRARY_PATH
+ENV MCALSW=$AGILE/mcalsw
+ENV PYTHONPATH=$AGILE/scripts/ap:$PYTHONPATH 
 
 # ----------------------------------  Download the test dataset ---------------------------------- 
 RUN mkdir -p $AGILE/agilepy-test-data && \
