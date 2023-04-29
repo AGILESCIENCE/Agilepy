@@ -139,7 +139,7 @@ class PlottingUtils(metaclass=Singleton):
             skymaptype = suffix.split(".")[1]
             filename = self.outdir.joinpath(prefix+"_"+skymaptype+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(str(filename))
-            self.logger.info(self, "Produced: %s", filename)
+            self.logger.info( "Produced: %s", filename)
             return str(filename)
         else:
             plt.show()
@@ -175,7 +175,7 @@ class PlottingUtils(metaclass=Singleton):
             _, filename = ntpath.split(fitsFilepath)
             filename = self.outdir.joinpath(filename+"_"+strftime("%Y%m%d-%H%M%S")).with_suffix(fileFormat)
             plt.savefig(filename)
-            self.logger.info(self, "Produced: %s", filename)
+            self.logger.info( "Produced: %s", filename)
             return str(filename)
         else:
             plt.show()
@@ -189,10 +189,10 @@ class PlottingUtils(metaclass=Singleton):
         """
 
         if len(separations) == 0:
-            self.logger.warning(self, "No data to plot")
+            self.logger.warning( "No data to plot")
             return None
 
-        self.logger.info(self, "Loading visibility plot...")
+        self.logger.info( "Loading visibility plot...")
         # total_obs = (np.max(tf_mjd)-np.min(ti_mjd))//1 # in days
 
         meantimes = (ti_mjd+tf_mjd)/2. # for plot
@@ -236,7 +236,7 @@ class PlottingUtils(metaclass=Singleton):
 
         if saveImage:
             filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
-            self.logger.info(self, "Visibility plot at: %s", filePath)
+            self.logger.info( "Visibility plot at: %s", filePath)
             f.savefig(filePath)
         else:
             plt.show()
@@ -247,7 +247,7 @@ class PlottingUtils(metaclass=Singleton):
         # self._updateRC()
 
         if len(separations) == 0:
-            self.logger.warning(self, "No data to plot")
+            self.logger.warning( "No data to plot")
             return None
 
         deltat = tf_tt - ti_tt
@@ -290,7 +290,7 @@ class PlottingUtils(metaclass=Singleton):
         if saveImage:
             filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
             f2.savefig(filePath)
-            self.logger.info(self, "Visibility histogram at: %s", filePath)
+            self.logger.info( "Visibility histogram at: %s", filePath)
         else:
             f2.show()
 
@@ -303,14 +303,14 @@ class PlottingUtils(metaclass=Singleton):
             for regionFile in regFiles:
                 if regionFile:
                     regionFile = Utils._expandEnvVar(regionFile)
-                    self.logger.info(self, "The region catalog %s will be loaded.", regionFile)
+                    self.logger.info( "The region catalog %s will be loaded.", regionFile)
 
                 regionsFiles.append(regionFile)
 
         regionsFilesDict = self.getSupportedRegionsCatalogs()
         if catalogRegions in regionsFilesDict.keys():
             catalogRegions = Utils._expandEnvVar(regionsFilesDict[catalogRegions])
-            self.logger.info(self, "The region catalog %s will be loaded.", catalogRegions)
+            self.logger.info( "The region catalog %s will be loaded.", catalogRegions)
 
         regionsFiles.append(catalogRegions)
 
@@ -326,11 +326,11 @@ class PlottingUtils(metaclass=Singleton):
         if twocolumns:
             fig_width_pt = 255.76535
             fontsize     = 10
-            self.logger.info(self, "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
+            self.logger.info( "Plot configuration: 'two column journal publication'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
         else:
             fig_width_pt = 426.79134
             fontsize     = 11
-            self.logger.info(self, "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
+            self.logger.info( "Plot configuration: 'standard'. fig_width_pt: %f fontsize:%f", fig_width_pt, fontsize)
 
         inches_per_pt = 1.0/72.27               # Convert pt to inch
         golden_mean = (np.sqrt(5)+1.0)/2.0      # Aesthetic ratio
@@ -381,7 +381,7 @@ class PlottingUtils(metaclass=Singleton):
             ax.set_ylabel('Declination' + " (" + str(wcs.wcs.cunit[1]) + ")")
 
         else:
-            self.logger.warning(self, f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
+            self.logger.warning( f"wcs type does not contain GLAT or RA but {wcs.wcs.ctype[0]}")
 
         ax.grid(b=True, color='white', ls='solid')
 
@@ -405,7 +405,7 @@ class PlottingUtils(metaclass=Singleton):
 
         if saveImage:
             filePath = join(self.outdir, column+".png")
-            self.logger.info(self, column+" plot at: %s", filePath)
+            self.logger.info( column+" plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath
         else:
@@ -454,7 +454,7 @@ class PlottingUtils(metaclass=Singleton):
 
         if saveImage:
             filePath = join(self.outdir, "plot.png")
-            self.logger.info(self,"plot at: %s", filePath)
+            self.logger.info("plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath
         else:
@@ -534,7 +534,7 @@ class PlottingUtils(metaclass=Singleton):
         
         if saveImage:
             filePath = join(self.outdir, "LightCurve.png")
-            self.logger.info(self, "Light curve plot at: %s", filePath)
+            self.logger.info( "Light curve plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath
 
@@ -574,7 +574,7 @@ class PlottingUtils(metaclass=Singleton):
         if saveImage:
             outfilename = f"light_curve_{data['tmin_tt'].iloc[0]}_{data['tmax_tt'].iloc[-1]}.png"
             filePath = join(self.outdir, outfilename)
-            self.logger.info(self, "Light curve plot at: %s", filePath)
+            self.logger.info( "Light curve plot at: %s", filePath)
             fig.write_image(filePath)
             return filePath
         else:
@@ -590,7 +590,6 @@ class PlottingUtils(metaclass=Singleton):
         indexDatesDF = pd.read_csv(indexFilePath, header=None, sep=" ", names=["name","tmin", "tmax", "type"])
 
         dateformat = "%Y-%m-%d"
-        print(indexDatesDF)
 
         indexDatesDF["tmin"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmin"])
         indexDatesDF["tmax"] = AstroUtils.time_agile_seconds_to_fits(indexDatesDF["tmax"])
@@ -603,8 +602,6 @@ class PlottingUtils(metaclass=Singleton):
                 datetime.datetime.strptime(
                         tmax, "%Y-%m-%dT%H:%M:%S.%f").strftime(dateformat) for tmax in indexDatesDF["tmax"]]
         
-        print(indexDatesDF["tmin"], indexDatesDF["tmax"])
-
 
         fig, ax = plt.subplots(1, 1)
         #ax2 = ax.twinx()
@@ -633,8 +630,7 @@ class PlottingUtils(metaclass=Singleton):
         
         if saveImage:
             filePath = join(self.outdir, "data_availability.png")
-            print("filePath",filePath)
-            self.logger.info(self,f"Plot at: {filePath}")
+            self.logger.info(f"Plot at: {filePath}")
             fig.savefig(filePath)
             return filePath
         else:

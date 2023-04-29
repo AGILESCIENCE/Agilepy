@@ -1,28 +1,23 @@
 import pytest
 from pathlib import Path
-from os.path import expandvars 
+from os.path import expandvars
+from agilepy.config.AgilepyConfig import AgilepyConfig 
 from agilepy.core.AgilepyLogger import AgilepyLogger
 
 @pytest.fixture(scope="function")
 def logger(request):
 
-    testlogger = AgilepyLogger()
-
-    script_path = Path( __file__ ).absolute().parent
-
-    marker = request.node.get_closest_marker("testdir")
+    marker = request.node.get_closest_marker("testlogsdir")
 
     if marker is None:
-        raise ValueError("marker is None! Something wrong passing 'testdir' to fixture!")
+        raise ValueError("marker is None! Something wrong passing 'testlogsdir' to fixture!")
 
-    testdir = marker.args[0]
-    testname = marker.args[1]
-
-    testlogger.initialize(testdir, f"{testname}", 1)
-
-    yield testlogger
-
-    testlogger.reset() 
+    testlogsdir = marker.args[0]
+ 
+    singletonLogger = AgilepyLogger()
+    rootLogsPath = Path( __file__ ).absolute().parent.joinpath(testlogsdir)
+    singletonLogger.setLogger(rootLogsPath, "DEBUG")
+    yield singletonLogger.getLogger(request.node.name)
     
 
 
@@ -31,14 +26,63 @@ def config(request):
 
     script_path = Path( __file__ ).absolute().parent
 
-    marker = request.node.get_closest_marker("testdir")
+    marker = request.node.get_closest_marker("testconfig")
 
     if marker is None:
-        raise ValueError("marker is None! Something wrong passing 'testdir' to fixture!")
+        raise ValueError("marker is None! Something wrong passing 'testconfig' to fixture!")
 
-    testdir = marker.args[0]
+    testconfig = marker.args[0]
 
-    return script_path.joinpath(testdir, "conf", "agilepyconf.yaml")
+    return script_path.joinpath(testconfig)
+
+
+
+@pytest.fixture(scope="function")
+def testdata(request):
+
+    script_path = Path( __file__ ).absolute().parent
+
+    marker = request.node.get_closest_marker("testdatafile")
+
+    if marker is None:
+        raise ValueError("marker is None! Something wrong passing 'testdatafile' to fixture!")
+
+    testdatafile = marker.args[0]
+
+    return str(script_path.joinpath(testdatafile))
+
+
+@pytest.fixture(scope="function")
+def testdata2(request):
+
+    script_path = Path( __file__ ).absolute().parent
+
+    marker = request.node.get_closest_marker("testdatafile2")
+
+    if marker is None:
+        raise ValueError("marker is None! Something wrong passing 'testdatafile2' to fixture!")
+
+    testdatafile2 = marker.args[0]
+
+    return str(script_path.joinpath(testdatafile2))
+
+
+@pytest.fixture(scope="function")
+def configObject(request):
+
+    script_path = Path( __file__ ).absolute().parent
+
+    marker = request.node.get_closest_marker("testconfig")
+
+    if marker is None:
+        raise ValueError("marker is None! Something wrong passing 'testconfig' to fixture!")
+
+    testconfig = marker.args[0]
+
+    config = AgilepyConfig()
+    config.loadBaseConfigurations(script_path.joinpath(testconfig))
+    config.loadConfigurationsForClass("AGAnalysis")
+    return config
 
 @pytest.fixture(scope="function")
 def testdataset():

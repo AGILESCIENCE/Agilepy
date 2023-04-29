@@ -163,7 +163,7 @@ output:
             skyCordsFK5.ra.deg
             skyCordsFK5.dec.deg
         """
-        self.logger.info(self, "Computing pointing distances from source (%f, %f) %s in [%f, %f]",src_x, src_y, ref, tmin, tmax)
+        self.logger.info( "Computing pointing distances from source (%f, %f) %s in [%f, %f]",src_x, src_y, ref, tmin, tmax)
 
         if not logfilesIndex:
             raise ValueError("'logfilesIndex' cannot be None")
@@ -177,23 +177,23 @@ output:
             skyCordsFK5 = skyCordsGAL.transform_to('fk5')
 
         else:
-            self.logger.critical(self, "Reference system '%s' is not supported", ref)
+            self.logger.critical( "Reference system '%s' is not supported", ref)
             raise WrongCoordinateSystemError("Reference system '%s' is not supported" %(ref))
 
         if step < 0.1:
-            self.logger.critical(self, "step %f cannot be < 0.1", step)
+            self.logger.critical( "step %f cannot be < 0.1", step)
             raise ValueError("'step' %f cannot be < 0.1"%(step))
 
-        self.logger.debug(self, "Galactict coords: l:%f b:%f", skyCordsGAL.l.deg,skyCordsGAL.b.deg)
+        self.logger.debug( "Galactict coords: l:%f b:%f", skyCordsGAL.l.deg,skyCordsGAL.b.deg)
 
-        self.logger.debug(self, "FK5 coords: ra:%f dec:%f ", skyCordsFK5.ra.deg,skyCordsFK5.dec.deg)
+        self.logger.debug( "FK5 coords: ra:%f dec:%f ", skyCordsFK5.ra.deg,skyCordsFK5.dec.deg)
 
         logFiles = self._getLogsFileInInterval(logfilesIndex, tmin, tmax)
 
-        self.logger.info(self, "%d log files satisfy the interval %f-%f", len(logFiles), tmin, tmax)
+        self.logger.info( "%d log files satisfy the interval %f-%f", len(logFiles), tmin, tmax)
 
         if not logFiles:
-            self.logger.warning(self, "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
+            self.logger.warning( "No log files can are compatible with tmin %f and tmax %f", tmin, tmax)
             return [], [], [], [], [], skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, None
 
 
@@ -206,13 +206,13 @@ output:
         tf_tt_tot = None
         init = False
 
-        self.logger.info(self, "Computing pointing distances. Please wait..")
+        self.logger.info( "Computing pointing distances. Please wait..")
 
         for idx, logFile in enumerate(logFiles):
 
             idx = idx + 1
 
-            self.logger.info(self, "%d/%d %s", idx, total, logFile)
+            self.logger.info( "%d/%d %s", idx, total, logFile)
 
             if idx == 1 or idx == total:
                 doTimeMask = True
@@ -232,17 +232,17 @@ output:
                 ti_tt_tot = np.concatenate((ti_tt_tot, ti_tt), axis=0)
                 tf_tt_tot = np.concatenate((tf_tt_tot, tf_tt), axis=0)
 
-            self.logger.debug(self, "Total computed separations: %d", len(separation_tot))
+            self.logger.debug( "Total computed separations: %d", len(separation_tot))
 
         # Conversion TT => MJD
-        self.logger.info(self, "Converting ti_tt_tot from TT to MJD..Number of elements=%d", len(ti_tt_tot))
+        self.logger.info( "Converting ti_tt_tot from TT to MJD..Number of elements=%d", len(ti_tt_tot))
         ti_mjd = AstroUtils.time_mjd_to_agile_seconds(ti_tt_tot)
 
-        self.logger.info(self, "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
+        self.logger.info( "Converting tf_tt_tot from TT to MJD..Number of elements=%d", len(tf_tt_tot))
         tf_mjd = AstroUtils.time_mjd_to_agile_seconds(tf_tt_tot)
 
         """
-        self.logger.info(self, "Computig meantimes..Number of elements=%d", len(ti_mjd))
+        self.logger.info( "Computig meantimes..Number of elements=%d", len(ti_mjd))
         meantimes = (ti_mjd+tf_mjd)/2.
 
         if writeFiles:
@@ -259,9 +259,9 @@ output:
         """
 
 
-        self.logger.debug(self, "separation_tot len: %d", len(separation_tot))
-        self.logger.debug(self, "ti_tt_tot len: %d", len(ti_tt_tot))
-        self.logger.debug(self, "tf_tt_tot len: %d", len(tf_tt_tot))
+        self.logger.debug( "separation_tot len: %d", len(separation_tot))
+        self.logger.debug( "ti_tt_tot len: %d", len(ti_tt_tot))
+        self.logger.debug( "tf_tt_tot len: %d", len(tf_tt_tot))
 
         filenamePath = None
         if writeFiles:
@@ -272,7 +272,7 @@ output:
             filenamePath = outdirPath.joinpath(filename)
 
             np.save(filenamePath, separation_tot.degree, allow_pickle=True)
-            self.logger.info(self, "Produced: %s", filenamePath)
+            self.logger.info( "Produced: %s", filenamePath)
 
 
         return separation_tot.degree, ti_tt_tot, tf_tt_tot, ti_mjd, tf_mjd, skyCordsFK5.ra.deg, skyCordsFK5.dec.deg, filenamePath
@@ -283,25 +283,25 @@ output:
                     
         hdulist = fits.open(logFile)
         SC = hdulist[1].data
-        self.logger.debug(self, "Total events: %f", len(SC["TIME"]))
-        self.logger.debug(self,"tmin: %f",tmin_start)
-        self.logger.debug(self,"tmin log file: %f",SC["TIME"][0])
-        self.logger.debug(self,"tmax: %f",tmax_start)
-        self.logger.debug(self,"tmax log file: %f",SC["TIME"][-1])
+        self.logger.debug( "Total events: %f", len(SC["TIME"]))
+        self.logger.debug("tmin: %f",tmin_start)
+        self.logger.debug("tmin log file: %f",SC["TIME"][0])
+        self.logger.debug("tmax: %f",tmax_start)
+        self.logger.debug("tmax log file: %f",SC["TIME"][-1])
 
-        self.logger.debug(self, "Do time mask? %d",doTimeMask)
+        self.logger.debug( "Do time mask? %d",doTimeMask)
 
         if doTimeMask:
 
-            self.logger.debug(self, "How many times are >= tmin_start? %d",np.sum(SC['TIME'] >= tmin_start))
-            self.logger.debug(self, "How many times are <= tmax_start? %d",np.sum(SC['TIME'] <= tmax_start))
+            self.logger.debug( "How many times are >= tmin_start? %d",np.sum(SC['TIME'] >= tmin_start))
+            self.logger.debug( "How many times are <= tmax_start? %d",np.sum(SC['TIME'] <= tmax_start))
 
             # Filtering out
             booleanMask = np.logical_and(SC['TIME'] >= tmin_start, SC['TIME'] <= tmax_start)
             TIME = SC['TIME'][booleanMask]
             ATTITUDE_RA_Y= SC['ATTITUDE_RA_Y'][booleanMask]
             ATTITUDE_DEC_Y= SC['ATTITUDE_DEC_Y'][booleanMask]
-            self.logger.debug(self, "Time mask: %d values skipped"%(np.sum(np.logical_not(booleanMask))))
+            self.logger.debug( "Time mask: %d values skipped"%(np.sum(np.logical_not(booleanMask))))
 
 
         else:
@@ -321,7 +321,7 @@ output:
         ATTITUDE_RA_Y= ATTITUDE_RA_Y[booleanMaskRADEC]
         ATTITUDE_DEC_Y= ATTITUDE_DEC_Y[booleanMaskRADEC]
 
-        self.logger.debug(self, "Not-null mask RA/DEC (at least one NULL): %d values skipped"%(np.sum(np.logical_not(booleanMaskRADEC))))
+        self.logger.debug( "Not-null mask RA/DEC (at least one NULL): %d values skipped"%(np.sum(np.logical_not(booleanMaskRADEC))))
 
 
         deltatime = 0.1 # AGILE attitude is collected every 0.1 s
@@ -332,18 +332,18 @@ output:
         index_ti = 0
         index_tf = len(TIME)-1
 
-        self.logger.debug(self, "Step is: %f",step)
+        self.logger.debug( "Step is: %f",step)
 
         indexstep = int(step*10) # if step 0.1 , indexstep=1 => all values
                             # if step 1 , indexstep=10 => one value on 10 values
 
-        self.logger.debug(self, "indexstep is: %f",indexstep)
+        self.logger.debug( "indexstep is: %f",indexstep)
 
         # creating arrays filled with zeros
         src_raz  = np.zeros(len(TIME[index_ti:index_tf:indexstep]))
         src_decz  = np.zeros(len(TIME[index_ti:index_tf:indexstep]))
 
-        self.logger.debug(self, "Number of separations to be computed: %f", index_tf/indexstep)
+        self.logger.debug( "Number of separations to be computed: %f", index_tf/indexstep)
 
         # filling the just created arrays with our coordinates of interest
         src_ra   = src_raz + skyCordsFK5.ra
@@ -354,13 +354,13 @@ output:
 #        print 'c1=', len(c1), 'c2=', len(c2) # to ensure c1 and c2 have the same length
         sep = c2.separation(c1)
 
-        self.logger.debug(self, "Number of computed separation: %f"%(len(sep)))
+        self.logger.debug( "Number of computed separation: %f"%(len(sep)))
 
         return np.asfarray(sep), TIME[index_ti:index_tf:indexstep], TIME[index_ti:index_tf:indexstep]+deltatime
 
     def _getLogsFileInInterval(self, logfilesIndex, tmin, tmax):
 
-        self.logger.debug(self, "Selecting files from %s [%d to %d]",logfilesIndex, tmin, tmax)
+        self.logger.debug( "Selecting files from %s [%d to %d]",logfilesIndex, tmin, tmax)
 
         logsFiles = []
 

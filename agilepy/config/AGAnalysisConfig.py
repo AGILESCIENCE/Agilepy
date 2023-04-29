@@ -59,6 +59,7 @@ class AGAnalysisConfig():
 
         errors = {}
 
+        errors.update(ValidationStrategies._validateVerboseLvl(confDict))
         #errors.update( ValidationStrategies._validateEvtFile(confDict) ) deprecated
         #errors.update( ValidationStrategies._validateLogFile(confDict) ) deprecated
         errors.update( ValidationStrategies._validateBackgroundCoeff(confDict) )

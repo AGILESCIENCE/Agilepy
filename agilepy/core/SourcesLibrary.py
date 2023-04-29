@@ -56,7 +56,6 @@ class SourcesLibrary:
 
     def __init__(self, agilepyConfig, agilepyLogger):
         self.logger = agilepyLogger
-
         self.config = agilepyConfig
 
         self.sources = []
@@ -83,7 +82,7 @@ class SourcesLibrary:
         if not Path(catPath).exists():
             catPath = Utils._expandEnvVar(f"$AGILE/catalogs/{catalogName}.multi")
             if not Path(catPath).exists():
-                self.logger.critical(self, f"The 2AGL catalog is not available. Please check the $AGILE environment variable.")
+                self.logger.critical( f"The 2AGL catalog is not available. Please check the $AGILE environment variable.")
                 raise FileNotFoundError(f"The 2AGL catalog is not available. Please check the $AGILE environment variable.")
         return catPath
 
@@ -96,7 +95,7 @@ class SourcesLibrary:
         supportedCatalogs = ["2AGL"]
         
         if catalogName not in supportedCatalogs:
-            self.logger.critical(self, f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
+            self.logger.critical( f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
             raise FileNotFoundError(f"The catalog {catalogName} is not supported. Supported catalogs: {supportedCatalogs}")
 
         catPath = self.searchCatalog(catalogName)
@@ -107,7 +106,7 @@ class SourcesLibrary:
         scaleFlux = False
         if catEmin != uEmin or catEmax != uEmax:
             scaleFlux = True
-            self.logger.warning(self, f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
+            self.logger.warning( f"The input energy range ({uEmin},{uEmax}) is different to the CAT2 energy range ({catEmin},{catEmax}). A scaling of the sources flux will be performed.")
 
         return self.loadSourcesFromFile(catPath, rangeDist, scaleFlux=scaleFlux, catEmin=catEmin, catEmax=catEmax, show=show)
 
@@ -130,7 +129,7 @@ class SourcesLibrary:
             newSources = self._loadFromSourcesTxt(filePath)
 
         if newSources is None:
-            self.logger.critical(self, "Errors during %s parsing (%s)", filePath, fileExtension)
+            self.logger.critical( "Errors during %s parsing (%s)", filePath, fileExtension)
             raise SourcesFileLoadingError("Errors during {} parsing ({})".format(filePath, fileExtension))
 
         mapCenterL = float(self.config.getOptionValue("glon"))
@@ -162,7 +161,7 @@ class SourcesLibrary:
 
             self.sources.append(source)
 
-        self.logger.info(self, "Loaded %d sources. Total sources: %d", len(filteredSources), len(self.sources))
+        self.logger.info( f"Loaded {len(filteredSources)} sources. Total sources: {len(self.sources)}")
 
         return filteredSources
 
@@ -191,7 +190,7 @@ class SourcesLibrary:
             sources = self.sources
 
         if len(sources) == 0:
-            self.logger.info(self,"No sources have been loaded yet. No file has been produced.")
+            self.logger.info("No sources have been loaded yet. No file has been produced.")
             return ""
 
         if fileformat == "txt":
@@ -210,7 +209,7 @@ class SourcesLibrary:
 
             sourceLibraryFile.write(sourceLibraryToWrite)
 
-        self.logger.info(self,"File %s has been produced", outputFilePath)
+        self.logger.info("File %s has been produced", outputFilePath)
 
         return str(outputFilePath)
 
@@ -279,7 +278,7 @@ class SourcesLibrary:
 
                 if show:
                     print(f"{s}")
-                    # self.logger.info(self, f"{s}")
+                    # self.logger.info( f"{s}")
 
         return affected
 
@@ -296,9 +295,9 @@ class SourcesLibrary:
         if show:
             for s in deletedSources:
                 print(f"{s}")
-                # self.logger.info(self, f"{s}")
+                # self.logger.info( f"{s}")
 
-        self.logger.info(self, "Deleted %d sources.", len(deletedSources))
+        self.logger.info( "Deleted %d sources.", len(deletedSources))
         return deletedSources
 
     def parseSourceFile(self, sourceFilePath):
@@ -307,7 +306,7 @@ class SourcesLibrary:
 
         returns: a MultiAnalysis object
         """
-        self.logger.debug(self, "Parsing output file of AG_multi: %s", sourceFilePath)
+        self.logger.debug(f"Parsing output file of AG_multi: {sourceFilePath}")
 
         with open(sourceFilePath, 'r') as sf:
             lines = sf.readlines()
@@ -369,7 +368,7 @@ class SourcesLibrary:
             allValues += values
 
         if len(allValues) != 128:
-            self.logger.critical(self, "The values extracted from %s file are lesser then 128", sourceFilePath)
+            self.logger.critical(f"The values extracted from {sourceFilePath} file are lesser then 128")
             raise FileSourceParsingError("The values extracted from {} file are lesser then 128".format(sourceFilePath))
 
         multiAnalysisResult = MultiAnalysis()
@@ -531,8 +530,8 @@ class SourcesLibrary:
     def addSource(self, sourceName, sourceObject):
 
         if not sourceName:
-            self.logger.critical(self, "'sourceName' cannot be None or empty.")
-            raise SourceParamNotFoundError("'sourceName' cannot be None or empty.")
+            self.logger.critical(f"sourceName='{sourceName}' cannot be None or empty.")
+            raise SourceParamNotFoundError(f"sourceName='{sourceName}' cannot be None or empty.")
 
         if self.doesSourceAlreadyExist(sourceName):
                 self.logger.warning(self,"The source %s already exists. The 'sourceObject' will not be added to the SourcesLibrary.", sourceName)
@@ -547,7 +546,7 @@ class SourcesLibrary:
     @_addSource.register(SourceR)
     def _(sourceObject, sourceName, self):
 
-        self.logger.debug(self, "Loading source from a Source object..")
+        self.logger.debug( "Loading source from a Source object..")
 
         self.sources.append(sourceObject)
 
@@ -556,7 +555,7 @@ class SourcesLibrary:
     @_addSource.register(dict)
     def _(sourceDict, sourceName, self):
 
-        self.logger.debug(self, "Loading source from a dictionary..")
+        self.logger.debug( "Loading source from a dictionary..")
 
         newSource = SourceR.fromDictionary(sourceName, sourceDict)
 
@@ -595,7 +594,7 @@ class SourcesLibrary:
                 self.logger.warning(self, f"The selection parameter '{paramName}' cannot be used for source '{source.name}' since mle() has not been called yet! Skipping source..")
                 return None
 
-        self.logger.debug(self, f"userSelectionParams: {userSelectionParams} selectionParamsValues: {selectionParamsValues}")
+        self.logger.debug( f"userSelectionParams: {userSelectionParams} selectionParamsValues: {selectionParamsValues}")
 
         return SourcesLibrary.__selectSource(selection, source, userSelectionParams, selectionParamsValues)
 
@@ -615,7 +614,7 @@ class SourcesLibrary:
 
     def _loadFromSourcesXml(self, xmlFilePath):
 
-        self.logger.debug(self, f"Parsing {xmlFilePath} ...")
+        self.logger.debug( f"Parsing {xmlFilePath} ...")
 
         xmlRoot = parse(xmlFilePath).getroot()
 
@@ -697,17 +696,17 @@ class SourcesLibrary:
             glon = multiL
             glat = multiB
 
-            self.logger.info(self, f"the parameters are multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
+            self.logger.debug(f"Parameters: multiL={multiL}, multiB={multiB}, multiLPeak={multiLPeak}, multiBPeak={multiBPeak}, startL={startL}, startB={startB} ")
 
             if glon == -1 or glat == -1 or position == "peak" or glon == None or glat == None:
                 glon = multiLPeak
                 glat = multiBPeak
-                self.logger.info(self, f"ellipse values not available, I got peak values")
+                self.logger.debug(f"Ellipse values not available, I got peak values")
             
             if glon == -1 or glat == -1 or position == "initial" or glon == None or glat == None:
                 glon = startL
                 glat = startB
-                self.logger.info(self, f"ellipse and peak values not available, I got initial values")
+                self.logger.debug(f"Ellipse and peak values not available, I got initial values")
            
             sourceStr += str(glon) + " "
             sourceStr += str(glat) + " "
@@ -855,7 +854,7 @@ class SourcesLibrary:
             phi = source.get("multiphi")["value"]
 
             if L == -1 and B == -1 and a == -1 and b == -1 and phi == -1:   
-                self.logger.info(self, f"L=B=a=b=phi={L} for {source.name}, using LPeak and BPeak..")
+                self.logger.info( f"L=B=a=b=phi={L} for {source.name}, using LPeak and BPeak..")
                 LPeak = source.get("multiLPeak")["value"]
                 BPeak = source.get("multiBPeak")["value"]
                 sourceStr += f"ellipse({LPeak}, {BPeak}, 0.5, 0.5, 0) #color=green width=2 text={source.name}"

@@ -73,6 +73,20 @@ class ValidationStrategies:
         
         return errors
     """
+
+
+    @staticmethod
+    def _validateVerboseLvl(confDict):
+
+        errors = {}
+
+        if confDict["output"]["verboselvl"] not in [0, 1, 2, 3]:
+
+            errors["output/verboselvl"] = f"Invalid value for verboselvl={confDict['output']['verboselvl']}. Allowed values are 0 (ERROR), 1 (WARNING), 2 (INFO), 3 (DEBUG)"
+
+        return errors
+
+
     @staticmethod
     def _validateBackgroundCoeff(confDict):
 

@@ -185,7 +185,7 @@ wavelet:
         
         if saveImage:
           filepath = join(self.outdir, "wavelet_analysis/", namefile+".plot.png")
-          self.logger.info(self, "plot at: %s", filepath)
+          self.logger.info( "plot at: %s", filepath)
           plt.savefig(filepath, bbox_inches='tight')
         else:
           plt.show()
@@ -201,7 +201,7 @@ wavelet:
 
           if saveImage:
             filepath = join(self.outdir, "wavelet_analysis/", namefile+str(i)+".plot.png")
-            self.logger.info(self, "plot at: %s", filepath)
+            self.logger.info( "plot at: %s", filepath)
             plt.savefig(filepath)
           else:
             plt.show()

@@ -24,8 +24,8 @@
 
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from colorama import Fore, Back, Style
 
-from agilepy.core.AgilepyLogger import Color 
 from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.core.source.Spectrum import Spectrum
 from agilepy.core.source.SpatialModel import SpatialModel
@@ -154,7 +154,7 @@ class Source:
         """
         freeParams = self.getFreeParams()
 
-        self.logger.info(self, f"{multiAnalysisResult.get('multiName')} (free) parameters update after mle: {freeParams}")
+        self.logger.info( f"{multiAnalysisResult.get('multiName')} (free) parameters update after mle: {freeParams}")
 
         if source.multi.get("multiL") != -1 and source.multi.get("multiB") != -1:
             oldPos = source.spatialModel.get("pos")
@@ -170,13 +170,13 @@ class Source:
                 newDistance = source.getSourceDistanceFromLB(mapCenterL, mapCenterB)
                 source.spatialModel.dist.setAttributes(value = newDistance)
                 source.multi.set("multiDist", newDistance)
-                self.logger.info(self, f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
-                self.logger.info(self, f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
+                self.logger.info( f"'pos' parameter has been updated {oldPos}==>{source.spatialModel.get('pos')}")
+                self.logger.info( f"'dist' has been updated {oldDistance}==>{source.spatialModel.get('dist')}")
             else:
-                self.logger.info(self, f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
+                self.logger.info( f"'pos' parameter has not changed: {source.spatialModel.get('pos')}")
 
         else:
-            self.logger.info(self, f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
+            self.logger.info( f"multiL,multiB=({source.multi.get('multiL')},{source.multi.get('multiB')}). 'pos' parameter has not changed: {source.spatialModel.get('pos')}")
 
         if "pos" in freeParams: freeParams.remove("pos")
 
@@ -194,10 +194,10 @@ class Source:
 
             if oldVal is None or newVal != oldVal:
                 source.spectrum.set(spectrumParamName, newVal)
-                self.logger.info(self, f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
+                self.logger.info( f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
                 # print(f"'{spectrumParamName}' parameter has been updated: {oldVal}==>{newVal}")
             else:
-                self.logger.info(self, f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
+                self.logger.info( f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
                 # print(f"'{spectrumParamName}' parameter has not changed: {oldVal}==>{newVal}")
 
 
@@ -495,19 +495,26 @@ class PointSource(Source):
         return willChange
 
     def bold(self, ss):
-        return Color.BOLD + ss + Color.END
+        return '\033[1m' + ss + '\033[0m'
 
     def colorRed(self, ss):
-        return Color.RED + ss + Color.END
+        return Fore.RED + ss + Fore.RESET
 
     def colorBlue(self, ss):
-        return Color.BLUE + ss + Color.END
+        return Fore.BLUE + ss + Fore.RESET
+    
+    def important(self, ss):
+        return Style.BRIGHT + Fore.RED + ss + Style.RESET_ALL
 
     def __str__title(self):
         strr = '\n-----------------------------------------------------------'
         strr += self.bold(f'\n Source name: {self.name} ({type(self).__name__})')
-        if self.multiAnalysis.getVal("multiSqrtTS") is not None:
-            strr += self.bold(" => sqrt(ts): "+str(self.multiAnalysis.getVal("multiSqrtTS")))
+        multiSqrtTs = self.multiAnalysis.getVal("multiSqrtTS")
+        if multiSqrtTs is not None:
+            if multiSqrtTs > 4:
+                strr += self.important(" => sqrt(ts): "+str(multiSqrtTs))            
+            else:
+                strr += self.bold(" => sqrt(ts): "+str(multiSqrtTs))
         return strr        
     
     def __str__spectrumType(self):

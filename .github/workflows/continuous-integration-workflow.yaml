@@ -7,6 +7,7 @@ on:
       - master
       - selection_of_response_matrices
       - deprecation_of_emin_emax
+      - feature-*
 
 jobs:
 
@@ -36,6 +37,7 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pip install -r requirements.lock 
+          python3 -m pip install colorama
           python3 -m pip install .
 
       - name: Running unit tests and code coverage
@@ -104,6 +106,7 @@ jobs:
       shell: bash -l {0}
       run: |
         python3 -m pip install -r requirements.lock
+        python3 -m pip install colorama
         python3 -m pip install .
 
     - name: Running unit tests and code coverage

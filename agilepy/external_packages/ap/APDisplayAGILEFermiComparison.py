@@ -84,9 +84,9 @@ class APDisplayAGILEFermiComparison:
 
         ax.errorbar(tm, agile_data[data_column_name], xerr=tw, yerr=yerr, color="b", marker="o", ls="none", markersize=1.0, linewidth=0.8, label="AGILE")
 
-        self.logger.info(self, f"AGILE mean, {agile_data[data_column_name].mean()}")
-        self.logger.info(self, f"AGILE median {agile_data[data_column_name].median()}")
-        self.logger.info(self, f"AGILE std {agile_data[data_column_name].std()}")
+        self.logger.info( f"AGILE mean, {agile_data[data_column_name].mean()}")
+        self.logger.info( f"AGILE median {agile_data[data_column_name].median()}")
+        self.logger.info( f"AGILE std {agile_data[data_column_name].std()}")
 
         agilemean = agile_data[data_column_name].median()
         agilestd = agile_data[data_column_name].std()
@@ -112,7 +112,7 @@ class APDisplayAGILEFermiComparison:
 
         # Casistiche FERMI
         if "Sign" in data_column_name or "flux" in data_column_name:
-            self.logger.warning(self, f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
+            self.logger.warning( f"Column {data_column_name} does not exist in FERMI data. Comparing with 'rate' column.")
             data_column_name = "rate"
 
         if data_column_name == "cts":
@@ -127,9 +127,9 @@ class APDisplayAGILEFermiComparison:
         
         ax.errorbar(tmFermi, fermi_data[data_column_name], xerr=twFermi, yerr=yerr, color="r", marker="s", ls="none", markersize=1.0, linewidth=0.8, label="FERMI")
 
-        self.logger.info(self, f"Fermi mean {fermi_data[data_column_name].mean()}")
-        self.logger.info(self, f"Fermi median {fermi_data[data_column_name].median()}")
-        self.logger.info(self, f"Fermi std' {fermi_data[data_column_name].std()}")
+        self.logger.info( f"Fermi mean {fermi_data[data_column_name].mean()}")
+        self.logger.info( f"Fermi median {fermi_data[data_column_name].median()}")
+        self.logger.info( f"Fermi std' {fermi_data[data_column_name].std()}")
 
         fermimean = fermi_data[data_column_name].mean()
         fermistd = fermi_data[data_column_name].std()
@@ -140,7 +140,7 @@ class APDisplayAGILEFermiComparison:
         ax.axhline(fermimean + 3 * fermistd, linestyle='dashdot', color='r', linewidth=1)
 
         time_diff = fermi_data["tstop"] - fermi_data["tstart"]
-        self.logger.info(self, f"Total time in GTI(bottom plot) {time_diff.sum()}")
+        self.logger.info( f"Total time in GTI(bottom plot) {time_diff.sum()}")
             
         ax.set_xlabel(timetype)
         ax.set_ylabel(data_column_name)
@@ -184,7 +184,7 @@ class APDisplayAGILEFermiComparison:
         lat_filt = lat_meantime[(lat_meantime > tstart) & (lat_meantime < tstop)]
         lat_sep_filt = lat_separation[(lat_meantime > tstart) & (lat_meantime < tstop)]
 
-        self.logger.info(self, f"{tstart}, {tstop}")
+        self.logger.info( f"{tstart}, {tstop}")
         axes[0].plot(agl_filt, agl_sep_filt, color='blue', label='AGILE', linewidth=0.5)
         axes[0].plot(lat_filt, lat_sep_filt, color='red', label='Fermi', linewidth=1.5)
 
@@ -192,7 +192,7 @@ class APDisplayAGILEFermiComparison:
         lat_filt2 = []
         for i in range(len(lat_filt) - 1):
             if (lat_filt[i+1] - lat_filt[i]) >= five_minutes:  
-                self.logger.debug(self, f"Green box in: {lat_filt[i]}, {lat_filt[i+1]}")
+                self.logger.debug( f"Green box in: {lat_filt[i]}, {lat_filt[i+1]}")
                 lat_filt2.append([lat_filt[i], lat_filt[i+1]])
                 axes[0].axvline(lat_filt[i], linestyle='--', color='green', linewidth=0.5)
                 axes[0].axvline(lat_filt[i+1], linestyle='--', color='green', linewidth=0.5)
@@ -231,13 +231,13 @@ class APDisplayAGILEFermiComparison:
                 ax.axvspan(xmin=lines[0], xmax=lines[1], facecolor='white')
 
         ###### YELLOW BOXES
-        self.logger.info(self, f"Total time in GTI {total_s_in_gti}")
+        self.logger.info( f"Total time in GTI {total_s_in_gti}")
         try:
             for i in range(0,len(vertical_boxes),2):
                 for ax in axes:
                     ax.axvspan(xmin=vertical_boxes[i], xmax=vertical_boxes[i+1], facecolor='y', alpha=0.1)
         except:
-            self.logger.info(self, "No lines")
+            self.logger.info( "No lines")
 
         axes[0].set_ylim(0., zmax+5.0)
         axes[0].set_title(f"T=[{tstart}, {tstop}] {timetype} Zmax={zmax}  ")
@@ -294,14 +294,14 @@ class APDisplayAGILEFermiComparison:
             for cts in fermi_data2["cts"]:
                 ntrials = ntrials + 1
                 if cts >= (fermimean + 5 * fermistd):
-                    self.logger.info(self, "####")
-                    self.logger.info(self, f"{fermi_data2['tstart']}")
+                    self.logger.info( "####")
+                    self.logger.info( f"{fermi_data2['tstart']}")
                     nsig = nsig + 1
                     break
                 n = n + 1
 
-        self.logger.info(self, f"ntrials {ntrials}")
-        self.logger.info(self, f"nsig {nsig}")
+        self.logger.info( f"ntrials {ntrials}")
+        self.logger.info( f"nsig {nsig}")
 
     def load_and_plot(self, agile, fermi, tstart, tstop, path, vertical_boxes_mjd=[], zmax=60, timetype="MJD", data_column_name="cts", time_range=None, trigger_time_tt=None, add_rm=False, rm_files=None, rm_labels=None):
 
@@ -359,11 +359,11 @@ class APDisplayAGILEFermiComparison:
         plt.show()
 
         outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
-        self.logger.info(self, f"Plot: {outfilename_pdf}")
+        self.logger.info( f"Plot: {outfilename_pdf}")
         fig.savefig(outfilename_pdf, format="pdf")
 
         outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
-        self.logger.info(self, f"Plot: {outfilename_png}")
+        self.logger.info( f"Plot: {outfilename_png}")
         fig.savefig(outfilename_png, format="png")  
 
         plt.close()      

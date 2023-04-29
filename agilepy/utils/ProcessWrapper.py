@@ -67,7 +67,7 @@ class ProcessWrapper(ABC):
         for option in self.getRequiredOptions():
             if confDict.getOptionValue(option) is None:
                 optionSection = confDict.getSectionOfOption(option)
-                self.logger.critical(self,"Option '%s' of section '%s' has not been set.", option, optionSection)
+                self.logger.critical("Option '%s' of section '%s' has not been set.", option, optionSection)
                 ok = False
         return ok
 
@@ -81,30 +81,30 @@ class ProcessWrapper(ABC):
         requiredProductsNumber = len(requiredProducts)
 
         if count == requiredProductsNumber:
-            self.logger.warning(self, f"{count} required products already exist.")
+            self.logger.warning( f"{count} required products already exist.")
             return True
         elif count == 0:
-            self.logger.debug(self, "No products exist yet")
+            self.logger.debug( "No products exist yet")
             return False
         else:
-            self.logger.critical(self, f"{count} required products already exist, but the expected required products number is {requiredProductsNumber}: {requiredProducts}")
+            self.logger.critical( f"{count} required products already exist, but the expected required products number is {requiredProductsNumber}: {requiredProducts}")
             raise ScienceToolProductNotFound(f"{count} required products already exist, but the expected required products number is {requiredProductsNumber}: {requiredProducts}")
 
             
     
     def call(self):
 
-        self.logger.info(self, "Science tool called!")
+        self.logger.debug( "Science tool called!")
 
         if not self.args:
-            self.logger.warning(self, "The 'args' attribute has not been set! Please, call setArguments() before call()! ")
+            self.logger.warning( "The 'args' attribute has not been set! Please, call setArguments() before call()! ")
             return []
 
         if self.checkIfRequiredProductsAlreadyExist():
-            self.logger.warning(self, f"The {self.exeName} will not be called. Products already exists: \n{self.products}")
+            self.logger.warning( f"The {self.exeName} will not be called. Products already exists: \n{self.products}")
             return self.products
 
-        self.logger.debug(self, f"outputDir={self.outputDir}")
+        self.logger.debug( f"outputDir={self.outputDir}")
 
         Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 
@@ -124,7 +124,7 @@ class ProcessWrapper(ABC):
 
 
         # starting the tool
-        self.logger.debug(self, f"args: {self.args}")
+        self.logger.debug( f"args: {self.args}")
         command = self.exeName + " " + " ".join(map(str, self.args))
         toolstdout = self.executeCommand(command)
 
@@ -144,14 +144,14 @@ class ProcessWrapper(ABC):
                 products.append(product)
 
 
-        self.logger.info(self, f"Science tool {self.exeName} produced:\n {products}")
+        self.logger.debug( f"Science tool {self.exeName} produced:\n {products}")
 
         return products
 
 
     def executeCommand(self, command, printStdout=True):
 
-        self.logger.debug(self, f"Executing command >>{command}")
+        self.logger.debug( f"Executing command >>{command}")
 
         completedProcess = subprocess.run(command, shell=True, capture_output=True, encoding="utf8")
 
@@ -159,6 +159,6 @@ class ProcessWrapper(ABC):
             raise ScienceToolErrorCodeReturned("Non zero return status. \nstderr:" + completedProcess.stderr.strip())
 
         if printStdout:
-            self.logger.debug(self, "Science tool stdout:\n\n%s\n\n", completedProcess.stdout)
+            self.logger.debug( "Science tool stdout:\n\n%s\n\n", completedProcess.stdout)
 
         return completedProcess.stdout
