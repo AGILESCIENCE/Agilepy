@@ -112,7 +112,7 @@ class AgilepyLogger(metaclass=Singleton):
         self.sh.setLevel(self.logLevel)
         self.sh.setFormatter(self.formatter)
 
-        print(f"Log level set to {self.logLevel} and output to {self.rootLogsDir}")
+        print(f"Log level set to {logging.getLevelName(self.logLevel)} and output to {self.rootLogsDir}")
         return self
 
     def getRootLogsDir(self):

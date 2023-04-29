@@ -595,8 +595,7 @@ plotting:
         # Change the maplist file path
         maplistObjBKP.setFile(outputDir)
 
-        if not tqdmOff:
-            self.logger.info("Generating maps..please wait.")
+        self.logger.info(f"Generating maps {fovbinnumber*len(energybins)}..please wait.")
     
         for stepi in trange(0, fovbinnumber, desc=f"Fov bins loop", disable=tqdmOff, leave=tqdmOff):
 
@@ -610,62 +609,62 @@ plotting:
 
             for bgCoeffIdx, stepe in tqdm(enumerate(energybins), desc=f"Energy bins loop", disable=tqdmOff, leave=tqdmOff):
 
-                if Parameters.checkEnergyBin(stepe):
-
-                    emin = stepe[0]
-                    emax = stepe[1]
-
-                    skymapL = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
-                    skymapH = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
-                    fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
-
-                    self.logger.debug( "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
-                                       fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
-
-
-                    configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
-                    configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
-                    configBKP.setOptions(energybins=[[emin, emax]])
-
-                    configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
-
-
-                    ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen", self.logger)
-                    expMapGenerator = ExpMapGenerator("AG_expmapgen", self.logger)
-                    gasMapGenerator = GasMapGenerator("AG_gasmapgen", self.logger)
-                    intMapGenerator = IntMapGenerator("AG_intmapgen", self.logger)
-
-                    ctsMapGenerator.configureTool(configBKP)
-                    expMapGenerator.configureTool(configBKP)
-                    gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0]})
-                    intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0], "ctsMapGeneratorOutfilePath" : next(iter(ctsMapGenerator.products.items()))[0]})
-
-                    configBKP.addOptions("maps", expmap=next(iter(expMapGenerator.products.items()))[0], ctsmap=next(iter(ctsMapGenerator.products.items()))[0])
-
-                    if not ctsMapGenerator.allRequiredOptionsSet(configBKP) or \
-                       not expMapGenerator.allRequiredOptionsSet(configBKP) or \
-                       not gasMapGenerator.allRequiredOptionsSet(configBKP) or \
-                       not intMapGenerator.allRequiredOptionsSet(configBKP):
-
-                        raise ScienceToolInputArgMissing("Some options have not been set.")
-
-                    f1 = ctsMapGenerator.call()
-
-                    f2 = expMapGenerator.call()
-
-                    f3 = gasMapGenerator.call()
-
-                    f4 = intMapGenerator.call()
-
-                    maplistObjBKP.addRow(   next(iter(ctsMapGenerator.products.items()))[0], \
-                                            next(iter(expMapGenerator.products.items()))[0], \
-                                            next(iter(gasMapGenerator.products.items()))[0], \
-                                            str(bincenter), \
-                                            str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
-                                            str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
-                                        )
-                else:
+                if not Parameters.checkEnergyBin(stepe):
                     self.logger.warning(f"Energy bin [{stepe[0]}, {stepe[1]}] is not supported. Map generation skipped.")
+                    continue
+                
+                emin = stepe[0]
+                emax = stepe[1]
+
+                skymapL = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
+                skymapH = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
+                fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
+
+                self.logger.debug("Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
+                                    fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
+
+
+                configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
+                configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
+                configBKP.setOptions(energybins=[[emin, emax]])
+
+                configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
+
+
+                ctsMapGenerator = CtsMapGenerator("AG_ctsmapgen", self.logger)
+                expMapGenerator = ExpMapGenerator("AG_expmapgen", self.logger)
+                gasMapGenerator = GasMapGenerator("AG_gasmapgen", self.logger)
+                intMapGenerator = IntMapGenerator("AG_intmapgen", self.logger)
+
+                ctsMapGenerator.configureTool(configBKP)
+                expMapGenerator.configureTool(configBKP)
+                gasMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0]})
+                intMapGenerator.configureTool(configBKP, {"expMapGeneratorOutfilePath": next(iter(expMapGenerator.products.items()))[0], "ctsMapGeneratorOutfilePath" : next(iter(ctsMapGenerator.products.items()))[0]})
+
+                configBKP.addOptions("maps", expmap=next(iter(expMapGenerator.products.items()))[0], ctsmap=next(iter(ctsMapGenerator.products.items()))[0])
+
+                if not ctsMapGenerator.allRequiredOptionsSet(configBKP) or \
+                    not expMapGenerator.allRequiredOptionsSet(configBKP) or \
+                    not gasMapGenerator.allRequiredOptionsSet(configBKP) or \
+                    not intMapGenerator.allRequiredOptionsSet(configBKP):
+
+                    raise ScienceToolInputArgMissing("Some options have not been set.")
+
+                f1 = ctsMapGenerator.call()
+
+                f2 = expMapGenerator.call()
+
+                f3 = gasMapGenerator.call()
+
+                f4 = intMapGenerator.call()
+
+                maplistObjBKP.addRow(   next(iter(ctsMapGenerator.products.items()))[0], \
+                                        next(iter(expMapGenerator.products.items()))[0], \
+                                        next(iter(gasMapGenerator.products.items()))[0], \
+                                        str(bincenter), \
+                                        str(configBKP.getOptionValue("galcoeff")[bgCoeffIdx]), \
+                                        str(configBKP.getOptionValue("isocoeff")[bgCoeffIdx])
+                                    )
 
 
         outdir = configBKP.getOptionValue("outdir")
