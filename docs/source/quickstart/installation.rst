@@ -86,7 +86,7 @@ The dependencies required by Agilepy are:
   - Cfitsio 4.1
   - Zlib
 
-`AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install is on sciencetools_version.txt in the repository main directory)
+`AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install can be found in the Docker container recipe)
 
 `Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`_
 

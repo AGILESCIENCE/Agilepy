@@ -15,7 +15,7 @@ RUN python3 -m pip install --upgrade pip
 RUN yum install -y ruby 
 
 # ---------------------------------- Create Agilepy user ---------------------------------- 
-RUN addgroup --gid 2007 agilepy
+RUN groupadd --gid 2007 agilepy
 RUN useradd flareadvocate
 RUN usermod -a -G agilepy flareadvocate
 USER flareadvocate
@@ -75,7 +75,7 @@ ENV PATH=$AGILE/bin:$AGILE/scripts:$PATH
 
 RUN mkdir $PREFIX/agiletools && cd $PREFIX/agiletools && \
     git clone https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup.git && cd AGILE-GRID-ScienceTools-Setup \
-    && git checkout BUILD25b3 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
+    && git checkout BUILD25b7 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
     && rm -rf $AGILE/AGILE-GRID-ScienceTools-Setup
 
 #RUN cd $AGILE/scripts && python3 -m pip install .
