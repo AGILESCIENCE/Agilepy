@@ -44,7 +44,7 @@ class Parameters:
 
     _supported_irfs = ["I0025", "H0025"]
 
-    _supportedEnergyBins = [ [10000,50000],
+    _supportedEnergyBins = [[10000,50000],
                             [1000,3000],
                             [1000,50000],
                             [100,1000],
@@ -72,6 +72,13 @@ class Parameters:
                             [400,50000],
                             [50,100],
                             [50,400],
+                            [1000,10000],
+                            [100,3000],
+                            [50,1000],
+                            [50,10000],
+                            [50,300],
+                            [50,3000],
+                            [50,50000]                            
                           ]
 
 
@@ -132,8 +139,14 @@ class Parameters:
             raise ValueError(f"IRF {irf} is not supported")        
         skymap = Parameters._skymapTemplate.format(emin, emax, Parameters.getFilterCodeMapping(filtercode), irf)
         if skymap in Parameters._calibrationFiles:
-            return Parameters._datapath.joinpath(skymap)
-
+            skymapPath = Parameters._datapath.joinpath(skymap)
+            if skymapPath.exists():
+                return skymapPath
+            else:
+                raise ValueError(f"Sky map {skymap} is not available in {Parameters._datapath}")
+        else:
+            raise ValueError(f"Sky map {skymap} is not available in {Parameters._datapath}")
+        
     @staticmethod
     def getCatEminEmax(catalogName):
         if catalogName == "2AGL":
