@@ -62,7 +62,6 @@ class AGAnalysis(AGBaseAnalysis):
     This constructor of this class requires a ``yaml configuration file``.
 
     """
-    INSTANCE_COUNT = 0
 
     def __init__(self, configurationFilePath, sourcesFilePath = None):
         """AGAnalysis constructor.
@@ -83,10 +82,6 @@ class AGAnalysis(AGBaseAnalysis):
         """
         super().__init__(configurationFilePath)
         
-        if AGAnalysis.INSTANCE_COUNT > 0:
-            print("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[WARNING] Each notebook should instantiate only one AGAnalysis object, otherwise the logger will be duplicated. Duplicate logs can be tricky. If you want to make another analysis, create a new notebook or restart the Kernel and update this one.")
-        AGAnalysis.INSTANCE_COUNT += 1
-    
         self.config.loadConfigurationsForClass("AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
@@ -497,7 +492,7 @@ plotting:
         """
 
         if value < 0 or value > 5:
-            self.logger.critical(self, "Value out of range, possible values [0, 1, 2, 3, 4, 5]")
+            self.logger.critical( "Value out of range, possible values [0, 1, 2, 3, 4, 5]")
             raise ValueOutOfRange("Value out of range, possible values[0, 1, 2, 3, 4, 5]")
 
         elif value == 0:
@@ -621,7 +616,7 @@ plotting:
                     skymapH = Parameters.getSkyMap(emin, emax)
                     fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
 
-                    self.logger.debug(self, "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
+                    self.logger.debug( "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
                                        fovmin,fovmax,bincenter,emin,emax,fileNamePrefix,skymapL,skymapH)
 
 
@@ -675,9 +670,9 @@ plotting:
 
         maplistFilePath = maplistObjBKP.writeToFile()
 
-        self.logger.info(self, "Maplist file created in %s", maplistFilePath)
+        self.logger.info( "Maplist file created in %s", maplistFilePath)
 
-        self.logger.info(self, "Took %f seconds.", time() - timeStart)
+        self.logger.info( "Took %f seconds.", time() - timeStart)
 
         return maplistFilePath
 
@@ -713,7 +708,7 @@ plotting:
         inputSource = self.selectSources(f'name == "{sourceName}"', show=False)
 
         if not inputSource:
-            self.logger.critical(self, "The source %s has not been loaded yet", sourceName)
+            self.logger.critical( "The source %s has not been loaded yet", sourceName)
             raise SourceNotFound(f"The source {sourceName} has not been loaded yet")
 
 
@@ -765,7 +760,7 @@ plotting:
         elif pastTimeWindow == 0 and excludeTmaxTmin:
             raise SelectionParamNotSupported("Cannot compute coeffs with pasttimewindow 0 and excludetmaxtmin True")
 
-        self.logger.info(self, "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
+        self.logger.info( "tmin: %f tmax: %f type: %s", tmin, tmax, timetype)
         configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
 
 
@@ -804,13 +799,13 @@ plotting:
         # extract iso e gal coeff of "sourceName"
         isoCoeff, galCoeff = self._extractBkgCoeff(sourceFiles, sourceName)
 
-        self.logger.info(self, f"New isoCoeff: {isoCoeff}, New galCoeff: {galCoeff}")
+        self.logger.info( f"New isoCoeff: {isoCoeff}, New galCoeff: {galCoeff}")
 
         self.sourcesLibrary.restoreSL()
         # check if self.maplist exist
         self.config.setOptions(galcoeff=galCoeff, isocoeff=isoCoeff)
 
-        self.logger.info(self, "Took %f seconds.", time()-timeStart)
+        self.logger.info( "Took %f seconds.", time()-timeStart)
 
         return galCoeff, isoCoeff, maplistFilePath
 
@@ -893,7 +888,7 @@ plotting:
         if len(sourceFiles) == 0:
             self.logger.warning(self, "The number of .source files is 0.")
 
-        self.logger.info(self,"AG_multi produced: %s", sourceFiles)
+        self.logger.info("AG_multi produced: %s", sourceFiles)
 
         if updateSourceLibrary:
 
@@ -903,7 +898,7 @@ plotting:
 
                 self.sourcesLibrary.updateSourceWithMLEResults(multiOutputData)
 
-        self.logger.info(self, "Took %f seconds.", time()-timeStart)
+        self.logger.info( "Took %f seconds.", time()-timeStart)
 
         return sourceFiles
 
@@ -945,7 +940,7 @@ plotting:
         tstart = bins[0][0]
         tstop = bins[-1][1]
 
-        self.logger.info(self,f"[LC] Using the tmin {tmin}, tmax {tmax}, number of temporal bins: {len(bins)}.")
+        self.logger.info(f"[LC] Using the tmin {tmin}, tmax {tmax}, number of temporal bins: {len(bins)}.")
 
 
         processes = 1
@@ -965,7 +960,7 @@ plotting:
         # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
 
-        self.logger.info(self, f"[LC] Number of processes: {processes}, Number of bins per process {len(binsForProcesses[0])}")
+        self.logger.info( f"[LC] Number of processes: {processes}, Number of bins per process {len(binsForProcesses[0])}")
 
         idx = 0
         for bin in tqdm(bins, desc="Temporal bin loop"):
@@ -1007,7 +1002,7 @@ plotting:
             processes.append((pID,p,len(pInputs)))
 
         for pID, p, binsNumber in processes:
-            self.logger.info(self, "Starting process %d for %d bins", pID, binsNumber)
+            self.logger.info( "Starting process %d for %d bins", pID, binsNumber)
             p.start()
 
         for pID, p, binsNumber in processes:
@@ -1021,9 +1016,9 @@ plotting:
         with open(lcOutputFilePath, "w") as lco:
             lco.write(lcData)
 
-        self.logger.info(self, "Light curve created in %s", lcOutputFilePath)
+        self.logger.info( "Light curve created in %s", lcOutputFilePath)
 
-        self.logger.info(self, "Took %f seconds.", time()-timeStart)
+        self.logger.info( "Took %f seconds.", time()-timeStart)
 
         self.lightCurveData["mle"] = str(lcOutputFilePath)
 
@@ -1048,7 +1043,7 @@ plotting:
             raise ScienceToolInputArgMissing("Some options have not been set.")
 
         products = apTool.call()
-        self.logger.info(self, f"Science tool AP produced:\n {products}")
+        self.logger.info( f"Science tool AP produced:\n {products}")
 
         self.lightCurveData["ap"] = products[0]
 
@@ -1367,7 +1362,7 @@ plotting:
 
                     timecounter += 1
 
-        self.logger.info(self, f"\n{lcData}")
+        self.logger.info( f"\n{lcData}")
 
         return lcData
 
@@ -1585,17 +1580,17 @@ plotting:
         sourceFilePath = [ sourceFilePath for sourceFilePath in sourceFiles if sourceName in basename(sourceFilePath)]
 
         if len(sourceFilePath) > 1:
-            self.logger.critical(self, f"Something is wrong, found two .source files {sourceFilePath} for the same source {sourceName}")
+            self.logger.critical( f"Something is wrong, found two .source files {sourceFilePath} for the same source {sourceName}")
             raise ValueError(f"Something is wrong, found two .source files {sourceFilePath} for the same source {sourceName}")
 
-        self.logger.debug(self, "Extracting isocoeff and galcoeff from %s", sourceFilePath)
+        self.logger.debug( "Extracting isocoeff and galcoeff from %s", sourceFilePath)
 
         multiOutput = self.sourcesLibrary.parseSourceFile(sourceFilePath.pop())
 
         isoCoeff = multiOutput.getVal("multiIsoCoeff")
         galCoeff = multiOutput.getVal("multiGalCoeff")
 
-        self.logger.debug(self, f"Multioutput: {multiOutput}")
+        self.logger.debug( f"Multioutput: {multiOutput}")
 
         return isoCoeff, galCoeff
 

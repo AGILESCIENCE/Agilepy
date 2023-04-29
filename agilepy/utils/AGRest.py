@@ -41,7 +41,7 @@ class AGRest:
 
         api_url = f"https://tools.ssdc.asi.it/AgileData/rest/publicdatacoverage"
 
-        self.logger.info(self, f"Getting data coverage to SSDC server..")
+        self.logger.info( f"Getting data coverage to SSDC server..")
 
         start = time() 
 
@@ -57,7 +57,7 @@ class AGRest:
 
         end = time() - start
 
-        self.logger.info(self, f"Took {end} seconds")
+        self.logger.info( f"Took {end} seconds")
 
         return tmin, tmax
 
@@ -84,7 +84,7 @@ class AGRest:
 
         api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDList/{tmin_utc}/{tmax_utc}"
 
-        self.logger.info(self, f"Downloading filelist to download ({tmin},{tmax}) ({tmin_utc}, {tmax_utc}) from {api_url}..")
+        self.logger.info( f"Downloading filelist to download ({tmin},{tmax}) ({tmin_utc}, {tmax_utc}) from {api_url}..")
 
         start = time() 
         
@@ -94,7 +94,7 @@ class AGRest:
 
         end = time() - start
 
-        self.logger.info(self, f"Took {end} seconds")
+        self.logger.info( f"Took {end} seconds")
 
         if json_data["Response"]["statusCode"] != "OK":
             raise SSDCRestErrorDownload(json_data["Response"]["message"])
@@ -125,7 +125,7 @@ class AGRest:
 
         api_url = f"https://tools.ssdc.asi.it/AgileData/rest/GRIDFiles/{tmin_utc}/{tmax_utc}"
 
-        self.logger.info(self, f"Downloading data ({tmin},{tmax}) from {api_url}..")
+        self.logger.info( f"Downloading data ({tmin},{tmax}) from {api_url}..")
 
         start = time() 
 
@@ -141,7 +141,7 @@ class AGRest:
 
         outpath_size = os.stat(outpath).st_size
 
-        self.logger.info(self, f"Took {end} seconds. Downloaded {outpath_size} bytes.")
+        self.logger.info( f"Took {end} seconds. Downloaded {outpath_size} bytes.")
 
         if not Path(outpath).is_file():
             raise FileNotFoundError

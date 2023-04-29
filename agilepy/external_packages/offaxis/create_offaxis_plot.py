@@ -104,15 +104,15 @@ class Create_offaxis_plot:
             if (tstart <=tmax) & (tstop >= tmax):
                 index_f = i
             if (i >= index_i) & (i <= index_f):
-                self.logger.info(self, f"{index_i}, {index_f}, {orbit}")
+                self.logger.info( f"{index_i}, {index_f}, {orbit}")
                 #print >> file, str(orbit)+'[1][MODE > 0 && INSTR_STATUS > 0]' #add row filtering to have good instr_status        
                 print(str(orbit), file=file)
         
-        self.logger.info(self, f"files {file} created successfully")
+        self.logger.info( f"files {file} created successfully")
         file.close()
         if send == True:
             #os.system("sh "+os.environ['AGILEPIPE']+"/merge_orbit_logs.sh "+str(filename)+" merged_list_"+str(tmin)+"_"+str(tmax)+".fits")
-            self.logger.info(self, "Merging fits....")
+            self.logger.info( "Merging fits....")
             self.merge_fits(filename, tmin, tmax, "merged_list_" + str(tmin) + "_" + str(tmax) + ".fits")
 
 
@@ -130,7 +130,7 @@ class Create_offaxis_plot:
 
             tstart = float(times[0])
             tstop = float(times[1])
-            self.logger.info(self, f"new ----- \n {tstart} {tstop}")
+            self.logger.info( f"new ----- \n {tstart} {tstop}")
 
             #create dir
             #new_dir =  "dir_"+str(self.run_number)+"_"+str(self.zmax)+"_"+str(tstart)+"_"+str(tstop)
@@ -153,7 +153,7 @@ class Create_offaxis_plot:
                 fermi_met_start = (tstart - 51910.0 ) * 86400.0
                 fermi_met_stop = (tstop - 51910.0 ) * 86400.0
 
-                self.logger.info(self, f"fermi time {fermi_met_start} {fermi_met_stop}")
+                self.logger.info( f"fermi time {fermi_met_start} {fermi_met_stop}")
 
                 check = fermicheck(self.path_dati_fermi, self.ra, self.dec, tstart, tstop, zmax=self.zmax, timelimiti=fermi_met_start,step=self.step, timelimitf=fermi_met_stop,out_name="output_"+str(self.zmax)+".txt", logger=self.logger)
                 check.PlotVisibility()
@@ -166,7 +166,7 @@ class Create_offaxis_plot:
                 agile_met_start = (tstart - 53005.0) *  86400.0
                 agile_met_stop = (tstop - 53005.0) *  86400.0
 
-                self.logger.info(self, f"agile {agile_met_start} {agile_met_stop}")
+                self.logger.info( f"agile {agile_met_start} {agile_met_stop}")
 
                 self.MET2orbit(agile_met_start, agile_met_stop, self.path_log_index)
 

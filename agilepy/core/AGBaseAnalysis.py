@@ -55,13 +55,8 @@ class AGBaseAnalysis:
 
         Path(self.outdir).mkdir(parents=True, exist_ok=True)
 
-
-        
-        self.logger = AgilepyLogger()
-
-        self.logger.initialize(self.outdir, self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-
+        logger = AgilepyLogger()
+        logger.setLogger(self.outdir, self.config.getConf("output","verboselvl"))
 
         self.plottingUtils = PlottingUtils(self.config, self.logger)
 
@@ -100,7 +95,7 @@ class AGBaseAnalysis:
         outDir = Path(self.config.getConf("output", "outdir"))
 
         if outDir.exists() and outDir.is_dir():
-            self.logger.info(self, "Removing directory %s", str(outDir))
+            self.logger.info( "Removing directory %s", str(outDir))
             self.logger.reset()
             rmtree(outDir)
         else:

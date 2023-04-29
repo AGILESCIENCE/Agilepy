@@ -83,7 +83,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         dir = offaxis.run()
 
-        self.logger.info(self,"Output directory: %s", dir)
+        self.logger.info("Output directory: %s", dir)
 
         return dir
 

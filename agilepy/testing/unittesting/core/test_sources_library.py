@@ -43,30 +43,7 @@ from agilepy.core.CustomExceptions import SourceParamNotFoundError, \
                                           SourceModelFormatNotSupported, \
                                           MultiOutputNotFoundError
 
-class SourcesLibraryUT(unittest.TestCase):
-
-    def setUp(self):
-        self.currentDirPath = Path(__file__).parent.absolute()
-
-        self.test_logs_dir = Path(self.currentDirPath).joinpath("test_logs", "SourcesLibraryUT")
-        self.test_logs_dir.mkdir(parents=True, exist_ok=True)
-        os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
-
-        self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyConf)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.logger = AgilepyLogger()
-        self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/core"))
-
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
-
-        self.sl = SourcesLibrary(self.config, self.logger)
+class TestSourcesLibrary:
 
     @staticmethod
     def get_free_params(source):
@@ -80,80 +57,109 @@ class SourcesLibraryUT(unittest.TestCase):
                }
 
 
-    def test_load_file_with_wrong_extension(self):
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sourceconf.wrongext")
+    def test_load_file_with_wrong_extension(self, configObject, logger, testdata):
 
-        xmlsourcesconfPath = os.path.join(self.currentDirPath,"test_data/sourceconf.wrongext")
+        sl = SourcesLibrary(configObject, logger)
 
-        self.assertRaises(SourceModelFormatNotSupported, self.sl.loadSourcesFromFile, xmlsourcesconfPath)
+        with pytest.raises(SourceModelFormatNotSupported):
+            sl.loadSourcesFromFile(testdata)
 
-    def test_load_wrong_file(self):
 
-        xmlsourcesconfPath = os.path.join(self.currentDirPath,"conf/idontexitst.txt")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sourceconf.idontexitst.txt")
+    def test_load_wrong_file(self, configObject, logger, testdata):
+        logger.info(f"Hello! {AgilepyLogger().getRootLogsDir()}")
 
-        self.assertRaises(FileNotFoundError, self.sl.loadSourcesFromFile, xmlsourcesconfPath)
+        sl = SourcesLibrary(configObject, logger)
 
-    def test_load_from_catalog(self):
+        with pytest.raises(FileNotFoundError):
+            sl.loadSourcesFromFile(testdata)
 
-        added = self.sl.loadSourcesFromCatalog("2AGL")
-        self.assertEqual(175, len(added))
-        self.assertEqual(175, len(self.sl.sources))
 
-        self.assertRaises(FileNotFoundError, self.sl.loadSourcesFromCatalog, "paperino")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_load_from_catalog(self, configObject, logger):
+        sl = SourcesLibrary(configObject, logger)
 
-    def test_load_catalog_from_catalog_filtering_on_distances(self):
+        added = sl.loadSourcesFromCatalog("2AGL")
+        assert 175==len(added)
+        assert 175==len(sl.sources)
 
-        added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(70, 80))
+        with pytest.raises(FileNotFoundError):
+            sl.loadSourcesFromCatalog("paperino")
 
-        self.assertEqual(13, len(added))
-        self.assertEqual(13, len(self.sl.sources))
 
-        self.sl.sources = []
-        added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 10))
-        self.assertEqual(1, len(added))
-        self.assertEqual(1, len(self.sl.sources))
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_load_catalog_from_catalog_filtering_on_distances(self, configObject, logger):
+        sl = SourcesLibrary(configObject, logger)
 
-        self.sl.sources = []
-        added = self.sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 50))
-        self.assertEqual(30, len(added))
-        self.assertEqual(30, len(self.sl.sources))
+        added = sl.loadSourcesFromCatalog("2AGL", rangeDist=(70, 80))
 
-    def test_load_sources_from_xml_file(self):
-        
-        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        assert 13 == len(added)
+        assert 13 == len(sl.sources)
 
-        self.assertEqual(2, len(added))
-        self.assertEqual(2, len(self.sl.sources))
+        sl.sources = []
+        added = sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 10))
+        assert 1 == len(added)
+        assert 1 == len(sl.sources)
 
-        sources = self.sl.selectSources('name == "2AGLJ2021+4029"')
-        self.assertEqual(1, len(sources))
+        sl.sources = []
+        added = sl.loadSourcesFromCatalog("2AGL", rangeDist=(0, 50))
+        assert 30 == len(added)
+        assert 30 == len(sl.sources)
+
+
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    def test_load_sources_from_xml_file(self, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
+
+        added = sl.loadSourcesFromFile(testdata)
+
+        assert 2== len(added)
+        assert 2== len(sl.sources)
+
+        sources = sl.selectSources('name == "2AGLJ2021+4029"')
+        assert 1 == len(sources)
         source = sources.pop()
-        self.assertEqual(119.3e-08, source.spectrum.getVal("flux"))
-        self.assertEqual(1.75, source.spectrum.getVal("index"))
-        self.assertEqual(78.2375, source.spatialModel.getVal("pos")[0])
-        self.assertEqual(True, source.spatialModel.getVal("dist") > 0)
+        assert 119.3e-08== source.spectrum.getVal("flux")
+        assert 1.75== source.spectrum.getVal("index")
+        assert 78.2375== source.spatialModel.getVal("pos")[0]
+        assert source.spatialModel.getVal("dist") > 0
 
-        sources = self.sl.selectSources('name == "2AGLJ2021+3654"')
-        self.assertEqual(1, len(sources))
+        sources = sl.selectSources('name == "2AGLJ2021+3654"')
+        assert 1== len(sources)
         source = sources.pop()
-        self.assertEqual(70.89e-08, source.spectrum.getVal("flux"))
-        self.assertEqual(1.38, source.spectrum.getVal("index"))
-        self.assertEqual(75.2562, source.spatialModel.getVal("pos")[0])
-        self.assertEqual(True, source.spatialModel.getVal("dist") > 0)
+        assert 70.89e-08== source.spectrum.getVal("flux")
+        assert 1.38== source.spectrum.getVal("index")
+        assert 75.2562== source.spatialModel.getVal("pos")[0]
+        assert source.spatialModel.getVal("dist") > 0
 
-    def test_load_sources_from_txt_file(self):
 
-        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.txt"))
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.txt")
+    def test_load_sources_from_txt_file(self, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-        self.assertEqual(10, len(added))
-        self.assertEqual(10, len(self.sl.sources))
+        added = sl.loadSourcesFromFile(testdata)
 
-        sources = self.sl.selectSources('name == "2AGLJ1801-2334"')
-        self.assertEqual(1, len(sources))
+        assert 10== len(added)
+        assert 10== len(sl.sources)
+
+        sources = sl.selectSources('name == "2AGLJ1801-2334"')
+        assert 1== len(sources)
         source = sources.pop()
 
-        self.assertEqual(3.579e-07, source.spectrum.getVal("flux"))
-        self.assertEqual(3.37991, source.spectrum.getVal("index"))
-        self.assertEqual(6.16978, source.spatialModel.getVal("pos")[0])
+        assert 3.579e-07== source.spectrum.getVal("flux")
+        assert 3.37991== source.spectrum.getVal("index")
+        assert 6.16978== source.spatialModel.getVal("pos")[0]
 
         # testing fixflags
         f0 = {"curvature":0, "pivot_energy":0, "index":0, "pos":0, "flux":0} # special case
@@ -178,190 +184,245 @@ class SourcesLibraryUT(unittest.TestCase):
             elif ff == 8: ff = 30
             elif ff == 9: ff = 32
 
-            self.assertDictEqual(fs[i], SourcesLibraryUT.get_free_params(self.sl.sources[i]))
+            assert fs[i] == TestSourcesLibrary.get_free_params(sl.sources[i])
 
-    def test_fixflag(self):
 
-        added = self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.txt"))
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.txt")
+    def test_fixflag(self, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
+
+        added = sl.loadSourcesFromFile(testdata)
         results_fixflag = []
 
-        for source in self.sl.sources:
+        for source in sl.sources:
             fixflag = SourcesLibrary._computeFixFlag(source, source.spectrum.getType())
-
             results_fixflag.append(fixflag)
-        print(results_fixflag)
-        #input("..")
-        self.assertEqual(results_fixflag, ['0','1','2','3','4','5','7','28','30','32'])
+
+        assert results_fixflag == ['0','1','2','3','4','5','7','28','30','32']
 
         
 
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/testcase_2AGLJ0835-4514.source")
+    def test_source_file_parsing(self, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-    def test_source_file_parsing(self):
+        sourceFile = testdata
 
-        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ0835-4514.source")
+        res = sl.parseSourceFile(sourceFile)
 
-        res = self.sl.parseSourceFile(sourceFile)
+        assert True== bool(res)
 
-        self.assertEqual(True, bool(res))
+        assert True== isinstance(res.multiFlux["value"], float)
+        assert 9.07364e-06== res.multiFlux["value"]
+        assert True== isinstance(res.multiSqrtTS["value"], float)
+        assert 2.17268== res.multiSqrtTS["value"]
+        assert None== res.multiDist["value"]
 
-        self.assertEqual(True, isinstance(res.multiFlux["value"], float))
-        self.assertEqual(9.07364e-06, res.multiFlux["value"])
-        self.assertEqual(True, isinstance(res.multiSqrtTS["value"], float))
-        self.assertEqual(2.17268, res.multiSqrtTS["value"])
-        self.assertEqual(None, res.multiDist["value"])
 
-    def test_load_source_from_catalog_without_scaling(self):
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_load_source_from_catalog_without_scaling(self, configObject, logger):
+        sl = SourcesLibrary(configObject, logger)
 
-        sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
+        sources = sl.loadSourcesFromCatalog(catalogName="2AGL")
 
-        self.assertEqual(175, len(sources))
+        assert 175== len(sources)
 
-        self.assertEqual(7.45398e-08, sources[0].spectrum.getVal("flux"))
+        assert 7.45398e-08== sources[0].spectrum.getVal("flux")
 
-    def test_load_source_from_catalog_with_scaling(self):
 
-        self.config.setOptions(emin=10, emax=1000)
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_load_source_from_catalog_with_scaling(self, configObject, logger):
+        sl = SourcesLibrary(configObject, logger)
 
-        sources = self.sl.loadSourcesFromCatalog(catalogName="2AGL")
+        configObject.setOptions(emin=10, emax=1000)
 
-        self.assertEqual(175, len(sources))
+        sources = sl.loadSourcesFromCatalog(catalogName="2AGL")
 
-        self.assertEqual(6.940938928095228e-07, sources[0].spectrum.getVal("flux"))
+        assert 175== len(sources)
 
-    def test_select_sources_with_selection_string(self):
+        assert 6.940938928095228e-07== sources[0].spectrum.getVal("flux")
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
-        self.assertEqual(2, len(self.sl.sources))
+
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
+    def test_select_sources_with_selection_string(self, configObject, logger, testdata, testdata2):
+        sl = SourcesLibrary(configObject, logger)
+
+        sl.loadSourcesFromFile(testdata)
+        assert 2== len(sl.sources)
         
-        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
-        self.assertEqual(1, len(sources))
+        sources = sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
+        assert 1== len(sources)
 
-        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
+        sourceFile = testdata2
 
-        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
+        mleAnalysisResults = sl.parseSourceFile(sourceFile)
 
-        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
+        sl.updateSourceWithMLEResults(mleAnalysisResults)
 
-        sources = self.sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
-        self.assertEqual(1, len(sources))
+        sources = sl.selectSources('name == "2AGLJ2021+3654" AND flux > 0')
+        assert 1 ==len(sources)
 
-        sources = self.sl.selectSources('multisqrtts == 10')
-        self.assertEqual(1, len(sources))
+        sources = sl.selectSources('multisqrtts == 10')
+        assert 1 == len(sources)
 
-        sources = self.sl.selectSources('sqrtts == 10')
-        self.assertEqual(1, len(sources))
+        sources = sl.selectSources('sqrtts == 10')
+        assert 1 == len(sources)
+        
+
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
+    def test_select_sources_with_selection_lambda(self, configObject, logger, testdata, testdata2):
+        sl = SourcesLibrary(configObject, logger)
+
+        sl.loadSourcesFromFile(testdata)
+
+        sources = sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
+        assert 1 == len(sources)
+
+        sourceFile = testdata2
+
+        mleAnalysisResults = sl.parseSourceFile(sourceFile)
+
+        sl.updateSourceWithMLEResults(mleAnalysisResults)
+
+        sources = sl.selectSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0)
+        assert 1== len(sources)
 
 
-    def test_select_sources_with_selection_lambda(self):
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
+    def test_free_sources_with_selection_string(self, configObject, logger, testdata, testdata2):
+        sl = SourcesLibrary(configObject, logger)
 
-        sources = self.sl.selectSources( lambda name : name == "2AGLJ2021+3654" )
-        self.assertEqual(1, len(sources))
+        sl.loadSourcesFromFile(testdata)
+        sourceFile = testdata2
+        mleAnalysisResults = sl.parseSourceFile(sourceFile)
+        sl.updateSourceWithMLEResults(mleAnalysisResults)
 
-        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
+        sources = sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", False)
 
-        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
+        assert 1== len(sources)
+        assert "flux" not in sources[0].getFreeParams()
 
-        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
+        sources = sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", True)
+        assert "flux" in sources[0].getFreeParams()
 
-        sources = self.sl.selectSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0)
-        self.assertEqual(1, len(sources))
+        sources = sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", True)
+        assert "index" in sources[0].getFreeParams()
 
-    def test_free_sources_with_selection_string(self):
+        sources = sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", False)
+        assert "index" not in sources[0].getFreeParams()
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
-        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
-        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", False)
 
-        self.assertEqual(1, len(sources))
-        self.assertEqual(True, "flux" not in sources[0].getFreeParams())
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
+    def test_free_sources_with_selection_lambda(self, configObject, logger, testdata, testdata2):
+        sl = SourcesLibrary(configObject, logger)
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "flux", True)
-        self.assertEqual(True, "flux" in sources[0].getFreeParams())
+        sl.loadSourcesFromFile(testdata)
+        sourceFile = testdata2
+        mleAnalysisResults = sl.parseSourceFile(sourceFile)
+        sl.updateSourceWithMLEResults(mleAnalysisResults)
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", True)
-        self.assertEqual(True, "index" in sources[0].getFreeParams())
+        sources = sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", False)
+        assert 1, len(sources)
+        assert "flux" not in sources[0].getFreeParams()
 
-        sources = self.sl.freeSources('name == "2AGLJ2021+3654" AND flux > 0', "index", False)
-        self.assertEqual(True, "index" not in sources[0].getFreeParams())
+        sources = sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", True)
+        assert "flux" in sources[0].getFreeParams()
 
-    def test_free_sources_with_selection_lambda(self):
+        sources = sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", True)
+        assert "index" in sources[0].getFreeParams()
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
-        sourceFile = os.path.join(self.currentDirPath,"test_data/testcase_2AGLJ2021+3654.source")
-        mleAnalysisResults = self.sl.parseSourceFile(sourceFile)
-        self.sl.updateSourceWithMLEResults(mleAnalysisResults)
+        sources = sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", False)
+        assert "index" not in sources[0].getFreeParams()
 
-        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", False)
-        self.assertEqual(1, len(sources))
-        self.assertEqual(True, "flux" not in sources[0].getFreeParams())
 
-        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "flux", True)
-        self.assertEqual(True, "flux" in sources[0].getFreeParams())
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    def test_write_to_file_xml(self, config, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", True)
-        self.assertEqual(True, "index" in sources[0].getFreeParams())
+        configObject = AgilepyConfig()
 
-        sources = self.sl.freeSources(lambda name, flux : name == "2AGLJ2021+3654" and flux > 0, "index", False)
-        self.assertEqual(True, "index" not in sources[0].getFreeParams())
+        configObject.loadBaseConfigurations(config)
 
-    def test_write_to_file_xml(self):
-
-        self.config = AgilepyConfig()
-
-        self.config.loadBaseConfigurations(self.agilepyConf)
-
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        sl.loadSourcesFromFile(testdata)
 
         outfileName = "write_to_file_testcase"
 
-        outputFile = Path(self.sl.writeToFile(outfileName, fileformat="xml"))
+        outputFile = Path(sl.writeToFile(outfileName, fileformat="xml"))
 
-        self.assertEqual(True, outputFile.exists())
+        assert True== outputFile.exists()
 
         sourcesxml = parse(outputFile).getroot()
 
-        self.assertEqual(2, len(sourcesxml))
+        assert 2== len(sourcesxml)
 
-    def test_write_to_file_txt(self):
 
-        self.config = AgilepyConfig()
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sourcesconf_for_write_to_file_txt.txt")
+    def test_write_to_file_txt(self, config, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-        self.config.loadBaseConfigurations(self.agilepyConf)
+        configObject = AgilepyConfig()
 
-        sourcesFile = os.path.join(self.currentDirPath,"test_data/sourcesconf_for_write_to_file_txt.txt")
+        configObject.loadBaseConfigurations(config)
 
-        self.sl.loadSourcesFromFile(sourcesFile)
+        sourcesFile = testdata
+
+        sl.loadSourcesFromFile(sourcesFile)
 
         outfileName = "write_to_file_testcase"
 
-        outputFile = Path(self.sl.writeToFile(outfileName, fileformat="txt"))
+        outputFile = Path(sl.writeToFile(outfileName, fileformat="txt"))
 
-        self.assertEqual(True, outputFile.exists())
+        assert True== outputFile.exists()
 
         with open(outputFile) as of:
             lines = of.readlines()
 
-        self.assertEqual("1.57017e-07 80.3286 1.12047 2.16619 0 2 _2AGLJ2032+4135 0 0 0 0 0.5 5.0 20 10000 0 100", lines[0].strip())
-        self.assertEqual("1.69737e-07 79.9247 0.661449 1.99734 0 2 CYGX3 0 0 0 0 0.5 5.0 20 10000 0 100", lines[1].strip())
-        self.assertEqual("1.19303e-06 78.2375 2.12298 1.75823 3 2 _2AGLJ2021+4029 0 1 3307.63 0 0.5 5.0 20.0 10000.0  0 100", lines[2].strip())
+        assert "1.57017e-07 80.3286 1.12047 2.16619 0 2 _2AGLJ2032+4135 0 0 0 0 0.5 5.0 20 10000 0 100"== lines[0].strip()
+        assert "1.69737e-07 79.9247 0.661449 1.99734 0 2 CYGX3 0 0 0 0 0.5 5.0 20 10000 0 100"== lines[1].strip()
+        assert "1.19303e-06 78.2375 2.12298 1.75823 3 2 _2AGLJ2021+4029 0 1 3307.63 0 0.5 5.0 20.0 10000.0  0 100"== lines[2].strip()
 
-    def test_add_source(self):
 
-        self.config = AgilepyConfig()
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")
+    def test_add_source(self, config, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-        self.config.loadBaseConfigurations(self.agilepyConf)
+        configObject = AgilepyConfig()
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        configObject.loadBaseConfigurations(config)
+
+        sl.loadSourcesFromFile(testdata)
 
         newSourceDict = {
             "a" : 10
         }
-        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "newsource", newSourceDict)
+        with pytest.raises(SourceParamNotFoundError):
+            sl.addSource("newsource", newSourceDict)
 
 
         newSourceDict = {
@@ -369,16 +430,18 @@ class SourcesLibraryUT(unittest.TestCase):
             "glat": 30,
             "spectrumType" : "LogPaperone"
         }
-        self.assertRaises(SpectrumTypeNotFoundError, self.sl.addSource, "newsource", newSourceDict)
+        with pytest.raises(SpectrumTypeNotFoundError):
+            sl.addSource("newsource", newSourceDict)
 
         newSourceDict = {
             "glon" : 250,
             "glat": 30,
             "spectrumType" : "LogParabola"
         }
-        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "", newSourceDict)
-        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, None, newSourceDict)
-        self.assertRaises(SourceParamNotFoundError, self.sl.addSource, "newsource", newSourceDict)
+        with pytest.raises(SourceParamNotFoundError):
+            sl.addSource("", newSourceDict)
+            sl.addSource(None, newSourceDict)
+            sl.addSource("newsource", newSourceDict)
 
         newSourceDict = {
             "glon" : 250,
@@ -389,62 +452,68 @@ class SourcesLibraryUT(unittest.TestCase):
             "pivotEnergy": 4,
             "curvature": 5
         }
-        newSourceObj = self.sl.addSource("newsource", newSourceDict)
+        newSourceObj = sl.addSource("newsource", newSourceDict)
 
-        self.assertEqual(True, isinstance(newSourceObj, PointSource))
+        assert True, isinstance(newSourceObj, PointSource)
 
-        newSource = self.sl.selectSources('name == "newsource"').pop()
+        newSource = sl.selectSources('name == "newsource"').pop()
 
-        self.assertEqual(40, newSource.spectrum.getVal("flux"))
-        self.assertEqual(5, newSource.spectrum.getVal("curvature"))
-        self.assertEqual("newsource", newSource.name)
-        self.assertEqual(35.2462913047547, newSource.spatialModel.getVal("dist"))
+        assert 40== newSource.spectrum.getVal("flux")
+        assert 5== newSource.spectrum.getVal("curvature")
+        assert "newsource"== newSource.name
+        assert 35.2462913047547== newSource.spatialModel.getVal("dist")
 
 
-    def test_convert_catalog_to_xml(self):
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_convert_catalog_to_xml(self, configObject, logger):
+        sl = SourcesLibrary(configObject, logger)
 
         catalogFile = "$AGILE/catalogs/2AGL.multi"
 
-        outfile = self.sl.convertCatalogToXml(catalogFile)
+        outfile = sl.convertCatalogToXml(catalogFile)
 
         sourcesxml = parse(outfile).getroot()
 
-        self.assertEqual(175, len(sourcesxml))
+        assert 175== len(sourcesxml)
 
-        added = self.sl.loadSourcesFromFile(outfile)
+        added = sl.loadSourcesFromFile(outfile)
 
-        self.assertEqual(175, len(added))
+        assert 175== len(added)
 
-        self.assertEqual(175, len(self.sl.sources))
+        assert 175== len(sl.sources)
 
-    def test_backup_restore(self):
-        self.config = AgilepyConfig()
 
-        self.config.loadBaseConfigurations(self.agilepyConf)
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafile("core/test_data/sources_2.xml")    
+    def test_backup_restore(self, config, configObject, logger, testdata):
+        sl = SourcesLibrary(configObject, logger)
 
-        self.sl.loadSourcesFromFile(os.path.join(self.currentDirPath,"test_data/sources_2.xml"))
+        configObject = AgilepyConfig()
+
+        configObject.loadBaseConfigurations(config)
+
+        sl.loadSourcesFromFile(testdata)
 
         """
-        for s in self.sl.getSources():
+        for s in sl.getSources():
             print(s)
         """
         
-        self.assertEqual(2, len(self.sl.sources))
+        assert 2== len(sl.sources)
 
-        self.sl.backupSL()
+        sl.backupSL()
 
-        self.sl.deleteSources('name=="2AGLJ2021+4029"')
+        sl.deleteSources('name=="2AGLJ2021+4029"')
 
-        self.assertEqual(1, len(self.sl.sources))
+        assert 1== len(sl.sources)
 
-        self.sl.deleteSources('name=="2AGLJ2021+3654"')
+        sl.deleteSources('name=="2AGLJ2021+3654"')
 
-        self.assertEqual(0, len(self.sl.sources))
+        assert 0== len(sl.sources)
 
-        self.sl.restoreSL()
+        sl.restoreSL()
 
-        self.assertEqual(2, len(self.sl.sources))
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert 2== len(sl.sources)
+ 

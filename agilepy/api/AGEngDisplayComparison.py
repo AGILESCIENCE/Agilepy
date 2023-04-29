@@ -181,7 +181,7 @@ class AGEngDisplayComparison:
                 t2 = t
                 gti_list.append([t1, t2]) 
 
-        self.logger.info(self, f"Total time in GTI = {total_s_in_gti} s")
+        self.logger.info( f"Total time in GTI = {total_s_in_gti} s")
         return np.array(gti_list)
 
     def get_intervals_larger_than_threshold(self, ax, times, threshold):
@@ -198,7 +198,7 @@ class AGEngDisplayComparison:
         intervals = []
         for i in range(len(times) - 1):
             if (times[i+1] - times[i]) >= threshold:  
-                self.logger.debug(self, f"Green box in: {times[i]}, {times[i+1]}")
+                self.logger.debug( f"Green box in: {times[i]}, {times[i+1]}")
                 intervals.append([times[i], times[i+1]])
                 ax.axvline(times[i], linestyle='--', color='green', linewidth=0.5)
                 ax.axvline(times[i+1], linestyle='--', color='green', linewidth=0.5)
@@ -218,7 +218,7 @@ class AGEngDisplayComparison:
             for i in range(0,len(agile_time_windows),2):
                 ax.axvspan(xmin=agile_time_windows[i], xmax=agile_time_windows[i+1], facecolor='y', alpha=0.1)
         except:
-            self.logger.info(self, "Empty 'agile_time_windows' list")
+            self.logger.info( "Empty 'agile_time_windows' list")
         return self
 
     def add_fermi_gti(self, ax, fermi_times, fermi_angles, zmax, threshold):
@@ -266,7 +266,7 @@ class AGEngDisplayComparison:
         # define tstart and tstop
         tstart = timerange[0]
         tstop = timerange[1]
-        self.logger.info(self, f"Time range = [{tstart}, {tstop}] {timetype}")
+        self.logger.info( f"Time range = [{tstart}, {tstop}] {timetype}")
 
         # manage time frame and trigger time shift
         assert timetype in ['TT', 'MJD'], ValueError(f'{timetype} must be TT or MJD')
@@ -528,11 +528,11 @@ class AGEngDisplayComparison:
         plt.show()
         # save pdf
         outfilename_pdf = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('pdf')
-        self.logger.info(self, f"Plot: {outfilename_pdf}")
+        self.logger.info( f"Plot: {outfilename_pdf}")
         fig.savefig(outfilename_pdf, format="pdf")
         # save png
         outfilename_png = 'merged_plot_'+str(tstart)+'_'+str(tstop)+'.'+str('png')
-        self.logger.info(self, f"Plot: {outfilename_png}")
+        self.logger.info( f"Plot: {outfilename_png}")
         fig.savefig(outfilename_png, format="png")        
         return self
 
