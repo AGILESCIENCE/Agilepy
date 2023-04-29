@@ -2,6 +2,13 @@
 
 from setuptools import setup, find_packages
 
+entry_points = {
+	'console_scripts': [
+		'agilepy_spectra = agilepy.api.advanced.spectra.main:main',
+    ]
+}
+
+
 setup( name='agilepy',
        version='1.6.3',
        author='Baroncelli Leonardo, Addis Antonio, Bulgarelli Andrea, Parmiggiani Nicolò, Ambra Di Piano, Gabriele Panebianco',
@@ -11,6 +18,7 @@ setup( name='agilepy',
        scripts=[
           'agilepy/scripts/start_coverage.sh'
        ],
+       entry_points=entry_points,
        include_package_data=True,
        package_data={'mypkg': [
                          'testing/unittesting/api/conf/*',
