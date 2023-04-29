@@ -25,11 +25,11 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from os import stat, listdir
 from pathlib import Path
 from typing import List
 import numpy as np
 from numbers import Number
+from agilepy.core.Parameters import Parameters
 
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
@@ -269,7 +269,7 @@ class ValidationStrategies:
                 raise ConfigFileOptionTypeError("Can't set config option '{}'. Error: expected dimension=scalar {} but you passed dimension={}".format(optionName, validType[1], type(optionValue)))
             
             # int is a Number...
-            if (type(optionValue) in [int, float, np.float64]) and validType[0]==Number:
+            if (type(optionValue) in [int, float, np.int64, np.float64]) and validType[0]==Number:
                 pass
             
             elif type(optionValue) != validType[0]:
@@ -319,3 +319,17 @@ class ValidationStrategies:
             errors["input/datapath"] = error_str
 
         return errors
+    
+
+    @staticmethod
+    def _validateIrf(confDict, section, option):
+        
+        errors = {}
+        
+        if confDict[section][option] is None:
+            errors["selection/irf"] = "irf is None"
+
+        if confDict[section][option] not in Parameters.getSupportedIRFs():
+            errors["selection/irf"] = f"irf = {confDict[section][option]} -> invalid value. Possible values {Parameters.getSupportedIRFs()}" 
+
+        return errors    

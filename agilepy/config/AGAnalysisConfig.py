@@ -66,13 +66,13 @@ class AGAnalysisConfig():
         #errors.update( ValidationStrategies._validateTimeInIndex(confDict) )
         errors.update( ValidationStrategies._validateLOCCL(confDict) )
         errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "fovradmin", "fovradmax") )
-        errors.update( ValidationStrategies._validateMinMax(confDict, "selection", "emin", "emax") )
         errors.update( ValidationStrategies._validateTimetype(confDict))
         errors.update( ValidationStrategies._validateFluxcorrection(confDict) )
         #errors.update( ValidationStrategies._validateAlbedorad(confDict) )
         #errors.update( ValidationStrategies._validateFovradmax(confDict) )
         errors.update( ValidationStrategies._validateDQ(confDict) )
         errors.update(ValidationStrategies._validateDatapath(confDict))
+        errors.update(ValidationStrategies._validateIrf(confDict, "selection", "irf"))
 
 
         return errors
@@ -113,7 +113,7 @@ class AGAnalysisConfig():
             validType = ()
 
             # int
-            if optionName in [  "verboselvl", "filtercode", "emin", "emax", "fovradmin", \
+            if optionName in [  "verboselvl", "filtercode", "fovradmin", \
                                 "fovradmax", "albedorad", "dq", "phasecode", "expstep", \
                                 "fovbinnumber", "galmode", "isomode", "loccl", "timeslot", "fluxcorrection", \
                                 "minimizerdefstrategy", "integratortype", "contourpoints",
@@ -135,7 +135,7 @@ class AGAnalysisConfig():
             # String
             elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
                                 "timetype", "timelist", "projtype", "proj", "modelfile", "minimizertype", \
-                                "minimizeralg", "maplistgen"]:
+                                "minimizeralg", "maplistgen", "irf"]:
 
                 validType = (str, 0)
 

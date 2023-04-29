@@ -28,6 +28,7 @@
 from genericpath import exists
 import unittest
 import os
+from pytest import approx
 import shutil
 from pathlib import Path
 from time import sleep
@@ -812,7 +813,8 @@ class AGAnalysisUT(unittest.TestCase):
         
         flux1 = source.get("multiFlux")["value"]
 
-        assert flux0 == flux1
+        assert flux0 == approx(flux1,  rel=1e-9, abs=1e-9)
+
 
         ag.destroy()
     

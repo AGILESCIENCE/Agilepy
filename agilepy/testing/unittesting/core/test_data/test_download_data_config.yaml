@@ -13,14 +13,14 @@ output:
   verboselvl: 1
 
 selection:
-  emin: 100
-  emax: 10000
+
   tmin: 57083
   tmax: 57090
   timetype: MJD
   glon: 263.55
   glat: -2.78
   timelist: None
+  irf: H0025
   filtercode: 5
   fovradmin: 0
   fovradmax: 60

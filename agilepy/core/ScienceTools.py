@@ -26,6 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import numpy as np
 from pathlib import Path
 from agilepy.core.Parameters import Parameters
 from agilepy.utils.ProcessWrapper import ProcessWrapper
@@ -36,7 +37,7 @@ class CtsMapGenerator(ProcessWrapper):
         super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
-        return ["evtfile", "outdir", "filenameprefix", "emin", "emax", "energybins", "glat", "glon", "tmin", "tmax"]
+        return ["evtfile", "outdir", "filenameprefix", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
 
@@ -64,8 +65,8 @@ class CtsMapGenerator(ProcessWrapper):
                       config.getOptionValue("proj"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                     ]
@@ -81,7 +82,7 @@ class ExpMapGenerator(ProcessWrapper):
 
 
     def getRequiredOptions(self):
-        return ["logfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "outdir", "filenameprefix", "energybins", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
 
@@ -92,7 +93,7 @@ class ExpMapGenerator(ProcessWrapper):
 
         edpmatrix = "None"
         if config.getOptionValue("useEDPmatrixforEXP"):
-            edpmatrix = Parameters.edpmatrix
+            edpmatrix = Parameters.getCalibrationMatrices(config.getOptionValue("filtercode"), config.getOptionValue("irf"))[1]
 
         outfilePath = os.path.join(self.outputDir, outputName)
 
@@ -102,7 +103,7 @@ class ExpMapGenerator(ProcessWrapper):
 
         self.args = [ outfilePath,  \
                       config.getOptionValue("logfile"), # = indexlog
-                      Parameters.sarmatrix, \
+                      Parameters.getCalibrationMatrices(config.getOptionValue("filtercode"), config.getOptionValue("irf"))[0], \
                       edpmatrix, \
                       config.getOptionValue("maplistgen"), \
                       config.getOptionValue("timelist"), \
@@ -122,8 +123,8 @@ class ExpMapGenerator(ProcessWrapper):
                       config.getOptionValue("spectralindex"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                     ]
@@ -325,12 +326,14 @@ class Multi(ProcessWrapper):
         
         expratioevaluation = 0
         if config.getOptionValue("expratioevaluation"):
-            expratioevaluation = 1
+            expratioevaluation = 1  
+
+        calibMatrices = Parameters.getCalibrationMatrices(config.getOptionValue("filtercode"), config.getOptionValue("irf"))
 
 
         self.args = [
             config.getOptionValue("maplist"), \
-            Parameters.matrixconf, \
+            f"{calibMatrices[0]} {calibMatrices[1]} {calibMatrices[2]}", \
             config.getOptionValue("ranal"), \
             config.getOptionValue("galmode"), \
             config.getOptionValue("isomode"), \
@@ -366,7 +369,7 @@ class AP(ProcessWrapper):
         super().__init__(exeName, agilepyLogger)
 
     def getRequiredOptions(self):
-        return ["logfile", "evtfile", "outdir", "filenameprefix", "emin", "emax", "glat", "glon", "tmin", "tmax"]
+        return ["logfile", "evtfile", "outdir", "filenameprefix", "glat", "glon", "tmin", "tmax"]
 
     def configureTool(self, config, extraParams=None):
         """
@@ -385,12 +388,12 @@ class AP(ProcessWrapper):
 
         edpmatrix = "None"
         if config.getOptionValue("useEDPmatrixforEXP"):
-            edpmatrix = Parameters.edpmatrix
+            edpmatrix = Parameters.getCalibrationMatrices(config.getOptionValue("filtercode"), config.getOptionValue("irf"))[1]
 
         self.args = [ outfilePath,  \
                       config.getOptionValue("logfile"), # = indexlog
                       config.getOptionValue("evtfile"), # = indexfiler
-                      Parameters.sarmatrix, \
+                      Parameters.getCalibrationMatrices(config.getOptionValue("filtercode"), config.getOptionValue("irf"))[0], \
                       edpmatrix, \
                       config.getOptionValue("timelist"), \
                       config.getOptionValue("binsize"), \
@@ -407,8 +410,8 @@ class AP(ProcessWrapper):
                       config.getOptionValue("spectralindex"), \
                       config.getOptionValue("tmin"), \
                       config.getOptionValue("tmax"), \
-                      config.getOptionValue("emin"), \
-                      config.getOptionValue("emax"), \
+                      np.matrix(config.getOptionValue("energybins")).min(), \
+                      np.matrix(config.getOptionValue("energybins")).max(), \
                       config.getOptionValue("fovradmin"), \
                       config.getOptionValue("fovradmax"), \
                       config.getOptionValue("filtercode"), \

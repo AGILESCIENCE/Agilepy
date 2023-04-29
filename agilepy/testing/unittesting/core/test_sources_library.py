@@ -229,23 +229,22 @@ class TestSourcesLibrary:
         sl = SourcesLibrary(configObject, logger)
 
         sources = sl.loadSourcesFromCatalog(catalogName="2AGL")
+        configObject.setOptions(energybins=[[100,300],[300,10000]])
 
         assert 175== len(sources)
 
-        assert 7.45398e-08== sources[0].spectrum.getVal("flux")
+        assert 6.731115280951456e-08== sources[0].spectrum.getVal("flux")
 
 
     @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_load_source_from_catalog_with_scaling(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
-
-        configObject.setOptions(emin=10, emax=1000)
+        configObject.setOptions(energybins=[[10,300],[300,1000]])
 
         sources = sl.loadSourcesFromCatalog(catalogName="2AGL")
 
         assert 175== len(sources)
-
         assert 6.940938928095228e-07== sources[0].spectrum.getVal("flux")
 
 

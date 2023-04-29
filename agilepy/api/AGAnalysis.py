@@ -162,8 +162,6 @@ output:
   verboselvl: {verboselvl}
 
 selection:  
-  emin: 100
-  emax: 10000
   tmin: {tmin}
   tmax: {tmax}
   timetype: {timetype}
@@ -171,6 +169,7 @@ selection:
   glat: {glat}
   proj: ARC
   timelist: None
+  irf: H0025
   filtercode: 5
   fovradmin: 0
   fovradmax: 60
@@ -248,7 +247,7 @@ plotting:
 
         You can also specify a rangeDist argument to filter out the sources which distance from (glon, glat) is not in the rangeDist interval.
 
-        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file is different from the catalog's energy range,
+        If the catalog is 2AGL and if the energy range (emin, emax) specified by the user in the configuration file (energybins parameter) is different from the catalog's energy range,
         the flux of every source will be scaled.
 
         Args:
@@ -612,8 +611,8 @@ plotting:
                     emin = stepe[0]
                     emax = stepe[1]
 
-                    skymapL = Parameters.getSkyMap(emin, emax)
-                    skymapH = Parameters.getSkyMap(emin, emax)
+                    skymapL = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
+                    skymapH = Parameters.getSkyMap(emin, emax, configBKP.getOptionValue("filtercode"), configBKP.getOptionValue("irf"))
                     fileNamePrefix = Parameters.getMapNamePrefix(tmin, tmax, emin, emax, glon, glat, stepi+1)
 
                     self.logger.debug( "Map generation => fovradmin %s fovradmax %s bincenter %s emin %s emax %s fileNamePrefix %s skymapL %s skymapH %s", \
@@ -622,7 +621,8 @@ plotting:
 
                     configBKP.setOptions(filenameprefix=initialFileNamePrefix+"_"+fileNamePrefix)
                     configBKP.setOptions(dq=0, fovradmin=int(fovmin), fovradmax=int(fovmax))
-                    configBKP.addOptions("selection", emin=int(emin), emax=int(emax))
+                    configBKP.setOptions(energybins=[[emin, emax]])
+
                     configBKP.addOptions("maps", skymapL=skymapL, skymapH=skymapH)
 
 
@@ -784,17 +784,10 @@ plotting:
         # "sourceName" must have flux = 1
         self.freeSources(f'name == "{sourceName}"', "flux", True)
 
-
-
-
         #################################################################### mle
         #configBKP.setOptions(filenameprefix = "calcBkg", outdir = str(analysisDataDir))
         #configBKP.setOptions(tmin = tmin, tmax = tmax, timetype = "TT")
         sourceFiles = self.mle(maplistFilePath = maplistFilePath, config = configBKP, updateSourceLibrary = False)
-
-
-
-
 
         # extract iso e gal coeff of "sourceName"
         isoCoeff, galCoeff = self._extractBkgCoeff(sourceFiles, sourceName)
@@ -808,6 +801,7 @@ plotting:
         self.logger.info( "Took %f seconds.", time()-timeStart)
 
         return galCoeff, isoCoeff, maplistFilePath
+
 
     def mle(self, maplistFilePath = None, config = None, updateSourceLibrary = True, position="ellipse"):
         """It performs a maximum likelihood estimation analysis on every source withing the ``sourceLibrary``, producing one output file per source.
