@@ -78,12 +78,35 @@ RUN mkdir $PREFIX/agiletools && cd $PREFIX/agiletools && \
     && git checkout BUILD25b7 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
     && rm -rf $AGILE/AGILE-GRID-ScienceTools-Setup
 
+# At the moment, the 'ap' package is not installed but discovered using the PYTHONPATH
 #RUN cd $AGILE/scripts && python3 -m pip install .
 
 ENV PATH=$AGILE/scripts/extendesources:$PATH 
-ENV LD_LIBRARY_PATH=$AGILE/lib:$MCALSW/lib:$LD_LIBRARY_PATH
-ENV MCALSW=$AGILE/mcalsw
+ENV LD_LIBRARY_PATH=$AGILE/lib:$LD_LIBRARY_PATH
 ENV PYTHONPATH=$AGILE/scripts/ap:$PYTHONPATH 
+
+# ---------------------------------- Install MCAL software --------------------------------- 
+# The ssh key is needed to download the MCAL software
+RUN mkdir -p /home/flareadvocate/.ssh
+COPY id_agilepy /home/flareadvocate/.ssh/id_agilepy
+RUN touch /home/flareadvocate/.ssh/known_hosts && ssh-keyscan github.com >> /home/flareadvocate/.ssh/known_hosts
+USER root
+RUN chmod 600 /home/flareadvocate/.ssh/id_agilepy
+RUN chown flareadvocate:flareadvocate /home/flareadvocate/.ssh/id_agilepy
+USER flareadvocate
+
+ENV MCALSW=$AGILE/mcalsw
+ENV LD_LIBRARY_PATH=$MCALSW/lib:$LD_LIBRARY_PATH
+
+RUN cd /home/flareadvocate/dependencies && \  
+    eval "$(ssh-agent -s)" && ssh-add /home/flareadvocate/.ssh/id_agilepy && \
+    git clone git@github.com:ASTRO-EDU/AGILE-MCAL.git AGILE-MCAL && \
+    cd AGILE-MCAL && \
+    make && make install  
+
+# Let's delete the ssh key
+RUN rm -r /home/flareadvocate/.ssh
+USER flareadvocate
 
 # ----------------------------------  Download the test dataset ---------------------------------- 
 RUN mkdir -p $AGILE/agilepy-test-data && \
