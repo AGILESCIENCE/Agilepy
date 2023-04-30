@@ -31,9 +31,9 @@ boostrap() {
 docker build \
 --tag $AGILEPY_TAG \
 - <<EOF
-FROM ${INTERMEDIATE_TAG}
+FROM ${INTERMEDIATE_TAG} 
 USER root
-RUN usermod -u "${MY_UID}" flareadvocate && groupmod -g --non-unique "${MY_GID}" flareadvocate
+RUN usermod -u ${MY_UID} flareadvocate && groupadd --gid ${MY_GID} hostg && usermod -a -G hostg flareadvocate
 USER flareadvocate
 EOF
 docker rmi $INTERMEDIATE_TAG
