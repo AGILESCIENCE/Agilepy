@@ -514,7 +514,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_extract_light_curve_data")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt", "data/testcase_2AGLJ0835-4514.source"])
+    @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt", "api/data/testcase_2AGLJ0835-4514.source"])
     def test_extract_light_curve_data(self, logger, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
