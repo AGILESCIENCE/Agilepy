@@ -59,7 +59,8 @@ The :code:`agilepy_development` directory is going to be shared between your loc
 
 .. code-block::
 
-    docker run --rm -t -d -p $CONTAINER_JUPYTER_PORT:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$IMAGE_NAME
+
+    docker run --rm -t -d -p $CONTAINER_JUPYTER_PORT:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/Agilepy:/home/flareadvocate/Agilepy agilescience/agilepy-recipe:$IMAGE_NAME
 
 
 a. The command above shares the :code:`agilepy_development` directory between host and container.
@@ -77,9 +78,8 @@ d. If you have problem with the network connection, add the :code:`--network=hos
 
 .. code-block::
 
-    cd $HOME/agilepy_development/Agilepy
-    python3 -m pip install -r requirements.lock
-    python3 -m pip install -e .
+    python3 -m pip install -r Agilepy/requirements.lock
+    python3 -m pip install -e Agilepy
 
 Now you have the Agilepy's latest development version installed in your environment.
 You can also edit it to implement your own agilepy features!
@@ -88,14 +88,15 @@ You can also edit it to implement your own agilepy features!
 
 .. code-block::
 
-    cd $HOME/agile/Agilepy/docs
+    cd Agilepy/docs
     make html
+    cd $HOME
 
 9. If you need to start a Jupyter server run the following command:
 
 ::
 
-    nohup jupyter-lab --ip="*" --port 8888 --no-browser --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyterlab_start.log 2>&1 &
+    nohup jupyter-lab --ip="*" --port 8888 --no-browser --notebook-dir=$HOME/Agilepy/agilepy/notebooks > jupyterlab_start.log 2>&1 &
 
 
 a. Use :code:`--NotebookApp.token='CUSTOM TOKEN'` or :code:`--NotebookApp.password='CUSTOM PASSWORD'` to set a custom authentication token or password.  
