@@ -40,37 +40,14 @@ from agilepy.core.source.Spectrum import Spectrum
 from agilepy.core.CustomExceptions import SourceParameterNotFound
 
 
-class SourceModelUT(unittest.TestCase):
+class TestSourceModel:
 
-    def setUp(self):
-        self.currentDirPath = Path(__file__).parent.absolute()
+    @pytest.mark.testlogsdir("core/test_logs/test_parse_source_XML_format")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/sources.xml"])
+    def test_parse_source_XML_format(self, configObject, logger, testdatafiles):
 
-        self.test_logs_dir = Path(self.currentDirPath).joinpath("test_logs", "SourceModelUT")
-        self.test_logs_dir.mkdir(parents=True, exist_ok=True)
-
-        os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
-
-        outDir = Path(os.path.join(os.environ["AGILE"])).joinpath("agilepy-test-data/unittesting-output/core")
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
-
-        self.sourcesTxt = os.path.join(self.currentDirPath,"test_data/sources.txt")
-        self.sourcesXml = os.path.join(self.currentDirPath,"test_data/sources.xml")
-
-        self.agilepyConf = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyConf)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.logger = AgilepyLogger()
-        self.logger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-        self.sl = SourcesLibrary(self.config, self.logger)
-
-    def test_parse_source_XML_format(self):
-
-        xmlRoot = parse(self.sourcesXml).getroot()
+        xmlRoot = parse(testdatafiles.pop()).getroot()
 
         sources = []
 
@@ -97,11 +74,14 @@ class SourceModelUT(unittest.TestCase):
         assert sources[3].get("pos")["value"] == (6.16978, -0.0676943)
 
 
-    def test_parse_source_TXT_format(self):
+    @pytest.mark.testlogsdir("core/test_logs/test_parse_source_XML_format")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/sources.txt"])
+    def test_parse_source_TXT_format(self, configObject, logger, testdatafiles):
 
         sources = []
 
-        with open(self.sourcesTxt, "r") as txtFile:
+        with open(testdatafiles.pop(), "r") as txtFile:
 
             for line in txtFile:
 
@@ -122,13 +102,11 @@ class SourceModelUT(unittest.TestCase):
 
 
     def test_init(self):
-
         source = PointSource(name="test-source")
         source.spectrum = Spectrum.getSpectrum("PowerLaw")
         assert "PointSource" == type(source.spatialModel).__name__
 
     def test_get(self):
-
         source = PointSource(name="test-source")
         source.spectrum = Spectrum.getSpectrum("PowerLaw")
         assert "PointSource" == type(source.spatialModel).__name__

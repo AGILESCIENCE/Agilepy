@@ -2,13 +2,15 @@
 
 ## Release 1.6.4 (not released yet)
 * The old Jupyter notebooks have been replaced with JupyterLab (notebook v7)
-* The Docker base image has been refactored. The user inside the container can be set to the user on the host to avoid file permission issues. The Root's python bindings are fixed. The unnecessary virtual environment has been removed. Ruby has been installed. The docker recipies have been moved inside the Agilepy repository.
+* The Docker base image has been refactored. The user inside the container can be set to the user on the host to avoid file permission issues. The Root's python bindings are fixed. The unnecessary virtual environment has been removed. Ruby has been installed. The docker recipies have been moved inside the Agilepy repository. The Science Tools BUILD25b7 have been installed.
 * The documentation has been improved.
 * The Agilepy's python dependencies are now locked. 
 * The "emin" and "emax" configuration parameters under "selection" have been deprecated. They are automatically calculated from the "energybins" configuration parameter.
 * The "irf" configuration parameter has been introduced. It is used to select the IRF to be used in the analysis. The default value is "default".
 * The logger has been refactored and improved. The duplicate logs issue has been fixed. The logging messages have been revisited.
-
+* The test suite has been ported to pytest.
+* The AGRatemeters tool has been added.
+* The "advanced" API packaged has been introduced: it contains analysis scripts that are built over the "basic" API.
 
 ## Release 1.6.3
 * Science Tools BUILD25b6, with changes on scripts to make them compatible with Python 3

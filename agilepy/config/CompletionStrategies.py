@@ -110,6 +110,12 @@ class CompletionStrategies:
             confDict["selection"]["tmax"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["tmax"])
             confDict["selection"]["tmin"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["tmin"])
             confDict["selection"]["timetype"] = "TT"
+            
+    @staticmethod
+    def _setT0(confDict):
+        if confDict["selection"]["timetype"] == "MJD":
+            confDict["selection"]["T0"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["T0"])
+            confDict["selection"]["timetype"] = "TT"
 
     @staticmethod
     def _setExpStep(confDict):

@@ -41,43 +41,26 @@ from agilepy.core.CustomExceptions import NoCoverageDataError
 class TestAGDataset:
 
     @pytest.mark.ssdc
-    @pytest.mark.testdir("core", "test_download_data")
-    def test_download_data(self, logger, datacoveragepath):
+    @pytest.mark.testlogsdir("core/test_logs/test_download_data")
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/EVT.qfile", "core/test_data/LOG.qfile", "AGILE_test_datacoverage"])
+    def test_download_data(self, logger, configObject, testdatafiles):
         """
         To run this test --runrest it needed when calling pytest
         """
-
-        testOutputDir = Path( __file__ ).absolute().parent.joinpath("test_out")
-
-        if testOutputDir.exists():
-            rmtree(str(testOutputDir))
-        
-        testOutputDir.mkdir(exist_ok=True, parents=True)
-
-        queryEVTPath = testOutputDir.joinpath("EVT.qfile")
-        queryLOGPath = testOutputDir.joinpath("LOG.qfile")
-
-        with open(queryEVTPath, "w") as inf:
+    
+        with open(testdatafiles[0], "w") as inf:
             inf.write("""2020-01-15T00:00:00 2020-01-31T00:00:00\n2020-03-15T00:00:00 2020-03-31T00:00:00""")
-        with open(queryLOGPath, "w") as infLOG:
+        with open(testdatafiles[1], "w") as infLOG:
             infLOG.write("""2020-01-15T00:00:00 2020-01-31T00:00:00\n2020-03-15T00:00:00 2020-03-31T00:00:00""")
 
-        os.environ["TEST_LOGS_DIR"] = str(testOutputDir)
-
-        configPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_download_data_config.yaml")
-        config = AgilepyConfig()
-        config.loadBaseConfigurations(configPath)
-        config.loadConfigurationsForClass("AGAnalysis")
-
-        datacoveragepath = Path( __file__ ).absolute().parent.joinpath("test_data", "AGILE_test_datacoverage")
-
-        agdataset = AGDataset(logger, datacoveragepath)
+        agdataset = AGDataset(logger, testdatafiles[2])
 
         #test download data
 
         tmin = 57083 # 2015-02-28T00:00:00
         tmax = 57090 # 2015-03-15T00:00:00
-        downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
+        downloaded = agdataset.downloadData(tmin, tmax, configObject.getOptionValue("datapath"), configObject.getOptionValue("evtfile"), configObject.getOptionValue("logfile"))
 
         assert downloaded == True
         sleep(3) # this sleep is to avoid too many requests ban
@@ -86,14 +69,16 @@ class TestAGDataset:
         tmax = 59582
 
         with pytest.raises(NoCoverageDataError):
-            downloaded = agdataset.downloadData(tmin, tmax, config.getOptionValue("datapath"), config.getOptionValue("evtfile"), config.getOptionValue("logfile"))
+            downloaded = agdataset.downloadData(tmin, tmax, configObject.getOptionValue("datapath"), configObject.getOptionValue("evtfile"), configObject.getOptionValue("logfile"))
 
         
-
-    @pytest.mark.testdir("core", "test_extract_data_evt")
-    def test_extract_data_evt(self, logger, datacoveragepath):
-
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_extract_data_EVT.qfile")
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/test_extract_data_EVT.qfile", "core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_extract_data_evt")
+    def test_extract_data_evt(self, logger, testdatafiles):
+        
+        queryEVTPath = Path(testdatafiles[0])
+        datacoveragepath = testdatafiles[1]
 
         agdataset = AGDataset(logger, datacoveragepath)
 
@@ -165,12 +150,16 @@ class TestAGDataset:
 
     
         
-    @pytest.mark.testdir("core", "test_extract_data_log")
-    def test_extract_data_log(self, logger, datacoveragepath):
-        
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "test_extract_data_LOG.qfile")
 
-        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/test_extract_data_LOG.qfile", "core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_extract_data_log")
+    def test_extract_data_log(self, logger, testdatafiles):
+        
+        queryLOGPath = Path(testdatafiles[0])
+        datacoveragepath = testdatafiles[1]
+
+        agdataset = AGDataset(logger, datacoveragepath)
 
         # Test - inside of multiple lines
         # =================
@@ -208,12 +197,16 @@ class TestAGDataset:
         
 
         
+        
 
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_compute_ssdc_slots")
+    def test_compute_ssdc_slots(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
 
-    @pytest.mark.testdir("core", "test_compute_ssdc_slots")
-    def test_compute_ssdc_slots(self, logger, datacoveragepath):
-
-        agdataset = AGDataset(logger, datacoveragepath=datacoveragepath)
+        agdataset = AGDataset(logger, datacoveragepath)
 
         ################## EVT FILES
 
@@ -252,8 +245,13 @@ class TestAGDataset:
             assert f"{slot['tmin']} {slot['tmax']}" == expectedSlots[index]
         
 
-    @pytest.mark.testdir("core", "test_update_qfiles_not_empty")
-    def test_update_qfiles_not_empty(self, logger, datacoveragepath): # with duplicates
+
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_update_qfiles_not_empty")
+    def test_update_qfiles_not_empty(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
 
         agdataset = AGDataset(logger, datacoveragepath)
         
@@ -276,8 +274,14 @@ class TestAGDataset:
            assert len(qf.readlines()) == 108
 
 
-    @pytest.mark.testdir("core", "test_update_qfiles_empty")
-    def test_update_qfiles_empty(self, logger, datacoveragepath):
+
+
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_update_qfiles_empty")
+    def test_update_qfiles_empty(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
 
         agdataset = AGDataset(logger, datacoveragepath)
         
@@ -297,8 +301,13 @@ class TestAGDataset:
            assert len(qf.readlines()) == 8
 
 
-    @pytest.mark.testdir("core", "test_update_qfiles_overwrite")
-    def test_update_qfiles_overwrite(self, logger, datacoveragepath):
+
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage"])
+    @pytest.mark.testlogsdir("core/test_logs/test_update_qfiles_overwrite")
+    def test_update_qfiles_overwrite(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
 
         agdataset = AGDataset(logger, datacoveragepath)
         
@@ -328,12 +337,19 @@ class TestAGDataset:
            assert len(qf.readlines()) == 109
 
     
-    @pytest.mark.testdir("core", "test_getInterval")
-    def test_getInterval(self, logger, datacoveragepath):
-        agdataset = AGDataset(logger, datacoveragepath)
 
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_EVT.qfile")
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "getinterval_LOG.qfile")
+
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage", "core/test_data/getinterval_EVT.qfile", "core/test_data/getinterval_LOG.qfile"])
+    @pytest.mark.testlogsdir("core/test_logs/test_getInterval")
+    def test_getInterval(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
+
+        agdataset = AGDataset(logger, datacoveragepath)
+        
+        queryEVTPath = testdatafiles[1]
+        queryLOGPath = testdatafiles[2]
 
         datesEVTDF = pd.read_csv(queryEVTPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
         datesLOGDF = pd.read_csv(queryLOGPath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
@@ -360,13 +376,20 @@ class TestAGDataset:
         assert intervalIndexEVT == -1
         assert intervalIndexLOG == -1
 
-    @pytest.mark.testdir("core", "test_got_hole")
-    def test_got_hole(self, logger, datacoveragepath):
+
+
+
+    @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
+    @pytest.mark.testdatafiles(["core/test_data/AGILE_test_datacoverage", "core/test_data/holes_EVT.qfile", "core/test_data/holes_LOG.qfile"])
+    @pytest.mark.testlogsdir("core/test_logs/test_got_hole")
+    def test_got_hole(self, logger, testdatafiles):
+        
+        datacoveragepath = testdatafiles[0]
 
         agdataset = AGDataset(logger, datacoveragepath)
-
-        queryEVTPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_EVT.qfile")
-        queryLOGPath = Path( __file__ ).absolute().parent.joinpath("test_data", "holes_LOG.qfile")
+        
+        queryEVTPath = testdatafiles[1]
+        queryLOGPath = testdatafiles[2]
 
         tmin = 58051
         tmax = 58058

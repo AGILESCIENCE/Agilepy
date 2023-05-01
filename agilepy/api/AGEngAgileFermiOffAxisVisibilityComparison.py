@@ -52,7 +52,8 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         self.config.loadConfigurationsForClass("AGEngAgileFermiOffAxisVisibilityComparison")
 
-       
+        self.logger = self.agilepyLogger.getLogger(__name__, "AGEngAgileFermiOffAxisVisibilityComparison")
+
 
 
 

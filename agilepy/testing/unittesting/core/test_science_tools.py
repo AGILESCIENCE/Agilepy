@@ -34,20 +34,21 @@ from agilepy.core.ScienceTools import Spotfinder
 
 class TestSourceModel:
 
-    @pytest.mark.testdir("core", "test_indexgen")
-    def test_indexgen(self, config, logger, testdataset):
+    @pytest.mark.testlogsdir("core/test_logs/test_indexgen")
+    @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
+    def test_indexgen(self, configObject, logger, testdataset):
 
         indexgen = Indexgen("AG_indexgen", logger)
 
         args = {
             "data_dir": testdataset["log"],
             "type": "log",
-            "out_dir": str(Path( __file__ ).absolute().parent.joinpath("test_out")),
+            "out_dir": "/tmp/test_indexgen",
             "out_file": "INDEX.LOG"
         }
 
 
-        indexgen.configureTool(config, args)
+        indexgen.configureTool(configObject.conf, args)
 
 
         products = indexgen.call()

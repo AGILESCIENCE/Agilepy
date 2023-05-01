@@ -45,8 +45,8 @@ class TestParameters:
         calibMatrices = Parameters.getCalibrationMatrices(5, "H0025")
         assert len(calibMatrices) == 3
         for matrix in calibMatrices:
-            assert matrix.endswith(".gz")
-            assert Path(matrix).exists()
+            assert str(matrix).endswith(".gz")
+            assert matrix.exists()
 
     def test_unsupportedIrf(self):
         with pytest.raises(ValueError):

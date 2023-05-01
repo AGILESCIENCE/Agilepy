@@ -5,7 +5,7 @@ input:
   datapath: None
 
 output:
-  outdir: $AGILE/agilepy-test-data/unittesting-output/config
+  outdir: $TEST_LOGS_DIR
   filenameprefix: testcase
   logfilenameprefix: testcase
   sourcename: source-test

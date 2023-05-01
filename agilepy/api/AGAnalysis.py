@@ -82,9 +82,9 @@ class AGAnalysis(AGBaseAnalysis):
         """
         super().__init__(configurationFilePath)
         
-        self.logger = self.agilepyLogger.getLogger(__name__)
-
         self.config.loadConfigurationsForClass("AGAnalysis")
+
+        self.logger = self.agilepyLogger.getLogger(__name__, "AGAnalysis")
 
         self.sourcesLibrary = SourcesLibrary(self.config, self.logger)
 
@@ -115,7 +115,6 @@ class AGAnalysis(AGBaseAnalysis):
         """ It clears the list of sources and the current maplist file.
         """
         self.sourcesLibrary.destroy()
-        self.logger.reset()
         self.config.detach(self.currentMapList, "galcoeff")
         self.config.detach(self.currentMapList, "isocoeff")
         self.currentMapList = None

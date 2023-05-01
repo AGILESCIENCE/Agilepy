@@ -8,6 +8,7 @@ on:
       - selection_of_response_matrices
       - deprecation_of_emin_emax
       - feature-*
+      - 14-read_ratemeters
 
 jobs:
 
@@ -42,8 +43,7 @@ jobs:
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
-        run: |
-          source start_coverage.sh
+        run: start_coverage.sh
   
   # building-testing-on-os-matrix:
   #   name: Build+Test ${{ matrix.os }}

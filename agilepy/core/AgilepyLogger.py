@@ -91,7 +91,7 @@ class AgilepyLogger(metaclass=Singleton):
         elif verboseLvl == 2:
             return logging.DEBUG
         else:
-            raise ValueError(f"Invalid value for verboseLvl ({verboseLvl}). Allowed values are 0 (ERROR), 1 (WARNING), 2 (INFO), 3 (DEBUG)")
+            raise ValueError(f"Invalid value for verboseLvl ({verboseLvl}). Allowed values are 0 (WARNING), 1 (INFO), 2 (DEBUG)")
 
 
     def setLogger(self, rootPath=None, logLevel=3):
