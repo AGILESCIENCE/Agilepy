@@ -18,5 +18,5 @@ class TestAGRatemeters:
         # Add Completion strategies for indexfile?
 
         # Test class methods
-        assert ag.run_ratemeters_script()
+        assert ag.read_ratemeters()
 

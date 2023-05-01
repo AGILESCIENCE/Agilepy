@@ -166,22 +166,23 @@ selection:
             T0 = AstroUtils.time_mjd_to_agile_seconds(self.getOption("T0"))
             self.setOptions(T0=T0, timetype='TT')
 
-        return read_r(
-                    T0,
-                    self.getOption('tmin')
-                    self.getOption('tmax')
-                    self.getOption('tmin_bkg')
-                    self.getOption('tmax_bkg')
-                    self.getOption('tmin_src')
-                    self.getOption('tmax_src')
-                    self.getOption('flag_detrending')
-                    self.getOption('sourcename')
-                    self.getOption('flag_N_RM')
-                    self.getOption('indexfile')            
+        return self.read_r(
+                        self.getOption('contact'),
+                        str(T0),
+                        self.getOption('tmin'),
+                        self.getOption('tmax'),
+                        self.getOption('tmin_bkg'),
+                        self.getOption('tmax_bkg'),
+                        self.getOption('tmin_src'),
+                        self.getOption('tmax_src'),
+                        self.getOption('flag_detrending'),
+                        self.getOption('sourcename'),
+                        self.getOption('flag_N_RM'),
+                        # self.getOption('indexfile')            
                 )
 
 
-    def rear_r(self, CONT: str, TEMPO: str, SX: float, DX: float, BKG_SX: float, BKG_DX: float, GRB_SX: float, GRB_DX: float, FLAG: str, NAME: str, FLAG_PLOT: str):
+    def read_r(self, CONT: str, TEMPO: str, SX: float, DX: float, BKG_SX: float, BKG_DX: float, GRB_SX: float, GRB_DX: float, FLAG: str, NAME: str, FLAG_PLOT: str):
 
         ################
         # A. Ursi 2022 #
@@ -1518,25 +1519,25 @@ selection:
 
         if FLAG == 'ND':
 
-            print "SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA), 2*np.mean(BKG_SA))
-            print "AC Top:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC0), np.mean(BKG_AC0))
-            print "AC1:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC1), np.mean(BKG_AC1))
-            print "AC2:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC2), np.mean(BKG_AC2))
-            print "AC3:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC3), np.mean(BKG_AC3))
-            print "AC4:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC4), np.mean(BKG_AC4))
-            print "MCAL:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_MCAL), np.mean(BKG_MCAL))
-            print "GRID:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_GRID), np.mean(BKG_GRID))
+            print("SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA), 2*np.mean(BKG_SA)))
+            print("AC Top:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC0), np.mean(BKG_AC0)))
+            print("AC1:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC1), np.mean(BKG_AC1)))
+            print("AC2:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC2), np.mean(BKG_AC2)))
+            print("AC3:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC3), np.mean(BKG_AC3)))
+            print("AC4:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC4), np.mean(BKG_AC4)))
+            print("MCAL:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_MCAL), np.mean(BKG_MCAL)))
+            print("GRID:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_GRID), np.mean(BKG_GRID)))
 
         if FLAG == 'D':
 
-            print "SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA_DET), 2*np.mean(BKG_SA_DET))
-            print "AC Top:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC0_DET), np.mean(BKG_AC0_DET))
-            print "AC1:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC1_DET), np.mean(BKG_AC1_DET))
-            print "AC2:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC2_DET), np.mean(BKG_AC2_DET))
-            print "AC3:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC3_DET), np.mean(BKG_AC3_DET))
-            print "AC4:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC4_DET), np.mean(BKG_AC4_DET))
-            print "MCAL:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_MCAL_DET), np.mean(BKG_MCAL_DET))
-            print "GRID:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_GRID_DET), np.mean(BKG_GRID_DET))
+            print("SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA_DET), 2*np.mean(BKG_SA_DET)))
+            print("AC Top:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC0_DET), np.mean(BKG_AC0_DET)))
+            print("AC1:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC1_DET), np.mean(BKG_AC1_DET)))
+            print("AC2:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC2_DET), np.mean(BKG_AC2_DET)))
+            print("AC3:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC3_DET), np.mean(BKG_AC3_DET)))
+            print("AC4:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_AC4_DET), np.mean(BKG_AC4_DET)))
+            print("MCAL:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_MCAL_DET), np.mean(BKG_MCAL_DET)))
+            print("GRID:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_GRID_DET), np.mean(BKG_GRID_DET)))
 
         ##################################################
         # CREATE PLOT WITH RATEMETERS FOR ALL RATEMETERS #
