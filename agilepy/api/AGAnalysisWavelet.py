@@ -61,10 +61,11 @@ class AGAnalysisWavelet(AGBaseAnalysis):
     """
 
       super().__init__(configurationFilePath)
-
+    
       self.config.loadConfigurationsForClass("AGAnalysisWavelet")
 
-        
+      self.logger = self.agilepyLogger.getLogger(__name__, "AGAnalysisWavelet")
+    
     
     @staticmethod
     def getConfiguration(confFilePath, userName, outputDir, verboselvl, ctsmap, scaletype, scalemin, scalemax, scalenum, methistsize, cclsizemin, cclsizemax, cclradmin, cclradmax, cclscalemin, cclscalemax):

@@ -1,6 +1,7 @@
 import os
 import pytest
 from pathlib import Path
+from shutil import rmtree
 from os.path import expandvars
 from agilepy.config.AgilepyConfig import AgilepyConfig 
 from agilepy.core.AgilepyLogger import AgilepyLogger
@@ -14,10 +15,19 @@ def logger(request):
         raise ValueError("marker is None! Something wrong passing 'testlogsdir' to fixture!")
 
     testlogsdir = marker.args[0]
- 
+    try:
+        marker = request.node.get_closest_marker("loglevel")
+        loglevel = marker.args[0]
+    except Exception:
+        loglevel = 2
+        pass
+
     singletonLogger = AgilepyLogger()
     rootLogsPath = Path( __file__ ).absolute().parent.joinpath(testlogsdir)
-    singletonLogger.setLogger(rootLogsPath, 0)
+    if rootLogsPath.exists():
+        rmtree(rootLogsPath)
+        rootLogsPath.mkdir(exist_ok=True, parents=True)
+    singletonLogger.setLogger(rootLogsPath, loglevel)
     os.environ["TEST_LOGS_DIR"] = str(rootLogsPath)
     yield singletonLogger.getLogger(request.node.name)
     
@@ -67,6 +77,21 @@ def testdata2(request):
     testdatafile2 = marker.args[0]
 
     return str(script_path.joinpath(testdatafile2))
+
+
+@pytest.fixture(scope="function")
+def testdatafiles(request):
+
+    script_path = Path( __file__ ).absolute().parent
+
+    marker = request.node.get_closest_marker("testdatafiles")
+
+    if marker is None:
+        raise ValueError("marker is None! Something wrong passing 'testdatafiles' to fixture!")
+
+    testdatafiles = marker.args[0]
+
+    return [str(script_path.joinpath(filename)) for filename in testdatafiles]
 
 
 @pytest.fixture(scope="function")

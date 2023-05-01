@@ -67,6 +67,8 @@ class AGEngAgileOffaxisVisibility(AGBaseAnalysis):
 
         self.config.loadConfigurationsForClass("AGEngAgileOffaxisVisibility")
     
+        self.logger = self.agilepyLogger.getLogger(__name__, "AGEngAgileOffaxisVisibility")
+
 
     @staticmethod
     def getConfiguration(confFilePath, userName, outputDir, verboselvl):

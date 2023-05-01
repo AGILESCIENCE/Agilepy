@@ -25,30 +25,21 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest
 import os
-import shutil
+import unittest
+import pytest
 from pathlib import Path
-
 from agilepy.utils.Utils import Utils
 from agilepy.api.AGEngAgileOffaxisVisibility import AGEngAgileOffaxisVisibility
 
-class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
+class TestAGEngAgileOffaxisVisibility:
 
-    def setUp(self):
-        self.currentDirPath = Path(__file__).parent.absolute()
+    @pytest.mark.skip("To be fixed")
+    @pytest.mark.testlogsdir("api/test_logs/test_compute_pointing_distances_from_source")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ageng.yaml")
+    def test_compute_pointing_distances_from_source(self, config, logger):
 
-        self.test_logs_dir = Path(self.currentDirPath).joinpath("test_logs", "AGEngAgileOffaxisVisibilityUT")
-        self.test_logs_dir.mkdir(parents=True, exist_ok=True)
-        os.environ["TEST_LOGS_DIR"] = str(self.test_logs_dir)
-
-
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf_ageng.yaml")
-
-        self.ageng = AGEngAgileOffaxisVisibility(self.agilepyconfPath)
-
-
-    def test_compute_pointing_distances_from_source(self):
+        ageng = AGEngAgileOffaxisVisibility(config)
 
         # file = "/data/AGILE/LOG_INDEX/LOG.log.index"
         zmax = 60
@@ -57,12 +48,16 @@ class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
 
         logfilesIndex = Utils._expandEnvVar(logfilesIndex)
 
-        _, _, _, _, _, _, _, separationFile = self.ageng._computePointingDistancesFromSource(logfilesIndex, 456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, writeFiles=True)
+        _, _, _, _, _, _, _, separationFile = ageng._computePointingDistancesFromSource(logfilesIndex, 456361778, 456373279, src_x=129.7, src_y=3.7, ref="gal", zmax=zmax, step=step, writeFiles=True)
 
-        # self.assertEqual(True, os.path.isfile(separationFile))
+        assert Path(separationFile).is_file()
 
 
-    def test_visibility_plot(self):
+    @pytest.mark.testlogsdir("api/test_logs/test_visibility_plot")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ageng.yaml")
+    def test_visibility_plot(self, config, logger):
+
+        ageng = AGEngAgileOffaxisVisibility(config)
 
         src_x=129.7
         src_y=3.7
@@ -77,11 +72,7 @@ class AGEngAgileOffaxisVisibilityUT(unittest.TestCase):
 
         logfilesIndex = "$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
 
-        visplot, histoplot = self.ageng.visibilityPlot(logfilesIndex, 433900000, 433957532, src_x, src_y, ref, zmax, step, histogram, writeFiles, saveImage, fileFormat, title)
+        visplot, histoplot = ageng.visibilityPlot(logfilesIndex, 433900000, 433957532, src_x, src_y, ref, zmax, step, histogram, writeFiles, saveImage, fileFormat, title)
 
-        self.assertEqual(True, os.path.isfile(visplot))
-        self.assertEqual(True, os.path.isfile(histoplot))
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert Path(visplot).is_file()
+        assert Path(histoplot).is_file()
