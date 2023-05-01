@@ -17,6 +17,8 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/utils"
+	if [ $? -ne 0 ]; then exit 1 
+	fi
 
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
@@ -25,6 +27,8 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/config"
+	if [ $? -ne 0 ]; then exit 1 
+	fi
 
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
@@ -33,7 +37,9 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/core"
-  
+	if [ $? -ne 0 ]; then exit 1 
+	fi
+
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
@@ -41,6 +47,8 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/api"
+	if [ $? -ne 0 ]; then exit 1 
+	fi
 
   printf "\n\33[32mCopying coverage report into $HOME\33[0m\n"
   cp -r "$agilepy_path/testing/unittesting/coverage/cov_xml_report" "$HOME/cov_xml_report"
