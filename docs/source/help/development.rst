@@ -2,55 +2,138 @@
 Development
 ***********
 
-Install the development environment
-===================================
+Install the development environment with Docker
+===============================================
 
-If you want to try agilepy's new features that are not officially released yet, 
-a develpoment environment called agilepy-environment is available into Anaconda cloud. 
-It contains all the dependencies unless agilepy, which must be installed by hand cloning the repository.
+If you want to develop new Agilepy features or try the newest yet unreleased ones,
+a development Docker image called agilepy-recipe is availabe on DockerHub.
+It contains all the dependencies but Agilepy, which must be manually installed by cloning the repository.
 
-Anaconda
---------
+Agilepy's development containers can be found at dockerhub `agilescience/agilepy-recipe <https://hub.docker.com/repository/docker/agilescience/agilepy-recipe>`_ page,
+please check it for the latest tag.
+
+Instructions
+------------
+
+1. Pull the development Docker image, replace :code:`<LATEST-TAG>` with the
+latest tag available at `agilepy-recipe/tags <https://hub.docker.com/r/agilescience/agilepy-recipe/tags>`_.
+
+.. code-block::
+
+    export LATEST_TAG=BUILD25b6-v3
+    docker pull agilescience/agilepy-recipe:$LATEST_TAG
+
+2. Prepare your workspace by creating a directory :code:`agilepy_development`
+and store its path in a variable :code:`$PATH_TO_AGILE`.
+The :code:`agilepy_development` directory is going to be shared between your local file system tree and the developement container's one.
+
+.. code-block::
+
+    mkdir agilepy_development && cd agilepy_development
+
+3. Clone the GitHub Agilepy repository, switch to the development branch you are interested to work on
+(e.g. :code:`develop` or any other branch with a given feature).
+
+.. code-block::
+
+    git clone https://github.com/AGILESCIENCE/Agilepy.git && cd Agilepy && git switch develop && cd ..
+
+4.a For Linux users. Execute the `boostrap_dev.sh` script to change the user inside the container to your local user.
+
+.. code-block::
+
+    ./Agilepy/agilepy/scripts/bootstrap_dev.sh $LATEST_TAG
+    export IMAGE_NAME="${LATEST_TAG}_$(whoami)"
+    export CONTAINER_NAME="agilepy_dev_$(whoami)"
+    export CONTAINER_JUPYTER_PORT=8090
+
+4.b. For Mac users. 
+
+.. code-block::
+
+    export IMAGE_NAME="${LATEST_TAG}"
+    export CONTAINER_NAME="agilepy_dev_$(whoami)"
+    export CONTAINER_JUPYTER_PORT=8090
+
+5. Create a Docker container with name :code:`$CONTAINER_NAME` from the Docker image.
+
+.. code-block::
+
+    docker run --rm -t -d -p $CONTAINER_JUPYTER_PORT:8888 --name $CONTAINER_NAME -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd):/home/flareadvocate/agile agilescience/agilepy-recipe:$IMAGE_NAME
+
+
+a. The command above shares the :code:`agilepy_development` directory between host and container.
+b. Mount any additional volumes you need to share with the container with the :code:`-v` option.
+c. The command above binds port :code:`8888` of the container to port :code:`$CONTAINER_JUPYTER_PORT` of your local host, change it if already in use.
+d. If you have problem with the network connection, add the :code:`--network=host` option.
+
+1. Enter the container with:
+
+.. code-block::
+
+    docker exec -it $CONTAINER_NAME bash -l
+
+7. Inside the container move to the repository location and install Agilepy's Python dependencies and Agilepy in *editable* mode:
+
+.. code-block::
+
+    cd $HOME/agilepy_development/Agilepy
+    python3 -m pip install -r requirements.lock
+    python3 -m pip install -e .
+
+Now you have the Agilepy's latest development version installed in your environment.
+You can also edit it to implement your own agilepy features!
+
+8. The documentation can be built with:
+
+.. code-block::
+
+    cd $HOME/agile/Agilepy/docs
+    make html
+
+9. If you need to start a Jupyter server run the following command:
+
 ::
 
-    
-    conda config --add channels conda-forge
-    conda config --add channels plotly
-    conda create -n agilepydev -c agilescience agiletools agilepy-dataset
-    conda activate agilepydev
-    git clone https://github.com/AGILESCIENCE/Agilepy.git
-    cd Agilepy && git checkout develop
-    conda env update -f environment.yml
-    python setup.py develop
+    nohup jupyter-lab --ip="*" --port 8888 --no-browser --notebook-dir="$HOME/agilepy_development/Agilepy/agilepy/notebooks" > jupyterlab_start.log 2>&1 &
 
-Docker
-------
+
+a. Use :code:`--NotebookApp.token='CUSTOM TOKEN'` or :code:`--NotebookApp.password='CUSTOM PASSWORD'` to set a custom authentication token or password.  
+b. The notebook will be available at `localhost:8090 <http://localhost:8090>`_
+c. If the remote machine needs authentication you can set an ssh tunnel with: :code:`ssh -N -f -L localhost:8090:localhost:8090 <user>@<remote_machine>`
+d. To obtain the Jupter access token from outside the container: :code:`docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter server list`
+
+
+
+1.  The unit tests can be started with the following command:
 
 ::
 
-    docker pull agilescience/agilepy-recipe:latest
-    mkdir shared_dir && cd shared_dir && git clone https://github.com/AGILESCIENCE/Agilepy.git \
-    && cd Agilepy && git checkout develop
-    
-    docker run --rm -it -p 8888:8888 \
-    -e DISPLAY=$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    -v $SHARED_DIR_PATH:/shared_dir \
-    agilescience/agilepy-recipe:latest
-    
-    ## -- Inside the container --
-    conda activate agilepydev
-    cd /shared_dir/Agilepy python setup.py develop
-
-    jupyter notebook --port 8889 --ip 0.0.0.0  --allow-root
+    start_coverage.sh
 
 
-Now you have the agilepy's latest version installed in your environment.
+11. When you need to exit the container just enter :code:`exit`.
+
+
+12. To stop the container use
+
+.. code-block::
+
+    docker stop $CONTAINER_NAME
+
+
+Example of development deployment
+=================================
+`This document <https://docs.google.com/document/d/1HSmHy6FeoKIlG9SX0YU8fuJSROswhCg3xsC94mgvnLo/edit>`_ describes an example of development deployment of Agilepy on agilehost3. 
+
+
+Docker images
+=============
+To build the docker image of Agilepy clone the [Agilepy-recipe repository](https://github.com/AGILESCIENCE/Agilepy-recipe)
 
 
 Git flow
 ========
-
 
 Branches
 --------
@@ -136,13 +219,8 @@ you have to merge the changes in your feature branch.
     git pull **origin** develop
 
 
-Finally you can merge your feature branch back to **develop** branch.
+Finally, you can open a merge request to merge your feature branch back to the **develop** branch.
 
-::
-
-    git merge --no-ff feature-#61-new-cool-feature
-    git branch -d feature-#61-new-cool-feature
-    git push origin develop
 
 Add configuration parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

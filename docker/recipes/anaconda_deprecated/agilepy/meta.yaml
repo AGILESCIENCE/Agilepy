@@ -1,0 +1,46 @@
+package:
+  name: "agilepy"
+  version: "{{PACKAGE_TAG}}"
+
+source:
+  git_url: https://github.com/AGILESCIENCE/Agilepy
+  git_rev: "{{AGILEPY_TAG}}"
+  # in GitHub CI use: path: /__w/Agilepy/Agilepy
+  
+build:
+  number: 0
+
+requirements:
+  host:
+    - python==3.8.13
+  run:
+    - python==3.8.13
+    - astropy
+    - plotly
+    - psutil
+    - connected-components-3d
+    - agiletools==BUILD25b3
+    - agilepy-dataset
+    - matplotlib
+    - pandas
+    - ipympl
+    - numpy
+    - scipy
+    - sphinx
+    - jupyter
+    - sphinx_rtd_theme
+    - pyyaml
+    - regions
+    - pytest-cov
+    - python-kaleido
+    - tqdm
+
+about:
+  home: https://github.com/AGILESCIENCE/Agilepy
+  license: GPL-3.0
+  summary: 'AGILE Python Analysis Framework'
+  description: |
+    A python wrapper around the AGILE science tools.
+  dev_url: https://github.com/AGILESCIENCE/Agilepy
+  doc_url: https://agilepy.readthedocs.io/en/latest/
+  doc_source_url: https://github.com/AGILESCIENCE/Agilepy/blob/master/docs/source/index.rst

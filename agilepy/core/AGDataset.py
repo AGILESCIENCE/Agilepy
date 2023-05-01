@@ -30,11 +30,11 @@ class AGDataset:
         self.datacoveragepath = datacoveragepath
 
         with open(self.datacoveragepath, "r") as f:
-            self.logger.debug(self, f"opening coverage file at {self.datacoveragepath}")
+            self.logger.debug( f"opening coverage file at {self.datacoveragepath}")
             line = f.readline().split(" ")
             self.coverage_tmin = line[0]
             self.coverage_tmax = line[1]
-            self.logger.info(self, f"AGILE data coverage from {self.coverage_tmin} to {self.coverage_tmax}")
+            self.logger.info( f"AGILE data coverage from {self.coverage_tmin} to {self.coverage_tmax}")
 
 
     def agilecoverage(self):
@@ -43,7 +43,7 @@ class AGDataset:
             new_coverage_tmin, new_coverage_tmax = self.agrest.get_coverage()
             
             with open(self.datacoveragepath, "w") as f:
-                self.logger.debug(self, f"writing new coverage file at {self.datacoveragepath}")
+                self.logger.debug( f"writing new coverage file at {self.datacoveragepath}")
                 f.write(f"{new_coverage_tmin} {new_coverage_tmax}")
 
 
@@ -51,7 +51,7 @@ class AGDataset:
 
         tmax = datetime.datetime.strptime(tmax, "%Y-%m-%dT%H:%M:%S")
         if tmin == "2007-12-01T12:00:00" and (datetime.datetime.today() - tmax).days <= 60:
-            self.logger.info(self, f"check coverage OK!")
+            self.logger.info( f"check coverage OK!")
             return True
         else:
             return False
@@ -88,33 +88,33 @@ class AGDataset:
         logDataMissing = False
 
         if self.dataIsMissing(tmin, tmax, evtQfile) == DataStatus.MISSING:
-            self.logger.info(self, f"EVT data in interval {tmin} {tmax} is missing!")
+            self.logger.info( f"EVT data in interval {tmin} {tmax} is missing!")
             evtDataMissing = True
         else:
-            self.logger.info(self, f"Local data for EVT already in dataset")
+            self.logger.info( f"Local data for EVT already in dataset")
 
         if self.dataIsMissing(tmin, tmax, logQfile) == DataStatus.MISSING:
-            self.logger.info(self, f"LOG data in interval {tmin} {tmax} is missing!")
+            self.logger.info( f"LOG data in interval {tmin} {tmax} is missing!")
             logDataMissing = True
         else:
-            self.logger.info(self, f"Local data for LOG already in dataset")
+            self.logger.info( f"Local data for LOG already in dataset")
 
         if evtDataMissing or logDataMissing:
-            self.logger.info(self, f"Downloading data from ssdc..")
+            self.logger.info( f"Downloading data from ssdc..")
             _ = self.agrest.gridList(tmin, tmax)
             tarFilePath = self.agrest.gridFiles(tmin, tmax)
 
-        self.logger.info(self, f"Extracting data from the tarball..")
+        self.logger.info( f"Extracting data from the tarball..")
 
         if evtDataMissing:
             extractedFiles = self.extractData("EVT", tarFilePath, dataPath)
-            self.logger.debug(self, f"Extracted files: {extractedFiles}")
+            self.logger.debug( f"Extracted files: {extractedFiles}")
             self.updateQFile(evtQfile, tmin, tmax, evtQfile)
             self.generateIndex(evtPath, "EVT", evtIndex)
 
         if logDataMissing:
             extractedFiles = self.extractData("LOG", tarFilePath, dataPath)
-            self.logger.debug(self, f"Extracted files: {extractedFiles}")
+            self.logger.debug( f"Extracted files: {extractedFiles}")
             self.updateQFile(logQfile, tmin, tmax, logQfile)
             self.generateIndex(logPath, "LOG", logIndex)
         
@@ -206,7 +206,7 @@ class AGDataset:
         This method can be extended to handle the case of partial missing data
         """
         if not queryFilepath.exists():
-            self.logger.warning(self, f"Query file {queryFilepath} does not exists")
+            self.logger.warning( f"Query file {queryFilepath} does not exists")
             return DataStatus.MISSING
 
         tminUtc = AstroUtils.time_mjd_to_fits(tmin) # YYYY-MM-DDTHH:mm:ss
@@ -215,35 +215,35 @@ class AGDataset:
         tminUtc = datetime.datetime.strptime(tminUtc, "%Y-%m-%dT%H:%M:%S.%f")
         tmaxUtc = datetime.datetime.strptime(tmaxUtc, "%Y-%m-%dT%H:%M:%S.%f")
 
-        self.logger.debug(self, f"({tmin}, {tmax}) => ({tminUtc}, {tmaxUtc})")
+        self.logger.debug( f"({tmin}, {tmax}) => ({tminUtc}, {tmaxUtc})")
 
         datesDF = pd.read_csv(queryFilepath, header=None, sep=" ", names=["ssdctmin","ssdctmax"], parse_dates=["ssdctmin","ssdctmax"])
 
         
         
-        #self.logger.debug(self, str(datesDF))
-        self.logger.debug(self, f"{tminUtc}, {tmaxUtc}")
+        #self.logger.debug( str(datesDF))
+        self.logger.debug( f"{tminUtc}, {tmaxUtc}")
 
         # check interval of tmin 
         intervalIndexTmin = self.getInterval(datesDF, tminUtc)
         # if tmin is not included in any interval:
         if intervalIndexTmin == -1:
-            self.logger.debug(self, f"tminUtc {tminUtc} not present in any interval!")
+            self.logger.debug( f"tminUtc {tminUtc} not present in any interval!")
             return DataStatus.MISSING
         
         # check interval of tmax:
         intervalIndexTmax = self.getInterval(datesDF, tmaxUtc)
         # if tmax is not included in any interval:
         if intervalIndexTmax == -1:
-            self.logger.debug(self, f"tmaxUtc {tmaxUtc} not present in any interval!")
+            self.logger.debug( f"tmaxUtc {tmaxUtc} not present in any interval!")
             return DataStatus.MISSING
 
-        self.logger.debug(self, f"intervalIndexTmin: {str(intervalIndexTmin)}")
-        self.logger.debug(self, f"intervalIndexTmax: {str(intervalIndexTmax)}")
+        self.logger.debug( f"intervalIndexTmin: {str(intervalIndexTmin)}")
+        self.logger.debug( f"intervalIndexTmax: {str(intervalIndexTmax)}")
 
         # check if there's missing data between the 2 intervals
         if self.gotHole(datesDF, intervalIndexTmin, intervalIndexTmax):
-            self.logger.debug(self, f"Missing data between the 2 intervals!")
+            self.logger.debug( f"Missing data between the 2 intervals!")
             return DataStatus.MISSING
         
         return DataStatus.OK
@@ -296,7 +296,7 @@ class AGDataset:
                 blabla3.LOG.gz
                 blabla4.LOG.gz              
         """
-        self.logger.debug(self, f"Extracting data from {targzPath} to {destDir}")
+        self.logger.debug( f"Extracting data from {targzPath} to {destDir}")
 
         fileDest = destDir.joinpath(fileType)
 
@@ -314,9 +314,9 @@ class AGDataset:
                 if added:
                     extractedFiles.append(tarInfo.name)
         
-        self.logger.debug(self, f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
+        self.logger.debug( f"Extracted {len(extractedFiles)} {fileType} files. Took {time()-start} seconds.")
         
-        self.logger.debug(self, f"Removing {targzPath} file.")
+        self.logger.debug( f"Removing {targzPath} file.")
         
 
         return extractedFiles                    
@@ -360,11 +360,11 @@ class AGDataset:
         # /WHATEVER/EVT/ag0909131200_0909161200_STD0P_FM.EVT.gz
         outFile = Path(destPath).joinpath(tmpFilePath.name)
 
-        self.logger.debug(self, f"tmpFilePath.name is {tmpFilePath.name}")
+        self.logger.debug( f"tmpFilePath.name is {tmpFilePath.name}")
 
         # if file already exist, append a suffix to it
         if outFile.exists():
-            self.logger.debug(self, f"The '{fileType}' file '{outFile}' is already present. Skipping it.")
+            self.logger.debug( f"The '{fileType}' file '{outFile}' is already present. Skipping it.")
             return False
             # /WHATEVER/EVT/ag0909131200_0909161200_STD0P_FM, .EVT.gz
             #root, _ = str(outFile).split(f".{fileType}.gz")
@@ -379,7 +379,7 @@ class AGDataset:
         
         #tmpFilePath.rename(outFile)
 
-        self.logger.debug(self, f"Moving {tmpFilePath} to {outFile}.")
+        self.logger.debug( f"Moving {tmpFilePath} to {outFile}.")
 
         return True
 
@@ -387,7 +387,7 @@ class AGDataset:
 
         index_name = f"{filetype}.index"
 
-        self.logger.debug(self, f"pathtoindex is {pathToIndex}")
+        self.logger.debug( f"pathtoindex is {pathToIndex}")
 
         extraparams = {
                        "out_dir" : pathToIndex.parent,
@@ -405,7 +405,7 @@ class AGDataset:
             ifile.unlink()
 
         indexfile = igen.call()
-        self.logger.info(self, f"indexfile at {indexfile}")
+        self.logger.info( f"indexfile at {indexfile}")
         
         #sorting indexfile & handling if newline is at the end of the line
         with open(str(indexfile[0]), "r") as fr:

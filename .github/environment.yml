@@ -18,6 +18,7 @@ dependencies:
   - scipy
   - sphinx
   - sphinx_rtd_theme
+  - sphinx-copybutton
   - pyyaml
   - regions
   - pytest-cov

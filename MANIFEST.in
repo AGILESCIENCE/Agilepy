@@ -1,5 +1,4 @@
 include README.md
-include sciencetools_version.txt
 include agilepy/testing/unittesting/api/data/testcase.maplist4
 include agilepy/testing/unittesting/core/test_data/sourceconf.wrongext
 

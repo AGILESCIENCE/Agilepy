@@ -78,8 +78,8 @@ class agilecheck:
             Output: separation (array), time_i (array), time_f (array)
         """
 
-        self.logger.info(self, "Computing angular distance to the center of f.o.v")
-        self.logger.info(self, "This might take a while...")
+        self.logger.info( "Computing angular distance to the center of f.o.v")
+        self.logger.info( "This might take a while...")
 
         # reading the Attitude AGILE file (the one created by merging the .log files)
         file1 = fits.open(self.agile_spacecraft)
@@ -130,8 +130,8 @@ class agilecheck:
         (Modified Julian Date).
         Output: t_start (array), t_stop (array)
         """
-        self.logger.info(self, "Converting MET to MJD time.")
-        self.logger.info(self,"This might take a while...")
+        self.logger.info( "Converting MET to MJD time.")
+        self.logger.info("This might take a while...")
 
         file     = fits.open(self.agile_spacecraft)
         SC       = file[1].data
@@ -152,8 +152,8 @@ class agilecheck:
             self.timelimitf = np.max(TIME)
         index_ti = bisect.bisect_left(TIME,self.timelimiti)
         index_tf = bisect.bisect_left(TIME,self.timelimitf)
-        self.logger.info(self, f"Time_i = {TIME[index_ti]}")
-        self.logger.info(self, f"Time_f = {TIME[index_tf]}")
+        self.logger.info( f"Time_i = {TIME[index_ti]}")
+        self.logger.info( f"Time_f = {TIME[index_tf]}")
         tref     = datetime.datetime(2004,1,1,0,0,0)
         t_mjd  = []
         for i in np.arange(index_ti,index_tf, int(self.step)):
@@ -256,14 +256,14 @@ class agilecheck:
         ttotal_under_zmax = np.sum(tTTf[separation<self.zmax]-tTTi[separation<self.zmax])
         #ttotal_above_zmax = np.sum(tTTf[separation>self.zmax]-tTTi[separation>self.zmax])
 
-        self.logger.info(self, f"Total integration time = {'{0:.2f}'.format(ttotal_obs*self.step)} s Total_bins: {total_obs} {len(tTTf)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
-        self.logger.info(self, f"Total absolute time= {'{0:.2f}'.format(ttotal_abs)}") #NEW
-        self.logger.info(self, f"Total time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*self.step)} s")
-        self.logger.info(self, f"Relative time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_obs*self.step)*100.)} %%")
-        self.logger.info(self, f"Relative time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_obs*self.step)*100.)} %%")
-        self.logger.info(self, f"Absolute time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_abs)*100.)} %%") #NEW
-        self.logger.info(self, f"Absolute time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_abs)*100.)} %%") #NEW
-        self.logger.info(self, f"Duty Cycle: {'{0:.2f}'.format((((ttotal_obs*self.step) / (ttotal_abs)))*100.)} %%") #NEW
+        self.logger.info( f"Total integration time = {'{0:.2f}'.format(ttotal_obs*self.step)} s Total_bins: {total_obs} {len(tTTf)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
+        self.logger.info( f"Total absolute time= {'{0:.2f}'.format(ttotal_abs)}") #NEW
+        self.logger.info( f"Total time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*self.step)} s")
+        self.logger.info( f"Relative time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_obs*self.step)*100.)} %%")
+        self.logger.info( f"Relative time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_obs*self.step)*100.)} %%")
+        self.logger.info( f"Absolute time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/(ttotal_abs)*100.)} %%") #NEW
+        self.logger.info( f"Absolute time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / (ttotal_abs)*100.)} %%") #NEW
+        self.logger.info( f"Duty Cycle: {'{0:.2f}'.format((((ttotal_obs*self.step) / (ttotal_abs)))*100.)} %%") #NEW
 
         f = open(self.out_name, "a")
         print("AGILE", file=f)
@@ -313,7 +313,7 @@ class agilecheck:
 #            ax.fill_between([t_agilei_mjd[i], t_agilef_mjd[i]], 0, 200, color='grey', alpha=0.5)
 
         if plot == True:
-            self.logger.info(self, 'Plotting figure...')
+            self.logger.info( 'Plotting figure...')
             f  = plt.figure()
             ax = f.add_subplot(111)
             ax.plot(meantime, separation, '-b')
@@ -329,11 +329,11 @@ class agilecheck:
                 f.show()
             else:
                 outfile_name = 'agile_visibility_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
-                self.logger.info(self, f'Saving figure in {outfile_name}')
+                self.logger.info( f'Saving figure in {outfile_name}')
                 f.savefig(outfile_name)
 
         if histogram == True:
-            self.logger.info(self, "Plotting histogram...")
+            self.logger.info( "Plotting histogram...")
             bins  = [0, 10, 20, 30, 40, 50, 60, 70]
             bins2 = [70, 180]
             hist, bins = np.histogram(separation, bins=bins, density=False)
@@ -371,6 +371,6 @@ class agilecheck:
                 f2.show()
             else:
                 outfile_name = 'agile_histogram_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tTTi))+'_tstop'+str(np.max(tTTf))+'.'+str(im_fmt)
-                self.logger.info(self, f'Saving figure in {outfile_name}')
+                self.logger.info( f'Saving figure in {outfile_name}')
                 f2.savefig(outfile_name)
             return ttotal_obs, np.concatenate((hist,hist2))

@@ -14,14 +14,14 @@ output:
 
 
 selection:
-  emin: 100
-  emax: 10000
+
   tmin: 433900000
   tmax: 433957532
   timetype: TT
   glon: 80
   glat: 0
   timelist: None
+  irf: H0025
   filtercode: 5
   fovradmin: 0
   fovradmax: 60
@@ -53,8 +53,7 @@ model:
   isomode: 1
   galcoeff: null
   isocoeff: null
-  emin_sources: 100
-  emax_sources: 10000
+
   galmode2: 0
   galmode2fit: 0
   isomode2: 0

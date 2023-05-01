@@ -1,0 +1,15 @@
+package:
+  name: "agilepy-dataset"
+  version: "{{SCIENCE_TOOLS_TAG}}"
+
+build:
+  number: 0
+  noarch: generic
+
+about:
+  home: https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup.git
+  license: GPL-3.0
+  summary: 'AGILE Python Analysis Framework.'
+  description: |
+    The software environment for Agilepy.
+  dev_url: https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup.git

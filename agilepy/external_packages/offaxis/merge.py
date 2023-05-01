@@ -72,11 +72,11 @@ class merge:
         else:
 
             outfile_name_png = 'merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png')
-            self.logger.info(self, f'Saving figure in {outfile_name_png}')
+            self.logger.info( f'Saving figure in {outfile_name_png}')
             f.savefig(outfile_name_png)
 
             outfile_name_pdf = 'merged_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf')
-            self.logger.info(self, f'Saving figure in {outfile_name_pdf}')
+            self.logger.info( f'Saving figure in {outfile_name_pdf}')
             f.savefig(outfile_name_pdf, format="pdf")
 
     def histogram_merge(self, show=False, mode="all"):
@@ -85,7 +85,7 @@ class merge:
             agile_center, agile_hist, agile_width = np.loadtxt('agile_histogram_visibility.txt', unpack=True)
         if(mode=="fermi" or mode=="all"):
             fermi_center, fermi_hist, fermi_width = np.loadtxt('fermi_histogram_visibility.txt', unpack=True)
-        self.logger.info(self, 'Plotting histogram...')
+        self.logger.info( 'Plotting histogram...')
         f = plt.figure()
         ax = f.add_subplot(111)
 
@@ -107,7 +107,7 @@ class merge:
         if show==True:
             f.show()
         else:
-            self.logger.info(self,'Saving histogram...')
+            self.logger.info('Saving histogram...')
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('png'))
             f.savefig('histogram_plot_'+str(self.zmax)+'_'+str(self.timelimiti)+'_'+str(self.timelimitf)+'.'+str('pdf'), format="pdf")
 

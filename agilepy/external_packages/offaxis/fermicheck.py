@@ -70,8 +70,8 @@ class fermicheck:
         given by src_ra and src_dec.
             Output: separation (array), time_i (array), time_f (array)
         """
-        self.logger.info(self, "Computing angular distance to the center of f.o.v")
-        self.logger.info(self, "This might take a while...")
+        self.logger.info( "Computing angular distance to the center of f.o.v")
+        self.logger.info( "This might take a while...")
 
         # reading the Attitude Fermi file (the one that finishes with _SC.fits)
         file     = fits.open(self.SC_filename)
@@ -110,8 +110,8 @@ class fermicheck:
         (Modified Julian Date).
         Output: t_start (list), t_stop (list)
         """
-        self.logger.info(self,"Converting MET to MJD time.")
-        self.logger.info(self, "This might take a while...")
+        self.logger.info("Converting MET to MJD time.")
+        self.logger.info( "This might take a while...")
 
         file     = fits.open(self.SC_filename)
         SC       = file[1].data
@@ -125,8 +125,8 @@ class fermicheck:
         index_ti = bisect.bisect_left(SC['START'],self.timelimiti)
         index_tf = bisect.bisect_left(SC['STOP'],self.timelimitf)
 
-        self.logger.info(self, f"Time_i = {SC['START'][index_ti]}")
-        self.logger.info(self,f"Time_f = {SC['STOP'][index_tf]}")
+        self.logger.info( f"Time_i = {SC['START'][index_ti]}")
+        self.logger.info(f"Time_f = {SC['STOP'][index_tf]}")
 
         tref     = datetime.datetime(2001,1,1,0,0,0)
         t_start  = []
@@ -252,14 +252,14 @@ class fermicheck:
         ttotal_obs = np.sum(deltat)
         ttotal_under_zmax = np.sum(tfMET[separation<self.zmax]-tiMET[separation<self.zmax])
         ttotal_above_zmax = np.sum(tfMET[separation>self.zmax]-tiMET[separation>self.zmax])
-        self.logger.info(self, f"Total integration time= {'{0:.2f}'.format((ttotal_obs*self.step))} s Total_bins: {total_obs} {len(tiMET)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
-        self.logger.info(self, f"Total absolute time= {'{0:.2f}'.format((self.tstop-self.tstart )*86400)}") #NEW
-        self.logger.info(self, f"Total time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*self.step)} s")
-        self.logger.info(self, f"Relative time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*100./ttotal_obs)} %%")
-        self.logger.info(self, f"Relative time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(ttotal_above_zmax*100./ttotal_obs)} %%")
-        self.logger.info(self, f"Absolute time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100)} %%") #NEW
-        self.logger.info(self, f"Absolute time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100)} %%") #NEW
-        self.logger.info(self, f"Duty Cycle: {'{0:.2f}'.format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100)} %%") #NEW
+        self.logger.info( f"Total integration time= {'{0:.2f}'.format((ttotal_obs*self.step))} s Total_bins: {total_obs} {len(tiMET)} Mean sep. < {self.zmax}: {str(round(np.mean(separation[separation<self.zmax]),4))}")
+        self.logger.info( f"Total absolute time= {'{0:.2f}'.format((self.tstop-self.tstart )*86400)}") #NEW
+        self.logger.info( f"Total time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*self.step)} s")
+        self.logger.info( f"Relative time spent at separation < {self.zmax} deg: {'{0:.2f}'.format(ttotal_under_zmax*100./ttotal_obs)} %%")
+        self.logger.info( f"Relative time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(ttotal_above_zmax*100./ttotal_obs)} %%")
+        self.logger.info( f"Absolute time spent at separation < {self.zmax} deg: {'{0:.2f}'.format((ttotal_under_zmax*self.step)/((self.tstop-self.tstart )*86400)*100)} %%") #NEW
+        self.logger.info( f"Absolute time spent at separation > {self.zmax} deg: {'{0:.2f}'.format(((ttotal_obs*self.step)-(ttotal_under_zmax*self.step)) / ((self.tstop-self.tstart )*86400)*100)} %%") #NEW
+        self.logger.info( f"Duty Cycle: {'{0:.2f}'.format((((ttotal_obs*self.step) / ((self.tstop-self.tstart )*86400)))*100)} %%") #NEW
 
         f = open(self.out_name, "a")
         print("FERMI", file=f)
@@ -305,7 +305,7 @@ class fermicheck:
 #            ax.fill_between([t_agilei_mjd[i], t_agilef_mjd[i]], 0, 200, color='grey', alpha=0.5)
 
         if plot == True:
-            self.logger.info(self, 'Plotting figure...')
+            self.logger.info( 'Plotting figure...')
             f  = plt.figure()
             ax = f.add_subplot(111)
             ax.plot(meantime, separation, '-b')
@@ -315,7 +315,7 @@ class fermicheck:
             ax.set_xlabel('MJD')
             ax.set_ylabel('off-axis angle [$^{\\circ}$]')
 
-            self.logger.info(self, 'Saving figure...')
+            self.logger.info( 'Saving figure...')
             ax.set_xlim(np.min(meantime), np.max(meantime))
             if show==True:
                 f.show()
@@ -323,7 +323,7 @@ class fermicheck:
                 f.savefig('fermi_visibility_ra'+str(self.src_ra)+'_dec'+str(self.src_dec)+'_tstart'+str(np.min(tiMET))+'_tstop'+str(np.max(tfMET))+'.'+str(im_fmt))
 
         if histogram == True:
-            self.logger.info(self, "Plotting histogram...")
+            self.logger.info( "Plotting histogram...")
             bins  = [0, 10, 20, 30, 40, 50, 60, 70]
             bins2 = [70, 180]
             hist, bins = np.histogram(separation, bins=bins, density=False)
@@ -357,7 +357,7 @@ class fermicheck:
                 print(center2[i], hist2[i]*29.1058/ttotal_obs*100., width2, file=fil)
             fil.close()
 
-            self.logger.info(self, 'Saving figure...')
+            self.logger.info( 'Saving figure...')
             if show==True:
                 f2.show()
             else:

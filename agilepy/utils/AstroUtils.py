@@ -66,8 +66,6 @@ class AstroUtils:
 
             except Exception as e:
 
-                print("\nException in AstroUtils.distance (error in acos() ): ", e)
-
                 return math.sqrt(d1 * d1 + d2 * d2)
     
     @staticmethod
@@ -101,8 +99,6 @@ class AstroUtils:
 
         product = str(outpath)+"/result"+"_"+str(tstart) + "_" + str(tstop)+".txt"
         data.to_csv(product, sep=" ", index=False)
-
-        print(product)
 
         return product
 

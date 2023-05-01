@@ -319,7 +319,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         """
 
         # This date would result in "0 days"
-        sec_tolerance = 0.0000001
         fitstime = AstroUtils.time_agile_seconds_to_fits(449582332)
         dt = datetime.strptime(fitstime, '%Y-%m-%dT%H:%M:%S.%f')
 

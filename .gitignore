@@ -15,6 +15,8 @@ cov_html_report/
 upload_coverage_report.sh
 .vscode
 test_logs
+test_out
+cov_xml_report
 
 load_env.sh
 /tmp/agilepy_test/Agilepy/agilepy/testing/unittesting/api/out
@@ -26,3 +28,4 @@ agilepy/testing/unittesting/utils/data/1640082575163.tar
 agilepy/testing/unittesting/api/data/test_ag_eng_agile_fermi_offaxis_visibility_comparison
 agilepy/testing/unittesting/api/tt_test.sh
 agilepy/testing/unittesting/api/mjd_test.sh
+*.log
