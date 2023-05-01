@@ -45,10 +45,6 @@ class TestAGAnalysis:
 
     VELA = "2AGLJ0835-4514"
 
-    """    
-    self.agilepyRestConf = os.path.join(self.currentDirPath,"conf/agilepyconfREST.yaml")
-    """
-
     @pytest.mark.testlogsdir("api/test_logs/test_delete_output_directory")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
@@ -63,13 +59,6 @@ class TestAGAnalysis:
         ag.deleteAnalysisDir()
 
         assert not outDir.exists()
-
-
-    def set_outputfolder(self, name):        
-        test_out_dir = self.test_logs_base_dir.joinpath(name)
-        test_out_dir.mkdir(parents=True, exist_ok=True)
-        os.environ["TEST_LOGS_DIR"] = str(test_out_dir)
-        return test_out_dir
 
 
     ########################################################################
@@ -301,7 +290,7 @@ class TestAGAnalysis:
         source_2 = ag.selectSources(lambda name: name == TestAGAnalysis.VELA ).pop()
         flux_2 = source_2.get("multiFlux")["value"]
 
-        self.assertNotEqual(flux_1, flux_2)
+        assert flux_1 != flux_2
 
         ag.destroy()
 
@@ -525,12 +514,12 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_extract_light_curve_data")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
+    @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt", "data/testcase_2AGLJ0835-4514.source"])
     def test_extract_light_curve_data(self, logger, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
-        sourceFile = Path(self.currentDirPath).joinpath("data/testcase_2AGLJ0835-4514.source")
+        sourceFile = testdatafiles[1]
 
         lcdata = ag._extractLightCurveDataFromSourceFile(str(sourceFile))
 
