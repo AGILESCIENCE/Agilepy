@@ -1,3 +1,4 @@
+import os
 import pytest
 from pathlib import Path
 from os.path import expandvars
@@ -16,7 +17,8 @@ def logger(request):
  
     singletonLogger = AgilepyLogger()
     rootLogsPath = Path( __file__ ).absolute().parent.joinpath(testlogsdir)
-    singletonLogger.setLogger(rootLogsPath, "DEBUG")
+    singletonLogger.setLogger(rootLogsPath, 0)
+    os.environ["TEST_LOGS_DIR"] = str(rootLogsPath)
     yield singletonLogger.getLogger(request.node.name)
     
 

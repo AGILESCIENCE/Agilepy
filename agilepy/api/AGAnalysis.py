@@ -115,7 +115,6 @@ class AGAnalysis(AGBaseAnalysis):
         """ It clears the list of sources and the current maplist file.
         """
         self.sourcesLibrary.destroy()
-        self.logger.reset()
         self.config.detach(self.currentMapList, "galcoeff")
         self.config.detach(self.currentMapList, "isocoeff")
         self.currentMapList = None

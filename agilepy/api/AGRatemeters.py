@@ -32,9 +32,7 @@ class AGRatemeters(AGBaseAnalysis):
     
     The constructor of this class requires a ``yaml configuration file``.
     """
-    
-    INSTANCE_COUNT = 0
-    
+       
     
     def __init__(self, configurationFilePath):
         """AGRatemeters constructor.
@@ -53,11 +51,9 @@ class AGRatemeters(AGBaseAnalysis):
         """
         super().__init__(configurationFilePath)
         
-        if AGRatemeters.INSTANCE_COUNT > 0:
-            print("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n[WARNING] Each notebook should instantiate only one AGAnalysis object, otherwise the logger will be duplicated. Duplicate logs can be tricky. If you want to make another analysis, create a new notebook or restart the Kernel and update this one.")
-        AGRatemeters.INSTANCE_COUNT += 1
-    
         self.config.loadConfigurationsForClass("AGRatemeters")
+
+        self.logger = self.agilepyLogger.getLogger(__name__)
 
         # Should I keep these two?
         # MapList Observes the observable AgilepyConfig
@@ -69,34 +65,32 @@ class AGRatemeters(AGBaseAnalysis):
 
     def destroy(self):
         """ It clears the list of sources and the current maplist file.
-        """
-        self.logger.reset()
-        self.currentMapList = None
-        
-        return None
+        """        
+        pass
     
 
     @staticmethod
-    def getConfiguration(confFilePath,
-                         userName,
-                         outputDir,
-                         verboselvl,
-                         timetype,
-                         indexfile,
-                         # evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
-                         # logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
-                         contact,
-                         T0,
-                         tmin,
-                         tmax,
-                         tmin_bkg,
-                         tmax_bkg,
-                         tmin_src,
-                         tmax_src,
-                         flag_detrending,
-                         sourceName,
-                         flag_N_RM,
-                         ):
+    def getConfiguration(
+                    confFilePath,
+                    userName,
+                    outputDir,
+                    verboselvl,
+                    timetype,
+                    indexfile,
+                    # evtfile="/AGILE_PROC3/FM3.119_ASDC2/INDEX/EVT.index",
+                    # logfile="/AGILE_PROC3/DATA_ASDC2/INDEX/LOG.log.index"
+                    contact,
+                    T0,
+                    tmin,
+                    tmax,
+                    tmin_bkg,
+                    tmax_bkg,
+                    tmin_src,
+                    tmax_src,
+                    flag_detrending,
+                    sourceName,
+                    flag_N_RM,
+        ):
         """Utility method to create a configuration file.
 
         Args:
@@ -161,6 +155,7 @@ selection:
         """
         Run ratemeters scripts.
         """
+        self.logger.info("Running ratemeters script")
         
         # Get the value of the parameters for the script
         T0=self.getOption('T0')
@@ -181,16 +176,14 @@ selection:
             T0 = AstroUtils.time_mjd_to_agile_seconds(self.getOption("T0"))
             self.setOptions(T0=T0, timetype='TT')
         
-        # Define Command to run
-        path_script="/PATH/TO/SCRIPT" # Change this line with path to the script
-        cmd = "echo python"           # Change this line with "python"
-        cmd+= f" {path_script}/RM_LC.py {T0} {tmin} {tmax} {tmax_bkg} {tmax_bkg} {tmin_src} {tmax_src} {flag_detrending} {flag_dir} {flag_N_RM}"
+        # TODO: add the following script to Agilepy and make it importable as a module.
+        #cmd+= f" {path_script}/RM_LC.py {T0} {tmin} {tmax} {tmax_bkg} {tmax_bkg} {tmin_src} {tmax_src} {flag_detrending} {flag_dir} {flag_N_RM}"
         
         # Move to output directory and run command from there.
         print(f"\nNow Run Script from {self.outdir}\n")
-        os.system(f"echo {indexfile} ")
-        os.chdir(self.outdir)
-        os.system(cmd)
+        #os.system(f"echo {indexfile} ")
+        #os.chdir(self.outdir)
+        #os.system(cmd)
         
-        return None
+        return True
 
