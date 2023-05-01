@@ -85,12 +85,10 @@ class AgilepyLogger(metaclass=Singleton):
     @staticmethod
     def mapLogLevel(verboseLvl):
         if verboseLvl == 0:
-            return logging.ERROR
-        elif verboseLvl == 1:
             return logging.WARNING
-        elif verboseLvl == 2:
+        elif verboseLvl == 1:
             return logging.INFO
-        elif verboseLvl == 3:
+        elif verboseLvl == 2:
             return logging.DEBUG
         else:
             raise ValueError(f"Invalid value for verboseLvl ({verboseLvl}). Allowed values are 0 (ERROR), 1 (WARNING), 2 (INFO), 3 (DEBUG)")
