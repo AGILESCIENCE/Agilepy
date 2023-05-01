@@ -167,13 +167,15 @@ The output section collects options related to the output files generation and l
 The *'outdir'* option sets the root directory of the analysis results where all output files are written.
 
 Agilepy use two loggers, one logs messages on the console, the other writes messages on disk.
-The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The Agilepy file logger verbosity is set to 2 by default.
 There are 4 kind of messages based on their importance factor:
 
   - CRITICAL: a message describing a critical problem, something unexpected, preceding a program crash or an Exception raise.
   - WARNING: an indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
   - INFO: confirmation that things are working as expected.
   - DEBUG: detailed information, typically of interest only when diagnosing problems.
+
+The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The Agilepy file logger verbosity is set to 2 by default.
+
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
