@@ -43,8 +43,7 @@ jobs:
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
-        run: |
-          source start_coverage.sh
+        run: start_coverage.sh
   
   # building-testing-on-os-matrix:
   #   name: Build+Test ${{ matrix.os }}

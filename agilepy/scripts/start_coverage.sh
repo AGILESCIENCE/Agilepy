@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e # Exit immediately if a command exits with a non-zero status.
+
 agilepy_path=$(python3 -c "import agilepy as _; print(_.__path__[0])")
 
 if [ $? -ne 0 ]; then
