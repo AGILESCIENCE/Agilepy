@@ -1,12 +1,18 @@
-# Agilepy
+# 
+
+
+
+# Agilepy &middot; [![GitHub license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Coverage) ![Docker Agilepy](https://img.shields.io/docker/v/agilescience/agilepy?label=Agilepy&logo=Docker&sort=date) [![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
+
 ![master CI](https://github.com/AGILESCIENCE/Agilepy/actions/workflows/continuous-integration-workflow.yaml/badge.svg?branch=master)
 ![develop](https://github.com/AGILESCIENCE/Agilepy/actions/workflows/continuous-integration-workflow.yaml/badge.svg?branch=develop)
 
-[![Documentation Status](https://readthedocs.org/projects/agilepy/badge/?version=latest)](https://agilepy.readthedocs.io/en/latest/?badge=latest)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Grade)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/1729ff523c6546188e94006ef0c8c594)](https://www.codacy.com/gh/AGILESCIENCE/Agilepy?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AGILESCIENCE/Agilepy&amp;utm_campaign=Badge_Coverage)
 
-![Docker Agilepy](https://img.shields.io/docker/v/agilescience/agilepy?label=Agilepy&logo=Docker&sort=date)
+
+
+
+
+
 
 ## Analysis framework for the AGILE space telescope
 
