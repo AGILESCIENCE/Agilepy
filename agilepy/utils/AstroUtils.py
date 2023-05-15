@@ -69,6 +69,42 @@ class AstroUtils:
                 return math.sqrt(d1 * d1 + d2 * d2)
     
     @staticmethod
+    def evaluate_erglog_from_flux(E, flux, E1, E2, alpha):
+        """
+        Evaluate SED erglog at energy E assuming power law with index alpha. Energies E, E1, E2 are in MeV.
+
+        Args:
+            E
+        Returns:
+
+        """
+
+    @staticmethod
+    def evaluate_erglog_from_flux(flux, E1, E2, alpha):
+        """
+        Given a flux, computed between E1 (MeV) and E2 (MeV) assuming power law with index alpha,
+        Evaluate SED erglog at energy log center between E1 and E2.
+
+        Args:
+            flux: in ph/cm2/s
+            E1: in MeV
+            E2: in MeV
+            alpha: power law index
+
+        Returns:
+            SED erglog at energy log center between E1 and E2
+        """
+        # MeV to erg
+        factor=0.00000160217733
+        # Ecsquared factor
+        Ecsquared=E1*E2
+        # Reference Energy where evaluate SED
+        log10_E = ( np.log10(E1) + np.log10(E2) ) /2.0
+        E = np.power(10, log10_E)
+        # Evaluate and return SED
+        return flux*np.power(factor, 3-alpha)*np.power(E,2-alpha)*Ecsquared/(E2-E1)
+
+    @staticmethod
     def AP_filter(filename, threshold, tstart, tstop, outpath):
         """
         This function filters an aperture photometry file using a threshold value for exposure,
