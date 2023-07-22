@@ -32,8 +32,12 @@ from pathlib import Path
 class Parameters:
 
     _datapath = Path(os.environ["AGILE"]).joinpath("model/scientific_analysis/data")
-    _calibrationFiles = os.listdir(_datapath)
 
+    if _datapath.exists():
+        _calibrationFiles = os.listdir(_datapath)
+    else:
+        _calibrationFiles = []
+        
     _skymapTemplate = "{}_{}.SKY002.{}_{}.disp.conv.sky.gz"
 
     _sarmatrixTemplate = "AG_GRID_G0017_{}_{}.sar.gz"
