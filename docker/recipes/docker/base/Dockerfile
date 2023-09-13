@@ -87,20 +87,21 @@ ENV PYTHONPATH=$AGILE/scripts/ap:$PYTHONPATH
 
 # ---------------------------------- Install MCAL software --------------------------------- 
 # The ssh key is needed to download the MCAL software
-RUN mkdir -p /home/flareadvocate/.ssh
-COPY id_agilepy /home/flareadvocate/.ssh/id_agilepy
-RUN touch /home/flareadvocate/.ssh/known_hosts && ssh-keyscan github.com >> /home/flareadvocate/.ssh/known_hosts
-USER root
-RUN chmod 600 /home/flareadvocate/.ssh/id_agilepy
-RUN chown flareadvocate:flareadvocate /home/flareadvocate/.ssh/id_agilepy
+# RUN mkdir -p /home/flareadvocate/.ssh
+# COPY id_agilepy /home/flareadvocate/.ssh/id_agilepy
+# RUN touch /home/flareadvocate/.ssh/known_hosts && ssh-keyscan github.com >> /home/flareadvocate/.ssh/known_hosts
+# USER root
+# RUN chmod 600 /home/flareadvocate/.ssh/id_agilepy
+# RUN chown flareadvocate:flareadvocate /home/flareadvocate/.ssh/id_agilepy
 USER flareadvocate
 
 ENV MCALSW=$AGILE/mcalsw
 ENV LD_LIBRARY_PATH=$MCALSW/lib:$LD_LIBRARY_PATH
 
 RUN cd /home/flareadvocate/dependencies && \  
-    eval "$(ssh-agent -s)" && ssh-add /home/flareadvocate/.ssh/id_agilepy && \
-    git clone git@github.com:ASTRO-EDU/AGILE-MCAL.git AGILE-MCAL && \
+    # eval "$(ssh-agent -s)" && ssh-add /home/flareadvocate/.ssh/id_agilepy && \
+    # git clone git@github.com:ASTRO-EDU/AGILE-MCAL.git AGILE-MCAL && \
+    git clone https://github.com/AGILESCIENCE/AGILE-MCAL.git AGILE-MCAL && \
     cd AGILE-MCAL && \
     make && make install  
 
