@@ -75,7 +75,7 @@ ENV PATH=$AGILE/bin:$AGILE/scripts:$PATH
 
 RUN mkdir $PREFIX/agiletools && cd $PREFIX/agiletools && \
     git clone https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup.git && cd AGILE-GRID-ScienceTools-Setup \
-    && git checkout BUILD25b7 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
+    && git checkout BUILD25b11 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
     && rm -rf $AGILE/AGILE-GRID-ScienceTools-Setup
 
 # At the moment, the 'ap' package is not installed but discovered using the PYTHONPATH
@@ -102,11 +102,11 @@ RUN cd /home/flareadvocate/dependencies && \
     # eval "$(ssh-agent -s)" && ssh-add /home/flareadvocate/.ssh/id_agilepy && \
     # git clone git@github.com:ASTRO-EDU/AGILE-MCAL.git AGILE-MCAL && \
     git clone https://github.com/AGILESCIENCE/AGILE-MCAL.git AGILE-MCAL && \
-    cd AGILE-MCAL && \
+    cd AGILE-MCAL && git checkout BUILD4 && \
     make && make install  
 
 # Let's delete the ssh key
-RUN rm -r /home/flareadvocate/.ssh
+# RUN rm -r /home/flareadvocate/.ssh
 USER flareadvocate
 
 # ----------------------------------  Download the test dataset ---------------------------------- 

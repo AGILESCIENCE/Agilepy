@@ -124,8 +124,9 @@ class ProcessWrapper(ABC):
 
 
         # starting the tool
-        self.logger.debug( f"args: {self.args}")
+        self.logger.debug(f"Executing:\n\n {command}")
         command = self.exeName + " " + " ".join(map(str, self.args))
+
         toolstdout = self.executeCommand(command)
 
         # remove temporary directory containing the par file copy 

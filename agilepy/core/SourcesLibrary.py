@@ -331,7 +331,7 @@ class SourcesLibrary:
                 fluxperchannel = values[-1].split(",")
                 values = values[:-1]
                 values = [*values, fluxperchannel]
-
+                values = [-1 if (value=='-nan' or value=='nan' or value=='null') else value for value in values]
             elif lin_num == 8:
                 galcoeffs  = line.split(" ")[0].split(",")
                 galcoeffserr = [g.strip() for g in line.split(" ")[1].split(",")]

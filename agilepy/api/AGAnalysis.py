@@ -49,7 +49,7 @@ from agilepy.core.Parameters import Parameters
 from agilepy.core.MapList import MapList
 from agilepy.utils.Utils import Utils
 from agilepy.core.CustomExceptions import   AGILENotFoundError, \
-                                            PFILESNotFoundError, \
+                                            PFILESNotFoundError, ScienceToolErrorCodeReturned, \
                                             ScienceToolInputArgMissing, \
                                             MaplistIsNone, SelectionParamNotSupported, \
                                             SourceNotFound, \
@@ -874,13 +874,17 @@ plotting:
 
         self.multiTool.configureTool(configBKP)
 
-        products = self.multiTool.call()
+        try:
+            products = self.multiTool.call()
+        except ScienceToolErrorCodeReturned as e:
+            self.logger.warning(f"AG_multi raised an exception:\n\n{e}")
+            return []
 
         # filter .source files
         sourceFiles = [product for product in products if product and ".source" in product]
 
         if len(sourceFiles) == 0:
-            self.logger.warning( "The number of .source files is 0.")
+            self.logger.warning("The number of .source files is 0.")
 
         self.logger.info("AG_multi produced: %s", sourceFiles)
 
