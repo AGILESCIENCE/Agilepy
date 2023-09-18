@@ -9,9 +9,14 @@ This repository containes the recipes to build the Docker container of Agilepy.
 This Dockerfile starts from an oracle8 image and installs all the low and high level dependencies required by Agilepy. The AGILE tools are installed from source. It can be used as develop environment. 
 
 Build the base image and push it to DockerHub. [Tags here](https://hub.docker.com/r/agilescience/agilepy-recipe/tags)
+
+Change the BUILD tags of AGILE GRID and AGILE MCAL software
+
+
+
 ```
+vi recipes/docker/base/Dockerfile
 cd recipes/docker/base
-cp $HOME/.ssh/<private-ssh-key> ./id_agilepy # the private key is required to download the MCAL software. Its name must be `id_agilepy` and it must be not protected by a passphrase.
 docker build --tag agilescience/agilepy-recipe:<tagname> .
 docker login
 docker push agilescience/agilepy-recipe:<tagname>
