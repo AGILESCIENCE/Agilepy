@@ -43,6 +43,7 @@ The main purpose of the package is to provide an easy to use high-level Python i
   :caption: Science Tools
 
   sciencetools/tools
+  sciencetools/calibration
   sciencetools/mleinput
   sciencetools/mleoutput
 

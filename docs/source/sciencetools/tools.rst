@@ -20,5 +20,6 @@ Science Tools
 	"`AG_multisim <AG_multisim.html>`_", "Given a list of sources and a set of exposure maps it generates the corresponding counts map by means of a Monte Carlo simulation. It optionally performs on these maps the same analysis of AG_multi. The entire process can be iterated. The generated maps can be saved to disk or just analyzed on the fly.", "AG_multisimUM.html"
 	"`AG_multiterative <AG_multiterative.html>`_", "This application iteratively performs the same analysis of AG_multi, tentatively adding more sources, one at a time, from a second sources list. It produces the best sources list explaining the data.", ""
 	"AG_pasteMap", "This utility program joins two sky maps together adapting their resolution.", ""
+	"`AG_pixextract <AG_pixextract.html>`_", "", ""
 	"AG_spotfinder", "", ""	
 	"AG_thetamapgen", "", ""	

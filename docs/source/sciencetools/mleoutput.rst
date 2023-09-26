@@ -198,9 +198,21 @@ The counts and fluxes are provided, as well as their symmetric, positive, and ne
    skytypeL.filter_irf, , , ,
    skytypeH.filter_irf, , , ,
 
-'*.source.con*' file
-^^^^^^^^^^^^^^^^^^^^^^^^
+'*.source.con*' file and ellipse
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 outfile.source.con: source contour (if found).
+
+If AG_multi was able to find a source contour, an ellipse is fit to the contour.
+The source contour is a list of points which defines a polygon by connecting each point sequentially. The value of Radius found in the HTML output is the radius in degrees of a circle with the same area as the polygon.
+AG_multi determines the ellipse which best fits the contour. This ellipse will have the same area as the polygon, and the distance between each contour point and the intersection between the ellipse and the line connecting that point to the centre will be minimized.
+The ellipse is completely described by three parameters: the two axes and the rotation (in degrees) of the first axis around the centre, as expected by the ds9 application.
+If the ellipse is a circle, its axes will both be equal to the Radius found in the HTML output.
+The ellipse is described by two files that are readable by ds9: one is a .reg file which contais the centre, the axes and the rotation of the ellipse, while the other describes the same ellipse as a list of points in galactic coordinates, thus using the same syntax of a contour file, and has extension .ellipse.con.
+This is an example of ellipse .reg file:
+
+::
+    galactic
+    ellipse(263.579,-2.8398,0.0167177,0.0205552,22.3895)
 
 '*.source.reg*' file
 ^^^^^^^^^^^^^^^^^^^^^^^^
