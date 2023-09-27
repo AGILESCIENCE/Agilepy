@@ -22,6 +22,7 @@ Enter into the Agilepy Docker container.
 .. code-block:: bash
 
     docker exec -it agilepy-1.7.0 bash -l
+	cd $AGILE/scripts/dispconv/
 
 1. Get the repositories
 ------------------------
