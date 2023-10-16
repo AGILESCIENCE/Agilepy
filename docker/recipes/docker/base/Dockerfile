@@ -75,7 +75,7 @@ ENV PATH=$AGILE/bin:$AGILE/scripts:$PATH
 
 RUN mkdir $PREFIX/agiletools && cd $PREFIX/agiletools && \
     git clone https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup.git && cd AGILE-GRID-ScienceTools-Setup \
-    && git checkout BUILD25b11 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
+    && git checkout BUILD26 && ./downloadScienceTools.sh && ./installScienceTools.sh && ./downloadIRF.sh && ./installIRF.sh \
     && rm -rf $AGILE/AGILE-GRID-ScienceTools-Setup
 
 # At the moment, the 'ap' package is not installed but discovered using the PYTHONPATH
