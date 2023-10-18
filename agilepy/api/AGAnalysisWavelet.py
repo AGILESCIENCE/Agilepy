@@ -25,21 +25,19 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from os.path import join
 
-import os
-
-from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.utils.Utils import Utils
-from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.core.ScienceTools import Cwt2, Met, Ccl
-
-from os.path import join, expandvars
 from astropy.wcs import WCS
 from astropy.io import fits
 import scipy.ndimage as ndimage
 import matplotlib.pyplot as plt
+
+
+from agilepy.utils.Utils import Utils
+from agilepy.core.ScienceTools import Cwt2, Met, Ccl
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
+
+
 
 
 class AGAnalysisWavelet(AGBaseAnalysis):
@@ -61,10 +59,11 @@ class AGAnalysisWavelet(AGBaseAnalysis):
     """
 
       super().__init__(configurationFilePath)
-
+    
       self.config.loadConfigurationsForClass("AGAnalysisWavelet")
 
-        
+      self.logger = self.agilepyLogger.getLogger(__name__, "AGAnalysisWavelet")
+    
     
     @staticmethod
     def getConfiguration(confFilePath, userName, outputDir, verboselvl, ctsmap, scaletype, scalemin, scalemax, scalenum, methistsize, cclsizemin, cclsizemax, cclradmin, cclradmax, cclscalemin, cclscalemax):
@@ -133,21 +132,22 @@ wavelet:
     """
 
       ####-------CWT2------------------
-      cwt2 = Cwt2("python $AGILE/scripts/PYWTOOLS/cwt2d.py", self.logger)
+      self.logger.info("Running CWT2..")
+      cwt2 = Cwt2("python3 $AGILE/scripts/PYWTOOLS/cwt2d.py", self.logger)
       cwt2.configureTool(self.config)
       f1 = cwt2.call()
 
       ####-------MET--------------
-
-      met = Met("python $AGILE/scripts/PYWTOOLS/met2d.py", self.logger)
+      self.logger.info("Running MET..")
+      met = Met("python3 $AGILE/scripts/PYWTOOLS/met2d.py", self.logger)
       extraParams = {"Cwt2OutfilePath":f1}
       met.configureTool(self.config, extraParams=extraParams)
       f2 = met.call()
 
 
       ####------CCL----------
-        
-      ccl = Ccl("python $AGILE/scripts/PYWTOOLS/ccl2d.py", self.logger)
+      self.logger.info("Running CCL..")        
+      ccl = Ccl("python3 $AGILE/scripts/PYWTOOLS/ccl2d.py", self.logger)
       extraParams = {"MetOutfilePath":f2}
       ccl.configureTool(self.config, extraParams=extraParams)
       f3 = ccl.call()
@@ -185,7 +185,7 @@ wavelet:
         
         if saveImage:
           filepath = join(self.outdir, "wavelet_analysis/", namefile+".plot.png")
-          self.logger.info(self, "plot at: %s", filepath)
+          self.logger.info( "plot at: %s", filepath)
           plt.savefig(filepath, bbox_inches='tight')
         else:
           plt.show()
@@ -201,7 +201,7 @@ wavelet:
 
           if saveImage:
             filepath = join(self.outdir, "wavelet_analysis/", namefile+str(i)+".plot.png")
-            self.logger.info(self, "plot at: %s", filepath)
+            self.logger.info( "plot at: %s", filepath)
             plt.savefig(filepath)
           else:
             plt.show()

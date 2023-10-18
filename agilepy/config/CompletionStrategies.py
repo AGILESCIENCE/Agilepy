@@ -29,13 +29,13 @@ from typing import List
 import numbers
 from pathlib import Path
 from time import strftime
+import logging
 
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
 
 class CompletionStrategies:
 
-    
     @staticmethod
     def _glonDeltaIncrement(confDict):
         confDict["selection"]["glon"] += 0.000001
@@ -109,6 +109,12 @@ class CompletionStrategies:
         if confDict["selection"]["timetype"] == "MJD":
             confDict["selection"]["tmax"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["tmax"])
             confDict["selection"]["tmin"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["tmin"])
+            confDict["selection"]["timetype"] = "TT"
+            
+    @staticmethod
+    def _setT0(confDict):
+        if confDict["selection"]["timetype"] == "MJD":
+            confDict["selection"]["T0"] = AstroUtils.time_mjd_to_agile_seconds(confDict["selection"]["T0"])
             confDict["selection"]["timetype"] = "TT"
 
     @staticmethod

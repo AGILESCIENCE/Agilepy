@@ -1,5 +1,5 @@
 output:
-  outdir: /agilepy_development/Agilepy/agilepy/testing/unittesting/api/test_logs/TestAGEngAgileFermiOffAxisVisibilityComparison
+  outdir: $TEST_LOGS_DIR
   filenameprefix: testcase
   logfilenameprefix: logtestcase
   sourcename: eng

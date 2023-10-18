@@ -52,7 +52,8 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         self.config.loadConfigurationsForClass("AGEngAgileFermiOffAxisVisibilityComparison")
 
-       
+        self.logger = self.agilepyLogger.getLogger(__name__, "AGEngAgileFermiOffAxisVisibilityComparison")
+
 
 
 
@@ -83,7 +84,7 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 
         dir = offaxis.run()
 
-        self.logger.info(self,"Output directory: %s", dir)
+        self.logger.info("Output directory: %s", dir)
 
         return dir
 

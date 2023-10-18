@@ -28,6 +28,7 @@
 import os
 import shutil
 import pytest
+import logging
 import unittest
 from time import sleep
 from pathlib import Path
@@ -39,38 +40,14 @@ from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.PlottingUtils import PlottingUtils
 from agilepy.config.AgilepyConfig import AgilepyConfig
 
-class AgilepyUtilsUT(unittest.TestCase):
+class TestAgilepyUtils:
 
-    def setUp(self):
-        self.currentDirPath = Path(__file__).parent.absolute()
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
+    @pytest.mark.testlogsdir("utils/test_logs/test_display_sky_map")
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles(["utils/test_data/testcase_EMIN00100_EMAX00300_01.cts.gz"])
+    def test_display_sky_map(self, configObject, logger, testdatafiles):
 
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-
-        self.agilepyLogger = AgilepyLogger()
-
-        self.agilepyLogger.initialize(self.config.getConf("output","outdir"), self.config.getConf("output","logfilenameprefix"), self.config.getConf("output","verboselvl"))
-
-        self.datadir = os.path.join(self.currentDirPath,"data")
-
-        self.outDir = Path(self.config.getOptionValue("outdir"))
-
-        if self.outDir.exists() and self.outDir.is_dir():
-            self.agilepyLogger.reset()
-            shutil.rmtree(self.outDir)
-
-        self.tmpDir = Path("./tmp")
-        self.tmpDir.mkdir(exist_ok=True)
-
-    def tearDown(self):
-        self.agilepyLogger.reset()
-        if self.tmpDir.exists() and self.tmpDir.is_dir():
-            shutil.rmtree(self.tmpDir)
-
-    def test_display_sky_map(self):
-
-        pu = PlottingUtils(self.config, self.agilepyLogger)
+        pu = PlottingUtils(configObject, logger)
 
         smooth = 4
         fileFormat = ".png"
@@ -81,7 +58,7 @@ class AgilepyUtilsUT(unittest.TestCase):
 
 
         file = pu.displaySkyMap(
-                    self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz", \
+                    testdatafiles.pop(), 
                     smooth = smooth,
                     fileFormat = fileFormat,
                     title = title,
@@ -93,11 +70,18 @@ class AgilepyUtilsUT(unittest.TestCase):
                     saveImage=True,
                     normType="linear")
 
-        assert True == os.path.isfile(file)
+        assert Path(file).exists()
 
-    def test_display_sky_map_single_mode_3_imgs(self):
+    @pytest.mark.testlogsdir("utils/test_logs/test_display_sky_map_single_mode_3_imgs")
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles([
+                        "utils/test_data/testcase_EMIN00100_EMAX00300_01.cts.gz",
+                        "utils/test_data/testcase_EMIN00100_EMAX00300_01.cts.gz",
+                        "utils/test_data/testcase_EMIN00100_EMAX00300_01.cts.gz"
+    ])
+    def test_display_sky_map_single_mode_3_imgs(self, configObject, logger, testdatafiles):
 
-        pu = PlottingUtils(self.config, self.agilepyLogger)
+        pu = PlottingUtils(configObject, logger)
 
         smooth = 4
         fileFormat = ".png"
@@ -106,10 +90,9 @@ class AgilepyUtilsUT(unittest.TestCase):
         regFiles = [Utils._expandEnvVar(
             "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
         regFileColors = ["yellow", "blue"]
-        img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
 
         file = pu.displaySkyMapsSingleMode(
-                    [img, img, img], \
+                    testdatafiles, \
                     smooth = smooth,
                     fileFormat = fileFormat,
                     titles = [title+"_1", title+"_2", title+"_3"],
@@ -121,140 +104,74 @@ class AgilepyUtilsUT(unittest.TestCase):
                     saveImage=True,
                     normType="linear")
 
-        assert True == os.path.isfile(file)
+        assert Path(file).exists()
+ 
 
-    def test_display_sky_map_single_mode_2_imgs(self):
-
-        pu = PlottingUtils(self.config, self.agilepyLogger)
-
-        smooth = 4
-        fileFormat = ".png"
-        title = "testcase"
-        cmap = "CMRmap"
-        regFiles = [Utils._expandEnvVar(
-            "$AGILE/catalogs/2AGL_2.reg"), Utils._expandEnvVar("$AGILE/catalogs/2AGL_2.reg")]
-        regFileColors = ["yellow", "blue"]
-        img = self.datadir+"/testcase_EMIN00100_EMAX00300_01.cts.gz"
-
-        file = pu.displaySkyMapsSingleMode(
-                    [img, img], \
-                    smooth = smooth,
-                    fileFormat = fileFormat,
-                    titles = [title+"_1", title+"_2", title+"_3"],
-                    cmap = cmap,
-                    regFiles = regFiles,
-                    regFileColors=regFileColors,
-                    catalogRegions = "2AGL",
-                    catalogRegionsColor = "red",
-                    saveImage=True,
-                    normType="linear")
-
-        assert True == os.path.isfile(file)
-
-
-
-    def test_plot_data_availability(self):
-
-        outputDir = self.currentDirPath.joinpath("output", "test_plot_data_availability")
-        outputDir.mkdir(parents=True, exist_ok=True)
-        os.environ["TEST_LOGS_DIR"] = str(outputDir)
+    @pytest.mark.testlogsdir("utils/test_logs/test_plot_data_availability")
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles(["utils/test_data/test_plot_data_availability/EVT.qfile", "utils/test_data/test_plot_data_availability/EVT.index"])
+    def test_plot_data_availability(self, configObject, logger, testdatafiles):
         
-        config = AgilepyConfig()
-        config.loadBaseConfigurations(self.currentDirPath.joinpath("conf", "test_plot_data_availability.yaml"))
+        pu = PlottingUtils(configObject, logger)
 
-        pu = PlottingUtils(config, self.agilepyLogger)
-
-        dataDir = Path(self.datadir).joinpath("test_plot_data_availability")
-
-        pu.plotDataAvailability(dataDir.joinpath("EVT.qfile"), dataDir.joinpath("EVT.index"), saveImage=True)
-
-        #pu.plotDataAvailability(dataDir.joinpath("LOG.qfile"), dataDir.joinpath("LOG.index"), saveImage=True)
+        pu.plotDataAvailability(testdatafiles[0], testdatafiles[1], saveImage=True)
 
 
 
+    @pytest.mark.testlogsdir("utils/test_logs/test_logger")
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    def test_logger(self, configObject, logger):
 
-    def test_initialize_logger_verboselvl_2(self):
-        sleep(1.0)
-        self.agilepyLogger.reset()
+        singletonLogger = AgilepyLogger()
+        assert singletonLogger.logLevel == logging.DEBUG
+        assert singletonLogger.rootLogsDir == Path(os.path.expandvars("$TEST_LOGS_DIR")).joinpath("logs")
 
-        self.config.loadBaseConfigurations(os.path.join(self.currentDirPath,"conf/agilepyconf_verbose_2.yaml"))
-        
-        logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
+        logger.debug("Test debug message")
+        logger.info("Test info message")
+        logger.warning("Test warning message")
+        logger.critical("Test critical message")
 
-        assert True == logfilePath.is_file()
+        logFile = Path(os.path.join(os.path.expandvars("$TEST_LOGS_DIR"), "logs", "test_logger.log"))
+        assert logFile.exists()
 
-        with open(logfilePath, "r") as f:
+        # assert one log files with 2 lines inside
+        with open(logFile, "r") as f:
             linesNumber = len(f.readlines())
-            assert 1 == linesNumber
+            assert 4 == linesNumber
 
-        self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
-        self.agilepyLogger.info(self, "%s %s", "Info", "message")
-        self.agilepyLogger.warning(self, "%s %s", "Warning", "message")
-        self.agilepyLogger.critical(self, "%s %s", "Critical", "message")
+    @pytest.mark.testlogsdir("utils/test_logs/test_less_verbose_logger")
+    @pytest.mark.loglevel(0)
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    def test_less_verbose_logger(self, configObject, logger):
 
-        with open(logfilePath, "r") as f:
+        singletonLogger = AgilepyLogger()
+        assert singletonLogger.logLevel == logging.WARNING
+        assert singletonLogger.rootLogsDir == Path(os.path.expandvars("$TEST_LOGS_DIR")).joinpath("logs")
+
+        logger.debug("Test debug message")
+        logger.info("Test info message")
+        logger.warning("Test warning message")
+        logger.critical("Test critical message")
+
+        logFile = Path(os.path.join(os.path.expandvars("$TEST_LOGS_DIR"), "logs", "test_less_verbose_logger.log"))
+
+        assert logFile.exists()
+
+        # assert one log files with 2 lines inside
+        with open(logFile, "r") as f:
             linesNumber = len(f.readlines())
-            assert 5 == linesNumber
+            assert 2 == linesNumber
 
-    def test_initialize_logger_verboselvl_1(self):
-        sleep(1.0)
-        self.agilepyLogger.reset()
 
-        self.config.loadBaseConfigurations(os.path.join(self.currentDirPath,"conf/agilepyconf_verbose_1.yaml"))
-
-        logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
-
-        assert True == logfilePath.is_file()
-
-        with open(logfilePath, "r") as f:
-            linesNumber = len(f.readlines())
-            assert 1 == linesNumber
-
-        self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
-        self.agilepyLogger.info(self, "%s %s", "Info", "message")
-        self.agilepyLogger.warning(self, "%s %s", "Warning", "message")
-        self.agilepyLogger.critical(self, "%s %s", "Critical", "message")
-
-        with open(logfilePath, "r") as f:
-            linesNumber = len(f.readlines())
-            assert 5 == linesNumber
-
-    def test_initialize_logger_verboselvl_0(self):
-        sleep(1.0)
-        self.agilepyLogger.reset()
-
-        self.config.loadBaseConfigurations(os.path.join(self.currentDirPath,"conf/agilepyconf_verbose_0.yaml"))
-
-        logfilePath = self.agilepyLogger.initialize(self.config.getOptionValue("outdir"), self.config.getOptionValue("logfilenameprefix"), self.config.getOptionValue("verboselvl"))
-
-        assert True == logfilePath.is_file()
-
-        with open(logfilePath, "r") as f:
-            linesNumber = len(f.readlines())
-            assert 1 == linesNumber
-
-        self.agilepyLogger.debug(self, "%s %s", "Debug", "message")
-        self.agilepyLogger.info(self, "%s %s", "Info", "message")
-        self.agilepyLogger.warning(self, "%s %s", "Warning", "message")
-        self.agilepyLogger.critical(self, "%s %s", "Critical", "message")
-
-        with open(logfilePath, "r") as f:
-            linesNumber = len(f.readlines())
-            assert 5 == linesNumber
-
-    def test_filterAP(self):
-    
-        print(self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap")
-        print(self.currentDirPath)
-        product = AstroUtils.AP_filter(
-            self.datadir+"/E1q1_604800s_emin100_emax10000_r2.ap", 1, 174142800, 447490800, self.currentDirPath)
+    @pytest.mark.testlogsdir("utils/test_logs/test_filterAP")
+    @pytest.mark.testconfig("utils/conf/agilepyconf.yaml")
+    @pytest.mark.testdatafiles(["utils/test_data/E1q1_604800s_emin100_emax10000_r2.ap"])
+    def test_filterAP(self, testdatafiles, logger):
+        product = AstroUtils.AP_filter(testdatafiles.pop(), 1, 174142800, 447490800, "/tmp")
         with open(product, "r") as f:
             linesNumber = len(f.readlines())
             assert 4 == linesNumber
         
-        os.remove(os.path.join(self.currentDirPath, "result.txt"))
-        os.remove(os.path.join(self.currentDirPath, product))
-
     """
     Time conversions
         # https://tools.ssdc.asi.it/conversionTools
@@ -319,7 +236,6 @@ class AgilepyUtilsUT(unittest.TestCase):
         """
 
         # This date would result in "0 days"
-        sec_tolerance = 0.0000001
         fitstime = AstroUtils.time_agile_seconds_to_fits(449582332)
         dt = datetime.strptime(fitstime, '%Y-%m-%dT%H:%M:%S.%f')
 
@@ -361,7 +277,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         line3 = '/ASDC_PROC2/FM3.119_2/EVT/agql2004160008_2004160045.EVT__FM.gz 514080437.000000 514082644.000000 EVT\n'
 
         # I test: 1 line
-        test_file = self.tmpDir.joinpath("test_file1.txt")
+        test_file = Path("/tmp/test_file1.txt")
         with open(test_file, "w") as f:
             f.write(line1)
         (first, last) = Utils._getFirstAndLastLineInFile(test_file)
@@ -369,7 +285,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert last == line1
 
         # II test: 2 lines
-        test_file = self.tmpDir.joinpath("test_file2.txt")
+        test_file = Path("/tmp/test_file2.txt")
         with open(test_file, "w") as f:
             f.write(line1)
             f.write(line2)
@@ -378,7 +294,7 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert last == line2
 
         # III test: 3 lines
-        test_file = self.tmpDir.joinpath("test_file3.txt")
+        test_file = Path("/tmp/test_file3.txt")
         with open(test_file, "w") as f:
             f.write(line1)
             f.write(line2)
@@ -402,6 +318,3 @@ class AgilepyUtilsUT(unittest.TestCase):
         assert lines[4] == "/pippoz/e.gz 50.500000 371995132.000000 EVT"
     """
         
-
-if __name__ == '__main__':
-    unittest.main()

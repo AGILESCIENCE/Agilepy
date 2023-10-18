@@ -53,8 +53,6 @@ The method above will create the following configuration file:
     verboselvl: 2
 
   selection:  
-    emin: 100
-    emax: 10000
     tmin: 54935.0
     tmax: 54936.0
     timetype: MJD
@@ -62,6 +60,7 @@ The method above will create the following configuration file:
     glat: -0.2689
     proj: ARC
     timelist: None
+    irf: H0025
     filtercode: 5
     fovradmin: 0
     fovradmax: 60
@@ -93,8 +92,6 @@ The method above will create the following configuration file:
     isomode: 1
     galcoeff: null
     isocoeff: null
-    emin_sources: 100
-    emax_sources: 10000
     galmode2: 0
     galmode2fit: 0
     isomode2: 0
@@ -170,13 +167,15 @@ The output section collects options related to the output files generation and l
 The *'outdir'* option sets the root directory of the analysis results where all output files are written.
 
 Agilepy use two loggers, one logs messages on the console, the other writes messages on disk.
-The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The Agilepy file logger verbosity is set to 2 by default.
 There are 4 kind of messages based on their importance factor:
 
   - CRITICAL: a message describing a critical problem, something unexpected, preceding a program crash or an Exception raise.
   - WARNING: an indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
   - INFO: confirmation that things are working as expected.
   - DEBUG: detailed information, typically of interest only when diagnosing problems.
+
+The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The Agilepy file logger verbosity is set to 2 by default.
+
 
 .. csv-table::
    :header: "Option", "Description", "Type", "Required", "Default"
@@ -203,8 +202,6 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    :header: "Option", "Description", "Type", "Default", "Required"
    :widths: 20, 100, 20, 20, 20
 
-   "emin", "Energy min in MeV", "int", 100, "no"
-   "emax", "Energy max in MeV", "int", 10000, "no"
    "glat", "Center of the ROI ('*latitude*' or *'b'*)", "float", "null", "yes"
    "glon", "Center of the ROI ('*longitude*' or *'l'*)", "float", "null", "yes"
    "tmin", "Minimum time (in MJD or TT)", "float", "null", "yes"
@@ -215,6 +212,7 @@ The center of the *ROI* (region of interest) is defined by explicit Galactic sky
    | format to generate maps
    | integrated within a time window.
    | If specified, *'tmin'* and *'tmax'* are ignored.", "str", "null", "no"
+   "irf", "The IRF to be used for the analysis.", "str", "H0025", "no"
    "filtercode", "filtercode = 5 select G filtercode = 0 select G+L+S", "int", 5, "no"
    "fovradmin", "fovradmin < fovradmax", "int", 0, "no"
    "fovradmax", "fovradmax > fovradmin (dq = 0 is necessary for setting)", "int", 60, "no"
@@ -386,8 +384,6 @@ following example show which iso/gal coefficients are assigned to which map.
    "isomode", "int", 1, "no",
    "galcoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
    "isocoeff", "set into .maplist if >= 0", "null, float or str", null, "no"
-   "emin_sources", "energy min of the modelfile", "int", 100, "no"
-   "emax_sources", "energy max of the modelfile", "int", 10000, "no"
 
 galcoeff and isocoeff
 ^^^^^^^^^^^^^^^^^^^^^^

@@ -20,9 +20,9 @@ Each line contains a set of maps:
 
 where:
 
- * countsMap, exposureMap and gasMap are file system paths pointing to the corresponding sky maps (see `Sky Maps section<../manual/products.html>`_)   
+ * countsMap, exposureMap and gasMap are file system paths pointing to the corresponding sky maps (see `Sky Maps section <../manual/products.html>`_)   
  * offaxisangle is in degrees;
- * galcoeff and isocoeff are the coefficients for the galactic and isotropic diffuse components. If positive they will be considered fixed (but see `galmode and isomode<manual/configuration_file.html#section-model>`_ section).
+ * galcoeff and isocoeff are the coefficients for the galactic and isotropic diffuse components. If positive they will be considered fixed (but see `galmode and isomode <../manual/configuration_file.html#section-model>`_ section).
 
 AGILE format (text file)
 ========================

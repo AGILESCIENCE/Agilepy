@@ -46,10 +46,9 @@ class Utils:
 
     @staticmethod
     def _expandEnvVar(path):
-        if "$" in path:
+        if "$" in str(path):
             expanded = expandvars(path)
             if expanded == path:
-                print(f"[CompletionStrategies] Environment variable has not been expanded in {expanded}")
                 raise EnvironmentVariableNotExpanded(f"[CompletionStrategies] Environment variable has not been expanded in {expanded}")
             else:
                 return expanded

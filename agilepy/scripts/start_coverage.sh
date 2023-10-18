@@ -1,29 +1,16 @@
 #!/bin/bash
 
-script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+set -e # Exit immediately if a command exits with a non-zero status.
 
-rm -f $script_dir/../.coverage
-
-echo "Script dir: $script_dir"
-
-agilepy_path=$((python "$script_dir/get_agilepy_path.py") 2>&1)
+agilepy_path=$(python3 -c "import agilepy as _; print(_.__path__[0])")
 
 if [ $? -ne 0 ]; then
-  echo "Getting agilepy library path => command failed."
+  printf "\n\33[31mGetting Agilepy installation dir failed ($?) !\33[0m\n"
   exit 126
 else
+  printf "\n\33[32mAgilepy is installed in: $agilepy_path\33[0m\n"
 
-  OS=$(uname -s)
-
-  if [ "$OS" = "Darwin" ]; then
-    echo "OSX detected"
-  else
-    echo "Linux detected"
-  fi
-
-  echo "agilepy_path: $agilepy_path"
-
-  pytest --disable-warnings \
+  python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
@@ -31,7 +18,7 @@ else
          --cov-append \
          "$agilepy_path/testing/unittesting/utils"
 
-  pytest --disable-warnings \
+  python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
@@ -39,20 +26,22 @@ else
          --cov-append \
          "$agilepy_path/testing/unittesting/config"
 
-  pytest --disable-warnings \
+  python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/core"
-  
-  pytest --disable-warnings \
+
+  python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
          --cov-report "xml:$agilepy_path/testing/unittesting/coverage/cov_xml_report" \
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/api"
-  
+
+  printf "\n\33[32mCopying coverage report into $HOME\33[0m\n"
+  cp -r "$agilepy_path/testing/unittesting/coverage/cov_xml_report" "$HOME/cov_xml_report"
 fi

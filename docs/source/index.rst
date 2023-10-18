@@ -37,11 +37,13 @@ The main purpose of the package is to provide an easy to use high-level Python i
   api/engineering_api
   api/astroutils_api
   api/source_api
+  api/advanced_analysis
 
 .. toctree::
   :caption: Science Tools
 
   sciencetools/tools
+  sciencetools/calibration
   sciencetools/mleinput
   sciencetools/mleoutput
 

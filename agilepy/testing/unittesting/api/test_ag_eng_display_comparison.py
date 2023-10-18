@@ -51,6 +51,7 @@ class TestAGEngDisplayComparison:
         currentDirPath = Path(__file__).parent.absolute()
         return currentDirPath.joinpath("data/test_ag_eng_agile_fermi_offaxis_visibility_comparison")
 
+    @pytest.mark.skip(reason="This test needs to access to /ASDC_PROC2/DATA_2/INDEX/LOG.log.index")        
     def test_display_comparison_mjd(self, data_dir, conf):
         t0 = 59861.55346063
         time_windows = [(t0-120/86400, t0+1000/86400)]
@@ -76,7 +77,7 @@ class TestAGEngDisplayComparison:
         ageng = AGEngDisplayComparison(conf)
 
     
-        
+    @pytest.mark.skip(reason="This test needs to access to /ASDC_PROC2/DATA_2/INDEX/LOG.log.index")        
     def test_plot_agile_fermi_comparison_tt(self, data_dir, conf):
         # params for AGEngAgileFermiOffAxisVisibilityComparison()
         t0_mjd = 59861.55346063
