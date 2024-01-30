@@ -19,7 +19,7 @@ The example below use release 1.6.4 (April 2023).
 
 .. code-block::
 
-    export AGILEPY_RELEASE=release-1.6.4
+    export AGILEPY_RELEASE=1.6.4
     docker pull agilescience/agilepy:release-$AGILEPY_RELEASE
 
 
@@ -30,6 +30,7 @@ in a shared machine, pass the `-d` option to duplicate the image instead of over
 .. code-block::
 
     wget https://raw.githubusercontent.com/AGILESCIENCE/Agilepy/master/agilepy/scripts/bootstrap.sh
+    wget https://raw.githubusercontent.com/AGILESCIENCE/Agilepy/master/agilepy/scripts/utilities.sh
     source bootstrap.sh release-$AGILEPY_RELEASE
 
 3. Start the Agilepy container. If you want a shared directory between the host and the container, create a folder in the host machine and use the -v option to mount it in the container as shown below.
@@ -41,18 +42,23 @@ Using the command below you can launch the container and automatically start jup
     mkdir shared_dir
     docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l
     
-.. note:: Jupyter server will listen at localhost:9999, change the port if you want to use a different one. 
-    
-.. note:: If Agilepy is running or a remote machine, you need to setup an ssh tunnel to access the jupyter server: `ssh -L 9999:localhost:9999 <user>@<host>`
-
-You can find the token to access the Jupyter server with:
+Enter inside the container to activate jupyter:
 
 .. code-block::
 
+    docker exec -it [docker container id] /bin/bash
+    source entrypoint.sh 
+
+Check the token from already running jupyter instance 
+.. code-block::
+    
     docker exec -it agilepy-$AGILEPY_RELEASE bash -l -c "jupyter notebook list"
 
 You can omit the "-c" option to enter the container with a bash shell.
 
+.. note:: Jupyter server will listen at localhost:9999, change the port if you want to use a different one. 
+    
+.. note:: If Agilepy is running or a remote machine, you need to setup an ssh tunnel to access the jupyter server: `ssh -L 9999:localhost:9999 <user>@<host>`
 
 Supported platforms
 ^^^^^^^^^^^^^^^^^^^
