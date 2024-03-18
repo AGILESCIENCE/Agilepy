@@ -22,8 +22,14 @@ The example below use release 1.6.4 (April 2023).
     export AGILEPY_RELEASE=1.6.4
     docker pull agilescience/agilepy:release-$AGILEPY_RELEASE
 
+.. code-block::
 
-2. Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. 
+    For Mac users:
+    export AGILEPY_RELEASE=1.6.4
+    docker pull --platform linux/amd64 agilescience/agilepy:release-$AGILEPY_RELEASE
+
+
+2. (Skyp if you have a Mac) Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. 
 The script will change the user ID inside the container to match the ID of your local user. If you want to use the same image for multiple user
 in a shared machine, pass the `-d` option to duplicate the image instead of overwriting it. In the latter case, the username will be appended to the image name.
 
@@ -59,6 +65,11 @@ You can omit the "-c" option to enter the container with a bash shell.
 .. note:: Jupyter server will listen at localhost:9999, change the port if you want to use a different one. 
     
 .. note:: If Agilepy is running or a remote machine, you need to setup an ssh tunnel to access the jupyter server: `ssh -L 9999:localhost:9999 <user>@<host>`
+
+
+
+
+
 
 Supported platforms
 ^^^^^^^^^^^^^^^^^^^
