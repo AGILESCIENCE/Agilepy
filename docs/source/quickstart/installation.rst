@@ -48,6 +48,10 @@ Using the command below you can launch the container and automatically start jup
     mkdir shared_dir
     docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l
     
+    For mac:
+    
+    docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 --platform linux/amd64 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l    
+
 Enter inside the container to activate jupyter:
 
 .. code-block::
