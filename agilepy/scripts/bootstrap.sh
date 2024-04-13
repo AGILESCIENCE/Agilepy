@@ -17,22 +17,22 @@ Help()
    echo 
    echo "Options:"
    echo "  h     Print this Help."
-   echo "  d     Duplicate image. If not provided, the original image will be overwritten. If provided, the username will be appended to the tag and the original image will be kept."
+   echo "  d     Not duplicate image. If provided, the original image will be overwritten. If not provided, the username will be appended to the tag and the original image will be kept."
    echo 
    echo "Arguments:"
    echo "  tag   The tag of the image to be boostrapped."
    echo
 }
 
-export DUPLICATE_IMAGE=false
+export DUPLICATE_IMAGE=true
 
 while getopts ":h:d" option; do
    case $option in
       h) # display Help
          Help
          exit;;
-      d) # duplicate image
-         export DUPLICATE_IMAGE=true
+      d) # not duplicate image
+         export DUPLICATE_IMAGE=false
          ;;
      \?) # incorrect option
          echo "Error: Invalid option"
