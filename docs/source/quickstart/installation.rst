@@ -59,6 +59,8 @@ Enter inside the container to activate jupyter:
     docker exec -it [docker container id] /bin/bash
     source entrypoint.sh 
 
+    nohup jupyter-lab --ip=“*” --port 8888 --no-browser --autoreload --NotebookApp.token='xxx' --notebook-dir=/shared_dir --allow-root > jupyterlab_start.log 2>&1 &
+
 Check the token from already running jupyter instance 
 .. code-block::
     
