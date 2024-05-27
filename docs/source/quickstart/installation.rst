@@ -15,7 +15,7 @@ Installation with Docker
           `docs.docker.com/get-docker <https://docs.docker.com/get-docker/>`_
 
 1. Pull the Agilepy Docker image, using the latest tag available at `agilepy/tags <https://hub.docker.com/r/agilescience/agilepy/tags>`_.
-The example below use release 1.6.4 (April 2023).
+The example below use release 1.6.4.
 
 .. code-block::
 
@@ -45,9 +45,9 @@ Using the command below you can launch the container and automatically start jup
 
 .. code-block::
   
-    mkdir shared_dir
+    mkdir $(pwd)/shared_dir
     docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l
-    
+     
     For mac:
     
     docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 --platform linux/amd64 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l    
@@ -56,10 +56,10 @@ Enter inside the container to activate jupyter:
 
 .. code-block::
 
+    docker ps
     docker exec -it [docker container id] /bin/bash
-    source entrypoint.sh 
 
-    nohup jupyter-lab --ip=“*” --port 8888 --no-browser --autoreload --NotebookApp.token='xxx' --notebook-dir=/shared_dir --allow-root > jupyterlab_start.log 2>&1 &
+    nohup jupyter notebook --ip="*" --port=8888 --no-browser --allow-root --NotebookApp.token='yyy' --notebook-dir=/shared_dir > entrypoint.log &
 
 Check the token from already running jupyter instance 
 .. code-block::
