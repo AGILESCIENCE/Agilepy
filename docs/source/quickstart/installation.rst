@@ -29,38 +29,42 @@ The example below use release 1.6.4.
     docker pull --platform linux/amd64 agilescience/agilepy:release-$AGILEPY_RELEASE
 
 
-2. (Skyp if you have a Mac) Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/master/agilepy/scripts/bootstrap.sh>`_. 
+2. [*Skip if you have a Mac*] Download the `bootstrap.sh <https://github.com/AGILESCIENCE/Agilepy/blob/develop/agilepy/scripts/bootstrap.sh>`_. 
 The script will change the user ID inside the container to match the ID of your local user. If you want to use the same image for multiple user
 in a shared machine, pass the `-d` option to duplicate the image instead of overwriting it. In the latter case, the username will be appended to the image name.
 
 .. code-block::
 
     wget https://raw.githubusercontent.com/AGILESCIENCE/Agilepy/master/agilepy/scripts/bootstrap.sh
-    wget https://raw.githubusercontent.com/AGILESCIENCE/Agilepy/master/agilepy/scripts/utilities.sh
-    source bootstrap.sh release-$AGILEPY_RELEASE
+    chmod +x bootstrap.sh
+    ./bootstrap.sh release-$AGILEPY_RELEASE
 
 3. Start the Agilepy container. If you want a shared directory between the host and the container, create a folder in the host machine and use the -v option to mount it in the container as shown below.
 It is not necessary to create a shared directory, but it's useful for several cases (exporting analysis outside the container, link another dataset etc.).
 Using the command below you can launch the container and automatically start jupyter notebook.
 
+For linux users:
+
 .. code-block::
-  
+
     mkdir $(pwd)/shared_dir
-  
-    For linux:
-  
+
     docker run --name agilepy-${AGILEPY_RELEASE} -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-${AGILEPY_RELEASE}_${USER} bash - l
-     
-    For mac:
+
+For Mac users:
+
+.. code-block::
+
+    mkdir $(pwd)/shared_dir
     
     docker run --name agilepy-$AGILEPY_RELEASE -itd --rm -v $(pwd)/shared_dir:/shared_dir -p 9999:8888 --platform linux/amd64 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw agilescience/agilepy:release-$AGILEPY_RELEASE bash - l    
+
 
 Enter inside the container to activate jupyter:
 
 .. code-block::
 
-    docker ps
-    docker exec -it [docker container id] /bin/bash
+    docker exec -it agilepy-$AGILEPY_RELEASE /bin/bash
 
     nohup jupyter notebook --ip="*" --port=8888 --no-browser --allow-root --NotebookApp.token='yyy' --notebook-dir=/shared_dir > entrypoint.log &
 
@@ -105,16 +109,14 @@ Tested on:
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^
 
-If the isntallation does not work with the instructions above, it is recommended to install Agilepy and its dependencies from scratch.
+If the installation does not work with the instructions above, it is recommended to install Agilepy and its dependencies from scratch.
 The dependencies required by Agilepy are:
 
   - Root 6.26
   - Cfitsio 4.1
   - Zlib
-
-`AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install can be found in the Docker container recipe)
-
-`Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`_
+  - `AGILE's Science Tools <https://github.com/AGILESCIENCE/AGILE-GRID-ScienceTools-Setup/tree/master>`_ (the correct tag to install can be found in the Docker container recipe)
+  - `Agilepy python dependencies <https://github.com/AGILESCIENCE/Agilepy-recipe/blob/master/recipes/docker/base/requirements.txt>`_
 
 
 Uninstalling
