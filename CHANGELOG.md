@@ -1,6 +1,6 @@
 # Changelog
 
-## Release 1.6.4 (not released yet)
+## Release 1.6.4 (Oct 18, 2023, d3c067e)
 * The old Jupyter notebooks have been replaced with JupyterLab (notebook v7)
 * The Docker base image has been refactored. The user inside the container can be set to the user on the host to avoid file permission issues. The Root's python bindings are fixed. The unnecessary virtual environment has been removed. Ruby has been installed. The docker recipies have been moved inside the Agilepy repository. The Science Tools BUILD25b7 have been installed.
 * The documentation has been improved.
