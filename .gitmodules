@@ -1,0 +1,4 @@
+[submodule "agilepy/external_packages/BBrta"]
+	path = agilepy/external_packages/BBrta
+	url = git@github.com:ASTRO-EDU/BBrta.git
+	branch = dev_falco
