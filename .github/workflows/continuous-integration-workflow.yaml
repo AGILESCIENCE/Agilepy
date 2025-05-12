@@ -48,12 +48,12 @@ jobs:
 
   building-testing-plus-codacy:
 
-    name: Build+Test Docker container
+    name: Build + Test + Codacy
 
     runs-on: ubuntu-latest
 
     container: 
-      image: agilescience/agilepy-recipe:BUILD25b6-v3
+      image: agilescience/agilepy-recipe:BUILD26
       options: --user 0
 
     steps:
