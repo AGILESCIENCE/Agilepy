@@ -5,10 +5,12 @@ on:
     branches:
       - develop
       - master
-      - selection_of_response_matrices
-      - deprecation_of_emin_emax
+      - '[0-9]*-*' # Match issue branches, that starts with a number followed by a dash, e.g. 14-my_issue
       - feature-*
-      - 14-read_ratemeters
+  pull_request:    # Triggers workflow when a PR targets the following branches
+    branches:
+      - 'main'
+      - 'develop'
 
 jobs:
 
@@ -22,7 +24,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     container: 
-      image: agilescience/agilepy-recipe:BUILD25b6-v3
+      image: agilescience/agilepy-recipe:BUILD26
       options: --user 0
   
     steps:
@@ -38,50 +40,14 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pip install -r requirements.lock 
-          python3 -m pip install colorama
           python3 -m pip install .
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: start_coverage.sh
-  
-  # building-testing-on-os-matrix:
-  #   name: Build+Test ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: ["macos-10.15"]
-  #       python-version: ["3.8.13"]
-  #   runs-on: ${{matrix.os}}
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - uses: conda-incubator/setup-miniconda@v2
-  #       with:
-  #         auto-update-conda: false
-  #         python-version: ${{ matrix.python-version }}
-  #         environment-file: .github/environment.yml
-  #         activate-environment: agilepydevops
-
-  #     - name: Installing Agilepy
-  #       shell: bash -l {0}
-  #       run: python setup.py develop
-
-  #     - name: Conda info
-  #       shell: bash -l {0}
-  #       run: |
-  #         conda info
-  #         conda list
-  #     - name: Running unit tests and code coverage
-  #       shell: bash -l {0}
-  #       run: |
-  #         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-  #         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-  #         bash $agilepy_path/scripts/start_coverage.sh
 
 
-  building-testing-on-os-centos7:
+  building-testing-plus-codacy:
 
     name: Build+Test Docker container
 
@@ -125,6 +91,40 @@ jobs:
         chmod +x get.sh
         ./get.sh report -r $HOME/cov_xml_report --commit-uuid "$GITHUB_SHA"
     
+    # building-testing-on-os-matrix:
+    #   name: Build+Test ${{ matrix.os }}
+    #   strategy:
+    #     fail-fast: false
+    #     matrix:
+    #       os: ["macos-10.15"]
+    #       python-version: ["3.8.13"]
+    #   runs-on: ${{matrix.os}}
+
+    #   steps:
+    #     - uses: actions/checkout@v3
+
+    #     - uses: conda-incubator/setup-miniconda@v2
+    #       with:
+    #         auto-update-conda: false
+    #         python-version: ${{ matrix.python-version }}
+    #         environment-file: .github/environment.yml
+    #         activate-environment: agilepydevops
+
+    #     - name: Installing Agilepy
+    #       shell: bash -l {0}
+    #       run: python setup.py develop
+
+    #     - name: Conda info
+    #       shell: bash -l {0}
+    #       run: |
+    #         conda info
+    #         conda list
+    #     - name: Running unit tests and code coverage
+    #       shell: bash -l {0}
+    #       run: |
+    #         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+    #         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+    #         bash $agilepy_path/scripts/start_coverage.sh
     
     #- name: Triggering dockerhub for container building
     #  shell: bash -l {0}
