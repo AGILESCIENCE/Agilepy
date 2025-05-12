@@ -10,7 +10,6 @@ on:
   pull_request:    # Triggers workflow when a PR targets the following branches
     branches:
       - 'main'
-      - 'develop'
 
 jobs:
 
@@ -19,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-22.04", "ubuntu-20.04"]
+        os: ["ubuntu-22.04", "ubuntu-24.04"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
@@ -51,7 +50,7 @@ jobs:
 
     name: Build+Test Docker container
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     container: 
       image: agilescience/agilepy-recipe:BUILD25b6-v3
