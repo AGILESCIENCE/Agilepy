@@ -50,7 +50,7 @@ jobs:
 
   building-testing-plus-codacy:
 
-    name: Build + Test + Codacy (${{ matrix.os }})
+    name: Build + Test + Codacy (Ubuntu-latest)
 
     runs-on: ubuntu-latest
 
