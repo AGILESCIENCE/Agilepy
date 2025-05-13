@@ -13,10 +13,8 @@ kaleido
 psutil
 connected-components-3d
 colorama
-
 sphinx
 sphinx_rtd_theme
 sphinx-copybutton
-
 pytest
 pytest-cov

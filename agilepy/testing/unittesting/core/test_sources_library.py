@@ -57,7 +57,7 @@ class TestSourcesLibrary:
                }
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/wrong_ext")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sourceconf.wrongext")
     def test_load_file_with_wrong_extension(self, configObject, logger, testdata):
@@ -68,7 +68,7 @@ class TestSourcesLibrary:
             sl.loadSourcesFromFile(testdata)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/wrong_file")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sourceconf.idontexitst.txt")
     def test_load_wrong_file(self, configObject, logger, testdata):
@@ -80,7 +80,7 @@ class TestSourcesLibrary:
             sl.loadSourcesFromFile(testdata)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/load_cat")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_load_from_catalog(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
@@ -93,7 +93,7 @@ class TestSourcesLibrary:
             sl.loadSourcesFromCatalog("paperino")
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/load_cat_filt_dist")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_load_catalog_from_catalog_filtering_on_distances(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
@@ -114,7 +114,7 @@ class TestSourcesLibrary:
         assert 30 == len(sl.sources)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/load_xml")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     def test_load_sources_from_xml_file(self, configObject, logger, testdata):
@@ -142,7 +142,7 @@ class TestSourcesLibrary:
         assert source.spatialModel.getVal("dist") > 0
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/load_txt")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.txt")
     def test_load_sources_from_txt_file(self, configObject, logger, testdata):
@@ -187,7 +187,7 @@ class TestSourcesLibrary:
             assert fs[i] == TestSourcesLibrary.get_free_params(sl.sources[i])
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/fixflag")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.txt")
     def test_fixflag(self, configObject, logger, testdata):
@@ -204,7 +204,7 @@ class TestSourcesLibrary:
 
         
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/source_file_parsing")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/testcase_2AGLJ0835-4514.source")
     def test_source_file_parsing(self, configObject, logger, testdata):
@@ -223,7 +223,7 @@ class TestSourcesLibrary:
         assert None== res.multiDist["value"]
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/cat_no_scaling")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_load_source_from_catalog_without_scaling(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
@@ -236,7 +236,7 @@ class TestSourcesLibrary:
         assert 6.731115280951456e-08== sources[0].spectrum.getVal("flux")
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/cat_with_scaling")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_load_source_from_catalog_with_scaling(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
@@ -248,7 +248,7 @@ class TestSourcesLibrary:
         assert 6.940938928095228e-07== sources[0].spectrum.getVal("flux")
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/selection_string")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
@@ -277,7 +277,7 @@ class TestSourcesLibrary:
         assert 1 == len(sources)
         
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/selection_lambda")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
@@ -300,7 +300,7 @@ class TestSourcesLibrary:
 
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/free_selection_string")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
@@ -328,7 +328,7 @@ class TestSourcesLibrary:
 
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/free_selection_lambda")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     @pytest.mark.testdatafile2("core/test_data/testcase_2AGLJ2021+3654.source")
@@ -354,7 +354,7 @@ class TestSourcesLibrary:
         assert "index" not in sources[0].getFreeParams()
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/write_xml")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     def test_write_to_file_xml(self, config, configObject, logger, testdata):
@@ -377,7 +377,7 @@ class TestSourcesLibrary:
         assert 2== len(sourcesxml)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/write_txt")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sourcesconf_for_write_to_file_txt.txt")
     def test_write_to_file_txt(self, config, configObject, logger, testdata):
@@ -405,7 +405,7 @@ class TestSourcesLibrary:
         assert "1.19303e-06 78.2375 2.12298 1.75823 3 2 _2AGLJ2021+4029 0 1 3307.63 0 0.5 5.0 20.0 10000.0  0 100"== lines[2].strip()
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/add_source")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")
     def test_add_source(self, config, configObject, logger, testdata):
@@ -463,7 +463,7 @@ class TestSourcesLibrary:
         assert 35.2462913047547== newSource.spatialModel.getVal("dist")
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/convert_xml")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     def test_convert_catalog_to_xml(self, configObject, logger):
         sl = SourcesLibrary(configObject, logger)
@@ -483,7 +483,7 @@ class TestSourcesLibrary:
         assert 175== len(sl.sources)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_sources_library")
+    @pytest.mark.testlogsdir("core/test_logs/test_sources_library/backup_restore")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafile("core/test_data/sources_2.xml")    
     def test_backup_restore(self, config, configObject, logger, testdata):

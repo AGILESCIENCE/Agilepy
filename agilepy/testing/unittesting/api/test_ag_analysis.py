@@ -48,7 +48,8 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_delete_output_directory")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_delete_output_directory(self, logger, config, testdatafiles):
+    @pytest.mark.skipif(os.geteuid() != 0, reason="Test requires root privileges")
+    def test_delete_output_directory(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config, testdatafiles[0])
 
@@ -84,7 +85,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_generate_maps")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_generate_maps(self, logger, config, testdatafiles):
+    def test_generate_maps(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config, testdatafiles[0])
 
@@ -141,7 +142,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_update_gal_iso")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_update_gal_iso(self, logger, config, testdatafiles):        
+    def test_update_gal_iso(self, environ_test_logs_dir, config, testdatafiles):        
 
         ag = AGAnalysis(config, testdatafiles[0])
 
@@ -178,7 +179,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_mle")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_mle(self, logger, config):
+    def test_mle(self, environ_test_logs_dir, config):
 
         ag = AGAnalysis(config)
         ag.setOptions(tmin = 433857532, tmax = 433858532, timetype = "TT", glon = 263.55, glat = -2.78)
@@ -192,7 +193,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_analysis_pipeline")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_analysis_pipeline(self, logger, config, testdatafiles): 
+    def test_analysis_pipeline(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config, testdatafiles[0])
 
@@ -225,7 +226,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_source_dist_updated_after_source_position_update")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_source_dist_updated_after_source_position_update(self, logger, config, testdatafiles): 
+    def test_source_dist_updated_after_source_position_update(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
         ag.setOptions(tmin = 433857532, tmax = 433857542, timetype = "TT", fovbinnumber=1, energybins=[[100,200]], glon = 263.55, glat = -2.78)
@@ -245,7 +246,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_source_dist_updated_after_mle")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_source_dist_updated_after_mle(self, logger, config, testdatafiles): 
+    def test_source_dist_updated_after_mle(self, environ_test_logs_dir, config, testdatafiles): 
     
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -273,7 +274,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_source_flux_updated_after_mle")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_source_flux_updated_after_mle(self, logger, config, testdatafiles): 
+    def test_source_flux_updated_after_mle(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -297,7 +298,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_parse_maplistfile")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_parse_maplistfile(self, logger, config, testdatafiles): 
+    def test_parse_maplistfile(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0])
 
@@ -323,7 +324,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_saving_sky_maps")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_saving_sky_maps(self, logger, config, testdatafiles): 
+    def test_saving_sky_maps(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
         ag.setOptions(tmin = 433857532, tmax = 433857732, timetype = "TT")
@@ -348,7 +349,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_saving_sky_maps_singlemode")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_saving_sky_maps_singlemode(self, logger, config, testdatafiles):
+    def test_saving_sky_maps_singlemode(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
         _ = ag.generateMaps()
@@ -371,7 +372,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_lc")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_lc(self, logger, config, testdatafiles):
+    def test_lc(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -423,7 +424,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_generic_column")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_generic_column(self, logger, config, testdatafiles):
+    def test_generic_column(self, environ_test_logs_dir, config, testdatafiles):
         
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -447,7 +448,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_calc_bkg")
     @pytest.mark.testconfig("api/conf/agilepyconfbkg.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_calc_bkg(self, logger, config, testdatafiles):
+    def test_calc_bkg(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config, testdatafiles[0])
 
@@ -515,7 +516,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_extract_light_curve_data")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt", "api/data/testcase_2AGLJ0835-4514.source"])
-    def test_extract_light_curve_data(self, logger, config, testdatafiles):
+    def test_extract_light_curve_data(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -545,7 +546,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_fix_exponent")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_fix_exponent(self, logger, config, testdatafiles):
+    def test_fix_exponent(self, environ_test_logs_dir, config, testdatafiles):
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -562,7 +563,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_aperture_photometry")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_aperture_photometry(self, logger, config, testdatafiles):    
+    def test_aperture_photometry(self, environ_test_logs_dir, config, testdatafiles):    
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -580,7 +581,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_update_source_parameter_value")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_update_source_parameter_value(self, logger, config, testdatafiles): 
+    def test_update_source_parameter_value(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -605,7 +606,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_multi_update_free_parameters")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_multi_update_free_parameters(self, logger, config, testdatafiles): 
+    def test_multi_update_free_parameters(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -646,7 +647,7 @@ class TestAGAnalysis:
     @pytest.mark.testlogsdir("api/test_logs/test_print_source")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
-    def test_print_source(self, logger, config, testdatafiles): 
+    def test_print_source(self, environ_test_logs_dir, config, testdatafiles): 
 
         ag = AGAnalysis(config,testdatafiles[0] )
 
@@ -658,7 +659,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_write_sources_on_file")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_write_sources_on_file(self, logger, config): 
+    def test_write_sources_on_file(self, environ_test_logs_dir, config): 
 
         ag = AGAnalysis(config)
 
@@ -692,7 +693,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_setOptionTimeMJD")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_setOptionTimeMJD(self, logger, config): 
+    def test_setOptionTimeMJD(self, environ_test_logs_dir, config): 
         
         ag = AGAnalysis(config)
 
@@ -716,7 +717,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_setOptionEnergybin")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_setOptionEnergybin(self, logger, config): 
+    def test_setOptionEnergybin(self, environ_test_logs_dir, config): 
         
         ag = AGAnalysis(config)
 
@@ -753,7 +754,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_setDQ")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_setDQ(self, logger, config):
+    def test_setDQ(self, environ_test_logs_dir, config):
 
         ag = AGAnalysis(config)
 
@@ -780,7 +781,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_fixed_parameters")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_fixed_parameters(self, logger, config):
+    def test_fixed_parameters(self, environ_test_logs_dir, config):
 
         ag = AGAnalysis(config)
 
@@ -814,7 +815,7 @@ class TestAGAnalysis:
 
     @pytest.mark.testlogsdir("api/test_logs/test_get_analysis_dir")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
-    def test_get_analysis_dir(self, logger, config):
+    def test_get_analysis_dir(self, environ_test_logs_dir, config):
             
         ag = AGAnalysis(config)
 
