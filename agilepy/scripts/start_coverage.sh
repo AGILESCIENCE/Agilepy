@@ -10,6 +10,8 @@ if [ $? -ne 0 ]; then
 else
   printf "\n\33[32mAgilepy is installed in: $agilepy_path\33[0m\n"
 
+  printf "\nAgilepy Unit Test: agilepy.utils\n"
+
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
@@ -17,6 +19,8 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/utils"
+
+  printf "\nAgilepy Unit Test: agilepy.config\n"
 
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
@@ -26,6 +30,8 @@ else
          --cov-append \
          "$agilepy_path/testing/unittesting/config"
 
+  printf "\nAgilepy Unit Test: agilepy.core\n"
+
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \
          --cov-report "html:$agilepy_path/testing/unittesting/coverage/cov_html_report" \
@@ -33,6 +39,8 @@ else
          --cov=agilepy \
          --cov-append \
          "$agilepy_path/testing/unittesting/core"
+
+  printf "\nAgilepy Unit Test: agilepy.api\n"
 
   python3 -m pytest -x --disable-warnings -v \
          --cov-config="$agilepy_path/testing/unittesting/coverage/.coveragerc" \

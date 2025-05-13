@@ -74,7 +74,7 @@ class TestSourceModel:
         assert sources[3].get("pos")["value"] == (6.16978, -0.0676943)
 
 
-    @pytest.mark.testlogsdir("core/test_logs/test_parse_source_XML_format")
+    @pytest.mark.testlogsdir("core/test_logs/test_parse_source_TXT_format")
     @pytest.mark.testconfig("core/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["core/test_data/sources.txt"])
     def test_parse_source_TXT_format(self, configObject, logger, testdatafiles):

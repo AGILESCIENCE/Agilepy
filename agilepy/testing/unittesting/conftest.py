@@ -22,15 +22,30 @@ def logger(request):
         loglevel = 2
         pass
 
-    singletonLogger = AgilepyLogger()
     rootLogsPath = Path( __file__ ).absolute().parent.joinpath(testlogsdir)
-    if rootLogsPath.exists():
+    if rootLogsPath.exists() and rootLogsPath.is_dir():
         rmtree(rootLogsPath)
         rootLogsPath.mkdir(exist_ok=True, parents=True)
+    singletonLogger = AgilepyLogger()
     singletonLogger.setLogger(rootLogsPath, loglevel)
     os.environ["TEST_LOGS_DIR"] = str(rootLogsPath)
     yield singletonLogger.getLogger(request.node.name)
     
+@pytest.fixture(scope="function")
+def environ_test_logs_dir(request):
+    """Sets the TEST_LOGS_DIR environment variable for the current test."""
+    
+    marker = request.node.get_closest_marker("testlogsdir")
+    if marker is None:
+        raise ValueError("Missing 'testlogsdir' marker!")
+    testlogsdir = marker.args[0]
+    test_name = request.node.name
+
+    log_root = Path( __file__ ).absolute().parent.joinpath(testlogsdir)
+
+    os.environ["TEST_LOGS_DIR"] = str(log_root)
+
+    yield log_root
 
 
 @pytest.fixture(scope="function")
