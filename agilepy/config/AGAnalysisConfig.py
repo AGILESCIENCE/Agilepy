@@ -74,6 +74,7 @@ class AGAnalysisConfig():
         errors.update( ValidationStrategies._validateDQ(confDict) )
         errors.update(ValidationStrategies._validateDatapath(confDict))
         errors.update(ValidationStrategies._validateIrf(confDict, "selection", "irf"))
+        errors.update(ValidationStrategies._validateDeprecatedOptions(confDict))
 
 
         return errors
