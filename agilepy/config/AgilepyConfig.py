@@ -44,10 +44,7 @@ from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 from agilepy.utils.Observable import Observable
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.core.CustomExceptions import  ConfigurationsNotValidError, \
-                                           OptionNotFoundInConfigFileError, \
-                                           CannotSetNotUpdatableOptionError, \
-                                           AnalysisClassNotSupported
+from agilepy.core.CustomExceptions import  ConfigurationsNotValidError, OptionNotFoundInConfigFileError, CannotSetNotUpdatableOptionError, AnalysisClassNotSupported, DeprecatedOptionError
 
 
 
@@ -135,7 +132,10 @@ class AgilepyConfig(Observable):
 
         self.analysisConfig.completeConfiguration(self.conf)
 
-        self.analysisConfig.validateConfiguration(self.conf)
+        # Validate Analysis Configuration
+        errors = self.analysisConfig.validateConfiguration(self.conf)
+        if errors:
+            raise ConfigurationsNotValidError(f"Errors: {errors}")
 
         self.initialized = True
 
@@ -180,6 +180,11 @@ class AgilepyConfig(Observable):
 
 
     def setOptions(self, validate=True, **kwargs):
+        
+        # Validate Deprecated Options
+        errors = ValidationStrategies._validateDeprecatedOptions(kwargs)
+        if errors:
+            raise DeprecatedOptionError(f"Errors: {errors}")
         
         # Base checks   
         for optionName, optionValue in kwargs.items():
