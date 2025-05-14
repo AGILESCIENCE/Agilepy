@@ -1,13 +1,13 @@
 input:
-  evtfile: "$AGILE/agilepy-test-data/evt_index/agile_proc3_fm3.119_asdc2_EVT.index"
-  logfile: "$AGILE/agilepy-test-data/log_index/agile_proc3_data_asdc2_LOG.log.index"
+  evtfile: $AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index
+  logfile: $AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index
   userestapi: False
   datapath: None
 
 output:
-  outdir: "$AGILE/agilepy-test-data/unittesting-output/utils"
-  filenameprefix: "utils-testcase"
-  logfilenameprefix: "utils-testcase"
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: utils-testcase
+  logfilenameprefix: utils-testcase
   sourcename: source-test
   username: user-test
   verboselvl: 1
@@ -16,7 +16,7 @@ selection:
 
   tmin: 456361778
   tmax: 456537945
-  timetype: "TT"
+  timetype: TT
   glon: 80
   glat: 0
   timelist: None
@@ -30,7 +30,8 @@ selection:
   lonpole: 180
   lpointing: null
   bpointing: null
-  maplistgen: "None"
+  maplistgen: None
+
 
 
 maps:
@@ -51,18 +52,17 @@ maps:
   binsize: 0.2
   offaxisangle: 30
 
+
 model:
   modelfile: null
   galmode: 1
   isomode: 1
   galcoeff: null
   isocoeff: null
-
   galmode2: 0
   galmode2fit: 0
   isomode2: 0
   isomode2fit: 0
-
 
 mle:
   ranal: 10

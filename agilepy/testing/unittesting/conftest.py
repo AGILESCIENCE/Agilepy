@@ -114,12 +114,18 @@ def configObject(request):
 
     script_path = Path( __file__ ).absolute().parent
 
+    # Handle TestConfig Marker
     marker = request.node.get_closest_marker("testconfig")
-
     if marker is None:
         raise ValueError("marker is None! Something wrong passing 'testconfig' to fixture!")
-
     testconfig = marker.args[0]
+    
+    # Handle testlogsdir marker
+    logs_marker = request.node.get_closest_marker("testlogsdir")
+    if logs_marker is not None:
+        testlogsdir = logs_marker.args[0]
+        log_root = script_path.joinpath(testlogsdir)
+        os.environ["TEST_LOGS_DIR"] = str(log_root)
 
     config = AgilepyConfig()
     config.loadBaseConfigurations(script_path.joinpath(testconfig))
