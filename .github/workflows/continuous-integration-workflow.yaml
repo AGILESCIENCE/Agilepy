@@ -14,11 +14,11 @@ on:
 jobs:
 
   building-testing-on-ubuntu-matrix:
-    name: Build+Test ${{ matrix.os }}
+    name: Multi-system Test with root user ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-22.04", "ubuntu-24.04"]
+        os: ["ubuntu-22.04", "ubuntu-24.04", "macos-13", "macos-14", "macos-15", "windows-2019", "windows-2022", "windows-2025"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
@@ -27,9 +27,18 @@ jobs:
       options: --user 0
   
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Debug
         shell: bash -l {0}
@@ -50,18 +59,17 @@ jobs:
 
   building-testing-plus-codacy:
 
-    name: Build + Test + Codacy (Ubuntu-latest)
+    name: Test + Codacy (Ubuntu-latest)
 
     runs-on: ubuntu-latest
 
     container: 
       image: agilescience/agilepy-recipe:BUILD26
-      options: --user 0
 
     steps:
 
     - name: Checking out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
           fetch-depth: 0
 
@@ -80,6 +88,9 @@ jobs:
     - name: Running unit tests and code coverage
       shell: bash -l {0}
       run: start_coverage.sh
+
+    - name: Confirm coverage file exists
+      run: ls -lh $HOME/cov_xml_report || (echo "Coverage file missing!" && exit 1)
 
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
