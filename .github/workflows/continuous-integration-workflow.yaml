@@ -65,6 +65,7 @@ jobs:
 
     container: 
       image: agilescience/agilepy-recipe:BUILD26
+      options: --user 0
 
     steps:
 
