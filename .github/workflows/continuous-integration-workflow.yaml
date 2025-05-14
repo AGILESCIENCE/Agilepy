@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.lock') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
