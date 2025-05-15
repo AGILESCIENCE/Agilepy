@@ -1,6 +1,7 @@
 include README.md
 include agilepy/testing/unittesting/api/data/testcase.maplist4
 include agilepy/testing/unittesting/core/test_data/sourceconf.wrongext
+include agilepy/testing/unittesting/core/test_data/AGILE_datacoverage
 
 recursive-include * *.ap
 recursive-include * *.py
