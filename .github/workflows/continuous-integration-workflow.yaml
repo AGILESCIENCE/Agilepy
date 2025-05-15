@@ -56,6 +56,46 @@ jobs:
         shell: bash -l {0}
         run: start_coverage.sh
 
+
+  testing-rest-api-ssdc-on-ubuntu-matrix:
+    name: Rest API test for SSDC data download ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "ubuntu-24.04"]
+        python-version: ["3.8.13"]
+    runs-on: ${{matrix.os}}
+
+    container: 
+      image: agilescience/agilepy-recipe:BUILD26
+      options: --user 0
+  
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Debug
+        shell: bash -l {0}
+        run: |
+          pwd
+          ls -la
+
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install -r requirements.lock 
+          python3 -m pip install .
+
       - name: Running REST API tests with SSDC data download
         shell: bash -l {0}
         run: start_test_rest_api.sh
