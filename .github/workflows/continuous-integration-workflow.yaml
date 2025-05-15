@@ -166,7 +166,7 @@ jobs:
       run: chmod +x ./docker/build_agilepy.sh && ./docker/build_agilepy.sh BUILD26 ${{ github.ref_name }} latest_ci
 
     - name: Run unit tests inside Docker container
-      run: docker run --rm --name agilepy_ci --entrypoint bash agilescience/agilepy:latest_ci -c "start_coverage.sh"
+      run: docker run --rm --name agilepy_ci --entrypoint bash docker.io/library/agilepy:latest_ci -c "start_coverage.sh"
 
     # Additionally, you can push the Docker image to DockerHub
     # - name: Log in to DockerHub
