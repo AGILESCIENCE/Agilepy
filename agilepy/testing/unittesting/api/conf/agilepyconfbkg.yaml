@@ -8,7 +8,7 @@ output:
   outdir: $TEST_LOGS_DIR
   filenameprefix: testcase
   logfilenameprefix: logtestcase
-  sourcename: vela-unittesting
+  sourcename: vela
   username: unittesting
   verboselvl: 2
 
