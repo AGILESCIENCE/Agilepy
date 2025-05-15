@@ -66,6 +66,10 @@ class ConfigFileOptionTypeError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class DeprecatedOptionError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 class CannotSetHiddenOptionError(Exception):
     def __init__(self, message):
         super().__init__(message)
