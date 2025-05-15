@@ -34,14 +34,21 @@ SCRIPT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pw
 PARENT_DIRECTORY="$(dirname "$SCRIPT_DIRECTORY")"
 
 # Arguments
-BASE_VERSION="$1"
-AGILEPY_RELEASE="$2"
-IMAGE_TAG="$3"
+BASE_VERSION=$1
+AGILEPY_RELEASE=$2
+IMAGE_TAG=$3
+
+echo "docker build --no-cache \
+  -f "$SCRIPT_DIRECTORY"/recipes/agilepy/Dockerfile \
+  --build-arg BASE_VERSION="$BASE_VERSION" \
+  --build-arg AGILEPY_RELEASE="$AGILEPY_RELEASE" \
+  -t agilepy:"$IMAGE_TAG" \
+  $PARENT_DIRECTORY"
 
 # Execution
-docker build \
+docker build --no-cache \
   -f $SCRIPT_DIRECTORY/recipes/agilepy/Dockerfile \
-  --build-arg BASE_VERSION=$BASE_VERSION \
-  --build-arg AGILEPY_RELEASE=$AGILEPY_RELEASE \
+  --build-arg BASE_VERSION="$BASE_VERSION" \
+  --build-arg AGILEPY_RELEASE="$AGILEPY_RELEASE" \
   -t agilepy:$IMAGE_TAG \
   $PARENT_DIRECTORY
