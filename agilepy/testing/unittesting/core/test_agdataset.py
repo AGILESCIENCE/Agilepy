@@ -43,7 +43,7 @@ class TestAGDataset:
     @pytest.mark.ssdc
     @pytest.mark.testlogsdir("core/test_logs/test_download_data")
     @pytest.mark.testconfig("core/conf/test_download_data_config.yaml")
-    @pytest.mark.testdatafiles(["core/test_data/EVT.qfile", "core/test_data/LOG.qfile", "AGILE_test_datacoverage"])
+    @pytest.mark.testdatafiles(["core/test_out/EVT.qfile", "core/test_out/LOG.qfile", "core/test_data/AGILE_test_datacoverage"])
     def test_download_data(self, logger, configObject, testdatafiles):
         """
         To run this test --runrest it needed when calling pytest
