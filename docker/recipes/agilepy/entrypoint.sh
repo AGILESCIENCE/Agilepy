@@ -1,16 +1,40 @@
 #!/bin/bash
-printf "Starting Jupyter Notebook Server...\n"                      > entrypoint.log
-printf "Python3 path: $(which python3) $(python3 --version)\n"      > entrypoint.log
-printf "Jupyter $(jupyter notebook --version)\n"                    > entrypoint.log
-printf "\n\n\n"                                                     > entrypoint.log
 
-# if jupyter server is not running, start it
-if [[ $(jupyter notebook list --json) ]]; then
-    printf "Jupyter Notebook Server is running at: $(jupyter notebook list --json | jq -r '.base_url')\n" > entrypoint.log
+set -e
+
+# Add local bin to PATH
+export PATH="/home/flareadvocate/.local/bin:$PATH"
+
+# Set the log file
+LOG_FILE="entrypoint.log"
+echo "PATH: $PATH"
+echo "Starting Jupyter Notebook Server..."                 | tee -a "$LOG_FILE"
+echo "Python3 path: $(which python3) $(python3 --version)" | tee -a "$LOG_FILE"
+echo "Python3 path: $(which jupyter)"                      | tee -a "$LOG_FILE"
+echo "Jupyter $(jupyter notebook --version)"               | tee -a "$LOG_FILE"
+echo ""                                                    | tee -a "$LOG_FILE"
+
+# Check for running Jupyter server
+RUNNING=$(jupyter notebook list 2>/dev/null | grep -v "Currently running servers:" || true)
+
+if [[ -n "$RUNNING" ]]; then
+    echo "An existing Jupyter server is already running:" | tee -a "$LOG_FILE"
+    echo "$RUNNING" | tee -a "$LOG_FILE"
 else
-    printf "Starting Jupyter Notebook Server...\n" > entrypoint.log
-    nohup jupyter notebook --ip="*" --port=8888 --no-browser --allow-root --notebook-dir=/shared_dir > entrypoint.log &
+    echo "No existing Jupyter server found. Starting a new one..." | tee -a "$LOG_FILE"
+    jupyter notebook --ip="*" --port=8888 --no-browser --allow-root --notebook-dir=/shared_dir 2>&1 | tee -a "$LOG_FILE" &
+    echo $! > /tmp/jupyter.pid
+    echo "Jupyter server started with PID $(cat /tmp/jupyter.pid)" | tee -a "$LOG_FILE"
 fi
 
-cat entrypoint.log
-tail -f /dev/null
+cat $LOG_FILE
+echo ""
+clear
+
+# Now keep the container alive by running the passed command or just a shell if none provided
+if [[ $# -gt 0 ]]; then
+    exec "$@"
+else
+    # fallback: keep container alive with a tail (or you can use `bash` or another process)
+    tail -f /dev/null
+fi
