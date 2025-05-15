@@ -165,8 +165,14 @@ jobs:
     - name: Build Docker image
       run: chmod +x ./docker/build_agilepy.sh && ./docker/build_agilepy.sh BUILD26 ${{ github.ref_name }} latest_ci
 
+    - name: Run python3 import agilepy inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
+
     - name: Run unit tests inside Docker container
-      run: docker run --rm --name agilepy_ci --entrypoint bash docker.io/library/agilepy:latest_ci -c "source ~/.bashrc && start_coverage.sh"
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "source ~/.bashrc && start_coverage.sh"
+    
+    - name: Run REST API unit tests inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "source ~/.bashrc && start_test_rest_api.sh"
 
     # Additionally, you can push the Docker image to DockerHub
     # - name: Log in to DockerHub
