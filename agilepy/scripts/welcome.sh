@@ -12,3 +12,5 @@ Welcome to...
 
 the Python Analysis Framework for the AGILE space telescope.
 """
+
+echo ""

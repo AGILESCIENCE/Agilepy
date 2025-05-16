@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-docker build --build-arg SOURCE_BRANCH_REPO=${SOURCE_BRANCH} -f ${DOCKERFILE_PATH} -t ${IMAGE_NAME} .

@@ -43,6 +43,7 @@ class TestAGRest():
     """
     @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_gridfiles","ssdc")
+    @pytest.mark.testlogsdir("utils/test_logs/test_gridfiles")
     def test_gridfiles(self, logger, gettmpdir):
 
         """
@@ -51,11 +52,11 @@ class TestAGRest():
 
         agrest = AGRest(logger)
 
-        tmin = 58051
-        tmax = 58055
+        tmin = 58051 # 2017-10-25 00:00:00.000
+        tmax = 58055 # 2017-10-29 00:00:00.000
 
-        outfile = agrest.gridFiles(tmin, tmax)
         sleep(3) # this sleep is to avoid too many requests ban
+        outfile = agrest.gridFiles(tmin, tmax)
 
         filepath = Path(outfile)
 
@@ -69,6 +70,7 @@ class TestAGRest():
 
     @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_gridList")
+    @pytest.mark.testlogsdir("utils/test_logs/test_gridlist")
     def test_gridList(self, logger, gettmpdir):
 
 
@@ -78,48 +80,43 @@ class TestAGRest():
 
         agrest = AGRest(logger)
 
-        tmin = 58051
-        tmax = 58072
+        # Test data is available
+        sleep(3) # this sleep is to avoid too many requests ban
+        tmin = 58051 # 2017-10-25 00:00:00.000
+        tmax = 58072 # 2017-11-15 00:00:00.000
         
         gridlist = agrest.gridList(tmin, tmax)
-        sleep(3) # this sleep is to avoid too many requests ban
-
         assert len(gridlist) == 24
 
-        tmax = 58200
+        # Test partially missing data
+        sleep(3) # this sleep is to avoid too many requests ban
+        tmax = 59030 # 2020-06-30 00:00:00.000
 
         with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
         
+        # Test Missing Data
         sleep(3) # this sleep is to avoid too many requests ban
 
-        tmin = 59549
-        tmax = 59569
+        tmin = 59062 # 2020-08-10T00:00:00.000
+        tmax = 59077 # 2020-08-16 00:00:00.000
 
         with pytest.raises(SSDCRestErrorDownload):
             gridlist = agrest.gridList(tmin, tmax)
         
-        sleep(3) # this sleep is to avoid too many requests ban
 
     @pytest.mark.ssdc
     @pytest.mark.testdir("utils", "test_datacoverage")
+    @pytest.mark.testlogsdir("utils/test_logs/test_datacoverage")
     def test_datacoverage(self, logger, gettmpdir):
 
         """
         To run this test --runrest it needed when calling pytest
         """
-
+        sleep(3) # this sleep is to avoid too many requests ban
         agrest = AGRest(logger)
 
         tmin, tmax = agrest.get_coverage()
 
-        sleep(3) # this sleep is to avoid too many requests ban
-
-        print(tmin, tmax)
-
         assert tmin == "2007-12-01T12:00:00"
-
-
-
-        
-        
+        assert tmax == "2024-01-15T12:00:00"

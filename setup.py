@@ -16,7 +16,8 @@ setup( name='agilepy',
        packages=find_packages(),
        package_dir={ 'agilepy': 'agilepy' },
        scripts=[
-          'agilepy/scripts/start_coverage.sh'
+          'agilepy/scripts/start_coverage.sh',
+          'agilepy/scripts/start_test_rest_api.sh'
        ],
        entry_points=entry_points,
        include_package_data=True,

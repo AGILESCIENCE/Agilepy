@@ -421,7 +421,7 @@ class TestAGAnalysis:
 
         ag.destroy()"""
 
-    @pytest.mark.testlogsdir("api/test_logs/test_generic_column")
+    @pytest.mark.testlogsdir("api/test_logs/test_gc")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])
     def test_generic_column(self, environ_test_logs_dir, config, testdatafiles):
@@ -559,7 +559,7 @@ class TestAGAnalysis:
 
         ag.destroy()
 
-    @pytest.mark.skip("Fails on MACOS")
+    #@pytest.mark.skip("Fails on MACOS")
     @pytest.mark.testlogsdir("api/test_logs/test_aperture_photometry")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])

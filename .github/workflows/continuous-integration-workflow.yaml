@@ -13,8 +13,8 @@ on:
 
 jobs:
 
-  building-testing-on-ubuntu-matrix:
-    name: Build+Test ${{ matrix.os }}
+  testing-on-ubuntu-matrix:
+    name: Ubuntu multi-version test ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,9 +27,18 @@ jobs:
       options: --user 0
   
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Debug
         shell: bash -l {0}
@@ -48,9 +57,53 @@ jobs:
         run: start_coverage.sh
 
 
-  building-testing-plus-codacy:
+  testing-rest-api-ssdc-on-ubuntu-matrix:
+    name: Rest API test for SSDC data download ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "ubuntu-24.04"]
+        python-version: ["3.8.13"]
+    runs-on: ${{matrix.os}}
 
-    name: Build + Test + Codacy (Ubuntu-latest)
+    container: 
+      image: agilescience/agilepy-recipe:BUILD26
+      options: --user 0
+  
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Debug
+        shell: bash -l {0}
+        run: |
+          pwd
+          ls -la
+
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install -r requirements.lock 
+          python3 -m pip install .
+
+      - name: Running REST API tests with SSDC data download
+        shell: bash -l {0}
+        run: start_test_rest_api.sh
+
+
+  testing-plus-codacy:
+
+    name: Test + Codacy (Ubuntu-latest)
 
     runs-on: ubuntu-latest
 
@@ -61,7 +114,7 @@ jobs:
     steps:
 
     - name: Checking out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
           fetch-depth: 0
 
@@ -81,6 +134,9 @@ jobs:
       shell: bash -l {0}
       run: start_coverage.sh
 
+    - name: Confirm coverage file exists
+      run: ls -lh $HOME/cov_xml_report || (echo "Coverage file missing!" && exit 1)
+
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
       env:
@@ -92,6 +148,43 @@ jobs:
         curl -Ls https://coverage.codacy.com/get.sh -o get.sh
         chmod +x get.sh
         ./get.sh report -r $HOME/cov_xml_report --commit-uuid "$GITHUB_SHA"
+    
+    
+    
+  build-agilepy-docker-and-test:
+    name: Build Docker image and run tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: chmod +x ./docker/build_agilepy.sh && ./docker/build_agilepy.sh BUILD26 ${{ github.ref_name }} latest_ci
+
+    - name: Run python3 import agilepy inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
+
+    - name: Run unit tests inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "source ~/.bashrc && start_coverage.sh"
+    
+    - name: Run REST API unit tests inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash docker.io/library/agilepy:latest_ci -c "source ~/.bashrc && start_test_rest_api.sh"
+
+    # Additionally, you can push the Docker image to DockerHub
+    # - name: Log in to DockerHub
+    #   uses: docker/login-action@v2
+    #   with:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+    # - name: Push Docker image
+    #   run: docker push myusername/myimage:latest
+    
+    
     
     # building-testing-on-os-matrix:
     #   name: Build+Test ${{ matrix.os }}
