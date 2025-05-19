@@ -47,6 +47,9 @@ class AGRest:
 
         response = self.http.get(api_url)
 
+        if response.status_code != 200:
+            raise SSDCRestErrorDownload(f"HTTP error. Failed to fetch data from SSDC: {response.status_code} - {response.text}")
+
         json_data = json.loads(response.text)
 
         if json_data["Response"]["statusCode"] != "OK":
@@ -90,6 +93,9 @@ class AGRest:
         
         response = self.http.get(api_url)
 
+        if response.status_code != 200:
+            raise SSDCRestErrorDownload(f"HTTP error. Failed to fetch data from SSDC: {response.status_code} - {response.text}")
+
         json_data = json.loads(response.text)
 
         end = time() - start
@@ -130,6 +136,9 @@ class AGRest:
         start = time() 
 
         response = self.http.get(api_url, stream=True)
+
+        if response.status_code != 200:
+            raise SSDCRestErrorDownload(f"HTTP error. Failed to fetch data from SSDC: {response.status_code} - {response.text}")
 
         outpath = f"/tmp/agile_{str(uuid.uuid4())}.tar.gz"
         with open(outpath, "wb") as f:

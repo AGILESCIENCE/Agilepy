@@ -15,8 +15,8 @@ Change the BUILD tags of AGILE GRID and AGILE MCAL software
 
 
 ```
-vi recipes/docker/base/Dockerfile
-cd recipes/docker/base
+vi recipes/base/Dockerfile
+cd recipes/base
 docker build --tag agilescience/agilepy-recipe:<tagname> .
 docker login
 docker push agilescience/agilepy-recipe:<tagname>
@@ -34,14 +34,21 @@ pip install pip-tools
 If you want to update a package, regenerate the .lock file using the `--upgrade-package PACKAGE` option.
 
 ### Agilepy image
-Add to the base image a specific release of Agilepy and push it to the DockerHub. [Agilepy releases here](https://github.com/AGILESCIENCE/Agilepy/tags)
+Add to the base image a specific release of Agilepy and push it to the DockerHub.
+We provide a `build_agilepy.sh` script to wrap the commands necessary to build the `agilescience/agilepy` image.
+Its arguments are:
+    - `BASE VERSION`: *tag* of the `agilescience/agilepy-recipe` base image to be used (e.g., `BUILD26`, [check available tags here](https://hub.docker.com/r/agilescience/agilepy-recipe/tags)).
+    - `AGILEPY_RELEASE`: tag, branch or commit of the `Agilepy` GitHub repository to be used to install `Agilepy` (e.g., `master`, `1.6.5`).
+    The Dockerfile performs `git checkout AGILEPY_RELEASE` and install the code from the specified commit.
+    - `IMAGE_TAG`: tag of the `agilescience/agilepy` image that will be created.
 
+Example of deployment (build plus push on DockerHub)
 ```
-cd recipes/docker/agilepy
-docker build --build-arg BASE_VERSION=<base-version> --build-arg AGILEPY_RELEASE=<agilepy-release> --tag agilescience/agilepy:release-<agilepy-release> .
+./build_agilepy.sh <BASE_VERSION> <AGILEPY_RELEASE> <IMAGE_TAG>
 docker login
-docker push agilescience/agilepy:<agilepy-release>
+docker push agilescience/agilepy:<IMAGE_TAG>
 ```
+[Agilepy releases here](https://github.com/AGILESCIENCE/Agilepy/tags)
 
 
 ## Building the conda packages (deprecated)

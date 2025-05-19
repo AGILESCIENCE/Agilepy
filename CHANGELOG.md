@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 1.6.5 (May 20, 2025)
+* [#41](https://github.com/AGILESCIENCE/Agilepy/issues/41): Documentation update on installation procedures.
+* [#48](https://github.com/AGILESCIENCE/Agilepy/issues/48): Fix a bug in the `entrypoint.sh` script for `agilepy` container that caused it to crash.
+* [#46](https://github.com/AGILESCIENCE/Agilepy/issues/46): Implement `agilepy/scripts/start_test_rest_api.sh` to test the REST API with data download from SSDC, and use it in CI pipelines.
+* [#37](https://github.com/AGILESCIENCE/Agilepy/issues/37): Introduce a CI pipeline that builds the `agilepy` image, runs the container and performs unit tests.
+* [#44](https://github.com/AGILESCIENCE/Agilepy/issues/44): Fix CI pipelines to use `agilepy-recipe:BUILD26` instead of `BUILD25b6-v3`. Fix log directories so that tests can be executed without needing the root user.
+* [#38](https://github.com/AGILESCIENCE/Agilepy/issues/38): Introduce a "Deprecated Option" Error to be thrown when the user tries to use "emin" and "emax" parameters for the AGAnalysis class. 
+* Bug fix: the code to download data with the REST API used to crash due to a misplaced logging instruction.
+
 ## Release 1.6.4 (Oct 18, 2023, d3c067e)
 * The old Jupyter notebooks have been replaced with JupyterLab (notebook v7)
 * The Docker base image has been refactored. The user inside the container can be set to the user on the host to avoid file permission issues. The Root's python bindings are fixed. The unnecessary virtual environment has been removed. Ruby has been installed. The docker recipies have been moved inside the Agilepy repository. The Science Tools BUILD25b7 have been installed.
@@ -35,10 +44,10 @@
 * (\#347) Handling -nan parameter in multi tool
 New anaconda recipes and docker container, environment and dependencies updated
 
-## Release 1.5.1 (03/03/22)
+## Release 1.5.1 (March 3, 2022)
 * Minor bugfixes and doc updated
 
-## Release 1.5.0 (24/02/22)
+## Release 1.5.0 (February 24, 2022)
 * (\#287) New Feature: automatic download of the AGILE public data using a REST API directly from SSDC!
 * (\#234) Internal refactoring of Source class, new set/get interface for Source class. Docs updated.
 * (\#291) Codacy coverage fixed
@@ -47,19 +56,19 @@ New anaconda recipes and docker container, environment and dependencies updated
 * (\#303) AG_spotfinder tool added
 * Various bugfixes and improvements
 
-## Release 1.4.2 (26/05/21)
+## Release 1.4.2 (May 26, 2021)
 * Minor hotfixes and docs updated
 
-## Release 1.4.1 (26/04/21)
+## Release 1.4.1 (April 26, 2021)
 * minor bugfixes and docs updated
 
-##  Release 1.4.0 (22/04/21)
+##  Release 1.4.0 (April 22, 2021)
 * (\#234) Added new installation method with docker containers
 * (\#267) Added several columns into lightcurvedata txt
-* (\#272  Updated method for displaying columns of lightcurve data
+* (\#272) Updated method for displaying columns of lightcurve data
 * Various bugfixes and improvements
 
-##  Release 1.3.0 - 29/03/21
+##  Release 1.3.0 (March 29, 2021)
 * (\#133) New normalization functions in displaymaps
 * (\#196) Notebooks have their own documentation section
 * (\#201) The confFilePath parameter of the getConfiguration(..) method now supports environment variables.
@@ -77,7 +86,7 @@ New anaconda recipes and docker container, environment and dependencies updated
 * (\#265) New parameter for plotting FERMI's lightcurve
 * (anaconda package update) The installation time of Agilepy has been reduced a lot.
 
-## Release 1.2.0 - 10/12/20
+## Release 1.2.0 (December 10, 2020)
 * (\#154) The method displayCtsSkyMaps() won't throw an error anymore in case of two maps to be drawn with singleMode=True.
 * (\#152) The setOptions() call to increment the number of energy bins while galcoeff and isocoeff are equal = null  won't throw an error anymore.
 * (\#161, \#165, \#166) Documentation updated.
@@ -92,7 +101,7 @@ New anaconda recipes and docker container, environment and dependencies updated
 * (\#189) New feature to display INT maps
 * (\#191) New feature wavelet display
 
-## Release 1.1.1 - 28/03/20
+## Release 1.1.1 (March 28, 2020)
 * (\#151) The method getConfiguration() accepts also "evtfile" and "logfile" and it raises an Exception if those files are not compabile with "tmin" and "tmax".
 * The flare advocate template notebook is moved under the analysis_notebook folder.  
 * (\#150) Fixed API documentation build error.

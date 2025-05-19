@@ -42,7 +42,7 @@ echo "docker build --no-cache \
   -f "$SCRIPT_DIRECTORY"/recipes/agilepy/Dockerfile \
   --build-arg BASE_VERSION="$BASE_VERSION" \
   --build-arg AGILEPY_RELEASE="$AGILEPY_RELEASE" \
-  -t agilepy:"$IMAGE_TAG" \
+  -t agilescience/agilepy:"$IMAGE_TAG" \
   $PARENT_DIRECTORY"
 
 # Execution
@@ -50,5 +50,5 @@ docker build --no-cache \
   -f $SCRIPT_DIRECTORY/recipes/agilepy/Dockerfile \
   --build-arg BASE_VERSION="$BASE_VERSION" \
   --build-arg AGILEPY_RELEASE="$AGILEPY_RELEASE" \
-  -t agilepy:$IMAGE_TAG \
+  -t agilescience/agilepy:$IMAGE_TAG \
   $PARENT_DIRECTORY
