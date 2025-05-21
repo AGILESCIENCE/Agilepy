@@ -5,28 +5,40 @@ on:
     branches:
       - develop
       - master
-      - selection_of_response_matrices
-      - deprecation_of_emin_emax
+      - '[0-9]*-*' # Match issue branches, that starts with a number followed by a dash, e.g. 14-my_issue
       - feature-*
-      - 14-read_ratemeters
+  pull_request:    # Triggers workflow when a PR targets the following branches
+    branches:
+      - 'main'
 
 jobs:
 
-  building-testing-on-ubuntu-matrix:
-    name: Build+Test ${{ matrix.os }}
+  testing-on-ubuntu-matrix:
+    name: Ubuntu multi-version test ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-22.04", "ubuntu-20.04"]
+        os: ["ubuntu-22.04", "ubuntu-24.04"]
         python-version: ["3.8.13"]
     runs-on: ${{matrix.os}}
 
     container: 
-      image: agilescience/agilepy-recipe:BUILD25b6-v3
+      image: agilescience/agilepy-recipe:BUILD26
       options: --user 0
   
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Debug
         shell: bash -l {0}
@@ -38,63 +50,73 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pip install -r requirements.lock 
-          python3 -m pip install colorama
           python3 -m pip install .
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: start_coverage.sh
-  
-  # building-testing-on-os-matrix:
-  #   name: Build+Test ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: ["macos-10.15"]
-  #       python-version: ["3.8.13"]
-  #   runs-on: ${{matrix.os}}
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - uses: conda-incubator/setup-miniconda@v2
-  #       with:
-  #         auto-update-conda: false
-  #         python-version: ${{ matrix.python-version }}
-  #         environment-file: .github/environment.yml
-  #         activate-environment: agilepydevops
-
-  #     - name: Installing Agilepy
-  #       shell: bash -l {0}
-  #       run: python setup.py develop
-
-  #     - name: Conda info
-  #       shell: bash -l {0}
-  #       run: |
-  #         conda info
-  #         conda list
-  #     - name: Running unit tests and code coverage
-  #       shell: bash -l {0}
-  #       run: |
-  #         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
-  #         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
-  #         bash $agilepy_path/scripts/start_coverage.sh
 
 
-  building-testing-on-os-centos7:
-
-    name: Build+Test Docker container
-
-    runs-on: ubuntu-20.04
+  testing-rest-api-ssdc-on-ubuntu-matrix:
+    name: Rest API test for SSDC data download ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "ubuntu-24.04"]
+        python-version: ["3.8.13"]
+    runs-on: ${{matrix.os}}
 
     container: 
-      image: agilescience/agilepy-recipe:BUILD25b6-v3
+      image: agilescience/agilepy-recipe:BUILD26
+      options: --user 0
+  
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Cache dependencies to speed up future pipelines. Each job has its own cache
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Debug
+        shell: bash -l {0}
+        run: |
+          pwd
+          ls -la
+
+      - name: Installing Agilepy
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install -r requirements.lock 
+          python3 -m pip install .
+
+      - name: Running REST API tests with SSDC data download
+        shell: bash -l {0}
+        run: start_test_rest_api.sh
+
+
+  testing-plus-codacy:
+
+    name: Test + Codacy (Ubuntu-latest)
+
+    runs-on: ubuntu-latest
+
+    container: 
+      image: agilescience/agilepy-recipe:BUILD26
       options: --user 0
 
     steps:
 
     - name: Checking out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
 
     - name: Debug
       shell: bash -l {0}
@@ -106,12 +128,14 @@ jobs:
       shell: bash -l {0}
       run: |
         python3 -m pip install -r requirements.lock
-        python3 -m pip install colorama
         python3 -m pip install .
 
     - name: Running unit tests and code coverage
       shell: bash -l {0}
       run: start_coverage.sh
+
+    - name: Confirm coverage file exists
+      run: ls -lh $HOME/cov_xml_report || (echo "Coverage file missing!" && exit 1)
 
     - name: Uploading coverage report to Codacy
       shell: bash -l {0}
@@ -125,6 +149,77 @@ jobs:
         chmod +x get.sh
         ./get.sh report -r $HOME/cov_xml_report --commit-uuid "$GITHUB_SHA"
     
+    
+    
+  build-agilepy-docker-and-test:
+    name: Build Docker image and run tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: chmod +x ./docker/build_agilepy.sh && ./docker/build_agilepy.sh BUILD26 ${{ github.ref_name }} latest_ci
+
+    - name: Run python3 import agilepy inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash agilescience/agilepy:latest_ci -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
+
+    - name: Run unit tests inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash agilescience/agilepy:latest_ci -c "source ~/.bashrc && start_coverage.sh"
+    
+    - name: Run REST API unit tests inside Docker container
+      run: docker run --rm --name agilepy_ci --network host --entrypoint bash agilescience/agilepy:latest_ci -c "source ~/.bashrc && start_test_rest_api.sh"
+
+    # Additionally, you can push the Docker image to DockerHub
+    # - name: Log in to DockerHub
+    #   uses: docker/login-action@v2
+    #   with:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+    # - name: Push Docker image
+    #   run: docker push myusername/myimage:latest
+    
+    
+    
+    # building-testing-on-os-matrix:
+    #   name: Build+Test ${{ matrix.os }}
+    #   strategy:
+    #     fail-fast: false
+    #     matrix:
+    #       os: ["macos-10.15"]
+    #       python-version: ["3.8.13"]
+    #   runs-on: ${{matrix.os}}
+
+    #   steps:
+    #     - uses: actions/checkout@v3
+
+    #     - uses: conda-incubator/setup-miniconda@v2
+    #       with:
+    #         auto-update-conda: false
+    #         python-version: ${{ matrix.python-version }}
+    #         environment-file: .github/environment.yml
+    #         activate-environment: agilepydevops
+
+    #     - name: Installing Agilepy
+    #       shell: bash -l {0}
+    #       run: python setup.py develop
+
+    #     - name: Conda info
+    #       shell: bash -l {0}
+    #       run: |
+    #         conda info
+    #         conda list
+    #     - name: Running unit tests and code coverage
+    #       shell: bash -l {0}
+    #       run: |
+    #         printf "import pkg_resources \npath = pkg_resources.require('agilepy')[0].location \nprint(path+'/agilepy')" > get_agilepy_installation_folder.py
+    #         agilepy_path=$((python get_agilepy_installation_folder.py) 2>&1)
+    #         bash $agilepy_path/scripts/start_coverage.sh
     
     #- name: Triggering dockerhub for container building
     #  shell: bash -l {0}

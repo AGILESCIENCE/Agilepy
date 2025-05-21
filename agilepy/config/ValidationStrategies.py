@@ -33,7 +33,7 @@ from agilepy.core.Parameters import Parameters
 
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.core.CustomExceptions import ConfigFileOptionTypeError
+from agilepy.core.CustomExceptions import ConfigFileOptionTypeError, DeprecatedOptionError
 
 class ValidationStrategies:
     """
@@ -347,3 +347,36 @@ class ValidationStrategies:
             errors["selection/irf"] = f"irf = {confDict[section][option]} -> invalid value. Possible values {Parameters.getSupportedIRFs()}" 
 
         return errors    
+
+
+    @staticmethod
+    def _validateDeprecatedOptions(confDict, removed_options=None, parent_key=''):
+        """Check if an option of the configuration is in a list of removed options.
+
+        Args:
+            confDict (dict): Configuration Dictionary.
+            removed_options (list, optional): List of removed options. Defaults to None.
+            parent_key (str, optional): _description_. Defaults to ''.
+
+        Raises:
+            DeprecatedOptionError (agilepy.core.CustomException.DeprecatedOptionError): Option was deprecated and is now removed.
+        """
+        errors = {}
+        
+        # List the deprecated options, now removed
+        if removed_options is None:
+            removed_options = ['emin', 'emax', 'min', 'max']
+
+        for key, value in confDict.items():
+            full_key = f"{parent_key}/{key}" if parent_key else key
+
+            if key in removed_options:
+                errors[full_key]=f"The configuration option \'{full_key}\' has been removed and is no longer supported."
+                #raise DeprecatedOptionError(f"The configuration option \'{full_key}\' has been removed and is no longer supported.")
+
+            # Call recursively for nested keys
+            if isinstance(value, dict):
+                errors.update(ValidationStrategies._validateDeprecatedOptions(value, removed_options, full_key))
+                
+        return errors
+

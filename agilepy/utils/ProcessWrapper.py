@@ -124,8 +124,8 @@ class ProcessWrapper(ABC):
 
 
         # starting the tool
-        self.logger.debug(f"Executing:\n\n {command}")
         command = self.exeName + " " + " ".join(map(str, self.args))
+        self.logger.debug(f"Executing:\n\n {command}")
 
         toolstdout = self.executeCommand(command)
 

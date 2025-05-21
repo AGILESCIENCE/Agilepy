@@ -33,12 +33,7 @@ import unittest
 from pathlib import Path
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, \
-                                          ConfigFileOptionTypeError, \
-                                          CannotSetHiddenOptionError, \
-                                          CannotSetNotUpdatableOptionError, \
-                                          ConfigurationsNotValidError, \
-                                          OptionNameNotSupportedError
+from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, ConfigFileOptionTypeError, CannotSetHiddenOptionError, CannotSetNotUpdatableOptionError, ConfigurationsNotValidError, OptionNameNotSupportedError, DeprecatedOptionError
 
 
 class AgilepyConfigUT(unittest.TestCase):
@@ -129,6 +124,18 @@ class AgilepyConfigUT(unittest.TestCase):
         self.assertRaises(ConfigurationsNotValidError,
                           self.config.setOptions, fluxcorrection=25)
 
+        # Test deprecated options
+        self.assertRaises(DeprecatedOptionError, self.config.setOptions, emin=100)
+
+    def test_validation_wrong_AGAnalysis(self):
+        """Test that reading a not valid configuration file raises an error."""
+
+        self.config = AgilepyConfig()
+        conf_path = os.path.join(self.currentDirPath,"conf/conf_notvalid.yaml")
+        self.config.loadBaseConfigurations(conf_path)
+        
+        with self.assertRaises(ConfigurationsNotValidError):
+            self.config.loadConfigurationsForClass("AGAnalysis")
 
     def test_energybins(self):
 
