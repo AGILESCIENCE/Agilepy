@@ -38,6 +38,7 @@ from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
 from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
 from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
 from agilepy.config.AGAnalysisWaveletConfig import AGAnalysisWaveletConfig
+from agilepy.config.AGBayesianBlocksConfig import AGBayesianBlocksConfig
 from agilepy.config.AGRatemetersConfig import AGRatemetersConfig
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
@@ -70,6 +71,7 @@ class AgilepyConfig(Observable):
 
 
     def loadBaseConfigurations(self, configurationFilePath):
+        """Check the configuration arguments to all agilepy classes."""
 
         user_conf = AgilepyConfig._loadFromYaml(configurationFilePath)
         
@@ -121,6 +123,10 @@ class AgilepyConfig(Observable):
             
             self.analysisConfig = AGAnalysisWaveletConfig()
             
+        elif className == "AGBayesianBlocks":
+            
+            self.analysisConfig = AGBayesianBlocksConfig()
+            
         elif className == "AGRatemeters":
             
             self.analysisConfig = AGRatemetersConfig()
@@ -128,11 +134,9 @@ class AgilepyConfig(Observable):
         else:
             raise AnalysisClassNotSupported("The class: {} is not supported".format(className))
 
+        # Configuration Validation and Completion
         self.analysisConfig.checkRequiredParams(self.conf)
-
         self.analysisConfig.completeConfiguration(self.conf)
-
-        # Validate Analysis Configuration
         errors = self.analysisConfig.validateConfiguration(self.conf)
         if errors:
             raise ConfigurationsNotValidError(f"Errors: {errors}")

@@ -1,0 +1,11 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  ap_path: "$AGILEPY_UNITTESTING_DIR/api/data/3C454.3_2010flare_86400s.ap"
+  rate: null

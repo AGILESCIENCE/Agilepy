@@ -1,0 +1,118 @@
+# DESCRIPTION
+#       Agilepy software
+#
+# NOTICE
+#      Any information contained in this software
+#      is property of the AGILE TEAM and is strictly
+#      private and confidential.
+#      Copyright (C) 2005-2020 AGILE Team.
+#          Baroncelli Leonardo <leonardo.baroncelli@inaf.it>
+#          Addis Antonio <antonio.addis@inaf.it>
+#          Bulgarelli Andrea <andrea.bulgarelli@inaf.it>
+#          Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>
+#      All rights reserved.
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+import pytest
+import os
+
+from pathlib import Path
+
+from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.config.AgilepyConfig import AgilepyConfig
+from agilepy.config.AGBayesianBlocksConfig import AGBayesianBlocksConfig
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError, CannotSetNotUpdatableOptionError, AnalysisClassNotSupported, DeprecatedOptionError
+
+
+@pytest.mark.bayesianblocks
+class TestAGBayesianBlocksConfig():
+    
+    @pytest.mark.testlogsdir("config/test_logs/config_bb_null")
+    @pytest.mark.testconfig("config/conf/conf_bb_null.yaml")
+    def test_config_bb_null(self, config, environ_test_logs_dir):
+        """Test that all null input files raise an error."""
+        ag_base = AGBaseAnalysis(config)
+        with pytest.raises(ConfigurationsNotValidError):
+            ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
+
+            
+    @pytest.mark.testlogsdir("config/test_logs/config_bb")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_config_BB(self, config, environ_test_logs_dir, testdata):
+        """Test that a standard configuration works."""
+        ag_base = AGBaseAnalysis(config)
+        ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
+        
+        # Check that ap_path read from file is the same provided in the test marker
+        assert ag_base.getOption("ap_path") == testdata
+        # Check that Completion Strategies expanded the path
+        assert "$" not in ag_base.getOption("ap_path")
+        
+        # Check that methods of mother classes work
+        assert ag_base.config.getSectionOfOption("ap_path")=="selection"
+        assert ag_base.config.getOptionValue("ap_path") == testdata
+        
+        # Test option setting with good and bad values
+        assert ag_base.getOption("rate") == False
+        ag_base.config.setOptions(rate=True)
+        assert ag_base.getOption("rate") == True
+        
+        with pytest.raises(ConfigFileOptionTypeError):
+            ag_base.config.setOptions(rate="not_a_bool")
+        
+        # Test various methods
+        config = ag_base.config.getConf()
+        assert config["selection"]["ap_path"] == testdata
+        config = ag_base.config.getConf(key="selection")
+        assert config["ap_path"] == testdata
+        config = ag_base.config.getConf(key="selection", subkey="ap_path")
+        assert config == testdata
+        
+        ag_base.printOptions()
+        
+        # Test output directory, which in this case is subfolder of TEST_LOGS_DIR
+        assert os.environ['TEST_LOGS_DIR'] in ag_base.getAnalysisDir()
+    
+    
+    @pytest.mark.testlogsdir("config/test_logs/config_bb_miss")
+    @pytest.mark.testconfig("config/conf/conf_bb_missingkeys.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_config_bb_miss(self, config, environ_test_logs_dir, testdata):
+        """Test that missing keys are dealt with."""
+        ag_base = AGBaseAnalysis(config)
+        ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
+        
+        assert ag_base.getOption("ap_path") == testdata
+        
+        # Test the Config Default values for selection and bayesianblocks sections
+        config = ag_base.config.getConf()
+        assert config['selection']['mle_path'  ] == None
+        assert config['selection']['ph_path'   ] == None
+        assert config['selection']['rate_path' ] == None
+        assert config['selection']['rate'      ] == False
+        assert config['selection']['ratefactor'] == 0
+        assert config['selection']['csv_detections_path'] == None
+        assert config['selection']['event_id'] == None
+        assert config['selection']['tstart'  ] == None
+        assert config['selection']['tstop'   ] == None
+        assert config['bayesianblocks']['fitness' ] == "events"
+        assert config['bayesianblocks']['useerror'] == False
+        assert config['bayesianblocks']['gamma'   ] == None
+        assert config['bayesianblocks']['p0'      ] == None
+        
+        
+
