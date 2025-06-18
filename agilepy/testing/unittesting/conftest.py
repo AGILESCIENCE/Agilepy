@@ -6,6 +6,15 @@ from os.path import expandvars
 from agilepy.config.AgilepyConfig import AgilepyConfig 
 from agilepy.core.AgilepyLogger import AgilepyLogger
 
+
+@pytest.fixture(scope="function", autouse=True)
+def set_env_var(monkeypatch):
+    # Get the directory containing this conftest.py file
+    conftest_dir = Path(__file__).parent.resolve()
+    
+    # Set the environment variable
+    monkeypatch.setenv("AGILEPY_UNITTESTING_DIR", str(conftest_dir))
+
 @pytest.fixture(scope="function")
 def logger(request):
 
