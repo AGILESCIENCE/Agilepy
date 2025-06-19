@@ -15,11 +15,11 @@ selection:
   ratefactor: null
   detections_csv_path: null
   event_id: null
-  tstart: null
-  tstop: null
+  tstart: 55497
+  tstop: 55562
 
 bayesianblocks:
-  fitness: null
+  fitness: "events"
   p0: null
-  gamma: null
+  gamma: 0.35
   useerror: true
