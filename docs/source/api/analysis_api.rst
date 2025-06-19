@@ -17,3 +17,9 @@ AGAnalysisWavelet
 *****************
 .. autoclass:: api.AGAnalysisWavelet.AGAnalysisWavelet
     :members: __init__, getConfiguration, waveletAnalysis, waveletDisplay
+
+AGBayesianBlocks
+*****************
+.. autoclass:: api.AGBayesianBlocks.AGBayesianBlocks
+    :members: __init__, getConfiguration, selectEvents, headEvents, headDetections, getDataIn, getDataOut, datamoed, sigma, bayesianBlocks, plotBayesianBlocks 
+
