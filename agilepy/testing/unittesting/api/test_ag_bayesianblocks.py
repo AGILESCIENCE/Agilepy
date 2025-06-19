@@ -234,4 +234,44 @@ class TestAGBayesianBlocks():
         assert os.path.isfile(plot_file)
         
         
+    @pytest.mark.testlogsdir("api/test_logs/bb_getconf")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_get_configuration(self, environ_test_logs_dir, testdata):
+        
+        confFilePath = os.environ['TEST_LOGS_DIR'] + "/conf.yaml"
+        # Cleanup
+        if os.path.isfile(confFilePath):
+            os.remove(confFilePath)
+        assert not os.path.isfile(confFilePath)
+        AGBayesianBlocks.getConfiguration(confFilePath=confFilePath,
+                                          outputDir=os.environ['TEST_LOGS_DIR'],
+                                          ap_path=testdata
+                                          )
+        assert os.path.isfile(confFilePath)
+        
+        ag_bb = AGBayesianBlocks(confFilePath)
+        assert ag_bb.getOption("username") == "my_name"
+        assert ag_bb.getOption("sourcename") == "bb-source"
+        assert ag_bb.getOption("filenameprefix") == "analysis_product"
+        assert ag_bb.getOption("logfilenameprefix") =="analysis_log"
+        assert ag_bb.getOption("verboselvl") == 0
+        
+        assert ag_bb.getOption('ap_path'   ) == testdata
+        assert ag_bb.getOption('mle_path'  ) == None
+        assert ag_bb.getOption('ph_path'   ) == None
+        assert ag_bb.getOption('rate_path' ) == None
+        assert ag_bb.getOption('rate'      ) == False
+        assert ag_bb.getOption('ratefactor') == 0
+        assert ag_bb.getOption('csv_detections_path') == None
+        assert ag_bb.getOption('event_id') == None
+        assert ag_bb.getOption('tstart'  ) == None
+        assert ag_bb.getOption('tstop'   ) == None
+        
+        assert ag_bb.getOption('fitness' ) == "events"
+        assert ag_bb.getOption('useerror') == True
+        assert ag_bb.getOption('gamma'   ) == 0.35
+        assert ag_bb.getOption('p0'      ) == None
+        
+        
+        
     #TODO: test mle_path, ph_path, rate_path, detections_csv_path
