@@ -58,9 +58,9 @@ class AGBayesianBlocks(AGBaseAnalysis):
         self.logger.info("AGBayesianBlocks initialized")
         
         
-    def select_event(self, 
+    def selectEvents(self, 
                      ap_path=None, mle_path=None, ph_path=None,
-                     rate_path=None, rate=False, ratefactor=0,
+                     rate_path=None, rate=None, ratefactor=None,
                      detections_csv_path= None, event_id=None,
                      tstart=None, tstop=None, 
                      ):
@@ -111,26 +111,44 @@ class AGBayesianBlocks(AGBaseAnalysis):
         tstop      = tstop      if tstop      is not None else self.config.getOptionValue("tstop")
         detections_csv_path = detections_csv_path if detections_csv_path is not None else self.config.getOptionValue("detections_csv_path")
         # Call the function from the external package
-        self.agile_bblocks.select_event(ap_path, mle_path, ph_path, rate_path, rate, ratefactor, detections_csv_path, event_id, tstart, tstop)
+        self.logger.info("Select Events...")
+        self.agile_bblocks.select_event(ap_path=ap_path, mle_path=mle_path, ph_path=ph_path, rate_path=rate_path,
+                                        rate=rate, ratefactor=ratefactor,
+                                        detections_csv_path=detections_csv_path, event_id=event_id, tstart=tstart, tstop=tstop)
+        self.logger.info("... done!")
         return None
         
-    def head_detections(self, n:int = 5):
+    def headDetections(self, n:int = 5):
         """Return the first `n` rows of the detections DataFrame."""
         return self.agile_bblocks.head_detections(n)
     
-    def head_event(self, n:int = 5):
+    def headEvents(self, n:int = 5):
         """Return the first `n` rows of the event DataFrame."""
         return self.agile_bblocks.head_event(n)
     
-    def get_data_out(self):
+    def getDataOut(self):
         """Return Output Data."""
         return self.agile_bblocks.get_data_out()
     
-    def get_data_in(self):
+    def getDataIn(self):
         """Return Input Data."""
         return self.agile_bblocks.get_data_in()
     
-    def bayesian_blocks(self, fitness='events', p0=None, gamma=None, useerror=False):
+    @property
+    def datamode(self):
+        try:
+            return self.agile_bblocks.datamode
+        except AttributeError:
+            return None
+        
+    @property
+    def sigma(self):
+        try:
+            return self.agile_bblocks.sigma
+        except AttributeError:
+            return None
+    
+    def bayesianBlocks(self, fitness=None, p0=None, gamma=None, useerror=None):
         """
         Compute the Bayesian blocks using the given parameters and plot the result.
 
@@ -151,13 +169,47 @@ class AGBayesianBlocks(AGBaseAnalysis):
         gamma    = gamma    if gamma    is not None else self.config.getOptionValue("gamma")
         useerror = useerror if useerror is not None else self.config.getOptionValue("useerror")
         # Call the function from the external package
+        self.logger.info("Compute Bayesian Blocks...")
         self.agile_bblocks.bayesian_blocks(fitness, p0, gamma, useerror)
+        self.logger.info("... done!")
         return None
     
-    def plot_data(self):
-        pass
-    def plot_bblocks(self):
-        pass
-    def plot_bblocks_with_rate(self):
-        pass
+    def plotBayesianBlocks(self, plotYErr=True, saveImage=False, plotBayesianBlocks=True, plotRate=False, plotDataCells=False):
+        """
+        Plot the data and the results of the Bayesian Blocks analysis.
+        
+        Parameters:
+        -----------
+        plotYErr : bool
+            Plot errors on Y data or not.
+        plotBayesianBlocks : bool
+            Plot The Bayesian blocks over the data if they were computed.
+        plotRate : bool
+            Add a second panel with the plot of the rate.
+        plotDataCells : bool
+            If True, plot the Data Cells vertical lines.
+        saveImage : bool
+            Write a copy of the image if True.
+        """
+        plotTDelta = False if self.datamode==1 else True
+        
+        plotSumBlocks = plotRate and not plotTDelta
+                
+        data = {"in":self.getDataIn(),"out":self.getDataOut()}
+        
+        if plotBayesianBlocks and data['out']=={}:
+            self.logger.warning("Bayesian Blocks not computed yet. Plotting only data...")
+            plotBayesianBlocks = False
+        if plotRate and data['out']=={}:
+            self.logger.warning("Bayesian Blocks not computed yet. Plotting only data...")
+            plotRate = False
+        
+        plot = self.plottingUtils.plotBayesianBlocks(data=data,
+                                                     plotTDelta=plotTDelta, plotYErr=plotYErr,
+                                                     edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
+                                                     dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
+                                                     saveImage=saveImage,
+                                                     )
+        
+        return plot
 
