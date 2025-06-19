@@ -237,6 +237,7 @@ class TestAGBayesianBlocks():
     @pytest.mark.testlogsdir("api/test_logs/bb_getconf")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
     def test_get_configuration(self, environ_test_logs_dir, testdata):
+        """Test the creation of a configuration file."""
         
         confFilePath = os.environ['TEST_LOGS_DIR'] + "/conf.yaml"
         # Cleanup
@@ -272,6 +273,63 @@ class TestAGBayesianBlocks():
         assert ag_bb.getOption('gamma'   ) == 0.35
         assert ag_bb.getOption('p0'      ) == None
         
+
+    @pytest.mark.skip(reason="External package is bugged")
+    @pytest.mark.testlogsdir("api/test_logs/bb_mle")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s_lc_mle.txt")
+    def test_bb_mle(self, environ_test_logs_dir, config, testdata):
+        """Test the computation of Bayesian Blocks with a MLE file."""
         
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.setOptions(mle_path=testdata)
+        ag_bb.setOptions(ap_path=None)
         
-    #TODO: test mle_path, ph_path, rate_path, detections_csv_path
+        ag_bb.selectEvents()
+        ag_bb.bayesianBlocks()
+        
+        # Plot
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+        
+        # Asserts
+        blocks_computed = ag_bb.getDataOut()
+        print(blocks_computed)
+        assert ag_bb.sigma is not None
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert len(blocks_computed['data_cells'])== 66
+        assert blocks_computed['N'           ] == 65
+        assert blocks_computed['N_data_cells'] == 65
+        assert len(blocks_computed['edge_vec'])== 7
+        assert blocks_computed['N_change_points'  ]  == 18
+        assert len(blocks_computed['change_points']) == 18
+        assert len(blocks_computed['edge_points'  ]) == 18
+        assert len(blocks_computed['sum_blocks'   ]) == 19
+        assert len(blocks_computed['mean_blocks'  ]) == 19
+        assert len(blocks_computed['dt_event_vec' ]) == 19
+        assert len(blocks_computed['dt_block_vec' ]) == 19
+        assert len(blocks_computed['blockrate'    ]) == 19
+        assert len(blocks_computed['blockrate2'   ]) == 19
+        assert len(blocks_computed['eventrate'    ]) == 19
+        
+    @pytest.mark.skip(reason="External package is bugged")
+    @pytest.mark.testlogsdir("api/test_logs/bb_tte")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
+    def test_bb_tte(self, environ_test_logs_dir, config, testdata):
+        """Test the computation of Bayesian Blocks with a MLE file."""
+        
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.setOptions(ph_path=testdata)
+        ag_bb.setOptions(ap_path=None, rate=False, p0=1.2)
+        
+        ag_bb.selectEvents()
+        ag_bb.bayesianBlocks()
+        
+        # Plot
+        ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=True, plotBayesianBlocks=True, plotRate=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+
+#TODO: ph_path, rate_path, detections_csv_path
