@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       # Cache dependencies to speed up future pipelines. Each job has its own cache
       - name: Cache pip dependencies
@@ -74,6 +75,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       # Cache dependencies to speed up future pipelines. Each job has its own cache
       - name: Cache pip dependencies
@@ -116,7 +118,8 @@ jobs:
     - name: Checking out code
       uses: actions/checkout@v4
       with:
-          fetch-depth: 0
+        fetch-depth: 0
+        submodules: recursive
 
     - name: Debug
       shell: bash -l {0}
@@ -158,6 +161,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursives
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
