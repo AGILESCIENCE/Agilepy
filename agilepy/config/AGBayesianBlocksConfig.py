@@ -3,10 +3,7 @@ from pathlib import PosixPath
 
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
-from agilepy.core.CustomExceptions import  CannotSetNotUpdatableOptionError, \
-                                           ConfigurationsNotValidError, \
-                                           OptionNameNotSupportedError, \
-                                           CannotSetHiddenOptionError
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError
 
 class AGBayesianBlocksConfig():
     """
@@ -19,14 +16,11 @@ class AGBayesianBlocksConfig():
         
         # Check required keys in "selection" section, if missing set to None
         selection = confDict.setdefault("selection", {})
-        required_keys = ["ap_path", "mle_path", "ph_path", "rate_path"]
+        required_keys = ["file_path", "file_mode"]
         for key in required_keys:
             selection.setdefault(key, None)
-
-        # If all values are None, raise an error
-        if all(selection[key] is None for key in required_keys):
-            errors.append("Please, set ap_path or mle_path or ph_path or rate_path")
-
+        # If required keys are missing, raise an error
+        errors+= [f"Please set {key}"for key in required_keys if selection[key] is None]
 
         # Same for "bayesianblocks" section
         bayesianblocks = confDict.setdefault("bayesianblocks", {})
@@ -42,24 +36,14 @@ class AGBayesianBlocksConfig():
         """Ensure the final configuration is complete thanks to Completion strategies"""
         # Complete Selection section with default values
         sectionDict = confDict['selection']
-        sectionDict['ap_path'  ] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['ap_path'])
-        sectionDict['mle_path' ] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['mle_path'])
-        sectionDict['ph_path'  ] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['ph_path'])
-        sectionDict['rate_path'] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['rate_path'])
-        
-        sectionDict.setdefault("csv_detections_path", None)
-        sectionDict['csv_detections_path'] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['csv_detections_path'])
-        
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "rate", False)
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "ratefactor", 0)
-        sectionDict.setdefault("event_id", None)
+        sectionDict['file_path'] = CompletionStrategies._expandEnvironmentalVariable(sectionDict['file_path'])
+        CompletionStrategies._setDefaultValueNotNone(sectionDict, "ratecorrection", 0)
         sectionDict.setdefault("tstart", None)
         sectionDict.setdefault("tstop", None)
         
-        
         # Complete Bayesian Blocks section with default values
         sectionDict = confDict['bayesianblocks']
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "useerror", False)
+        CompletionStrategies._setDefaultValueNotNone(sectionDict, "useerror", True)
         CompletionStrategies._setDefaultValueNotNone(sectionDict, "fitness", "events")
         sectionDict.setdefault("gamma", None)
         sectionDict.setdefault("p0", None)
@@ -108,19 +92,18 @@ class AGBayesianBlocksConfig():
             if optionName in ["verboselvl"]:
                 validType = (int, 0)
             # Number (int and float)
-            elif optionName in ["ratefactor", "tstart", "tstop", "p0", "gamma"]:
+            elif optionName in ["ratecorrection", "tstart", "tstop", "p0", "gamma"]:
                 validType = (Number, 0)
             # String
             elif optionName in ["logfile", "filenameprefix", "logfilenameprefix", "sourcename", "username",
-                              "ap_path", "mle_path", "ph_path", "rate_path", "detections_csv_path", "event_id",
-                              "fitness",
-                              ]:
+                                "file_path", "file_mode", "fitness",
+                                ]:
                 validType = (str, 0)
             # Path
             elif optionName in ["outdir"]:
                 validType = (PosixPath, 0)
             # Bool
-            elif optionName in ["rate", "useerror"]:
+            elif optionName in ["useerror"]:
                 validType = (bool, 0)
             # List of Numbers
             elif optionName in []:
@@ -134,7 +117,7 @@ class AGBayesianBlocksConfig():
                 #raise OptionNameNotSupportedError(f"Option name: {optionName} is not supported")
     
             # Do not check for None options
-            keysNotAllowedToBeNone = ["rate","ratefactor","useerror","fitness"]
+            keysNotAllowedToBeNone = ["useerror","fitness"]
             if (optionValue is None) and (optionName not in keysNotAllowedToBeNone):
                 continue
             # Check the type

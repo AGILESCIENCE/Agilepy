@@ -7,14 +7,9 @@ output:
   verboselvl: 2
 
 selection:
-  ap_path: null
-  mle_path: null
-  ph_path: null
-  rate_path: null
-  rate: null
-  ratefactor: null
-  detections_csv_path: null
-  event_id: null
+  file_path: null
+  file_mode: null
+  ratecorrection: null
   tstart: null
   tstop: null
 

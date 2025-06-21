@@ -57,29 +57,32 @@ class TestAGBayesianBlocksConfig():
         ag_base = AGBaseAnalysis(config)
         ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
         
-        # Check that ap_path read from file is the same provided in the test marker
-        assert ag_base.getOption("ap_path") == testdata
+        # Check that file_path read from file is the same provided in the test marker
+        assert ag_base.getOption("file_path") == testdata
         # Check that Completion Strategies expanded the path
-        assert "$" not in ag_base.getOption("ap_path")
+        assert "$" not in ag_base.getOption("file_path")
         
         # Check that methods of mother classes work
-        assert ag_base.config.getSectionOfOption("ap_path")=="selection"
-        assert ag_base.config.getOptionValue("ap_path") == testdata
+        assert ag_base.config.getSectionOfOption("file_path")=="selection"
+        assert ag_base.config.getOptionValue("file_path") == testdata
         
         # Test option setting with good and bad values
-        assert ag_base.getOption("rate") == False
-        ag_base.config.setOptions(rate=True)
-        assert ag_base.getOption("rate") == True
+        assert ag_base.getOption("useerror") == True
+        ag_base.config.setOptions(useerror=False)
+        assert ag_base.getOption("useerror") == False
         
         with pytest.raises(ConfigFileOptionTypeError):
-            ag_base.config.setOptions(rate="not_a_bool")
-        
+            ag_base.config.setOptions(ratecorrection="not_a_bool")
+        with pytest.raises(OptionNotFoundInConfigFileError):
+            ag_base.config.setOptions(rate="not_a_bool")    
+
+
         # Test various methods
         config = ag_base.config.getConf()
-        assert config["selection"]["ap_path"] == testdata
+        assert config["selection"]["file_path"] == testdata
         config = ag_base.config.getConf(key="selection")
-        assert config["ap_path"] == testdata
-        config = ag_base.config.getConf(key="selection", subkey="ap_path")
+        assert config["file_path"] == testdata
+        config = ag_base.config.getConf(key="selection", subkey="file_path")
         assert config == testdata
         
         ag_base.printOptions()
@@ -96,21 +99,16 @@ class TestAGBayesianBlocksConfig():
         ag_base = AGBaseAnalysis(config)
         ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
         
-        assert ag_base.getOption("ap_path") == testdata
+        assert ag_base.getOption("file_path") == testdata
         
         # Test the Config Default values for selection and bayesianblocks sections
         config = ag_base.config.getConf()
-        assert config['selection']['mle_path'  ] == None
-        assert config['selection']['ph_path'   ] == None
-        assert config['selection']['rate_path' ] == None
-        assert config['selection']['rate'      ] == False
-        assert config['selection']['ratefactor'] == 0
-        assert config['selection']['csv_detections_path'] == None
-        assert config['selection']['event_id'] == None
+        assert config['selection']['file_mode'] == "agile_ap"
+        assert config['selection']['ratecorrection'] == 0
         assert config['selection']['tstart'  ] == None
         assert config['selection']['tstop'   ] == None
         assert config['bayesianblocks']['fitness' ] == "events"
-        assert config['bayesianblocks']['useerror'] == False
+        assert config['bayesianblocks']['useerror'] == True
         assert config['bayesianblocks']['gamma'   ] == None
         assert config['bayesianblocks']['p0'      ] == None
         

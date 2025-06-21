@@ -60,10 +60,9 @@ class AGBayesianBlocks(AGBaseAnalysis):
         
         
     @staticmethod
-    def getConfiguration(confFilePath, outputDir,
+    def getConfiguration(confFilePath, outputDir, filePath,
                          userName="my_name", sourceName="bb-source", verboselvl=0,
-                         ap_path="null", mle_path="null", ph_path="null", rate_path="null",
-                         detections_csv_path="null", rate="null", ratefactor="null", event_id="null", tstart="null", tstop="null",
+                         fileMode="AGILE_AP", rateCorrection=0, tstart="null", tstop="null",
                          fitness="events", p0="null", gamma=0.35, useerror="true"
                          ):
         """Utility method to create a configuration file.
@@ -75,13 +74,16 @@ class AGBayesianBlocks(AGBaseAnalysis):
             sourceName (str): the name of the source.
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
             
-            ap_path, mle_path, ph_path, rate_path (str): The path to the data file, in AP, MLE (binned light curves), TTE (events) or rate format. 
-            rate (bool): For ap_path. Enable the evaluation of the rate multiplied for a ratefactor and converted into integer. If ratefactor == 0 use the mean of the exposure
-            ratefactor (float). Scale a rate to int. Usualy set it as the a mean effective area * dt
-            detections_csv_path (str): The path to the CSV file containing detection data time ranges.
-            event_id (str): The ID of the event to select (default is None) if detections_csv_path is not None.
-            tstart, tstop (float): Time start and stop in MJD. This is used if event_id is None.
-
+            filePath (str): The path to the data file. 
+            fileMode (str or int) : it defines the format of the data. Allowed data formats:
+                - UNBINNED data: AGILE_PH (1)
+                - BINNED data: AGILE_AP (2), AGILE_MLE (3), CUSTOM_LC (4)
+            tstart, tstop (float) : Time start, stop in MJD to select events. If None, no selection is applied.
+            rateCorrection (None or 0 or float) : Multiplication factor to convert rates (cts/exp) into integers.
+                - Set to None to not use.
+                - Set to 0 to use the mean exposure (effective area * dt).
+                - Set to a float value to use it directly.
+            
             fitness (str): The fitness function to use.
             p0 (float): Prior on the number of blocks (optional). Calculated with eq. 21 in Scargle (2013)
             gamma (float): Regularization parameter (optional).
@@ -101,16 +103,11 @@ output:
   verboselvl: {verboselvl}
 
 selection:
-  ap_path: {ap_path}
-  mle_path: {mle_path}
-  ph_path: {ph_path}
-  rate_path: {rate_path}
-  rate: {rate}
-  ratefactor: {ratefactor}
-  detections_csv_path: {detections_csv_path}
-  event_id: {event_id}
+  file_path: {filePath}
+  file_mode: {fileMode}
   tstart: {tstart}
   tstop: {tstop}
+  ratecorrection: {rateCorrection}
 
 bayesianblocks:
   fitness: {fitness}
@@ -132,63 +129,39 @@ bayesianblocks:
 
         
         
-    def selectEvents(self, 
-                     ap_path=None, mle_path=None, ph_path=None,
-                     rate_path=None, rate=None, ratefactor=None,
-                     detections_csv_path= None, event_id=None,
-                     tstart=None, tstop=None, 
-                     ):
+    def selectEvents(self, file_path=None, file_mode=None, tstart=None, tstop=None, ratecorrection=None):
         """
         Select an event by specifying its ID and data paths.
         If None, they are selected from the configuration.
 
         Parameters:
         -----------
-        ap_path, mle_path : str
-            The path to the binned light curve data file, in AP or MLE format. 
-        ph_path : str
-            The path to the TTE data file.
-        rate_path : str
-            Path to the rate file.
-        rate: bool
-            For ap_path. Enable the evaluation of the rate multiplied for a ratefactor and converted into integer. If ratefactor == 0 use the mean of the exposure
-        ratefactor: float
-            Scale a rate to int. Usualy set it as the a mean effective area * dt
-            For ap_path: A scale factor of the cts/exp values to obtain an integer after conversion. Typical value 1e7
-            For rate_path: ratefactor=0 scale to int with a mean rate scaling, ratefactor=-1 show row data, scalefactor > 1 give your own scale factor
-        detections_csv_path : str or None
-            The path to the CSV file containing detection data time ranges.
-            Example of csv:
-            ```
-            flare_id,mjd_start,mjd_stop
-            E01,54343.0,54344.0
-            E02,54732.0,54733.0
-            E03,54746.0,54747.0
-            E04,54915.0,54916.0
-            ```
-        event_id : str
-            The ID of the event to select (default is None) if detections_csv_path is not None.
-        tstart 
-            Time start in MJD. This is used if event_id is None
-        tstop 
-            Time stop in MJD. This is used if event_id is Non
+        file_path : str
+            The path to the data file. 
+        file_mode : str, int or FileMode
+            FileMode to set read function and DataMode. Allowed data formats:
+            - UNBINNED data: AGILE_PH (1)
+            - BINNED data: AGILE_AP (2), AGILE_MLE (3), CUSTOM_LC (4)
+        tstart, tstop : float 
+            Time start, stop in MJD to select events. If None, no selection is applied.
+        ratecorrection: None or 0 or float
+            Multiplication factor to convert rates (cts/exp) into integers.
+            - Set to None to not use.
+            - Set to 0 to use the mean exposure (effective area * dt), typical value 1e7.
+            - Set to a float value to use it directly.
         """
         # If arguments are not provided explicitly, set them from the configuration
-        ap_path    = ap_path    if ap_path    is not None else self.config.getOptionValue("ap_path")
-        mle_path   = mle_path   if mle_path   is not None else self.config.getOptionValue("mle_path")
-        ph_path    = ph_path    if ph_path    is not None else self.config.getOptionValue("ph_path")
-        rate_path  = rate_path  if rate_path  is not None else self.config.getOptionValue("rate_path")
-        rate       = rate       if rate       is not None else self.config.getOptionValue("rate")
-        ratefactor = ratefactor if ratefactor is not None else self.config.getOptionValue("ratefactor")
-        event_id   = event_id   if event_id   is not None else self.config.getOptionValue("event_id")
+        file_path    = file_path    if file_path    is not None else self.config.getOptionValue("file_path")
+        file_mode    = file_mode    if file_mode    is not None else self.config.getOptionValue("file_mode")
+        ratecorrection = ratecorrection if ratecorrection is not None else self.config.getOptionValue("ratecorrection")
         tstart     = tstart     if tstart     is not None else self.config.getOptionValue("tstart")
         tstop      = tstop      if tstop      is not None else self.config.getOptionValue("tstop")
-        detections_csv_path = detections_csv_path if detections_csv_path is not None else self.config.getOptionValue("detections_csv_path")
         # Call the function from the external package
         self.logger.info("Select Events...")
-        self.agile_bblocks.select_event(ap_path=ap_path, mle_path=mle_path, ph_path=ph_path, rate_path=rate_path,
-                                        rate=rate, ratefactor=ratefactor,
-                                        detections_csv_path=detections_csv_path, event_id=event_id, tstart=tstart, tstop=tstop)
+        self.agile_bblocks.select_event(file_path=file_path, file_mode=file_mode,
+                                        tstart=tstart, tstop=tstop,
+                                        ratecorrection=ratecorrection
+                                        )
         self.logger.info("... done!")
         return None
         
@@ -216,9 +189,16 @@ bayesianblocks:
             return None
         
     @property
-    def sigma(self):
+    def filemode(self):
         try:
-            return self.agile_bblocks.sigma
+            return self.agile_bblocks.filemode
+        except AttributeError:
+            return None
+        
+    @property
+    def df_event(self):
+        try:
+            return self.agile_bblocks.df_event
         except AttributeError:
             return None
     
@@ -244,7 +224,7 @@ bayesianblocks:
         useerror = useerror if useerror is not None else self.config.getOptionValue("useerror")
         # Call the function from the external package
         self.logger.info("Compute Bayesian Blocks...")
-        self.agile_bblocks.bayesian_blocks(fitness, p0, gamma, useerror)
+        self.agile_bblocks.bayesian_blocks(fitness, p0, gamma, useerror, plotBlocks=False)
         self.logger.info("... done!")
         return None
     

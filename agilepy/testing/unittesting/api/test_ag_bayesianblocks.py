@@ -50,7 +50,8 @@ class TestAGBayesianBlocks():
         
         assert str(environ_test_logs_dir) in ag_bb.getAnalysisDir()
         ag_bb.printOptions()
-        assert ag_bb.getOption("ap_path") == testdata
+        assert ag_bb.getOption("file_path") == testdata
+        assert ag_bb.getOption("file_mode") == "AGILE_AP"
         ag_bb.setOptions(tstart=55510, tstop=55530)
         assert ag_bb.getOption("tstart")==55510
         assert ag_bb.getOption("tstop" )==55530
@@ -67,7 +68,7 @@ class TestAGBayesianBlocks():
         
         # Data not selected yet
         assert ag_bb.getDataIn() == {}
-        assert ag_bb.datamode is None
+        assert ag_bb.datamode == None
         
         ### Select events
         ag_bb.selectEvents() # No arguments -> Taken from the configuration
@@ -78,8 +79,7 @@ class TestAGBayesianBlocks():
         data_table = Table.read(testdata,format="ascii", names=["TT_start","TT_stop","exposure","on_counts"])
         
         assert ag_bb.datamode == 2
-        
-        assert len(ag_bb.sigma)==65
+        assert ag_bb.filemode == 2
         assert len(events_selected['x']) == 65
         assert len(events_selected['t']) == 65
         assert len(events_selected['sigma']) == 65
@@ -100,14 +100,14 @@ class TestAGBayesianBlocks():
         assert ag_bb.getDataOut() == {}
         
         # Make plot
-        ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=False, plotBayesianBlocks=False)
+        ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=False, plotBayesianBlocks=False, plotRate=False, plotDataCells=False)
         
-        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True)
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=False, plotDataCells=True)
         plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_data.png"
         assert os.path.isfile(plot_file)
         
         # rate must not be produced, as it requires bayesian blocks
-        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=False, plotRate=True, plotDataCells=True)
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=False, plotRate=True, plotDataCells=False)
         plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_data_rate.png"
         assert not os.path.isfile(plot_file)
     
@@ -129,6 +129,7 @@ class TestAGBayesianBlocks():
         events_selected = ag_bb.getDataIn()
                 
         assert ag_bb.datamode == 2
+        assert ag_bb.filemode == 2
         
         assert len(events_selected['x']) == 50
         assert len(events_selected['t']) == 50
@@ -163,23 +164,22 @@ class TestAGBayesianBlocks():
         
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
-        assert ag_bb.sigma is not None
 
         assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
         assert len(blocks_computed['data_cells'])== 66
         assert blocks_computed['N'           ] == 65
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 7
-        assert blocks_computed['N_change_points'  ]  == 18
-        assert len(blocks_computed['change_points']) == 18
-        assert len(blocks_computed['edge_points'  ]) == 18
-        assert len(blocks_computed['sum_blocks'   ]) == 19
-        assert len(blocks_computed['mean_blocks'  ]) == 19
-        assert len(blocks_computed['dt_event_vec' ]) == 19
-        assert len(blocks_computed['dt_block_vec' ]) == 19
-        assert len(blocks_computed['blockrate'    ]) == 19
-        assert len(blocks_computed['blockrate2'   ]) == 19
-        assert len(blocks_computed['eventrate'    ]) == 19
+        assert blocks_computed['N_change_points'  ]  == 16
+        assert len(blocks_computed['change_points']) == 16
+        assert len(blocks_computed['edge_points'  ]) == 16
+        assert len(blocks_computed['sum_blocks'   ]) == 17
+        assert len(blocks_computed['mean_blocks'  ]) == 17
+        assert len(blocks_computed['dt_event_vec' ]) == 17
+        assert len(blocks_computed['dt_block_vec' ]) == 17
+        assert len(blocks_computed['blockrate'    ]) == 17
+        assert len(blocks_computed['blockrate2'   ]) == 17
+        assert len(blocks_computed['eventrate'    ]) == 17
         
         # Make plot
         ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=False, plotBayesianBlocks=False)
@@ -211,16 +211,16 @@ class TestAGBayesianBlocks():
         assert blocks_computed['N'           ] == 65
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 7
-        assert blocks_computed['N_change_points'  ]  == 22
-        assert len(blocks_computed['change_points']) == 22
-        assert len(blocks_computed['edge_points'  ]) == 22
-        assert len(blocks_computed['sum_blocks'   ]) == 23
-        assert len(blocks_computed['mean_blocks'  ]) == 23
-        assert len(blocks_computed['dt_event_vec' ]) == 23
-        assert len(blocks_computed['dt_block_vec' ]) == 23
-        assert len(blocks_computed['blockrate'    ]) == 23
-        assert len(blocks_computed['blockrate2'   ]) == 23
-        assert len(blocks_computed['eventrate'    ]) == 23
+        assert blocks_computed['N_change_points'  ]  == 18
+        assert len(blocks_computed['change_points']) == 18
+        assert len(blocks_computed['edge_points'  ]) == 18
+        assert len(blocks_computed['sum_blocks'   ]) == 19
+        assert len(blocks_computed['mean_blocks'  ]) == 19
+        assert len(blocks_computed['dt_event_vec' ]) == 19
+        assert len(blocks_computed['dt_block_vec' ]) == 19
+        assert len(blocks_computed['blockrate'    ]) == 19
+        assert len(blocks_computed['blockrate2'   ]) == 19
+        assert len(blocks_computed['eventrate'    ]) == 19
         
         # Make plot
         ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=False, plotBayesianBlocks=False)
@@ -234,6 +234,80 @@ class TestAGBayesianBlocks():
         assert os.path.isfile(plot_file)
         
         
+    @pytest.mark.testlogsdir("api/test_logs/bb_ap_alt1")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_bb_ap_alternative1(self, environ_test_logs_dir, config, testdata):
+        """Test the bayesian blocks method with ratecorrection=None."""
+        
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.selectEvents(ratecorrection=None)
+        with pytest.raises(ValueError):
+            # Regular events must have only 0 and 1 in x
+            ag_bb.bayesianBlocks(fitness="regular_events")
+        
+        # Use fitness Events
+        ag_bb.bayesianBlocks()
+        blocks_computed = ag_bb.getDataOut()
+        #print(blocks_computed)
+
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 65
+        assert len(blocks_computed['edge_vec'])== 7
+        assert blocks_computed['N_change_points'] == 16
+        
+        # Make plot
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+    
+    
+    @pytest.mark.testlogsdir("api/test_logs/bb_ap_alt2")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_bb_ap_alternative2(self, environ_test_logs_dir, config, testdata):
+        """Test the bayesian blocks method with ratecorrection=-1."""
+        
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.selectEvents(ratecorrection=-1)
+        ag_bb.bayesianBlocks()
+        blocks_computed = ag_bb.getDataOut()
+        #print(blocks_computed)
+
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 65
+        assert len(blocks_computed['edge_vec'])== 7
+        assert blocks_computed['N_change_points'] == 18
+        
+        # Make plot
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+        
+        
+    @pytest.mark.testlogsdir("api/test_logs/bb_ap_alt3")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_bb_ap_alternative3(self, environ_test_logs_dir, config, testdata):
+        """Test the bayesian blocks method with ratecorrection=float."""
+        
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.selectEvents(ratecorrection=3.0E7)
+        ag_bb.bayesianBlocks()
+        blocks_computed = ag_bb.getDataOut()
+        #print(blocks_computed)
+
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 65
+        assert len(blocks_computed['edge_vec'])== 5
+        assert blocks_computed['N_change_points'] == 40
+        
+        # Make plot
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+        
+
     @pytest.mark.testlogsdir("api/test_logs/bb_getconf")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
     def test_get_configuration(self, environ_test_logs_dir, testdata):
@@ -244,9 +318,8 @@ class TestAGBayesianBlocks():
         if os.path.isfile(confFilePath):
             os.remove(confFilePath)
         assert not os.path.isfile(confFilePath)
-        AGBayesianBlocks.getConfiguration(confFilePath=confFilePath,
-                                          outputDir=os.environ['TEST_LOGS_DIR'],
-                                          ap_path=testdata
+        AGBayesianBlocks.getConfiguration(confFilePath=confFilePath, outputDir=os.environ['TEST_LOGS_DIR'],
+                                          filePath=testdata, fileMode="AGILE_AP", 
                                           )
         assert os.path.isfile(confFilePath)
         
@@ -257,24 +330,17 @@ class TestAGBayesianBlocks():
         assert ag_bb.getOption("logfilenameprefix") =="analysis_log"
         assert ag_bb.getOption("verboselvl") == 0
         
-        assert ag_bb.getOption('ap_path'   ) == testdata
-        assert ag_bb.getOption('mle_path'  ) == None
-        assert ag_bb.getOption('ph_path'   ) == None
-        assert ag_bb.getOption('rate_path' ) == None
-        assert ag_bb.getOption('rate'      ) == False
-        assert ag_bb.getOption('ratefactor') == 0
-        assert ag_bb.getOption('csv_detections_path') == None
-        assert ag_bb.getOption('event_id') == None
-        assert ag_bb.getOption('tstart'  ) == None
-        assert ag_bb.getOption('tstop'   ) == None
+        assert ag_bb.getOption('file_path') == testdata
+        assert ag_bb.getOption('file_mode') == "AGILE_AP"
+        assert ag_bb.getOption('ratecorrection') == 0
+        assert ag_bb.getOption('tstart') == None
+        assert ag_bb.getOption('tstop' ) == None
         
         assert ag_bb.getOption('fitness' ) == "events"
         assert ag_bb.getOption('useerror') == True
         assert ag_bb.getOption('gamma'   ) == 0.35
         assert ag_bb.getOption('p0'      ) == None
         
-
-    @pytest.mark.skip(reason="External package is bugged")
     @pytest.mark.testlogsdir("api/test_logs/bb_mle")
     @pytest.mark.testconfig("config/conf/conf_bb.yaml")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s_lc_mle.txt")
@@ -282,10 +348,11 @@ class TestAGBayesianBlocks():
         """Test the computation of Bayesian Blocks with a MLE file."""
         
         ag_bb = AGBayesianBlocks(config)
-        ag_bb.setOptions(mle_path=testdata)
-        ag_bb.setOptions(ap_path=None)
+        ag_bb.setOptions(file_path=testdata, file_mode="AGILE_MLE")
         
         ag_bb.selectEvents()
+        assert ag_bb.datamode == 2
+        assert ag_bb.filemode == 3
         ag_bb.bayesianBlocks()
         
         # Plot
@@ -295,41 +362,193 @@ class TestAGBayesianBlocks():
         
         # Asserts
         blocks_computed = ag_bb.getDataOut()
-        print(blocks_computed)
-        assert ag_bb.sigma is not None
         assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
-        assert len(blocks_computed['data_cells'])== 66
-        assert blocks_computed['N'           ] == 65
-        assert blocks_computed['N_data_cells'] == 65
-        assert len(blocks_computed['edge_vec'])== 7
-        assert blocks_computed['N_change_points'  ]  == 18
-        assert len(blocks_computed['change_points']) == 18
-        assert len(blocks_computed['edge_points'  ]) == 18
-        assert len(blocks_computed['sum_blocks'   ]) == 19
-        assert len(blocks_computed['mean_blocks'  ]) == 19
-        assert len(blocks_computed['dt_event_vec' ]) == 19
-        assert len(blocks_computed['dt_block_vec' ]) == 19
-        assert len(blocks_computed['blockrate'    ]) == 19
-        assert len(blocks_computed['blockrate2'   ]) == 19
-        assert len(blocks_computed['eventrate'    ]) == 19
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 5
+        assert blocks_computed['N_change_points'] == 8
         
-    @pytest.mark.skip(reason="External package is bugged")
-    @pytest.mark.testlogsdir("api/test_logs/bb_tte")
+
+    @pytest.mark.testlogsdir("api/test_logs/bb_mle_alt")
     @pytest.mark.testconfig("config/conf/conf_bb.yaml")
-    @pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
-    def test_bb_tte(self, environ_test_logs_dir, config, testdata):
-        """Test the computation of Bayesian Blocks with a MLE file."""
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s_lc_mle.txt")
+    def test_bb_mle_alternative(self, environ_test_logs_dir, config, testdata):
+        "Test MLE with ratecorrection values different than 0."
+        
+        # Rate Correction = None
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.setOptions(file_path=testdata, file_mode="AGILE_MLE", ratecorrection=None)
+        ag_bb.selectEvents()
+        assert ag_bb.datamode == 2
+        assert ag_bb.filemode == 3
+        ag_bb.bayesianBlocks()
+        blocks_computed = ag_bb.getDataOut()
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 4
+        assert blocks_computed['N_change_points'] == 8
+        
+        # Rate Correction = -1
+        ag_bb2 = AGBayesianBlocks(config)
+        ag_bb2.setOptions(file_path=testdata, file_mode="AGILE_MLE", ratecorrection=-1)
+        ag_bb2.selectEvents()
+        ag_bb2.bayesianBlocks()
+        assert ag_bb2.datamode == 2
+        assert ag_bb2.filemode == 3
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 4
+        assert blocks_computed['N_change_points'] == 8
+        
+        # Rate Correction = 5E7
+        ag_bb3 = AGBayesianBlocks(config)
+        ag_bb3.setOptions(file_path=testdata, file_mode="AGILE_MLE", ratecorrection=5.0E7)
+        ag_bb3.selectEvents()
+        ag_bb3.bayesianBlocks()
+        assert ag_bb3.datamode == 2
+        assert ag_bb3.filemode == 3
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 4
+        assert blocks_computed['N_change_points'] == 8
+    
+    
+    
+    @pytest.mark.testlogsdir("api/test_logs/bb_custom")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s_lc_custom.txt")
+    def test_bb_custom(self, environ_test_logs_dir, config, testdata):
+        """Test the computation of Bayesian Blocks with a CUSTOM_LC file."""
         
         ag_bb = AGBayesianBlocks(config)
-        ag_bb.setOptions(ph_path=testdata)
-        ag_bb.setOptions(ap_path=None, rate=False, p0=1.2)
+        ag_bb.setOptions(file_path=testdata, file_mode="CUSTOM_LC", tstart=None, tstop=None)
         
         ag_bb.selectEvents()
+        assert ag_bb.datamode == 2
+        assert ag_bb.filemode == 4
         ag_bb.bayesianBlocks()
         
         # Plot
-        ag_bb.plotBayesianBlocks(plotYErr=False, saveImage=True, plotBayesianBlocks=True, plotRate=True)
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True)
         plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
         assert os.path.isfile(plot_file)
+        
+        # Asserts
+        blocks_computed = ag_bb.getDataOut()
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 10
+        assert blocks_computed['N_change_points'] == 2
 
-#TODO: ph_path, rate_path, detections_csv_path
+
+    @pytest.mark.testlogsdir("api/test_logs/bb_cus_alt")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s_lc_custom.txt")
+    def test_bb_custom_alternative(self, environ_test_logs_dir, config, testdata):
+        "Test CUSTOM with ratecorrection values different than 0."
+        
+        # Rate Correction = None
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.setOptions(file_path=testdata, file_mode="CUSTOM_LC", ratecorrection=None, tstart=None, tstop=None)
+        ag_bb.selectEvents()
+        assert ag_bb.datamode == 2
+        assert ag_bb.filemode == 4
+        ag_bb.bayesianBlocks()
+        blocks_computed = ag_bb.getDataOut()
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 2
+        assert blocks_computed['N_change_points'] == 17
+        
+        # Rate Correction = -1
+        ag_bb2 = AGBayesianBlocks(config)
+        ag_bb2.setOptions(file_path=testdata, file_mode="CUSTOM_LC", ratecorrection=-1, tstart=None, tstop=None)
+        ag_bb2.selectEvents()
+        ag_bb2.bayesianBlocks()
+        assert ag_bb2.datamode == 2
+        assert ag_bb2.filemode == 4
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 2
+        assert blocks_computed['N_change_points'] == 17
+        
+        # Rate Correction = 0.5
+        ag_bb3 = AGBayesianBlocks(config)
+        ag_bb3.setOptions(file_path=testdata, file_mode="CUSTOM_LC", ratecorrection=0.5, tstart=None, tstop=None)
+        ag_bb3.selectEvents()
+        ag_bb3.bayesianBlocks()
+        assert ag_bb3.datamode == 2
+        assert ag_bb3.filemode == 4
+        assert blocks_computed['N_data_cells'] == 20
+        assert len(blocks_computed['edge_vec'])== 2
+        assert blocks_computed['N_change_points'] == 17
+
+    #@pytest.mark.new
+    #@pytest.mark.testlogsdir("api/test_logs/bb_ph")
+    #@pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
+    #@pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
+    #def test_bb_ph(self, environ_test_logs_dir, config, testdata):
+    #    """Test the computation of Bayesian Blocks with a AGILE_PH file."""
+    #    
+    #    ag_bb = AGBayesianBlocks(config)
+    #    
+    #    ag_bb.selectEvents()
+    #    events_selected = ag_bb.getDataIn()
+    #    assert ag_bb.datamode == 1
+    #    assert ag_bb.filemode == 1
+    #    
+    #    assert len(events_selected['x']) == 26901
+    #    assert len(events_selected['t']) == 26901
+    #    assert len(events_selected['sigma']) == 26901
+    #    assert events_selected['dt'] == 0
+    #    assert events_selected['datamode'] == 1
+    #    
+    #    # Run Bayesian Blocks
+    #    ag_bb.bayesianBlocks()
+    #    
+    #    # Asserts
+    #    blocks_computed = ag_bb.getDataOut()
+    #    print(blocks_computed)
+    #    assert blocks_computed['ncp_prior'] == pytest.approx(4.396, rel=1e-3)        
+    #    assert blocks_computed['N_data_cells'] == 26901
+    #    assert len(blocks_computed['edge_vec'])== 383
+    #    assert blocks_computed['N_change_points'] == 260
+    #    
+    #    # Plot
+    #    ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=False)
+    #    plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+    #    assert os.path.isfile(plot_file)
+
+
+    #@pytest.mark.new
+    #@pytest.mark.testlogsdir("api/test_logs/bb_ph_alt")
+    #@pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
+    #@pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
+    #def test_bb_ph_alt(self, environ_test_logs_dir, config, testdata):
+    #    """Test the computation of Bayesian Blocks with a AGILE_PH file and fitness measures."""
+    #    
+    #    ag_bb = AGBayesianBlocks(config)
+    #    
+    #    ag_bb.selectEvents()
+    #    events_selected = ag_bb.getDataIn()
+    #    assert ag_bb.datamode == 1
+    #    assert ag_bb.filemode == 1
+    #    
+    #    assert len(events_selected['x']) == 26901
+    #    assert len(events_selected['t']) == 26901
+    #    assert len(events_selected['sigma']) == 26901
+    #    assert events_selected['dt'] == 0
+    #    assert events_selected['datamode'] == 1
+    #    
+    #    # Run Bayesian Blocks
+    #    ag_bb.bayesianBlocks(fitness="measures")
+    #    
+    #    # Asserts
+    #    blocks_computed = ag_bb.getDataOut()
+    #    print(blocks_computed)
+    #    assert blocks_computed['ncp_prior'] == pytest.approx(4.396, rel=1e-3)        
+    #    assert blocks_computed['N_data_cells'] == 26901
+    #    assert len(blocks_computed['edge_vec'])== 26902
+    #    assert blocks_computed['N_change_points'] == 0
+    #    
+    #    # Plot
+    #    ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
+    #    plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+    #    assert os.path.isfile(plot_file)
