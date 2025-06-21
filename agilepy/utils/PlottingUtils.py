@@ -754,9 +754,10 @@ class PlottingUtils(metaclass=Singleton):
             means = []
             i_edge = 0
             for t in data_in['data_cells']:
-                means.append(data_out['mean_blocks'][i_edge])
                 if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
                     i_edge += 1
+                means.append(data_out['mean_blocks'][i_edge])
+            
             trace2 = go.Scatter(
                 x=data_in['data_cells'],
                 y=means,
@@ -772,9 +773,10 @@ class PlottingUtils(metaclass=Singleton):
             sumb = []
             i_edge = 0
             for t in data_in['data_cells']:
-                sumb.append(data_out['sum_blocks'][i_edge])
                 if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
                     i_edge += 1
+                sumb.append(data_out['sum_blocks'][i_edge])
+
             trace3 = go.Scatter(
                 x=data_in['data_cells'],
                 y=sumb,
@@ -794,15 +796,14 @@ class PlottingUtils(metaclass=Singleton):
             rate_key = 'blockrate2' if data_in['datamode'] == 2 else 'blockrate'
 
             for t in data_in['data_cells']:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                
                 event_rate = data_out['eventrate'][i_edge]
                 block_rate = data_out[rate_key][i_edge]
 
                 rates.append(event_rate if event_rate != np.inf else 0)
                 rateblocks.append(block_rate if block_rate != np.inf else 0)
-
-                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
-                    i_edge += 1
-                    
             
             # --- Add edge points and data cells as vertical lines in subplot 2 ---
             ymax_rate = max(rateblocks)        
@@ -814,16 +815,6 @@ class PlottingUtils(metaclass=Singleton):
                                 name=rate_key
                                 )
             fig.add_trace(trace4, row=2, col=1)
-
-            # Optional: if you also want eventrate shown
-            # fig.add_trace(go.Scatter(
-            #     x=self.data_in['data_cells'],
-            #     y=rates,
-            #     mode='lines',
-            #     line=dict(shape='hv', color='orange', dash='dash'),
-            #     name='eventrate'
-            # ), row=2, col=1)
-
 
 
             if edgePoints:
