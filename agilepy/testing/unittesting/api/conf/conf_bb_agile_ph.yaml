@@ -1,0 +1,20 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: "$AGILEPY_UNITTESTING_DIR/api/data/test_data.ph"
+  file_mode: "AGILE_PH"
+  ratecorrection: 0
+  tstart: null
+  tstop: null
+
+bayesianblocks:
+  fitness: "events"
+  p0: 0.5
+  gamma: null
+  useerror: true

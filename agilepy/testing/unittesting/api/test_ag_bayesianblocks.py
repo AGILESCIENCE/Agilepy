@@ -308,6 +308,28 @@ class TestAGBayesianBlocks():
         assert os.path.isfile(plot_file)
         
 
+    @pytest.mark.testlogsdir("api/test_logs/bb_ap_alt4")
+    @pytest.mark.testconfig("config/conf/conf_bb.yaml")
+    @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
+    def test_bb_ap_alternative4(self, environ_test_logs_dir, config, testdata):
+        """Test the bayesian blocks method with fitness=measures."""
+        
+        ag_bb = AGBayesianBlocks(config)
+        ag_bb.selectEvents(ratecorrection=0)
+        ag_bb.bayesianBlocks(fitness="measures")
+        blocks_computed = ag_bb.getDataOut()
+
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['N_data_cells'] == 65
+        assert len(blocks_computed['edge_vec'])== 7
+        assert blocks_computed['N_change_points'] == 16
+        
+        # Make plot
+        ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
+        plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+        assert os.path.isfile(plot_file)
+        
+
     @pytest.mark.testlogsdir("api/test_logs/bb_getconf")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
     def test_get_configuration(self, environ_test_logs_dir, testdata):
@@ -480,75 +502,37 @@ class TestAGBayesianBlocks():
         assert len(blocks_computed['edge_vec'])== 2
         assert blocks_computed['N_change_points'] == 17
 
-    #@pytest.mark.new
-    #@pytest.mark.testlogsdir("api/test_logs/bb_ph")
-    #@pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
-    #@pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
-    #def test_bb_ph(self, environ_test_logs_dir, config, testdata):
-    #    """Test the computation of Bayesian Blocks with a AGILE_PH file."""
-    #    
-    #    ag_bb = AGBayesianBlocks(config)
-    #    
-    #    ag_bb.selectEvents()
-    #    events_selected = ag_bb.getDataIn()
-    #    assert ag_bb.datamode == 1
-    #    assert ag_bb.filemode == 1
-    #    
-    #    assert len(events_selected['x']) == 26901
-    #    assert len(events_selected['t']) == 26901
-    #    assert len(events_selected['sigma']) == 26901
-    #    assert events_selected['dt'] == 0
-    #    assert events_selected['datamode'] == 1
-    #    
-    #    # Run Bayesian Blocks
-    #    ag_bb.bayesianBlocks()
-    #    
-    #    # Asserts
-    #    blocks_computed = ag_bb.getDataOut()
-    #    print(blocks_computed)
-    #    assert blocks_computed['ncp_prior'] == pytest.approx(4.396, rel=1e-3)        
-    #    assert blocks_computed['N_data_cells'] == 26901
-    #    assert len(blocks_computed['edge_vec'])== 383
-    #    assert blocks_computed['N_change_points'] == 260
-    #    
-    #    # Plot
-    #    ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=False)
-    #    plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
-    #    assert os.path.isfile(plot_file)
-
-
-    #@pytest.mark.new
-    #@pytest.mark.testlogsdir("api/test_logs/bb_ph_alt")
-    #@pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
-    #@pytest.mark.testdatafile("api/data/AGL1736-3250_E100_10000_r2_dq1.ap.ph")
-    #def test_bb_ph_alt(self, environ_test_logs_dir, config, testdata):
-    #    """Test the computation of Bayesian Blocks with a AGILE_PH file and fitness measures."""
-    #    
-    #    ag_bb = AGBayesianBlocks(config)
-    #    
-    #    ag_bb.selectEvents()
-    #    events_selected = ag_bb.getDataIn()
-    #    assert ag_bb.datamode == 1
-    #    assert ag_bb.filemode == 1
-    #    
-    #    assert len(events_selected['x']) == 26901
-    #    assert len(events_selected['t']) == 26901
-    #    assert len(events_selected['sigma']) == 26901
-    #    assert events_selected['dt'] == 0
-    #    assert events_selected['datamode'] == 1
-    #    
-    #    # Run Bayesian Blocks
-    #    ag_bb.bayesianBlocks(fitness="measures")
-    #    
-    #    # Asserts
-    #    blocks_computed = ag_bb.getDataOut()
-    #    print(blocks_computed)
-    #    assert blocks_computed['ncp_prior'] == pytest.approx(4.396, rel=1e-3)        
-    #    assert blocks_computed['N_data_cells'] == 26901
-    #    assert len(blocks_computed['edge_vec'])== 26902
-    #    assert blocks_computed['N_change_points'] == 0
-    #    
-    #    # Plot
-    #    ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=True)
-    #    plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
-    #    assert os.path.isfile(plot_file)
+    
+    @pytest.mark.testlogsdir("api/test_logs/bb_ph")
+    @pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
+    def test_bb_ph(self, environ_test_logs_dir, config):
+       """Test the computation of Bayesian Blocks with a AGILE_PH file."""
+       
+       ag_bb = AGBayesianBlocks(config)
+       
+       ag_bb.selectEvents()
+       events_selected = ag_bb.getDataIn()
+       assert ag_bb.datamode == 1
+       assert ag_bb.filemode == 1
+       
+       assert len(events_selected['x']) == 1285
+       assert len(events_selected['t']) == 1285
+       assert len(events_selected['sigma']) == 1285
+       assert events_selected['dt'] == 0
+       assert events_selected['datamode'] == 1
+       
+       # Run Bayesian Blocks
+       ag_bb.bayesianBlocks()
+       
+       # Asserts
+       blocks_computed = ag_bb.getDataOut()
+       print(blocks_computed)
+       assert blocks_computed['ncp_prior'] == pytest.approx(3.817, rel=1e-3)        
+       assert blocks_computed['N_data_cells'] == 1285
+       assert len(blocks_computed['edge_vec'])== 307
+       assert blocks_computed['N_change_points'] == 2
+       
+       # Plot
+       ag_bb.plotBayesianBlocks(plotYErr=True, saveImage=True, plotBayesianBlocks=True, plotRate=True, plotDataCells=False, plotSumBlocks=True)
+       plot_file = ag_bb.getAnalysisDir()+"/plots/bayesianblocks_results_rate.png"
+       assert os.path.isfile(plot_file)
