@@ -29,17 +29,13 @@
 import pytest
 import os
 
-from pathlib import Path
-
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.config.AGBayesianBlocksConfig import AGBayesianBlocksConfig
-from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError, CannotSetNotUpdatableOptionError, AnalysisClassNotSupported, DeprecatedOptionError
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError
 
 
 @pytest.mark.bayesianblocks
 class TestAGBayesianBlocksConfig():
-    
+
     @pytest.mark.testlogsdir("config/test_logs/config_bb_null")
     @pytest.mark.testconfig("config/conf/conf_bb_null.yaml")
     def test_config_bb_null(self, config, environ_test_logs_dir):
@@ -74,7 +70,7 @@ class TestAGBayesianBlocksConfig():
         with pytest.raises(ConfigFileOptionTypeError):
             ag_base.config.setOptions(ratecorrection="not_a_bool")
         with pytest.raises(OptionNotFoundInConfigFileError):
-            ag_base.config.setOptions(rate="not_a_bool")    
+            ag_base.config.setOptions(rate="not_a_bool")
 
 
         # Test various methods

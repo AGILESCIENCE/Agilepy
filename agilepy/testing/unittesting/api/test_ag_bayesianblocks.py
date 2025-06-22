@@ -31,15 +31,13 @@ import numpy as np
 import os
 
 from astropy.table import Table
-from pathlib import Path
 
 from agilepy.api.AGBayesianBlocks import AGBayesianBlocks
-from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError, CannotSetNotUpdatableOptionError, AnalysisClassNotSupported, DeprecatedOptionError
 
 
 @pytest.mark.bayesianblocks
 class TestAGBayesianBlocks():
-    
+
     @pytest.mark.testlogsdir("api/test_logs/bb_init")
     @pytest.mark.testconfig("config/conf/conf_bb.yaml")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
@@ -165,7 +163,7 @@ class TestAGBayesianBlocks():
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert len(blocks_computed['data_cells'])== 66
         assert blocks_computed['N'           ] == 65
         assert blocks_computed['N_data_cells'] == 65
@@ -206,7 +204,7 @@ class TestAGBayesianBlocks():
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(0.799, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(0.799, rel=1e-3)
         assert len(blocks_computed['data_cells'])== 66
         assert blocks_computed['N'           ] == 65
         assert blocks_computed['N_data_cells'] == 65
@@ -251,7 +249,7 @@ class TestAGBayesianBlocks():
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 7
         assert blocks_computed['N_change_points'] == 16
@@ -274,7 +272,7 @@ class TestAGBayesianBlocks():
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 7
         assert blocks_computed['N_change_points'] == 18
@@ -297,7 +295,7 @@ class TestAGBayesianBlocks():
         blocks_computed = ag_bb.getDataOut()
         #print(blocks_computed)
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 5
         assert blocks_computed['N_change_points'] == 40
@@ -319,7 +317,7 @@ class TestAGBayesianBlocks():
         ag_bb.bayesianBlocks(fitness="measures")
         blocks_computed = ag_bb.getDataOut()
 
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.049, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 65
         assert len(blocks_computed['edge_vec'])== 7
         assert blocks_computed['N_change_points'] == 16
@@ -341,7 +339,7 @@ class TestAGBayesianBlocks():
             os.remove(confFilePath)
         assert not os.path.isfile(confFilePath)
         AGBayesianBlocks.getConfiguration(confFilePath=confFilePath, outputDir=os.environ['TEST_LOGS_DIR'],
-                                          filePath=testdata, fileMode="AGILE_AP", 
+                                          filePath=testdata, fileMode="AGILE_AP",
                                           )
         assert os.path.isfile(confFilePath)
         
@@ -384,7 +382,7 @@ class TestAGBayesianBlocks():
         
         # Asserts
         blocks_computed = ag_bb.getDataOut()
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 20
         assert len(blocks_computed['edge_vec'])== 5
         assert blocks_computed['N_change_points'] == 8
@@ -404,7 +402,7 @@ class TestAGBayesianBlocks():
         assert ag_bb.filemode == 3
         ag_bb.bayesianBlocks()
         blocks_computed = ag_bb.getDataOut()
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 20
         assert len(blocks_computed['edge_vec'])== 4
         assert blocks_computed['N_change_points'] == 8
@@ -416,7 +414,7 @@ class TestAGBayesianBlocks():
         ag_bb2.bayesianBlocks()
         assert ag_bb2.datamode == 2
         assert ag_bb2.filemode == 3
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 20
         assert len(blocks_computed['edge_vec'])== 4
         assert blocks_computed['N_change_points'] == 8
@@ -428,7 +426,7 @@ class TestAGBayesianBlocks():
         ag_bb3.bayesianBlocks()
         assert ag_bb3.datamode == 2
         assert ag_bb3.filemode == 3
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 20
         assert len(blocks_computed['edge_vec'])== 4
         assert blocks_computed['N_change_points'] == 8
@@ -456,7 +454,7 @@ class TestAGBayesianBlocks():
         
         # Asserts
         blocks_computed = ag_bb.getDataOut()
-        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)        
+        assert blocks_computed['ncp_prior'] == pytest.approx(1.05, rel=1e-3)
         assert blocks_computed['N_data_cells'] == 20
         assert len(blocks_computed['edge_vec'])== 10
         assert blocks_computed['N_change_points'] == 2
@@ -505,10 +503,12 @@ class TestAGBayesianBlocks():
     
     @pytest.mark.testlogsdir("api/test_logs/bb_ph")
     @pytest.mark.testconfig("api/conf/conf_bb_agile_ph.yaml")
-    def test_bb_ph(self, environ_test_logs_dir, config):
+    @pytest.mark.testdatafile("api/data/test_data.ph")
+    def test_bb_ph(self, environ_test_logs_dir, config, testdata):
        """Test the computation of Bayesian Blocks with a AGILE_PH file."""
        
        ag_bb = AGBayesianBlocks(config)
+       ag_bb.setOptions(file_path=testdata)
        
        ag_bb.selectEvents()
        events_selected = ag_bb.getDataIn()
@@ -527,7 +527,7 @@ class TestAGBayesianBlocks():
        # Asserts
        blocks_computed = ag_bb.getDataOut()
        print(blocks_computed)
-       assert blocks_computed['ncp_prior'] == pytest.approx(3.817, rel=1e-3)        
+       assert blocks_computed['ncp_prior'] == pytest.approx(3.817, rel=1e-3)
        assert blocks_computed['N_data_cells'] == 1285
        assert len(blocks_computed['edge_vec'])== 307
        assert blocks_computed['N_change_points'] == 2

@@ -9,7 +9,7 @@ class AGBayesianBlocksConfig():
     """
     Class to define the Configuration for AGBayesianBlocks
     """
-    
+
     def checkRequiredParams(self, confDict):
         """Check thats the required parameters are present."""
         errors = []
@@ -23,7 +23,7 @@ class AGBayesianBlocksConfig():
         errors+= [f"Please set {key}"for key in required_keys if selection[key] is None]
 
         # Same for "bayesianblocks" section
-        bayesianblocks = confDict.setdefault("bayesianblocks", {})
+        _ = confDict.setdefault("bayesianblocks", {})
 
         # Collect Errors
         if errors:
@@ -58,7 +58,7 @@ class AGBayesianBlocksConfig():
         errors.update(ValidationStrategies._validateDeprecatedOptions(confDict))
         
         # Check Options Type for each section of ConfDict
-        for k, v in confDict.items():
+        for _, v in confDict.items():
             if isinstance(v, dict):
                 self.checkOptionsType(**v)
         
@@ -72,7 +72,6 @@ class AGBayesianBlocksConfig():
     
     def checkOptions(self, **kwargs):
         """Check combinations of parameters."""
-        pass
 
     def checkOptionsType(self, **kwargs):
         """

@@ -187,7 +187,7 @@ class CompletionStrategies:
         return expanded_path
     
     @staticmethod
-    def _setDefaultValueNotNone(confSection, key, defaultValue): 
+    def _setDefaultValueNotNone(confSection, key, defaultValue):
         # Set the default value if the key is not defined
         confSection.setdefault(key, defaultValue)
         # Do not allow None
