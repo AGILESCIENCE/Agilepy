@@ -43,7 +43,7 @@ class TestAGBayesianBlocks():
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")
     def test_init(self, environ_test_logs_dir, config, testdata):
         """Test that the class is initialised and the mother class methods work."""
-        
+
         ag_bb = AGBayesianBlocks(config)
         
         assert str(environ_test_logs_dir) in ag_bb.getAnalysisDir()

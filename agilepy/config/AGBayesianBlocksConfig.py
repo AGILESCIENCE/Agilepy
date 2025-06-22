@@ -13,7 +13,7 @@ class AGBayesianBlocksConfig():
     def checkRequiredParams(self, confDict):
         """Check thats the required parameters are present."""
         errors = []
-        
+
         # Check required keys in "selection" section, if missing set to None
         selection = confDict.setdefault("selection", {})
         required_keys = ["file_path", "file_mode"]

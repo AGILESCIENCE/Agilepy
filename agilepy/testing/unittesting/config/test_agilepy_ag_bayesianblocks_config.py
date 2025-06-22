@@ -44,7 +44,7 @@ class TestAGBayesianBlocksConfig():
         with pytest.raises(ConfigurationsNotValidError):
             ag_base.config.loadConfigurationsForClass("AGBayesianBlocks")
 
-            
+
     @pytest.mark.testlogsdir("config/test_logs/config_bb")
     @pytest.mark.testconfig("config/conf/conf_bb.yaml")
     @pytest.mark.testdatafile("api/data/3C454.3_2010flare_86400s.ap")

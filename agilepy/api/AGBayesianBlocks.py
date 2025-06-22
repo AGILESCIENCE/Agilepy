@@ -124,7 +124,7 @@ bayesianblocks:
         with open(full_file_path,"w") as cf:
 
             cf.write(configuration)
-            
+
         return None
 
         
