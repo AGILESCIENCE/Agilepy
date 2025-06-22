@@ -54,11 +54,11 @@ class AGBayesianBlocks(AGBaseAnalysis):
 
         # Load the AGILE BB RTA class as an object
         self.agile_bblocks = AGILE_BBlocks()
-        
+
         # End initialization
         self.logger.info("AGBayesianBlocks initialized")
-        
-        
+
+
     @staticmethod
     def getConfiguration(confFilePath, outputDir, filePath,
                          userName="my_name", sourceName="bb-source", verboselvl=0,
@@ -258,22 +258,12 @@ bayesianblocks:
             self.logger.warning("Bayesian Blocks not computed yet. Plotting only data...")
             plotRate = False
         
-        if self.datamode==2:
-            plot = self.plottingUtils.plotBayesianBlocks(data=data,
-                                                         plotTDelta=plotTDelta, plotYErr=plotYErr,
-                                                         edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
-                                                         dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
-                                                         saveImage=saveImage,
-                                                         )
-        elif self.datamode==1:
-            plot = self.plottingUtils.plotBayesianBlocksUnbinned(data=data,
-                                                         plotTDelta=plotTDelta, plotYErr=plotYErr,
-                                                         edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
-                                                         dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
-                                                         saveImage=saveImage,
-                                                         )
-        else:
-            raise ValueError(f"Datamode {self.datamode} not recognised, run selectEvents first.")
+        plot = self.plottingUtils.plotBayesianBlocks(data=data, datamode=self.datamode,
+                                                     plotTDelta=plotTDelta, plotYErr=plotYErr,
+                                                     edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
+                                                     dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
+                                                     saveImage=saveImage,
+                                                     )
         
         return plot
 
