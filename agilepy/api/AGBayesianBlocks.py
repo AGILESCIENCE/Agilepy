@@ -228,7 +228,7 @@ bayesianblocks:
         self.logger.info("... done!")
         return None
     
-    def plotBayesianBlocks(self, plotYErr=True, saveImage=False, plotBayesianBlocks=True, plotRate=False, plotDataCells=False):
+    def plotBayesianBlocks(self, plotYErr=True, saveImage=False, plotBayesianBlocks=True, plotRate=False, plotDataCells=False, plotSumBlocks=False):
         """
         Plot the data and the results of the Bayesian Blocks analysis.
         
@@ -244,10 +244,10 @@ bayesianblocks:
             If True, plot the Data Cells vertical lines.
         saveImage : bool
             Write a copy of the image if True.
+        plotSumBlocks :
+            Plot the Sum of the events in the Block if True.
         """
         plotTDelta = False if self.datamode==1 else True
-        
-        plotSumBlocks = plotRate and not plotTDelta
                 
         data = {"in":self.getDataIn(),"out":self.getDataOut()}
         
@@ -258,12 +258,22 @@ bayesianblocks:
             self.logger.warning("Bayesian Blocks not computed yet. Plotting only data...")
             plotRate = False
         
-        plot = self.plottingUtils.plotBayesianBlocks(data=data,
-                                                     plotTDelta=plotTDelta, plotYErr=plotYErr,
-                                                     edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
-                                                     dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
-                                                     saveImage=saveImage,
-                                                     )
+        if self.datamode==2:
+            plot = self.plottingUtils.plotBayesianBlocks(data=data,
+                                                         plotTDelta=plotTDelta, plotYErr=plotYErr,
+                                                         edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
+                                                         dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
+                                                         saveImage=saveImage,
+                                                         )
+        elif self.datamode==1:
+            plot = self.plottingUtils.plotBayesianBlocksUnbinned(data=data,
+                                                         plotTDelta=plotTDelta, plotYErr=plotYErr,
+                                                         edgePoints=plotBayesianBlocks, meanBlocks=plotBayesianBlocks,
+                                                         dataCells=plotDataCells, plotRate=plotRate, sumBlocks=plotSumBlocks,
+                                                         saveImage=saveImage,
+                                                         )
+        else:
+            raise ValueError(f"Datamode {self.datamode} not recognised, run selectEvents first.")
         
         return plot
 
