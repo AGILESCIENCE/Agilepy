@@ -158,10 +158,19 @@ We provide a few examples below, but you can customize the command to suit your 
 
     
 
+Test Dataset
+""""""""""""
+
+Additional data for tests can be downloaded in the ``$AGILE/agilepy-test-data`` directory with:
+    
+    .. code-block::
+
+        download_test_dataset.sh
 
 
 Tips for using Docker and Jupyter Server
-"""""""""
+""""""""""""""""""""""""""""""""""""""""
+
 The general structure of a ``docker run`` command is:
 
     .. code-block::

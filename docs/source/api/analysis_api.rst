@@ -21,5 +21,5 @@ AGAnalysisWavelet
 AGBayesianBlocks
 *****************
 .. autoclass:: api.AGBayesianBlocks.AGBayesianBlocks
-    :members: __init__, getConfiguration, selectEvents, headEvents, headDetections, getDataIn, getDataOut, datamoed, sigma, bayesianBlocks, plotBayesianBlocks 
+    :members: __init__, getConfiguration, selectEvents, headEvents, headDetections, getDataIn, getDataOut, datamode, filemode, bayesianBlocks, plotBayesianBlocks
 
