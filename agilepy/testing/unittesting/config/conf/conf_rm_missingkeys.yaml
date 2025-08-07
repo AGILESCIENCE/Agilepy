@@ -1,0 +1,14 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: "$AGILEPY_UNITTESTING_DIR/api/data/PKP080686_1_3913_000.lv1.cor.gz"
+
+analysis:
+  timetype: "isot"
+  T0: "2022-10-28T13:16:27"
