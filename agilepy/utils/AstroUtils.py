@@ -159,6 +159,36 @@ class AstroUtils:
     #   Supported formats = ["jd", "mjd", "fits", "iso", "unix", "agile seconds since 2004"]
     
     UNIX_AGILE_DELTA = 1072915200
+    # AGILE_DELTA: 2004-01-01 00:00:00.000 # MJD 53005
+    
+    ############################
+    # Generic Conversion functions
+    @staticmethod
+    def convert_time_to_agile_seconds(t):
+        """Convert an astropy time object to AGILE seconds.
+
+        Args:
+            t (astropy.time.Time): Time Object.
+
+        Returns:
+            agile_time (float): Time in AGILE TT format.
+        """
+        agile_time = t.unix - AstroUtils.UNIX_AGILE_DELTA
+        return agile_time
+    
+    @staticmethod
+    def convert_time_from_agile_seconds(time_agile_seconds):
+        """Convert time from AGILE seconds format to an astropy time object.
+
+        Args:
+            time_agile_seconds (float): Time in AGILE TT format.
+
+        Returns:
+            t (astropy.time.Time): Time Object.
+        """
+        time_unix = np.array(time_agile_seconds) + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t
     
     ############################
     # Input: JD
