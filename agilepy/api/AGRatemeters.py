@@ -41,7 +41,7 @@ class AGRatemeters(AGBaseAnalysis):
         self.logger = self.agilepyLogger.getLogger(__name__, "AGRatemeters")
         
         # Set attributes
-        self._ratemeters_tables = None
+        self._ratemetersTables = None
         
         # End initialization
         self.logger.info("AGRatemeters initialized")
@@ -89,7 +89,7 @@ selection:
 
         return None
     
-    def _detrend_data(self, data, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2)):
+    def _detrendData(self, data, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2)):
         """Apply Detrending algorithm of Background Modulation using Fast Fourier Transform.
 
         Arguments:
@@ -133,27 +133,27 @@ selection:
         return data_cut_signal
             
             
-    def read_ratemeters(self, file_path=None, write_files=True):
+    def readRatemeters(self, filePath=None, writeFiles=True):
         """Read a file with ratemeters data and store it in a table.
         The table contains three columns: OBT Time (AGILE TT), Measured Counts, Detrended Counts.
         The detrending algorithm uses Fast Fourier Transforms.
         
         Parameters
         ----------
-        file_path (str) : Input file. If None, read from the configuration.
-        write_files (bool) : Boolean flag to write the ratemeters light curves.
+        filePath (str) : Input file. If None, read from the configuration.
+        writeFiles (bool) : Boolean flag to write the ratemeters light curves.
         
         Return
         ------
         ratemeters_table (dict of astropy.Table.table) : each Table contains OBT time (AGILE TT), Counts, Detrended Counts.
         """
         # If arguments are not provided explicitly, set them from the configuration
-        file_path = file_path if file_path is not None else self.config.getOptionValue("file_path")
+        filePath = filePath if filePath is not None else self.config.getOptionValue("file_path")
         
-        if not os.path.isfile(file_path):
+        if not os.path.isfile(filePath):
             raise FileNotFoundError
         
-        self.logger.info(f"Converting 3913 file: {file_path}")
+        self.logger.info(f"Converting 3913 file: {filePath}")
         
         # From every row of the 1913 file, read appropriate (time, value) and append them to each array.
         # For each row of the 3913 file, append 8 values to each array from different columns,
@@ -230,7 +230,7 @@ selection:
 
         # Read the input file
         # f"/ASDC_PROC2/DATA_2/COR/PKP{CONT}_1_3913_000.lv1.cor.gz"
-        with fits.open(file_path) as hdulist:
+        with fits.open(filePath) as hdulist:
             tbdata = hdulist[1].data
 
             for i in range(0,int(tbdata.shape[0])):
@@ -1074,21 +1074,21 @@ selection:
             #################################################
             # APPLY FFT DETRENDING OF BACKGROUND MODULATION #
             #################################################
-            GRID['COUNTS_D']     = self._detrend_data(    GRID, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2))
-            SA['COUNTS_D']       = self._detrend_data(      SA, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2))
-            MCAL['COUNTS_D']     = self._detrend_data(    MCAL, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
-            AC_SIDE0['COUNTS_D'] = self._detrend_data(AC_SIDE0, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
-            AC_SIDE1['COUNTS_D'] = self._detrend_data(AC_SIDE1, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
-            AC_SIDE2['COUNTS_D'] = self._detrend_data(AC_SIDE2, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
-            AC_SIDE3['COUNTS_D'] = self._detrend_data(AC_SIDE3, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
-            AC_SIDE4['COUNTS_D'] = self._detrend_data(AC_SIDE4, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            GRID['COUNTS_D']     = self._detrendData(    GRID, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2))
+            SA['COUNTS_D']       = self._detrendData(      SA, sampling=0.512, frequency_cut_range=(1.0E-4,1.0E-2))
+            MCAL['COUNTS_D']     = self._detrendData(    MCAL, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            AC_SIDE0['COUNTS_D'] = self._detrendData(AC_SIDE0, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            AC_SIDE1['COUNTS_D'] = self._detrendData(AC_SIDE1, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            AC_SIDE2['COUNTS_D'] = self._detrendData(AC_SIDE2, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            AC_SIDE3['COUNTS_D'] = self._detrendData(AC_SIDE3, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
+            AC_SIDE4['COUNTS_D'] = self._detrendData(AC_SIDE4, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
 
             for col in GRID.colnames:
                 self.logger.info(f"{col}: shape = {GRID[col].shape}")
             ###########################
             # CREATE RATEMETERS FILES #
             ###########################
-            if write_files:
+            if writeFiles:
                 self.logger.info(f"Writing Ratemeters Time Series in: {self.outdir}")
                 output_directory = Path(self.outdir).absolute().joinpath("rm")
                 output_directory.mkdir(exist_ok=True, parents=True)
@@ -1103,17 +1103,42 @@ selection:
                 AC_SIDE4.write(output_directory.joinpath('RM-AC4_LC.txt'), format='ascii', delimiter=' ', overwrite=True)
                 
         # Return
-        ratemeters_tables = {"GRID":GRID,"MCAL":MCAL,"SA":SA,"AC0":AC_SIDE0,"AC1":AC_SIDE1,"AC2":AC_SIDE2,"AC3":AC_SIDE3,"AC4":AC_SIDE4}
-        self._ratemeters_tables = ratemeters_tables
+        ratemetersTables = {"GRID":GRID,"MCAL":MCAL,"SA":SA,"AC0":AC_SIDE0,"AC1":AC_SIDE1,"AC2":AC_SIDE2,"AC3":AC_SIDE3,"AC4":AC_SIDE4}
+        self._ratemetersTables = ratemetersTables
         self.logger.info(f"Done.")
-        return ratemeters_tables
+        return ratemetersTables
     
     @property
-    def ratemeters_tables(self):
-        return self._ratemeters_tables
+    def ratemetersTables(self):
+        return self._ratemetersTables
     
-    
-    def analyse_signal(self, backgroundRange=(0.0,0.0), signalRange=(0.0,0.0), plotLightCurve=False):
+    def plotRatemeters(self, plotInstruments=["3RM"], plotRange=(None, None), plotDetrendedData=True):
+        """Plot Ratemeters Light Curves.
+
+        Args:
+            plotInstruments (list of str): Keys of the instruments to plot (including "3RM", "8RM"). Defaults to ["3RM"].
+            plotDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+
+        Returns:
+            plot (str or None): Plot output path.
+        """
+        # Get Data
+        ratemetersTables = self._ratemetersTables
+        
+        plot = []
+        # Plot the chosen instruments
+        for instrument_key in plotInstruments:
+            if instrument_key.upper()=="3RM":
+                raise NotImplementedError
+            elif instrument_key.upper()=="8RM":
+                raise NotImplementedError
+            else:
+                # Get Data Table
+                dataTable = ratemetersTables[instrument_key]
+        
+        return plot
+
+    def analyseSignal(self, backgroundRange=(0.0,0.0), signalRange=(0.0,0.0), plotLightCurve=False):
         """_summary_
 
         Args:
@@ -1126,11 +1151,11 @@ selection:
         """
         
         # Get Data
-        ratemeters_tables = self._ratemeters_tables
+        ratemetersTables = self._ratemetersTables
         self.logger.info(f"Analyse Ratemeters Time Series...")
         
         # Evaluate Background for every instrument, with raw and de-trended data
-        GRID = ratemeters_tables['GRID']
+        GRID = ratemetersTables['GRID']
         mask_bkg = (GRID['OBT']>backgroundRange[0])&(GRID['OBT']<backgroundRange[1])
         mask_sig = (GRID['OBT']>signalRange[0])&(GRID['OBT']<signalRange[1])
         GRID_bkg = GRID[mask_bkg]['COUNTS'].data
@@ -1156,5 +1181,5 @@ selection:
         self.logger.info(f"Done.")
         return None
     
-    def estimate_duration(self):
+    def estimateDuration(self):
         pass

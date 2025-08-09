@@ -29,10 +29,11 @@ class TestAGRatemeters:
         assert ag_rm.getOption("signal_tmin") == pytest.approx(-1.0, rel=1e-6)
         assert ag_rm.getOption("signal_tmax") == pytest.approx(3.0, rel=1e-6)
         
-        ag_rm.setOptions(signal_tmin=-2.0)
-        assert ag_rm.getOption("signal_tmin") == pytest.approx(-2.0)
+        ag_rm.setOptions(signal_tmin=-2.0, signal_tmax=4.0)
+        assert ag_rm.getOption("signal_tmin") == pytest.approx(-2.0, rel=1e-6)
+        assert ag_rm.getOption("signal_tmax") == pytest.approx( 4.0, rel=1e-6)
         
-        assert ag_rm.ratemeters_tables is None
+        assert ag_rm.ratemetersTables is None
 
 
     @pytest.mark.testlogsdir("api/test_logs/rm_read")
@@ -43,10 +44,10 @@ class TestAGRatemeters:
         
         # Define Object
         ag_rm = AGRatemeters(config)
-        assert ag_rm.ratemeters_tables is None
+        assert ag_rm.ratemetersTables is None
         
         # Run Function
-        ratemeters_tables = ag_rm.read_ratemeters()
+        ratemetersTables = ag_rm.readRatemeters()
                 
         # Assert files are written
         assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-GRID_LC.txt")

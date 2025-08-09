@@ -31,7 +31,7 @@ import pytest
 import os
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
-from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError
+from agilepy.core.CustomExceptions import ConfigurationsNotValidError, ConfigFileOptionTypeError, OptionNotFoundInConfigFileError, CannotSetNotUpdatableOptionError
 
 
 @pytest.mark.ratemeters
@@ -71,14 +71,6 @@ class TestAGRatemetersConfig():
         assert ag_base.getOption("signal_tmin") == pytest.approx(-1.0, rel=1e-6)
         assert ag_base.getOption("signal_tmax") == pytest.approx(3.0, rel=1e-6)
         
-        # Test option setting with good and bad values
-        ag_base.setOptions(signal_tmin=-2.0)
-        assert ag_base.getOption("signal_tmin") == pytest.approx(-2.0)
-        with pytest.raises(ConfigFileOptionTypeError):
-            ag_base.config.setOptions(signal_tmin="not_a_number")
-        with pytest.raises(OptionNotFoundInConfigFileError):
-            ag_base.config.setOptions(false_key="this_does_not_exist")
-
         # Test various methods
         config = ag_base.config.getConf()
         assert config["selection"]["file_path"] == testdata
@@ -91,6 +83,38 @@ class TestAGRatemetersConfig():
         
         # Test output directory, which in this case is subfolder of TEST_LOGS_DIR
         assert os.environ['TEST_LOGS_DIR'] in ag_base.getAnalysisDir()
+        
+        # Test option setting with good and bad values
+        ag_base.setOptions(signal_tmin=-2.0, signal_tmax=4.0)
+        assert ag_base.getOption("signal_tmin") == pytest.approx(-2.0)
+        assert ag_base.getOption("signal_tmax") == pytest.approx(+4.0)
+        with pytest.raises(ConfigFileOptionTypeError):
+            ag_base.config.setOptions(file_path=3)
+        with pytest.raises(OptionNotFoundInConfigFileError):
+            ag_base.config.setOptions(false_key="this_does_not_exist")
+        
+        # Test that pair options cannot be updated on their own
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(T0=594047780)
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(timetype="iso")
+        
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(background_tmin=-3.0)
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(background_tmax=-3.0)
+        
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(signal_tmin=-3.0)
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(signal_tmax=-3.0)
+        
+        # Test that Tmin and Tmax order is respected
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(signal_tmin=3.0, signal_tmax=-3.0)
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            ag_base.setOptions(background_tmin=3.0, background_tmax=-3.0)
+        
     
     
     @pytest.mark.testlogsdir("config/test_logs/config_rm_miss")
@@ -108,8 +132,16 @@ class TestAGRatemetersConfig():
         
         # Test the Config Default values
         config = ag_base.config.getConf()
-        assert config['analysis']['background_tmin'] == None
-        assert config['analysis']['background_tmax'] == None
-        assert config['analysis']['signal_tmin'] == None
-        assert config['analysis']['signal_tmax'] == None
+        assert config['analysis']['background_tmin'] == pytest.approx(-4, rel=1e-6)
+        assert config['analysis']['background_tmax'] == pytest.approx(-2, rel=1e-6)
+        assert config['analysis']['signal_tmin'] == pytest.approx(-1, rel=1e-6)
+        assert config['analysis']['signal_tmax'] == pytest.approx( 1, rel=1e-6)
 
+
+    @pytest.mark.testlogsdir("config/test_logs/config_rm_bad")
+    @pytest.mark.testconfig("config/conf/conf_rm_bad.yaml")
+    def test_config_rm_bad(self, config, environ_test_logs_dir):
+        """Test that a bad configuration with tmin>tmax raises an error."""
+        ag_base = AGBaseAnalysis(config)
+        with pytest.raises(ConfigurationsNotValidError):
+            ag_base.config.loadConfigurationsForClass("AGRatemeters")
