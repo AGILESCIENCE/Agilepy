@@ -879,3 +879,92 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
+
+    def plotRatemeters(self, data_dict, instruments, T0, x_limits=None, plotDetrendedData=True, filePath=None):
+        """Plot the Light Curve of the AGILE Scientific Ratemeters.
+
+        Args:
+            data_dict (dict[str, Table]): Keys are instrument names, values are Astropy Tables with 'OBT', 'COUNTS', 'COUNTS_D' columns.
+            instruments (list[str]): Names of the instruments to plot.
+            T0 (float): Burst T0 in AGILE seconds.
+            x_limits (tuple(float,float)): plot limits in seconds relative to T0.
+            plotDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            filePath (str): Output path of the plot.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Harcoded information
+        INSTRUMENT_COLORS = {
+            "SA": "blue",
+            "AC0": "green",
+            "AC1": "#006400",
+            "AC2": "#006400",
+            "AC3": "#006400",
+            "AC4": "#006400",
+            "MCAL": "red",
+        }
+        INSTRUMENT_RANGES = {
+            "SA": "SuperAGILE [18-60 keV]",
+            "AC0": "AC Top [50-200 keV]",
+            "AC1": "AC Lat 1 [80-200 keV]",
+            "AC2": "AC Lat 2 [80-200 keV]",
+            "AC3": "AC Lat 3 [80-200 keV]",
+            "AC4": "AC Lat 4 [80-200 keV]",
+            "MCAL": "MCAL [0.4-100 MeV]",
+            "GRID": "GRID [>50 MeV]",
+        }
+        
+        # Subplot layout: one row per instrument
+        fig = make_subplots(
+            rows=len(instruments),
+            cols=1,
+            subplot_titles=[INSTRUMENT_RANGES.get(inst, "black") for inst in instruments]
+            )
+        
+        # Add traces for each instrument
+        for i, inst in enumerate(instruments, start=1):
+            # Select data
+            data_table = data_dict[inst]
+            if x_limits is not None:
+                mask = (data_table['OBT']>T0+x_limits[0])&(data_table['OBT']<T0+x_limits[1])
+                data_table = data_table[mask]
+            time = data_table['OBT'].data - T0
+            counts = data_table['COUNTS_D'].data if plotDetrendedData else data_table['COUNTS'].data
+            time_width = data_table['OBT'][1]-data_table['OBT'][0]
+            rate = counts / time_width
+            
+            # Add Trace
+            trace_1 = go.Scatter(x=time,
+                                 y=rate,
+                                 mode='lines',
+                                 name=inst,
+                                 line=dict(shape='hv', color=INSTRUMENT_COLORS.get(inst, "black"))
+                                 )
+            fig.add_trace(trace_1, row=i, col=1)
+            # Axis labels and Limits
+            fig.update_yaxes(title_text="Counts Rate [cts/s]", row=i, col=1)
+            fig.update_xaxes(title_text="Time - T0 [s]",tickmode="array",row=i, col=1)
+            if x_limits is not None:
+                fig.update_xaxes(range=[x_limits[0], x_limits[1]], row=i, col=1)
+        
+        # Update layout
+        T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
+        detrended_flag = "Detrended " if plotDetrendedData else ""
+        fig.update_layout(
+            title_text = f"{detrended_flag}AGILE Scientific Ratemeters\nT0={T0_iso} (UTC)",
+            title_x=0.5,
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            height=300 * len(instruments),
+            showlegend=False
+        )
+        
+        # Show Image and Write Plot
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath

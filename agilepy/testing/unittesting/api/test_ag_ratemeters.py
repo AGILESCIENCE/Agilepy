@@ -61,4 +61,32 @@ class TestAGRatemeters:
         
         # Assert results
 
+    @pytest.mark.testlogsdir("api/test_logs/rm_plot")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
+    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
+    def test_plotratemeters(self, environ_test_logs_dir, config, testdata):
+        """Test plotter produces results."""
+        # Run Read Ratemeters
+        ag_rm = AGRatemeters(config)
+        assert ag_rm.ratemetersTables is None
+        ratemetersTables = ag_rm.readRatemeters()
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-GRID_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-SA_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-MCAL_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC0_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC1_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC2_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC3_LC.txt")
+        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC4_LC.txt")
+        
+        # Plot
+        plots = ag_rm.plotRatemeters(plotInstruments=["2RM","3RM","8RM","AC0","AC1","AC2","AC3","AC4","MCAL","GRID","SA"],
+                                     plotRange=(-100,100),
+                                     plotDetrendedData=True
+                                     )
+        plots+= ag_rm.plotRatemeters(plotInstruments=["AC0"] ,plotRange=(-100,100),plotDetrendedData=False)
+        plots+= ag_rm.plotRatemeters(plotInstruments=["MCAL"],plotRange=(-100,100),plotDetrendedData=False)
+        for plot in plots:
+            assert os.path.isfile(plot)
+        assert len(plots)==6
 

@@ -1120,23 +1120,36 @@ selection:
             plotDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
 
         Returns:
-            plot (str or None): Plot output path.
+            plots (list(str) or None): Plot output paths.
         """
-        # Get Data
-        ratemetersTables = self._ratemetersTables
-        
-        plot = []
+        data_flag = "D" if plotDetrendedData else "ND"
+        plots = []
         # Plot the chosen instruments
-        for instrument_key in plotInstruments:
-            if instrument_key.upper()=="3RM":
-                raise NotImplementedError
-            elif instrument_key.upper()=="8RM":
-                raise NotImplementedError
-            else:
-                # Get Data Table
-                dataTable = ratemetersTables[instrument_key]
+        if "2RM" in plotInstruments:
+            instrument_list = ["AC0","MCAL"]
+            filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_2RM.png")
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plots.append(plot)
+        if "3RM" in plotInstruments:
+            instrument_list = ["SA","AC0","MCAL"]
+            filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_3RM.png")
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plots.append(plot)
+        if "8RM" in plotInstruments:
+            instrument_list = ["SA","GRID","AC0","AC1","AC2","AC3","AC4","MCAL"]
+            filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_8RM.png")
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plots.append(plot)
+            
+        # Remove "2RM", "3RM", "8RM".
+        instrument_list = [item for item in plotInstruments if item not in ("2RM","3RM","8RM")]
+        fileName = f"ratemeters_{data_flag}_"+"_".join(instrument_list)+".png"
+        filePath = Path(self.outdir).absolute().joinpath(f"plots/{fileName}")
         
-        return plot
+        plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+        plots.append(plot)
+        
+        return plots
 
     def analyseSignal(self, backgroundRange=(0.0,0.0), signalRange=(0.0,0.0), plotLightCurve=False):
         """_summary_
@@ -1169,11 +1182,6 @@ selection:
         # But the rate is incorrect, as time bins are not 1s. 
         # Repeat for all other files. Exception SA:
         # print("SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA), 2*np.mean(BKG_SA)))
-        
-        # Plot the Light Curve.
-        # "3RM" = SA, AC0, MCAL.
-        # "8RM" = all.
-        # Each individually.
         
         
         
