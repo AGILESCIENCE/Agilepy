@@ -3,6 +3,7 @@ import numpy as np
 import os
 
 from astropy.table import Table
+from pathlib import Path
 
 from agilepy.api.AGRatemeters import AGRatemeters
 from agilepy.utils.AstroUtils import AstroUtils
@@ -39,16 +40,15 @@ class TestAGRatemeters:
     @pytest.mark.testlogsdir("api/test_logs/rm_read")
     @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
     @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
-    def test_read_ratemeters(self, environ_test_logs_dir, config, testdata):
+    def test_readRatemeters_plotRatemeters(self, environ_test_logs_dir, config, testdata):
         """Test that the ratemeters are correctly read."""
-        
         # Define Object
         ag_rm = AGRatemeters(config)
         assert ag_rm.ratemetersTables is None
-        
         # Run Function
         ratemetersTables = ag_rm.readRatemeters()
-                
+        
+        ####################
         # Assert files are written
         assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-GRID_LC.txt")
         assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-SA_LC.txt")
@@ -59,34 +59,48 @@ class TestAGRatemeters:
         assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC3_LC.txt")
         assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC4_LC.txt")
         
-        # Assert results
-
-    @pytest.mark.testlogsdir("api/test_logs/rm_plot")
-    @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
-    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
-    def test_plotratemeters(self, environ_test_logs_dir, config, testdata):
-        """Test plotter produces results."""
-        # Run Read Ratemeters
-        ag_rm = AGRatemeters(config)
-        assert ag_rm.ratemetersTables is None
-        ratemetersTables = ag_rm.readRatemeters()
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-GRID_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-SA_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-MCAL_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC0_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC1_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC2_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC3_LC.txt")
-        assert os.path.isfile(ag_rm.getAnalysisDir()+"/rm/RM-AC4_LC.txt")
+        # Check results value using the AC Top Table
+        ResTable = ratemetersTables['AC0']
         
-        # Plot
+        DataDirectory = Path(testdata).absolute().parent
+        DataTable = Table.read(DataDirectory.joinpath("GRB221028A_RM-AC0_LC.txt"), format="ascii")
+        
+        assert np.max(np.abs(DataTable['OBT']-ResTable['OBT'])) < 1e-6
+        assert np.max(np.abs(DataTable['COUNTS']-ResTable['COUNTS'])) < 1e-6
+        assert np.max(np.abs(DataTable['COUNTS_D']-ResTable['COUNTS_D'])) < 1e-6
+        ####################
+        
+        
+        ####################
+        # Test Plot Function
         plots = ag_rm.plotRatemeters(plotInstruments=["2RM","3RM","8RM","AC0","AC1","AC2","AC3","AC4","MCAL","GRID","SA"],
                                      plotRange=(-100,100),
-                                     plotDetrendedData=True
+                                     useDetrendedData=True
                                      )
-        plots+= ag_rm.plotRatemeters(plotInstruments=["AC0"] ,plotRange=(-100,100),plotDetrendedData=False)
-        plots+= ag_rm.plotRatemeters(plotInstruments=["MCAL"],plotRange=(-100,100),plotDetrendedData=False)
+        plots+= ag_rm.plotRatemeters(plotInstruments=["AC0"] ,plotRange=(-100,100),useDetrendedData=False)
+        plots+= ag_rm.plotRatemeters(plotInstruments=["MCAL"],plotRange=(-100,100),useDetrendedData=False)
         for plot in plots:
             assert os.path.isfile(plot)
         assert len(plots)==6
-
+        
+        with pytest.raises(KeyError):
+            ag_rm.plotRatemeters(plotInstruments=["Fake"])
+        ####################
+        
+        
+        ####################
+        # Test Aperture Photometry Analysis
+        detrended_AP = ag_rm.analyseSignal(useDetrendedData=True)
+        detrended_data = Table.read(DataDirectory.joinpath("GRB221028A_analysis_D.csv"))
+        assert np.max(np.abs(detrended_AP['N_ON']-detrended_data['N_ON'])) < 1e-6
+        assert np.max(np.abs(detrended_AP['t_ON']-detrended_data['t_ON'])) < 1e-6
+        assert np.max(np.abs(detrended_AP['N_OFF']-detrended_data['N_OFF'])) < 1e-6
+        assert np.max(np.abs(detrended_AP['t_OFF']-detrended_data['t_OFF'])) < 1e-6
+        
+        raw_AP = ag_rm.analyseSignal(useDetrendedData=False)
+        raw_data = Table.read(DataDirectory.joinpath("GRB221028A_analysis_ND.csv"))
+        assert np.max(np.abs(raw_AP['N_ON']-raw_data['N_ON'])) < 1e-6
+        assert np.max(np.abs(raw_AP['t_ON']-raw_data['t_ON'])) < 1e-6
+        assert np.max(np.abs(raw_AP['N_OFF']-raw_data['N_OFF'])) < 1e-6
+        assert np.max(np.abs(raw_AP['t_OFF']-raw_data['t_OFF'])) < 1e-6
+        ####################

@@ -10,6 +10,7 @@ from astropy.table import Table
 from pathlib import Path
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
+from agilepy.utils.AstroUtils import AstroUtils
 from agilepy.utils.Utils import Utils
 
 
@@ -1112,33 +1113,34 @@ selection:
     def ratemetersTables(self):
         return self._ratemetersTables
     
-    def plotRatemeters(self, plotInstruments=["3RM"], plotRange=(None, None), plotDetrendedData=True):
+    def plotRatemeters(self, plotInstruments=["3RM"], plotRange=(None, None), useDetrendedData=True):
         """Plot Ratemeters Light Curves.
 
         Args:
-            plotInstruments (list of str): Keys of the instruments to plot (including "3RM", "8RM"). Defaults to ["3RM"].
-            plotDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            plotInstruments (list of str): Keys of the instruments to plot (including "2RM", "3RM", "8RM"). Defaults to ["3RM"].
+            plotRange (tuple(float, float)): Time limits of the plots, in seconds relative to T0.
+            useDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
 
         Returns:
             plots (list(str) or None): Plot output paths.
         """
-        data_flag = "D" if plotDetrendedData else "ND"
+        data_flag = "D" if useDetrendedData else "ND"
         plots = []
         # Plot the chosen instruments
         if "2RM" in plotInstruments:
             instrument_list = ["AC0","MCAL"]
             filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_2RM.png")
-            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,useDetrendedData,filePath)
             plots.append(plot)
         if "3RM" in plotInstruments:
             instrument_list = ["SA","AC0","MCAL"]
             filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_3RM.png")
-            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,useDetrendedData,filePath)
             plots.append(plot)
         if "8RM" in plotInstruments:
             instrument_list = ["SA","GRID","AC0","AC1","AC2","AC3","AC4","MCAL"]
             filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_8RM.png")
-            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+            plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,useDetrendedData,filePath)
             plots.append(plot)
             
         # Remove "2RM", "3RM", "8RM".
@@ -1146,48 +1148,85 @@ selection:
         fileName = f"ratemeters_{data_flag}_"+"_".join(instrument_list)+".png"
         filePath = Path(self.outdir).absolute().joinpath(f"plots/{fileName}")
         
-        plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,plotDetrendedData,filePath)
+        plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,useDetrendedData,filePath)
         plots.append(plot)
         
         return plots
 
-    def analyseSignal(self, backgroundRange=(0.0,0.0), signalRange=(0.0,0.0), plotLightCurve=False):
-        """_summary_
+
+    def _analyseTable(self, data_table, backgroundRange, signalRange, useDetrendedData=True):
+        """Analyse the Burst in a given table.
 
         Args:
-            backgroundRange (tuple, optional): _description_. Defaults to (0.0,0.0).
-            signalRange (tuple, optional): _description_. Defaults to (0.0,0.0).
-            plotLightCurve (bool, optional): _description_. Defaults to False.
-
-        Returns:
-            _type_: _description_
+            data_table (astropy.table.Table): Ratemeters Light Curve Table.
+            backgroundRange (tuple(float, float)): Time range for background selection, in seconds relative to T0.
+            signalRange (tuple(float, float)): Time range for signal selection, in seconds relative to T0.
+            useDetrendedData (bool): If True, use detrended data.
+        
+        Return:
+            results (dict): Dictionary with ON and OFF counts and time interval. Also includes background rate and Li&Ma significance.
         """
+        # Get T0
+        T0 = self.getOption("T0")
         
-        # Get Data
-        ratemetersTables = self._ratemetersTables
+        time = data_table['OBT'].data - T0
+        counts = data_table['COUNTS_D'].data if useDetrendedData else data_table['COUNTS'].data
+        
+        # Evaluate Background
+        mask_bkg = (time>backgroundRange[0])&(time<backgroundRange[1])
+        time_bkg = time[mask_bkg]
+        counts_bkg = counts[mask_bkg]
+        
+        N_OFF = np.round(np.sum(counts_bkg)).astype(int) # Round is needed for detrended data
+        t_OFF = np.round(time_bkg[-1]-time_bkg[0],3)
+        
+        # Evaluate Signal
+        mask_sig = (time>signalRange[0])&(time<signalRange[1])
+        time_sig = time[mask_sig]
+        counts_sig = counts[mask_sig]
+        
+        N_ON = np.round(np.sum(counts_sig)).astype(int)
+        t_ON = np.round(time_sig[-1]-time_sig[0],3)
+        
+        # Collect Results
+        R_BKG = N_OFF/t_OFF
+        li_ma = AstroUtils.li_ma(N_ON, N_OFF, t_ON / t_OFF)
+        results = {"t_ON":t_ON,"N_ON":N_ON,"t_OFF":t_OFF,"N_OFF":N_OFF,"R_BKG":np.round(R_BKG,3),"lima":np.round(li_ma,3)}
+        
+        return results
+
+
+    def analyseSignal(self, backgroundRange=(None,None), signalRange=(None,None), useDetrendedData=True):
+        """Analyse the Burst in all tables.
+
+        Args:
+            backgroundRange (tuple(float, float)): Time range for background selection, in seconds relative to T0.
+            signalRange (tuple(float, float)): Time range for signal selection, in seconds relative to T0.
+            useDetrendedData (bool): If True, use detrended data.
+        
+        Returns:
+            results (astropy.table.Table): Results table with Aperture Photometry Information.
+        """
+        # Set Background and Signal Range from configuration if None
+        bkgRange = (backgroundRange[0] if backgroundRange[0] is not None else self.config.getOptionValue("background_tmin"),
+                    backgroundRange[1] if backgroundRange[1] is not None else self.config.getOptionValue("background_tmax")
+                    )
+        sigRange = (signalRange[0] if signalRange[0] is not None else self.config.getOptionValue("signal_tmin"),
+                    signalRange[1] if signalRange[1] is not None else self.config.getOptionValue("signal_tmax"))
+        
+        # Results table
         self.logger.info(f"Analyse Ratemeters Time Series...")
-        
-        # Evaluate Background for every instrument, with raw and de-trended data
-        GRID = ratemetersTables['GRID']
-        mask_bkg = (GRID['OBT']>backgroundRange[0])&(GRID['OBT']<backgroundRange[1])
-        mask_sig = (GRID['OBT']>signalRange[0])&(GRID['OBT']<signalRange[1])
-        GRID_bkg = GRID[mask_bkg]['COUNTS'].data
-        GRID_sig = GRID[mask_sig]['COUNTS'].data
-        GRID_bkg_det = GRID[mask_bkg]['COUNTS_D'].data
-        GRID_sig_det = GRID[mask_sig]['COUNTS_D'].data
-           
-        self.logger.info(f"GRID:\t{np.sum(GRID_sig)    } counts above a background rate of {np.mean(GRID_bkg)    } Hz")
-        self.logger.info(f"GRID:\t{np.sum(GRID_sig_det)} counts above a background rate of {np.mean(GRID_bkg_det)} Hz")
-        
-        # But the rate is incorrect, as time bins are not 1s. 
-        # Repeat for all other files. Exception SA:
-        # print("SA:\t%d counts above a background rate of %d Hz" % (np.sum(GRB_SA), 2*np.mean(BKG_SA)))
-        
-        
+        results = Table(names=("instrument","t_ON","N_ON","t_OFF","N_OFF","R_BKG","lima"),
+                        dtype=(str,float,int,float,int,float,float))
+        for instr, data_table in self._ratemetersTables.items():
+            res = self._analyseTable(data_table, bkgRange, sigRange, useDetrendedData)
+            res['instrument'] = instr
+            results.add_row(res)
+            self.logger.info(f"{instr}: {res['N_ON']} counts above a background rate of {res['R_BKG']} Hz")
         
         # Return
         self.logger.info(f"Done.")
-        return None
+        return results
     
     def estimateDuration(self):
         pass

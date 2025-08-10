@@ -880,7 +880,7 @@ class PlottingUtils(metaclass=Singleton):
             fig.show()
             return None
 
-    def plotRatemeters(self, data_dict, instruments, T0, x_limits=None, plotDetrendedData=True, filePath=None):
+    def plotRatemeters(self, data_dict, instruments, T0, x_limits=None, useDetrendedData=True, filePath=None):
         """Plot the Light Curve of the AGILE Scientific Ratemeters.
 
         Args:
@@ -888,7 +888,7 @@ class PlottingUtils(metaclass=Singleton):
             instruments (list[str]): Names of the instruments to plot.
             T0 (float): Burst T0 in AGILE seconds.
             x_limits (tuple(float,float)): plot limits in seconds relative to T0.
-            plotDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            useDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
             filePath (str): Output path of the plot.
 
         Returns:
@@ -930,7 +930,7 @@ class PlottingUtils(metaclass=Singleton):
                 mask = (data_table['OBT']>T0+x_limits[0])&(data_table['OBT']<T0+x_limits[1])
                 data_table = data_table[mask]
             time = data_table['OBT'].data - T0
-            counts = data_table['COUNTS_D'].data if plotDetrendedData else data_table['COUNTS'].data
+            counts = data_table['COUNTS_D'].data if useDetrendedData else data_table['COUNTS'].data
             time_width = data_table['OBT'][1]-data_table['OBT'][0]
             rate = counts / time_width
             
@@ -950,7 +950,7 @@ class PlottingUtils(metaclass=Singleton):
         
         # Update layout
         T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
-        detrended_flag = "Detrended " if plotDetrendedData else ""
+        detrended_flag = "Detrended " if useDetrendedData else ""
         fig.update_layout(
             title_text = f"{detrended_flag}AGILE Scientific Ratemeters\nT0={T0_iso} (UTC)",
             title_x=0.5,
