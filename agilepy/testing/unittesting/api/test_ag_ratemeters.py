@@ -40,7 +40,7 @@ class TestAGRatemeters:
     @pytest.mark.testlogsdir("api/test_logs/rm_read")
     @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
     @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
-    def test_readRatemeters_plotRatemeters(self, environ_test_logs_dir, config, testdata):
+    def test_readRatemeters(self, environ_test_logs_dir, config, testdata):
         """Test that the ratemeters are correctly read."""
         # Define Object
         ag_rm = AGRatemeters(config)
@@ -69,8 +69,14 @@ class TestAGRatemeters:
         assert np.max(np.abs(DataTable['COUNTS']-ResTable['COUNTS'])) < 1e-6
         assert np.max(np.abs(DataTable['COUNTS_D']-ResTable['COUNTS_D'])) < 1e-6
         ####################
-        
-        
+
+    @pytest.mark.testlogsdir("api/test_logs/rm_plot")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
+    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
+    def test_plotRatemeters(self, environ_test_logs_dir, config, testdata):
+        """Test that the ratemeters are correctly visualized."""
+        ag_rm = AGRatemeters(config)
+        ratemetersTables = ag_rm.readRatemeters()    
         ####################
         # Test Plot Function
         plots = ag_rm.plotRatemeters(plotInstruments=["2RM","3RM","8RM","AC0","AC1","AC2","AC3","AC4","MCAL","GRID","SA"],
@@ -87,7 +93,14 @@ class TestAGRatemeters:
             ag_rm.plotRatemeters(plotInstruments=["Fake"])
         ####################
         
-        
+    @pytest.mark.testlogsdir("api/test_logs/rm_ap")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
+    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
+    def test_analyseSignal(self, environ_test_logs_dir, config, testdata):
+        """Test that the ratemeters are correctly analysed."""
+        ag_rm = AGRatemeters(config)
+        ratemetersTables = ag_rm.readRatemeters()
+        DataDirectory = Path(testdata).absolute().parent
         ####################
         # Test Aperture Photometry Analysis
         detrended_AP = ag_rm.analyseSignal(useDetrendedData=True)
@@ -104,3 +117,37 @@ class TestAGRatemeters:
         assert np.max(np.abs(raw_AP['N_OFF']-raw_data['N_OFF'])) < 1e-6
         assert np.max(np.abs(raw_AP['t_OFF']-raw_data['t_OFF'])) < 1e-6
         ####################
+    
+    
+    @pytest.mark.testlogsdir("api/test_logs/rm_getconf")
+    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
+    def test_get_configuration(self, environ_test_logs_dir, testdata):
+        """Test the creation of a configuration file."""
+        
+        confFilePath = os.environ['TEST_LOGS_DIR'] + "/conf.yaml"
+        # Cleanup
+        if os.path.isfile(confFilePath):
+            os.remove(confFilePath)
+        assert not os.path.isfile(confFilePath)
+        # Create Configuration
+        AGRatemeters.getConfiguration(confFilePath=confFilePath, outputDir=os.environ['TEST_LOGS_DIR'],
+                                      filePath=testdata, timetype="isot", T0="2022-10-28T13:16:27",
+                                      )
+        assert os.path.isfile(confFilePath)
+        # Read it and check it
+        ag_rm = AGRatemeters(confFilePath)
+        assert ag_rm.getOption("username") == "my_name"
+        assert ag_rm.getOption("sourcename") == "rm-source"
+        assert ag_rm.getOption("filenameprefix") == "ratemeters_product"
+        assert ag_rm.getOption("logfilenameprefix") =="ratemeters_log"
+        assert ag_rm.getOption("verboselvl") == 0
+        
+        assert ag_rm.getOption('file_path') == testdata
+        
+        assert ag_rm.getOption('timetype') == "TT"
+        assert ag_rm.getOption("T0") == pytest.approx(594047787, rel=1e-6)
+        assert ag_rm.getOption("background_tmin") == pytest.approx(-4.0, rel=1e-6)
+        assert ag_rm.getOption("background_tmax") == pytest.approx(-2.0, rel=1e-6)
+        assert ag_rm.getOption("signal_tmin") == pytest.approx(-1.0, rel=1e-6)
+        assert ag_rm.getOption("signal_tmax") == pytest.approx(1.0, rel=1e-6)
+

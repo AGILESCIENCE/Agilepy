@@ -49,7 +49,8 @@ class AGRatemeters(AGBaseAnalysis):
     
 
     @staticmethod
-    def getConfiguration(confFilePath, outputDir, filePath,
+    def getConfiguration(confFilePath, outputDir, filePath, timetype, T0,
+                         background_tmin="null", background_tmax="null", signal_tmin="null", signal_tmax="null",
                          userName="my_name", sourceName="rm-source", verboselvl=0,
         ):
         """Utility method to create a configuration file.
@@ -58,6 +59,14 @@ class AGRatemeters(AGBaseAnalysis):
             confFilePath (str): the path and filename of the configuration file that is going to be created.
             outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
             filePath (str): The path to the data file. 
+            
+            timetype (str): Format of the Burst Reference Time T0.
+            T0 (float or str): Value of the Burst Reference Time T0.
+            background_tmin (float): Min Time for Background computation.
+            background_tmax (float): Max Time for Background computation.
+            signal_tmin (float): Min Time for Signal computation.
+            signal_tmax (float): Max Time for Signal computation.
+            
             userName (str): the username of who is running the software.
             sourceName (str): the name of the source.
             verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug            
@@ -78,6 +87,14 @@ output:
 
 selection:
   file_path: {filePath}
+
+analysis:
+  timetype: \"{timetype}\"
+  T0: \"{T0}\"
+  background_tmin: {background_tmin}
+  background_tmax: {background_tmax}
+  signal_tmin: {signal_tmin}
+  signal_tmax: {signal_tmax}
 
         """
         full_file_path = Utils._expandEnvVar(confFilePath)
@@ -1142,7 +1159,8 @@ selection:
             filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_{data_flag}_8RM.png")
             plot = self.plottingUtils.plotRatemeters(self._ratemetersTables,instrument_list,self.config.getOptionValue("T0"),plotRange,useDetrendedData,filePath)
             plots.append(plot)
-            
+
+        # Requested Instruments
         # Remove "2RM", "3RM", "8RM".
         instrument_list = [item for item in plotInstruments if item not in ("2RM","3RM","8RM")]
         fileName = f"ratemeters_{data_flag}_"+"_".join(instrument_list)+".png"
@@ -1228,5 +1246,3 @@ selection:
         self.logger.info(f"Done.")
         return results
     
-    def estimateDuration(self):
-        pass

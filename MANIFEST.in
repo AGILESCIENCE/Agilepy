@@ -13,6 +13,7 @@ recursive-include * *.xml
 recursive-include * *.source
 recursive-include * *.sh
 recursive-include * *.txt
+recursive-include * *.csv
 recursive-include * *.ipynb
 recursive-include * *.cts.gz
 recursive-include * *.coveragerc
