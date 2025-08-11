@@ -1035,7 +1035,7 @@ class PlottingUtils(metaclass=Singleton):
 
         # Add the Background and Signal Bands
         fig.add_vrect(x0=signalRange[0], x1=signalRange[1],
-                      fillcolor="blue", opacity=0.4, line_width=0,
+                      fillcolor="blue", opacity=0.3, line_width=0,
                       row="all", col="all"
                       )
         fig.add_vrect(x0=backgroundRange[0], x1=backgroundRange[1],

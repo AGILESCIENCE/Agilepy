@@ -166,15 +166,74 @@ class TestAGRatemeters:
         assert os.path.isfile(plot)
         
         assert data_dict["SA"]['duration']  == pytest.approx(0.00, rel=1e-6)
-        assert data_dict["AC0"]['duration']== pytest.approx(1.02, rel=1e-2)
-        assert data_dict["MCAL"]['duration'] == pytest.approx(3.07, rel=1e-2)
+        assert data_dict["AC0"]['duration'] == pytest.approx(1.02, rel=1e-2)
+        assert data_dict["MCAL"]['duration']== pytest.approx(3.07, rel=1e-2)
         
         data_dict, plot = ag_rm.estimateDuration(dataRange=(-50,50), backgroundRange=(-50,-10), useDetrendedData=True)
         assert os.path.isfile(plot)
         
         assert data_dict["SA"]['duration']  == pytest.approx(0.00, rel=1e-6)
-        assert data_dict["AC0"]['duration']== pytest.approx(1.02, rel=1e-2)
-        assert data_dict["MCAL"]['duration'] == pytest.approx(2.05, rel=1e-2)
+        assert data_dict["AC0"]['duration'] == pytest.approx(1.02, rel=1e-2)
+        assert data_dict["MCAL"]['duration']== pytest.approx(2.05, rel=1e-2)
         
         with pytest.raises(ValueError):
             _ = ag_rm.estimateDuration(dataRange=(-4,4))
+
+
+
+    @pytest.mark.testlogsdir("api/test_logs/rm_grblong")
+    @pytest.mark.testconfig("api/conf/conf_rm_GRB231129C.yaml")
+    @pytest.mark.testdatafile("api/data/PKP086465_1_3913_000.lv1.cor.gz")
+    def test_longGRB(self, environ_test_logs_dir, config, testdata):
+        """Test the RM with a long GRB."""
+        ag_rm = AGRatemeters(config)
+        DataDirectory = Path(testdata).absolute().parent
+        
+        # Read Data, Check Values
+        ratemetersTables = ag_rm.readRatemeters()
+        for instr, res in ratemetersTables.items():
+            reference = Table.read(DataDirectory.joinpath(f"086465_RM-{instr}_LC.txt"), format='ascii')
+            assert np.max(np.abs(res['OBT']-reference['OBT'])) < 1e-3
+            assert np.max(np.abs(res['COUNTS']-reference['COUNTS'])) < 1e-3
+            assert np.max(np.abs(res['COUNTS_D']-reference['COUNTS_D'])) < 1e-3
+        
+        # Plot
+        plots = ag_rm.plotRatemeters(plotInstruments=["2RM","3RM","8RM","AC0","AC1","AC2","AC3","AC4","MCAL","GRID","SA"],
+                                     plotRange=(-60,60),
+                                     useDetrendedData=True
+                                     )
+        plots+= ag_rm.plotRatemeters(plotInstruments=["3RM","AC0"] ,plotRange=(-60,60),useDetrendedData=False)
+        plots+= ag_rm.plotRatemeters(plotInstruments=["3RM","MCAL"],plotRange=(-60,60),useDetrendedData=False)
+        
+        # Aperture Photometry, Detrended
+        detrended_AP = ag_rm.analyseSignal(useDetrendedData=True)
+        detrended_AP.write(DataDirectory.joinpath("GRB231129C_analysis_D.csv"), overwrite=True)
+        reference = Table.read(DataDirectory.joinpath("GRB231129C_analysis_D.csv"))
+        assert np.max(np.abs(detrended_AP['N_ON' ]-reference['N_ON'])) < 1e-6
+        assert np.max(np.abs(detrended_AP['t_ON' ]-reference['t_ON'])) < 1e-6
+        assert np.max(np.abs(detrended_AP['N_OFF']-reference['N_OFF']))< 1e-6
+        assert np.max(np.abs(detrended_AP['t_OFF']-reference['t_OFF']))< 1e-6
+        
+        # Aperture Photometry, Not Detrended
+        raw_AP = ag_rm.analyseSignal(useDetrendedData=False)
+        raw_AP.write(DataDirectory.joinpath("GRB231129C_analysis_ND.csv"), overwrite=True)
+        reference = Table.read(DataDirectory.joinpath("GRB231129C_analysis_ND.csv"))
+        assert np.max(np.abs(raw_AP['N_ON' ]-reference['N_ON'])) < 1e-6
+        assert np.max(np.abs(raw_AP['t_ON' ]-reference['t_ON'])) < 1e-6
+        assert np.max(np.abs(raw_AP['N_OFF']-reference['N_OFF']))< 1e-6
+        assert np.max(np.abs(raw_AP['t_OFF']-reference['t_OFF']))< 1e-6
+        
+        # Duration Estimate
+        data_dict, plot = ag_rm.estimateDuration(dataRange=(-60,60), useDetrendedData=False)
+        plots.append(plot)
+        assert data_dict["AC0"]['duration'] == pytest.approx(8.20, rel=1e-2)
+        assert data_dict["MCAL"]['duration']== pytest.approx(9.22, rel=1e-2)
+        
+        data_dict, plot = ag_rm.estimateDuration(dataRange=(-60,60), useDetrendedData=True)
+        plots.append(plot)
+        assert data_dict["AC0"]['duration'] == pytest.approx(6.15, rel=1e-2)
+        assert data_dict["MCAL"]['duration']== pytest.approx(4.10, rel=1e-2)
+        
+        # Plots assert
+        for plot in plots:
+            assert os.path.isfile(plot)
