@@ -919,7 +919,7 @@ class PlottingUtils(metaclass=Singleton):
         fig = make_subplots(
             rows=len(instruments),
             cols=1,
-            subplot_titles=[INSTRUMENT_RANGES.get(inst, "black") for inst in instruments]
+            subplot_titles=[INSTRUMENT_RANGES.get(inst, "NotFound") for inst in instruments]
             )
         
         # Add traces for each instrument
@@ -952,12 +952,111 @@ class PlottingUtils(metaclass=Singleton):
         T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
         detrended_flag = "Detrended " if useDetrendedData else ""
         fig.update_layout(
-            title_text = f"{detrended_flag}AGILE Scientific Ratemeters\nT0={T0_iso} (UTC)",
+            title_text = f"{detrended_flag}AGILE Scientific Ratemeters<br>T0={T0_iso} (UTC)",
             title_x=0.5,
             xaxis=dict(tickformat="g"),
             template='plotly_white',
             hovermode="closest",
             height=300 * len(instruments),
+            showlegend=False
+        )
+        
+        # Show Image and Write Plot
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath
+
+
+    def plotRatemetersDuration(self, data_dict, instruments, T0, backgroundRange=(None,None), signalRange=(None,None), x_limits=None, filePath=None):
+        """Plot Ratemeters Light Curves for Burst Duration Computation.
+
+        Args:
+            data_dict (dict[str, Table]): Keys are instrument names, values are Astropy Tables with 'OBT', 'COUNTS', 'COUNTS_D' columns.
+            instruments (list[str]): Names of the instruments to plot.
+            T0 (float): Burst T0 in AGILE seconds.
+            x_limits (tuple(float,float)): plot limits in seconds relative to T0.
+            useDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            filePath (str): Output path of the plot.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Harcoded information
+        INSTRUMENT_RANGES = {
+            "SA": "SuperAGILE [18-60 keV]",
+            "AC0": "AC Top [50-200 keV]",
+            "AC1": "AC Lat 1 [80-200 keV]",
+            "AC2": "AC Lat 2 [80-200 keV]",
+            "AC3": "AC Lat 3 [80-200 keV]",
+            "AC4": "AC Lat 4 [80-200 keV]",
+            "MCAL": "MCAL [0.4-100 MeV]",
+            "GRID": "GRID [>50 MeV]",
+        }
+        
+        # Subplot layout: one column per instrument, two rows
+        fig = make_subplots(rows=2,cols=len(instruments),
+                            subplot_titles=[f"Light Curve {INSTRUMENT_RANGES.get(inst, 'NotFound')}" for inst in instruments]+[f"Cumulative {INSTRUMENT_RANGES.get(inst, 'NotFound')}" for inst in instruments]
+                            )
+        
+        # Add traces for each instrument
+        for i, inst in enumerate(instruments, start=1):
+            # Select data
+            data_table = data_dict[inst]
+            time = data_table['time']
+            counts=data_table['counts']
+            counts_bkgsub=data_table['counts_bkgsub']
+            integral_counts=data_table['integral_counts']
+            sigrise_time=data_table['sigrise_time']
+            
+            # Add Light Curve Trace
+            trace_1 = go.Scatter(x=time,y=counts_bkgsub,mode='lines',name=inst,line=dict(shape='hv', color="black"))
+            fig.add_trace(trace_1, row=1, col=i)
+                
+            # Add Cumulative Light Curve Trace
+            trace_2 = go.Scatter(x=time,y=integral_counts,mode='lines',name=inst,line=dict(shape='hv', color="black"))
+            fig.add_trace(trace_2, row=2, col=i)
+
+            # Add Lines for the Rising Section if present
+            try:
+                fig.add_vline(x=sigrise_time[ 0],line=dict(color="green",width=2,dash="dash"),row="all",col=i)
+                fig.add_vline(x=sigrise_time[-1],line=dict(color="green",width=2,dash="dash"),row="all",col=i)
+            except IndexError:
+                pass
+            
+            # Graphis
+            fig.update_yaxes(title_text="Counts [cts]", row=1, col=i)
+            fig.update_xaxes(title_text="Time - T0 [s]",row=1, col=i)
+            fig.update_yaxes(title_text="Counts [cts]", row=2, col=i)
+            fig.update_xaxes(title_text="Time - T0 [s]",row=2, col=i)
+            
+
+        # Add the Background and Signal Bands
+        fig.add_vrect(x0=signalRange[0], x1=signalRange[1],
+                      fillcolor="blue", opacity=0.4, line_width=0,
+                      row="all", col="all"
+                      )
+        fig.add_vrect(x0=backgroundRange[0], x1=backgroundRange[1],
+                      fillcolor="red", opacity=0.2, line_width=0,
+                      row="all", col="all"
+                      )
+        
+        # Graphics
+        if x_limits is not None:
+            fig.update_xaxes(range=[x_limits[0], x_limits[1]], row="all", col="all")
+
+        # Update layout
+        T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
+        fig.update_layout(
+            title_text = f"AGILE Scientific Ratemeters (Background Subtracted)<br>T0={T0_iso} (UTC)",
+            title_x=0.5,
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            height=900,
+            width=500 * len(instruments),
             showlegend=False
         )
         

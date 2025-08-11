@@ -1101,8 +1101,6 @@ analysis:
             AC_SIDE3['COUNTS_D'] = self._detrendData(AC_SIDE3, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
             AC_SIDE4['COUNTS_D'] = self._detrendData(AC_SIDE4, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
 
-            for col in GRID.colnames:
-                self.logger.info(f"{col}: shape = {GRID[col].shape}")
             ###########################
             # CREATE RATEMETERS FILES #
             ###########################
@@ -1130,7 +1128,7 @@ analysis:
     def ratemetersTables(self):
         return self._ratemetersTables
     
-    def plotRatemeters(self, plotInstruments=["3RM"], plotRange=(None, None), useDetrendedData=True):
+    def plotRatemeters(self, plotInstruments=["3RM"], plotRange=(-100, 100), useDetrendedData=True):
         """Plot Ratemeters Light Curves.
 
         Args:
@@ -1163,6 +1161,8 @@ analysis:
         # Requested Instruments
         # Remove "2RM", "3RM", "8RM".
         instrument_list = [item for item in plotInstruments if item not in ("2RM","3RM","8RM")]
+        if len(instrument_list)==0:
+            return plots
         fileName = f"ratemeters_{data_flag}_"+"_".join(instrument_list)+".png"
         filePath = Path(self.outdir).absolute().joinpath(f"plots/{fileName}")
         
@@ -1245,4 +1245,85 @@ analysis:
         # Return
         self.logger.info(f"Done.")
         return results
+    
+    def estimateDuration(self, dataRange, backgroundRange=(None,None), signalRange=(None,None), useDetrendedData=True, plotDuration=True):
+        """Estimate the Duration of the Burst with Cumulative Light Curves.
+
+        Args:
+            dataRange (tuple(float, float)): Time range for the plot.
+            backgroundRange (tuple(float, float)): Time range for background selection, in seconds relative to T0.
+            signalRange (tuple(float, float)): Time range for signal selection, in seconds relative to T0.
+            useDetrendedData (bool): If True, use detrended data.
+            plotDuration (bool): if True, plot the Cumulative Light Curves.
+
+        Raises:
+            ValueError: if dataRange does not contain the Background or Signal Range.
+
+        Returns:
+            data_dict (dict): Dictionary of results.
+            plot (str or None): Plot output path.
+        """
+        # Set Background and Signal Range from configuration if None
+        bkgRange = (backgroundRange[0] if backgroundRange[0] is not None else self.config.getOptionValue("background_tmin"),
+                    backgroundRange[1] if backgroundRange[1] is not None else self.config.getOptionValue("background_tmax")
+                    )
+        sigRange = (signalRange[0] if signalRange[0] is not None else self.config.getOptionValue("signal_tmin"),
+                    signalRange[1] if signalRange[1] is not None else self.config.getOptionValue("signal_tmax"))
+        # Data Range Must contain both Signal and Background ranges
+        if dataRange[0]>min(bkgRange[0],sigRange[0]): raise ValueError(f"Tmin of Data Range must be <= {min(bkgRange[0],sigRange[0])}")
+        if dataRange[1]<max(bkgRange[1],sigRange[1]): raise ValueError(f"Tmax of Data Range must be >= {min(bkgRange[1],sigRange[1])}")
+        # Set T0
+        T0 = self.config.getOptionValue("T0")
+        instruments = ["SA", "MCAL", "AC0"]
+        active_instruments = []
+        self.logger.info("Computing Duration in SuperAGILE, MCAL and AC Top...")
+            
+        data_dict={}
+        for instr in instruments:
+            # Select data in the given data range
+            data_full = self._ratemetersTables[instr]
+            mask = (data_full['OBT']>T0+dataRange[0])&(data_full['OBT']<T0+dataRange[1])
+            time  = data_full[mask]['OBT'].data - T0
+            counts= data_full[mask]['COUNTS_D'].data if useDetrendedData else data_full[mask]['COUNTS'].data
+
+            # Subtract Avg background where the detector is active (counts>0)
+            bkg_mask = (time>=bkgRange[0])&(time<=bkgRange[1])
+            bkg_mean = np.mean(counts[bkg_mask])
+            
+            # Compute the Cumulative, background subtracted Light Curve where the detector is active
+            counts_bkgsub = np.where(counts>0, counts-bkg_mean, 0)
+            integral_counts = np.cumsum(counts_bkgsub)
+
+            # Identify the Region where the Signal is rising, within the Signal Window
+            sig_mask = (time>=sigRange[0])&(time<=sigRange[1])
+            rise_mask= np.diff(integral_counts, prepend=integral_counts[0]) > 0
+            sigrise_time = time[sig_mask&rise_mask]
+            try:
+                duration = sigrise_time[-1] - sigrise_time[0]
+            except IndexError:
+                duration = 0.0
+            
+            # Bundle Results for the Plot
+            data_dict[instr] = {'time':time,'counts':counts,'counts_bkgsub':counts_bkgsub,'integral_counts':integral_counts,'sigrise_time':sigrise_time,'duration':duration}
+            
+            # Do not plot if inactive
+            if np.max(counts)<1e-3:
+                self.logger.warning(f"Detector {instr} not active.")
+                continue
+            # If active, print results and plot
+            self.logger.info(f"Duration (Signal Rise Time) in {instr}: {duration:.3g} s")
+            active_instruments.append(instr)
+        
+        # Plot if requested
+        plot = None
+        if plotDuration:
+            data_flag = "D" if useDetrendedData else "ND"
+            filePath = Path(self.outdir).absolute().joinpath(f"plots/ratemeters_duration_{data_flag}.png")
+            plot = self.plottingUtils.plotRatemetersDuration(
+                data_dict,active_instruments,self.config.getOptionValue("T0"),
+                bkgRange, sigRange, dataRange, filePath
+                )
+        # Return
+        self.logger.info(f"Done.")
+        return (data_dict, plot)
     

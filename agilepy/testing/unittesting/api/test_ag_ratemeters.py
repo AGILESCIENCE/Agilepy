@@ -151,3 +151,30 @@ class TestAGRatemeters:
         assert ag_rm.getOption("signal_tmin") == pytest.approx(-1.0, rel=1e-6)
         assert ag_rm.getOption("signal_tmax") == pytest.approx(1.0, rel=1e-6)
 
+
+    @pytest.mark.testlogsdir("api/test_logs/rm_dur")
+    @pytest.mark.testconfig("api/conf/agilepyconf_ratemeters.yaml")
+    @pytest.mark.testdatafile("api/data/PKP080686_1_3913_000.lv1.cor.gz")
+    def test_estimateDuration(self, environ_test_logs_dir, config, testdata):
+        """Test that the ratemeters are correctly analysed."""
+        ag_rm = AGRatemeters(config)
+        ratemetersTables = ag_rm.readRatemeters()
+        ag_rm.plotRatemeters()
+        ag_rm.plotRatemeters(useDetrendedData=False)
+        # Estimate Duration
+        data_dict, plot = ag_rm.estimateDuration(dataRange=(-50,50), backgroundRange=(-50,-10), useDetrendedData=False)
+        assert os.path.isfile(plot)
+        
+        assert data_dict["SA"]['duration']  == pytest.approx(0.00, rel=1e-6)
+        assert data_dict["AC0"]['duration']== pytest.approx(1.02, rel=1e-2)
+        assert data_dict["MCAL"]['duration'] == pytest.approx(3.07, rel=1e-2)
+        
+        data_dict, plot = ag_rm.estimateDuration(dataRange=(-50,50), backgroundRange=(-50,-10), useDetrendedData=True)
+        assert os.path.isfile(plot)
+        
+        assert data_dict["SA"]['duration']  == pytest.approx(0.00, rel=1e-6)
+        assert data_dict["AC0"]['duration']== pytest.approx(1.02, rel=1e-2)
+        assert data_dict["MCAL"]['duration'] == pytest.approx(2.05, rel=1e-2)
+        
+        with pytest.raises(ValueError):
+            _ = ag_rm.estimateDuration(dataRange=(-4,4))
