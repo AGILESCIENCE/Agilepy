@@ -1101,6 +1101,16 @@ analysis:
             AC_SIDE3['COUNTS_D'] = self._detrendData(AC_SIDE3, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
             AC_SIDE4['COUNTS_D'] = self._detrendData(AC_SIDE4, sampling=1.024, frequency_cut_range=(1.0E-5,3.0E-2))
 
+            # Sort by Time
+            SA.sort('OBT')
+            AC_SIDE0.sort('OBT')
+            AC_SIDE1.sort('OBT')
+            AC_SIDE2.sort('OBT')
+            AC_SIDE3.sort('OBT')
+            AC_SIDE4.sort('OBT')
+            MCAL.sort('OBT')
+            GRID.sort('OBT')
+
             ###########################
             # CREATE RATEMETERS FILES #
             ###########################
@@ -1191,7 +1201,7 @@ analysis:
         counts = data_table['COUNTS_D'].data if useDetrendedData else data_table['COUNTS'].data
         
         # Evaluate Background
-        mask_bkg = (time>backgroundRange[0])&(time<backgroundRange[1])
+        mask_bkg = (time>=backgroundRange[0])&(time<=backgroundRange[1])
         time_bkg = time[mask_bkg]
         counts_bkg = counts[mask_bkg]
         
@@ -1199,7 +1209,7 @@ analysis:
         t_OFF = np.round(time_bkg[-1]-time_bkg[0],3)
         
         # Evaluate Signal
-        mask_sig = (time>signalRange[0])&(time<signalRange[1])
+        mask_sig = (time>=signalRange[0])&(time<=signalRange[1])
         time_sig = time[mask_sig]
         counts_sig = counts[mask_sig]
         
