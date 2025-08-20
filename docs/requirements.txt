@@ -16,5 +16,6 @@ colorama
 sphinx
 sphinx_rtd_theme
 sphinx-copybutton
+myst-nb
 pytest
 pytest-cov
