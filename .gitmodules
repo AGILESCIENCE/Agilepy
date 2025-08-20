@@ -1,0 +1,3 @@
+[submodule "agilepy/external_packages/BBrta"]
+	path = agilepy/external_packages/BBrta
+	url = https://github.com/ASTRO-EDU/BBrta.git

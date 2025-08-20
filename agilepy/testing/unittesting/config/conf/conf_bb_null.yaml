@@ -1,0 +1,20 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: null
+  file_mode: null
+  ratecorrection: null
+  tstart: null
+  tstop: null
+
+bayesianblocks:
+  fitness: null
+  p0: null
+  gamma: null
+  useerror: true

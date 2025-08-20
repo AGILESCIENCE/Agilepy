@@ -8,7 +8,7 @@ WORKDIR /home/flareadvocate
 
 # Install Agilepy dependencies + library
 RUN git clone https://github.com/AGILESCIENCE/Agilepy.git 
-RUN cd Agilepy && git checkout ${AGILEPY_RELEASE}
+RUN cd Agilepy && git checkout ${AGILEPY_RELEASE} && git submodule update --init --recursive
 RUN cd Agilepy && python3 -m pip install -r requirements.lock
 RUN cd Agilepy && python3 -m pip install .
 

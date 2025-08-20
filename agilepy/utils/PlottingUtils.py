@@ -636,3 +636,246 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
+        
+        
+    def plotBayesianBlocks(self, data, datamode, plotTDelta=True, plotYErr=True, edgePoints=True, dataCells=True, meanBlocks=True, sumBlocks=False, plotRate=False, saveImage=False):
+        """
+        Plot the results of the Bayesian Blocks analysis, including the light curve, detected blocks, and optionally the mean value of each block.
+        
+        Parameters:
+        -----------
+        data : dict
+            Dictionary with input (raw) and output (processed by Bayesian Blocks) data to plot.
+        datamode : int
+            Unbinned data=1, binned data=2.
+        plotTDelta, plotYErr : bool
+            If True, include error bars based on time resolution (dt) and Poisson uncertainties in the plot.
+        edgePoints : bool
+            If True, plots the positions of the edge points between blocks.
+        dataCells : bool
+            If True, plots the positions of data cells or segments identified by the algorithm. 
+        meanBlocks : bool
+            If True, plots the mean value within each identified block.
+        sumBlocks : bool
+            If True, plots the sum within each identified block.
+        plotRate : bool
+            if True, add a second plot with the rate.
+        saveImage : bool
+            If True, save a copy of the plot.
+        """
+        
+        data_in = data["in"]
+        data_out= data["out"]
+        
+        # Error bars
+        if plotTDelta:
+            try:
+                terr = data_in['t_delta'] / 2.0
+            except Exception:
+                terr = np.full_like(data_in['x'], data_in['dt'] / 2.0)
+        else:
+            terr = np.zeros_like(data_in['x'])
+        
+        
+        # Sanity Check
+        if isinstance(data_in['sigma'], int) and plotYErr:
+            self.logger.warning(f"Incoherent options: useerror=False and then plotYErr=True. Forcing plotYErr=False")
+            plotYErr = False
+        
+        if plotYErr:
+            yerr = data_in['sigma'] # np.sqrt(self.data_in['x'])
+        else:
+            yerr = np.zeros_like(data_in['x'])
+        
+        # Datamode
+        if datamode==1:
+            data_cells = data_in['t']
+        elif datamode==2:
+            data_cells = data_in['data_cells']
+        else:
+            raise ValueError(f"Datamode {datamode} not recognised, run selectEvents first.")
+        
+        #Plotting
+        fig = make_subplots(
+            rows=2 if plotRate else 1,
+            cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.1,
+            subplot_titles=["Light Curve", "Rate Vector"] if plotRate else ["Light Curve"]
+        )
+
+        # Plot vertical lines for edge points
+        shape_ep = []
+        if edgePoints:
+            for edge_point in data_out['edge_points']:
+                sh = fig.add_shape(
+                    type='line',
+                    x0=edge_point, x1=edge_point,
+                    y0=0, y1=max(data_in['x'] + yerr),
+                    line=dict(color="green", dash='dash', width=1.5),
+                    name='Edge blocks',  # note: shapes don't appear in legend
+                    row=1, col=1,
+                )
+                shape_ep.append(sh)
+            fig.add_trace(go.Scatter(x=[None],y=[None],
+                                     mode='lines',line=dict(color="green", dash='dash', width=1.5),
+                                     name='Edge blocks',
+                                     ),
+                                     row=1, col=1
+                          ) # For legend only
+        
+        # Plot the data cells if specified
+        shape_dc = []
+        if dataCells:
+            for data_cell in data_cells:
+                sh = fig.add_shape(
+                    type='line',
+                    x0=data_cell, x1=data_cell,
+                    y0=0, y1=max(data_in['x'] + yerr),
+                    line=dict(color='gray', dash='dash', width=0.5),
+                    name='Data cells', row=1, col=1,
+                )
+                shape_dc.append(sh)
+            fig.add_trace(go.Scatter(x=[None],y=[None],
+                                     mode='lines',line=dict(color='gray', dash='dash', width=0.5),
+                                     name='Data cells',
+                                     ),
+                          row=1, col=1
+                          ) # For legend only
+        
+        # Plot the light curve with error bars
+        trace1 = go.Scatter(
+            x=data_in['t'],
+            y=data_in['x'],
+            error_x=dict(type='data', array=terr),
+            error_y=dict(type='data', array=yerr),
+            mode='markers',
+            name='Data',
+            marker=dict(size=6, color='blue'),
+            # customdata=np.stack((data_in["time_start_mjd"], data_in["time_end_mjd"], data_in["sqrt(ts)"]), axis=-1),
+            # hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}, sqrts: %{customdata[2]:.4f}",
+        )
+        fig.add_trace(trace1, row=1, col=1)
+
+        
+        
+        # Plot the mean values of the blocks if specified
+        if meanBlocks:
+            means = []
+            i_edge = 0
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                means.append(data_out['mean_blocks'][i_edge])
+            
+            trace2 = go.Scatter(
+                x=data_cells,
+                y=means,
+                mode='lines',
+                line_shape='hv',
+                name='Blocks Mean',
+                line=dict(color='purple'),
+            )
+            fig.add_trace(trace2, row=1, col=1)
+            
+        # Plot block sums as a step line
+        if sumBlocks:
+            sumb = []
+            i_edge = 0
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                sumb.append(data_out['sum_blocks'][i_edge])
+
+            trace3 = go.Scatter(
+                x=data_cells,
+                y=sumb,
+                mode='lines',
+                line_shape='hv',
+                name='Blocks Sum',
+                line=dict(color='red')
+            )
+            fig.add_trace(trace3, row=1, col=1)
+            
+            
+        # Plot rate in a second Plot if Required
+        if plotRate:
+            rates = []
+            rateblocks = []
+            i_edge = 0
+            rate_key = 'blockrate2' if data_in['datamode'] == 2 else 'blockrate'
+
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                
+                event_rate = data_out['eventrate'][i_edge]
+                block_rate = data_out[rate_key][i_edge]
+
+                rates.append(event_rate if event_rate != np.inf else 0)
+                rateblocks.append(block_rate if block_rate != np.inf else 0)
+            
+            # --- Add edge points and data cells as vertical lines in subplot 2 ---
+            ymax_rate = max(rateblocks)
+            # --- Add step plot for block rate ---
+            trace4 = go.Scatter(x=data_cells,
+                                y=rateblocks,
+                                mode='lines',
+                                line=dict(shape='hv', color='blue'),
+                                name=rate_key
+                                )
+            fig.add_trace(trace4, row=2, col=1)
+
+
+            if edgePoints:
+                for x in data_out['edge_points']:
+                    fig.add_shape(
+                        type='line',
+                        x0=x, x1=x,
+                        y0=0, y1=ymax_rate,
+                        line=dict(color="green", dash='dash', width=1.5),
+                        row=2, col=1
+                    )
+
+            if dataCells:
+                for x in data_cells:
+                    fig.add_shape(
+                        type='line',
+                        x0=x, x1=x,
+                        y0=0, y1=ymax_rate,
+                        line=dict(color='gray', dash='dash', width=0.5),
+                        row=2, col=1
+                    )
+                    
+            # --- Axis labels and formatting ---
+            fig.update_yaxes(title_text="Rate", row=2, col=1)
+            fig.update_xaxes(title_text="Time",tickangle=45,tickmode="array",row=2, col=1)
+
+        
+        # Update layout
+        fig.update_xaxes(title_text="Time",tickangle=45, showline=True, linecolor="black", row=1, col=1)
+        fig.update_yaxes(title_text="Light Curve", showline=True, linecolor="black", row=1, col=1)
+        fig.update_layout(
+            title=f"Bayesian Blocks Analysis on a Time Series",
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            showlegend=True,
+            #legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=17)),
+            #margin=dict(t=60, b=60),
+            #height=600
+        )
+        
+        # Write plot
+        if saveImage:
+            fileName = "bayesianblocks"
+            fileName+= "_results" if edgePoints else "_data"
+            fileName+= "_rate" if plotRate else ""
+            fileName+= ".png"
+            filePath = join(self.outdir,fileName)
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
