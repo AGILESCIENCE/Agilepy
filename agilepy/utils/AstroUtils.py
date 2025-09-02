@@ -159,6 +159,36 @@ class AstroUtils:
     #   Supported formats = ["jd", "mjd", "fits", "iso", "unix", "agile seconds since 2004"]
     
     UNIX_AGILE_DELTA = 1072915200
+    # AGILE_DELTA: 2004-01-01 00:00:00.000 # MJD 53005
+    
+    ############################
+    # Generic Conversion functions
+    @staticmethod
+    def convert_time_to_agile_seconds(t):
+        """Convert an astropy time object to AGILE seconds.
+
+        Args:
+            t (astropy.time.Time): Time Object.
+
+        Returns:
+            agile_time (float): Time in AGILE TT format.
+        """
+        agile_time = t.unix - AstroUtils.UNIX_AGILE_DELTA
+        return agile_time
+    
+    @staticmethod
+    def convert_time_from_agile_seconds(time_agile_seconds):
+        """Convert time from AGILE seconds format to an astropy time object.
+
+        Args:
+            time_agile_seconds (float): Time in AGILE TT format.
+
+        Returns:
+            t (astropy.time.Time): Time Object.
+        """
+        time_unix = np.array(time_agile_seconds) + AstroUtils.UNIX_AGILE_DELTA
+        t = Time(time_unix, format="unix")
+        return t
     
     ############################
     # Input: JD
@@ -333,3 +363,35 @@ class AstroUtils:
     def time_unix_to_agile_seconds(time_unix):
         t = Time(time_unix, format="unix")
         return np.round(t.unix - AstroUtils.UNIX_AGILE_DELTA)
+    
+    ###############
+    @staticmethod
+    def li_ma(n_on:int, n_off:int, alpha:float):
+        """Compute Li&Ma Significance if enough counts are provided.
+
+        Args:
+            n_on (int): ON counts.
+            n_off (int): OFF counts.
+            alpha (float): Exposure Ratio ON / OFF region.
+
+        Returns:
+            significance (float): Li&Ma Significance
+        """
+
+        if n_on < 10 or n_off < 10 or alpha == 0:
+            return 0.0
+        fc = (1 + alpha) / alpha
+        fb = n_on / (n_on + n_off)
+        f  = fc * fb
+        
+        gc = 1 + alpha
+        gb = n_off / (n_on + n_off)
+        g  = gc * gb
+        
+        first  = n_on * np.log(f)
+        second = n_off * np.log(g)
+        
+        fullb   = first + second
+        significance = np.sqrt(2) * np.sqrt(fullb)
+        
+        return significance

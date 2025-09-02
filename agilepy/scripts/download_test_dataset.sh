@@ -37,5 +37,9 @@ wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download
 tar -xzf bayesian_blocks.tar.gz && \
 rm bayesian_blocks.tar.gz
 
+wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL" -O ratemeters.tar.gz && rm -rf /tmp/cookies.txt && \
+tar -xzf ratemeters.tar.gz && \
+rm ratemeters.tar.gz
+
 # End
 echo "Download completed!"

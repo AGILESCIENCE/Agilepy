@@ -22,6 +22,8 @@ There're several categories of tutorial notebooks:
 - `Wavelet analysis <../_static/notebooks/wavelet_analysis.html>`_: it shows how to use the Agilepy's wavelet analysis API. 
 - engineering_api_tutorial: they show how to use the Agilepy's engineering analysis API. 
 - `Bayesian Blocks analysis <../_static/notebooks/BayesianBlocks_tutorial.ipynb>`_: run the Bayesian Blocks algorithm on AGILE light curves produced by Maximum Likelihood or Aperture Photometry algorithms, or on unbinnned data.
+- `Ratemeters analysis <../_static/notebooks/Ratemeters_tutorial.ipynb>`_: Tutorial for the analysis of the Light Curves produced by the AGILE Scientific Ratemeters.
+
 
 The following notebook is another useful example of the use of Agilepy that is runned downloading AGILE data from SSDC website:
 

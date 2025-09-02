@@ -23,3 +23,7 @@ AGBayesianBlocks
 .. autoclass:: api.AGBayesianBlocks.AGBayesianBlocks
     :members: __init__, getConfiguration, selectEvents, headEvents, headDetections, getDataIn, getDataOut, datamode, filemode, bayesianBlocks, plotBayesianBlocks
 
+AGRatemeters
+************
+.. autoclass:: api.AGRatemeters.AGRatemeters
+    :members: __init__, getConfiguration, readRatemeters, ratemetersTables, plotRatemeters, analyseSignal, estimateDuration

@@ -1,8 +1,8 @@
 output:
   outdir: $TEST_LOGS_DIR
-  filenameprefix: test_rm
-  logfilenameprefix: test_rm
-  sourcename: src-rm-test
+  filenameprefix: testcase
+  logfilenameprefix: testcase
+  sourcename: source-test
   username: user-test
   verboselvl: 2
 
@@ -12,7 +12,7 @@ selection:
 analysis:
   timetype: "isot"
   T0: "2022-10-28T13:16:27"
-  background_tmin: -100.0
-  background_tmax: -90.0
-  signal_tmin: -1.0
-  signal_tmax: 3.0
+  signal_tmin: 3.0
+  signal_tmax: 1.0
+  background_tmin: -4.0
+  background_tmax: -10.0
