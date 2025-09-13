@@ -94,7 +94,7 @@ class AGBayesianBlocksConfig():
             elif optionName in ["ratecorrection", "tstart", "tstop", "p0", "gamma"]:
                 validType = (Number, 0)
             # String
-            elif optionName in ["logfile", "filenameprefix", "logfilenameprefix", "sourcename", "username",
+            elif optionName in ["logfile", "filenameprefix", "sourcename", "username",
                                 "file_path", "file_mode", "fitness",
                                 ]:
                 validType = (str, 0)

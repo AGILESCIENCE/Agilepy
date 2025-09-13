@@ -36,7 +36,6 @@ These parameters are common to all ``Agilepy`` classes.
 
    "outdir", "string", "", "yes", "Output Directory."
    "filenameprefix", "string", "analysis_product", "no", "Prefix for files."
-   "logfilenameprefix", "string", "analysis_log", "no", "Prefix for log files."
    "sourcename", "string", "bb-source", "no", "Tag with source name."
    "username", "string", "my_name", "no", "Tag with user name."
    "verboselvl", "int", "0", "yes", "0 for no extra logs, 1 for INFO, 2 for DEBUG."

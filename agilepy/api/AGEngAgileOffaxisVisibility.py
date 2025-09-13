@@ -88,7 +88,6 @@ class AGEngAgileOffaxisVisibility(AGBaseAnalysis):
 output:
   outdir: %s
   filenameprefix: eng_product
-  logfilenameprefix: eng_log
   username: %s
   sourcename: offaxis
   verboselvl: %d

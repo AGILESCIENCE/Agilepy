@@ -7,7 +7,6 @@ input:
 output:
   outdir: $AGILE/agilepy-test-data/unittesting-output/config
   filenameprefix: testcase
-  logfilenameprefix: testcase
   sourcename: source-test
   username: user-test
   verboselvl: 1

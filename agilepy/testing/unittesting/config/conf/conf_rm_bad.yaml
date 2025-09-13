@@ -1,7 +1,6 @@
 output:
   outdir: $TEST_LOGS_DIR
   filenameprefix: testcase
-  logfilenameprefix: testcase
   sourcename: source-test
   username: user-test
   verboselvl: 2

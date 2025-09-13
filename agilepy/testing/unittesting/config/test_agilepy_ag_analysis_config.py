@@ -73,8 +73,6 @@ class TestAGAnalysisConfig():
 
         with pytest.raises(CannotSetNotUpdatableOptionError):
             config.setOptions(verboselvl=2)
-        with pytest.raises(CannotSetNotUpdatableOptionError):
-            config.setOptions(logfilenameprefix="pippo")
 
         with pytest.raises(OptionNotFoundInConfigFileError):
             config.setOptions(pdor="kmer")

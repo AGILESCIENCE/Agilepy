@@ -80,7 +80,6 @@ class AGRatemeters(AGBaseAnalysis):
 output:
   outdir: {outputDir}
   filenameprefix: ratemeters_product
-  logfilenameprefix: ratemeters_log
   sourcename: {sourceName}
   username: {userName}
   verboselvl: {verboselvl}

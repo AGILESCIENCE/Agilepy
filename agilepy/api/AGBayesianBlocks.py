@@ -97,7 +97,6 @@ class AGBayesianBlocks(AGBaseAnalysis):
 output:
   outdir: {outputDir}
   filenameprefix: analysis_product
-  logfilenameprefix: analysis_log
   sourcename: {sourceName}
   username: {userName}
   verboselvl: {verboselvl}

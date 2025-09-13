@@ -347,7 +347,6 @@ class TestAGBayesianBlocks():
         assert ag_bb.getOption("username") == "my_name"
         assert ag_bb.getOption("sourcename") == "bb-source"
         assert ag_bb.getOption("filenameprefix") == "analysis_product"
-        assert ag_bb.getOption("logfilenameprefix") =="analysis_log"
         assert ag_bb.getOption("verboselvl") == 0
         
         assert ag_bb.getOption('file_path') == testdata
