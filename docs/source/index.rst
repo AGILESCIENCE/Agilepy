@@ -28,6 +28,8 @@ The main purpose of the package is to provide an easy to use high-level Python i
   manual/work_with_sources
   manual/products
   manual/advanced_configuration
+  manual/bayesian_blocks
+  manual/ratemeters
 
 
 .. toctree::
