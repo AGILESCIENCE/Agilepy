@@ -139,7 +139,6 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
 output:
   outdir: %s
   filenameprefix: eng_product
-  logfilenameprefix: eng_log
   username: %s
   sourcename: agilefermioffaxis
   verboselvl: %d

@@ -150,7 +150,7 @@ class AGRatemetersConfig():
             elif optionName in ["background_tmin", "background_tmax", "signal_tmin", "signal_tmax", "T0"]:
                 validType = (Number, 0)
             # String
-            elif optionName in ["logfile", "filenameprefix", "logfilenameprefix", "sourcename", "username", "file_path", "timetype"]:
+            elif optionName in ["logfile", "filenameprefix", "sourcename", "username", "file_path", "timetype"]:
                 validType = (str, 0)
             # Path
             elif optionName in ["outdir"]:

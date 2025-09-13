@@ -559,7 +559,6 @@ class TestAGAnalysis:
 
         ag.destroy()
 
-    #@pytest.mark.skip("Fails on MACOS")
     @pytest.mark.testlogsdir("api/test_logs/test_aperture_photometry")
     @pytest.mark.testconfig("api/conf/agilepyconf.yaml")
     @pytest.mark.testdatafiles(["api/conf/sourcesconf_1.txt"])

@@ -139,7 +139,6 @@ class TestAGRatemeters:
         assert ag_rm.getOption("username") == "my_name"
         assert ag_rm.getOption("sourcename") == "rm-source"
         assert ag_rm.getOption("filenameprefix") == "ratemeters_product"
-        assert ag_rm.getOption("logfilenameprefix") =="ratemeters_log"
         assert ag_rm.getOption("verboselvl") == 0
         
         assert ag_rm.getOption('file_path') == testdata

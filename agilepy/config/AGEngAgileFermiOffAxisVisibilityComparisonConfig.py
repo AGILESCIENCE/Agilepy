@@ -24,7 +24,7 @@ class AGEngAgileFermiOffAxisVisibilityComparisonConfig:
             validType = ()
 
             # String
-            if optionName in ["logfile", "outdir", "filenameprefix", "logfilenameprefix"]:
+            if optionName in ["logfile", "outdir", "filenameprefix"]:
 
                 validType = (str, 0)
 

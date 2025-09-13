@@ -47,7 +47,6 @@ The method above will create the following configuration file:
   output:
     outdir: $HOME/agilepy_analysis
     filenameprefix: analysis_product
-    logfilenameprefix: analysis_log
     sourcename: sourcename
     username: username
     verboselvl: 2
@@ -183,7 +182,6 @@ The *'verboselvl'* option sets the verbosity of the Agilepy console logger. The 
 
    "outdir", "Path of the output directory", "str", "yes", "null"
    "filenameprefix", "The filename prefix of each output file", "str", "yes", "null"
-   "logfilenameprefix", "The filename prefix of the log file", "str", "yes", "null"
    "sourcename", "The name of the source under analysis", "str", "yes", "null"
    "userName", "The name of the user performing the analysis", "str", "yes", "null" 
    "verboselvl", "| 0 ⇒ *CRITICAL* and *WARNING* messages are logged on the console.

@@ -83,9 +83,6 @@ class AgilepyConfig(Observable):
         if user_conf["output"]["filenameprefix"] is None:
             errors.append("Please, set output/filenameprefix")
 
-        if user_conf["output"]["logfilenameprefix"] is None:
-            errors.append("Please, set output/logfilenameprefix")
-
         if user_conf["output"]["sourcename"] is None:
             errors.append("Please, set output/sourcename")
 
@@ -250,7 +247,7 @@ class AgilepyConfig(Observable):
 
     @staticmethod
     def _notUpdatable(optionName):
-        if optionName in ["userestapi", "datapath", "logfilenameprefix", "verboselvl"]:
+        if optionName in ["userestapi", "datapath", "verboselvl"]:
             return True
         return False
 

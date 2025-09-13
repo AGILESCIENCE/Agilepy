@@ -1,21 +1,11 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Set the directory path (change this to your target directory)
 DIR="$AGILE/agilepy-test-data/"
 
-# # Check if the directory exists
-# if [ -d "$DIR" ]; then
-#   echo "Directory $DIR exists. Removing it..."
-#   rm -rf "$DIR"
-#   echo "Directory removed."
-# else
-#   echo "Directory $DIR does not exist."
-# fi
-# 
-# # Create the directory
-# mkdir -p "$DIR"
-# echo "Directory $DIR created."
+# Ensure directory exists
+mkdir -p "$DIR"
 
 # Move into the directory
 cd "$DIR" || { echo "Failed to enter directory $DIR"; exit 1; }
@@ -24,22 +14,30 @@ echo "Now inside $DIR"
 # Download test dataset
 echo "Download test dataset..."
 
-# These are downloaded in the base image
-# wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1B31SCrHoOU0KnZoaZ7NTq6nY_PTD-ner' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1B31SCrHoOU0KnZoaZ7NTq6nY_PTD-ner" -O test_dataset_6.0.tar.gz && rm -rf /tmp/cookies.txt && \
-# tar -xzf test_dataset_6.0.tar.gz && \
-# rm test_dataset_6.0.tar.gz
+# Function to download and extract only if missing
+download_and_extract() {
+    local id="$1"
+    local tar_name="$2"
+    local extract_dir="$3"
 
-# wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1B3Tp-01-X7Cwh6lq11BUCiaHuctj0iDW' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1B3Tp-01-X7Cwh6lq11BUCiaHuctj0iDW" -O test_dataset_agn.tar.gz && rm -rf /tmp/cookies.txt && \
-# tar -xzf test_dataset_agn.tar.gz && \
-# rm test_dataset_agn.tar.gz
+    if [ -d "$extract_dir" ]; then
+        echo " $extract_dir already exists, skipping download."
+    else
+        echo " Downloading $tar_name ..."
+        wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate "https://docs.google.com/uc?export=download&id=$id" -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1/p')&id=$id" -O "$tar_name" && \
+        rm -f /tmp/cookies.txt && \
+        tar -xzf "$tar_name" && \
+        rm "$tar_name"
 
-wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1dRfBltxWvijKjxgU9lHTJRm--l8tbgGZ' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1dRfBltxWvijKjxgU9lHTJRm--l8tbgGZ" -O bayesian_blocks.tar.gz && rm -rf /tmp/cookies.txt && \
-tar -xzf bayesian_blocks.tar.gz && \
-rm bayesian_blocks.tar.gz
+        echo " Extracted $extract_dir"
+    fi
+}
 
-wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL" -O ratemeters.tar.gz && rm -rf /tmp/cookies.txt && \
-tar -xzf ratemeters.tar.gz && \
-rm ratemeters.tar.gz
+# Datasets
+download_and_extract "1B31SCrHoOU0KnZoaZ7NTq6nY_PTD-ner" "test_dataset_6.0.tar.gz" "test_dataset_6.0"
+download_and_extract "1B3Tp-01-X7Cwh6lq11BUCiaHuctj0iDW" "test_dataset_agn.tar.gz" "test_dataset_agn"
+download_and_extract "1dRfBltxWvijKjxgU9lHTJRm--l8tbgGZ" "bayesian_blocks.tar.gz" "bayesian_blocks"
+download_and_extract "1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL" "ratemeters.tar.gz" "ratemeters"
 
 # End
 echo "Download completed!"
