@@ -25,17 +25,10 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import shutil
 import pytest
-import unittest
-from pathlib import Path
 from xml.etree.ElementTree import parse
 
 from agilepy.core.source.Source import Source, PointSource
-from agilepy.core.AgilepyLogger import AgilepyLogger
-from agilepy.config.AgilepyConfig import AgilepyConfig
-from agilepy.core.SourcesLibrary import SourcesLibrary
 from agilepy.core.source.Spectrum import Spectrum
 from agilepy.core.CustomExceptions import SourceParameterNotFound
 
