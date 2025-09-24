@@ -28,16 +28,16 @@
 import pytest
 from pathlib import Path
 from agilepy.utils.Utils import Utils
-from agilepy.api.AGEngAgileOffaxisVisibility import AGEngAgileOffaxisVisibility
+from agilepy.api.AGVisibility import AGVisibility
 
-class TestAGEngAgileOffaxisVisibility:
+class TestAGVisibility:
 
     @pytest.mark.skip("To be fixed")
     @pytest.mark.testlogsdir("api/test_logs/test_compute_pointing_distances_from_source")
     @pytest.mark.testconfig("api/conf/agilepyconf_ageng.yaml")
     def test_compute_pointing_distances_from_source(self, config, logger):
 
-        ageng = AGEngAgileOffaxisVisibility(config)
+        ageng = AGVisibility(config)
 
         # file = "/data/AGILE/LOG_INDEX/LOG.log.index"
         zmax = 60
@@ -55,7 +55,7 @@ class TestAGEngAgileOffaxisVisibility:
     @pytest.mark.testconfig("api/conf/agilepyconf_ageng.yaml")
     def test_visibility_plot(self, config, logger):
 
-        ageng = AGEngAgileOffaxisVisibility(config)
+        ageng = AGVisibility(config)
 
         src_x=129.7
         src_y=3.7

@@ -2,9 +2,9 @@
 Engineering API
 ***************
 
-AGEngAgileOffaxisVisibility
+AGVisibility
 ***************************
-.. autoclass:: api.AGEngAgileOffaxisVisibility.AGEngAgileOffaxisVisibility
+.. autoclass:: api.AGVisibility.AGVisibility
     :members: __init__, getConfiguration, visibilityPlot
 
 AGEngAgileFermiOffAxisVisibilityComparison

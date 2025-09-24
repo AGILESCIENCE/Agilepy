@@ -35,7 +35,7 @@ from os.path import dirname, realpath, join
 from pathlib import Path
 
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
-from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
+from agilepy.config.AGVisibilityConfig import AGVisibilityConfig
 from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
 from agilepy.config.AGAnalysisWaveletConfig import AGAnalysisWaveletConfig
 from agilepy.config.AGBayesianBlocksConfig import AGBayesianBlocksConfig
@@ -109,7 +109,7 @@ class AgilepyConfig(Observable):
 
         elif className == "AGEngAgileOffaxisVisibility":
 
-            self.analysisConfig = AGEngAgileOffaxisVisibilityConfig()
+            self.analysisConfig = AGVisibilityConfig()
 
 
         elif className == "AGEngAgileFermiOffAxisVisibilityComparison":
