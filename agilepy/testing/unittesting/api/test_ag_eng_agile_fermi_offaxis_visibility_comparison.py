@@ -29,7 +29,7 @@ import os
 import pytest
 from pathlib import Path
 
-from agilepy.api.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
+from agilepy.external_packages.ap.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
 
 from agilepy.utils.Utils import Utils
 from agilepy.utils.AstroUtils import AstroUtils

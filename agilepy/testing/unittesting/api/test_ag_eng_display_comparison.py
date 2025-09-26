@@ -29,8 +29,8 @@ import os
 import pytest
 from pathlib import Path
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.api.AGEngDisplayComparison import AGEngDisplayComparison
-from agilepy.api.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
+from agilepy.external_packages.offaxis.AGEngDisplayComparison import AGEngDisplayComparison
+from agilepy.external_packages.ap.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
 class TestAGEngDisplayComparison:
 
     @pytest.fixture

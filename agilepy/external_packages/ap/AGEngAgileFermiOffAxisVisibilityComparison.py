@@ -36,23 +36,6 @@ from pathlib import Path
 
 class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
     """This class contains the high-level API methods to run offaxis and offaxis_ap_comparison tools. It's a AGEng subclass"""
-    
-    def __init__(self, configurationFilePath):
-        """AGEngAgileFermiOffAxisVisibilityComparison constructor.
-
-        Args:
-            configurationFilePath (str): the relative or absolute path to the yaml configuration file.
-
-        Example:
-            >>> from agilepy.api.AGEngAgileFermiOffAxisVisibilityComparison import AGEngAgileFermiOffAxisVisibilityComparison
-            >>> ageng = AGEngAgileFermiOffAxisVisibilityComparison('agconfig.yaml')
-
-        """
-        super().__init__(configurationFilePath)
-
-        self.config.loadConfigurationsForClass("AGEngAgileFermiOffAxisVisibilityComparison")
-
-        self.logger = self.agilepyLogger.getLogger(__name__, "AGEngAgileFermiOffAxisVisibilityComparison")
 
 
 
@@ -119,46 +102,3 @@ class AGEngAgileFermiOffAxisVisibilityComparison(AGBaseAnalysis):
         #print(f'!!! times apOffAxisComparation {tstart_mjd} {trigger_time_tt}')
         comparison.load_and_plot(agile_pathAP, fermi_pathAP, tstart_mjd, tstop_mjd, path_offaxis, zmax=zmax, vertical_boxes_mjd=vertical_boxes_mjd, timetype=timetype, data_column_name=data_column_name, time_range=time_range, trigger_time_tt=trigger_time_tt, add_rm=add_rm, rm_files=rm_files, rm_labels=rm_labels)
 
-
-
-    @staticmethod
-    def getConfiguration(confFilePath, userName, outputDir, verboselvl):
-        """Utility method to create a configuration file.
-
-        Args:
-            confFilePath (str): the path and filename of the configuration file that is going to be created.
-            userName (str): the username of who is running the software.
-            outputDir (str): the path to the output directory. The output directory will be created using the following format: 'userName_sourceName_todaydate'
-            verboselvl (int): the verbosity level of the console output. Message types: level 0 => critical, warning, level 1 => critical, warning, info, level 2 => critical, warning, info, debug
-
-        Returns:
-            None
-        """
-
-        configuration = """
-output:
-  outdir: %s
-  filenameprefix: eng_product
-  username: %s
-  sourcename: agilefermioffaxis
-  verboselvl: %d
-
-        """%(outputDir, userName, verboselvl)
-
-        with open(Utils._expandEnvVar(confFilePath),"w") as cf:
-
-            cf.write(configuration)
-
-
-
-    @staticmethod
-    def checkRequiredParams(confDict):
-        pass
-    
-    @staticmethod
-    def completeConfiguration(confDict):
-        pass
-
-    @staticmethod
-    def validateConfiguration(confDict):
-        pass
