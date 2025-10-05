@@ -78,7 +78,7 @@ class AGVisibilityConfig:
         
         # Complete section with default values: Selection
         sectionDict = confDict['selection']
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "step",  30.0)
+        CompletionStrategies._setDefaultValueNotNone(sectionDict, "step",  1.0)
         
         CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmin", 104371200) # 2007-04-23 00:00:00
         CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmax", 632620800) # 2024-01-18 00:00:00
