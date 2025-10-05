@@ -3,13 +3,16 @@ Agilepy
 
 Agilepy is an open-source Python package developed at `INAF/OAS Bologna <https://www.oas.inaf.it>`_  to analyse AGILE/GRID data built on top of the command-line version of the AGILE/GRID Science Tools.   
 
-The main purpose of the package is to provide an easy to use high-level Python interface to analyse AGILE/GRID data by simplifying the configuration of the tasks and ensuring straightforward access to the data.  The current features are the generation and display of sky maps and light curves, the access to gamma-ray sources catalogues, the analysis to perform spectral model and position fitting including the background evaluation, the aperture photometry analysis, and the wavelet analysis.   In addition, Agilepy provides an engineering interface to analyse the time evolution of the AGILE off-axis viewing angle for a chosen sky region, comparing them with Fermi/LAT off-axis evolution.  
+The main purpose of the package is to provide an easy to use high-level Python interface to analyse AGILE/GRID data by simplifying the configuration of the tasks and ensuring straightforward access to the data.
+The current features are the generation and display of sky maps and light curves, the access to gamma-ray sources catalogues, the analysis to perform spectral model and position fitting including the background evaluation, the aperture photometry analysis, the bayesian blocks analysis and the wavelet analysis.
+In addition, Agilepy provides a visibiliy interface to analyse the time evolution of the AGILE off-axis viewing angle for a chosen sky region, comparing them with Fermi/LAT off-axis evolution.
+The analysis of the AGILE Scientific Ratemeters is also possible.
 
-Agilepy is similar to Fermipy (https://fermipy.readthedocs.io/)  and gammapy  (https://docs.gammapy.org/) tools, providing a common way to analyse gamma-ray data.  
+Agilepy is similar to `Fermipy <https://fermipy.readthedocs.io/>`_ and `gammapy <https://docs.gammapy.org/>`_ tools, providing a common way to analyse gamma-ray data.
 
-Agilepy provides the last version of the available Science Tools (BUILD25), the H0025 instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
+Agilepy provides the last version of the available Science Tools (BUILD26), the H0025 instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
 
-Agilepy (and its dependencies) can be easily installed using Anaconda (https://www.anaconda.com/).
+Agilepy (and its dependencies) can be easily installed using `Docker <https://docs.docker.com/get-docker/>`_.
 
 .. note:: **AGILE DATASET DOWNLOAD**: 
           Now it possible to download all the public AGILE dataset stored on SSDC datacenter through a REST Api. 

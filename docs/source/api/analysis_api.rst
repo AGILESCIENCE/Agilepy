@@ -27,3 +27,8 @@ AGRatemeters
 ************
 .. autoclass:: api.AGRatemeters.AGRatemeters
     :members: __init__, getConfiguration, readRatemeters, ratemetersTables, plotRatemeters, analyseSignal, estimateDuration
+
+AGVisibility
+************
+.. autoclass:: api.AGVisibility.AGVisibility
+    :members: __init__, getConfiguration, computePointingDirection, getFermiPointing, plotVisibility, agileVisibility, fermiVisibility
