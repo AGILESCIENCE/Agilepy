@@ -38,6 +38,7 @@ download_and_extract "1B31SCrHoOU0KnZoaZ7NTq6nY_PTD-ner" "test_dataset_6.0.tar.g
 download_and_extract "1B3Tp-01-X7Cwh6lq11BUCiaHuctj0iDW" "test_dataset_agn.tar.gz" "test_dataset_agn"
 download_and_extract "1dRfBltxWvijKjxgU9lHTJRm--l8tbgGZ" "bayesian_blocks.tar.gz" "bayesian_blocks"
 download_and_extract "1m7DhHHxiU3Q81biNvTGRAhFjP0j5IJfL" "ratemeters.tar.gz" "ratemeters"
+download_and_extract "1GuOG9B4CgD-GqbTrPPIghea275THApoe" "visibility.tar.gz" "visibility"
 
 # End
 echo "Download completed!"
