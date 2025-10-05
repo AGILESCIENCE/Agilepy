@@ -161,6 +161,9 @@ class AstroUtils:
     UNIX_AGILE_DELTA = 1072915200
     # AGILE_DELTA: 2004-01-01 00:00:00.000 # MJD 53005
     
+    UNIX_FERMI_DELTA = 978307200
+    # FERMI_DELTA: 2001-01-01 00:00:00.000 # MJD 51910
+    
     ############################
     # Generic Conversion functions
     @staticmethod
@@ -189,6 +192,61 @@ class AstroUtils:
         time_unix = np.array(time_agile_seconds) + AstroUtils.UNIX_AGILE_DELTA
         t = Time(time_unix, format="unix")
         return t
+    
+    @staticmethod
+    def convert_time_to_fermi_seconds(t):
+        """Convert an astropy time object to FERMI seconds.
+
+        Args:
+            t (astropy.time.Time): Time Object.
+
+        Returns:
+            fermi_time (float): Time in Fermi MET format.
+        """
+        fermi_time = t.unix - AstroUtils.UNIX_FERMI_DELTA
+        return fermi_time
+    
+    @staticmethod
+    def convert_time_from_fermi_seconds(time_fermi_seconds):
+        """Convert time from Fermi seconds format to an astropy time object.
+
+        Args:
+            time_fermi_seconds (float): Time in Fermi MET format.
+
+        Returns:
+            t (astropy.time.Time): Time Object.
+        """
+        time_unix = np.array(time_fermi_seconds) + AstroUtils.UNIX_FERMI_DELTA
+        t = Time(time_unix, format="unix")
+        return t
+    
+    @staticmethod
+    def time_fermi_to_agile(fermi_time):
+        """Convert Fermi MET (s since 2001-01-01) to AGILE time (s since 2004-01-01).
+        
+        Args:
+            fermi_time (float): Time in Fermi MET format.
+            
+        Returns:
+            agile_time (float): Time in AGILE TT format.
+        """
+        AGILE_OFFSET_FROM_FERMI = AstroUtils.UNIX_AGILE_DELTA - AstroUtils.UNIX_FERMI_DELTA
+        agile_time = fermi_time - AGILE_OFFSET_FROM_FERMI
+        return agile_time
+
+    @staticmethod
+    def time_agile_to_fermi(agile_time):
+        """Convert AGILE time (s since 2004-01-01) to Fermi MET (s since 2001-01-01).
+        
+        Args:
+            agile_time (float): Time in AGILE TT format.
+            
+        Returns:
+            fermi_time (float): Time in Fermi MET format.
+        """
+        AGILE_OFFSET_FROM_FERMI = AstroUtils.UNIX_AGILE_DELTA - AstroUtils.UNIX_FERMI_DELTA
+        fermi_time = agile_time + AGILE_OFFSET_FROM_FERMI
+        return fermi_time
     
     ############################
     # Input: JD

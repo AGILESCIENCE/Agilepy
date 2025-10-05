@@ -36,12 +36,7 @@ from os.path import join, expandvars
 from pathlib import Path
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
-from agilepy.utils.Utils import Utils, expandvars
-
-from agilepy.utils.PlottingUtils import PlottingUtils
-from agilepy.core.AgilepyLogger import AgilepyLogger
 from agilepy.utils.AstroUtils import AstroUtils
-from agilepy.core.CustomExceptions import WrongCoordinateSystemError
 
 class AGVisibility(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run the visibility analysis.
@@ -153,51 +148,12 @@ source:
     def fermiVisibility(self):
         return self._fermiTable
 
-    def visibilityPlot(self, logfilesIndex, tmin, tmax, src_x, src_y, ref, zmax=60, step=1, writeFiles=True, computeHistogram=True, saveImage=True, fileFormat="png", title="Visibility Plot"):
-        """ Compute the angular separations between the center of the
-        AGILE GRID field of view and the coordinates for a given position in the sky,
-        given by src_ra and src_dec.
-
-        Args:
-            logfilesIndex (str): the index file for the logs files.
-            tmin (float): inferior observation time limit to analize.
-            tmax (float): superior observation time limit to analize.
-            src_x (float): source position x (unit: degrees)
-            src_y (float): source position y (unit: degrees)
-            zmax (float): maximum zenith distance of the source to the center of the detector (unit: degrees)
-            step (integer): time interval in seconds between 2 consecutive points in the resulting plot. Minimum accepted value: 0.1 s.
-            writeFiles (bool): if True, two text files with the separions data will be written on file.
-            saveImage (bool): If True, the image will be saved on disk
-            fileFormat (str): The output format of the image
-            title (str): The plot title
-
-        Returns:
-            separations (List): the angular separations
-            ti_tt (List):
-            tf_tt (List):
-            ti_mjd (List):
-            tf_mjd (List):
-            skyCordsFK5.ra.deg
-            skyCordsFK5.dec.deg
-        """
-        logfilesIndex = Utils._expandEnvVar(logfilesIndex)
-
-        separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, sepFile = self._computePointingDistancesFromSource(logfilesIndex, tmin, tmax, src_x, src_y, ref, zmax, step, writeFiles)
-
-        vis_plot = self.plottingUtils.visibilityPlot(separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, self.outdir, fileFormat, title)
-        hist_plot = None
-
-        if computeHistogram:
-            hist_plot = self.plottingUtils.visibilityHisto(separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, self.outdir, fileFormat, title)
-
-        return vis_plot, hist_plot
-
-
-
 
     def computePointingDirection(self, logfilesIndex=None, tmin=None, tmax=None, timetype=None, step=None, src_x=None, src_y=None, frame=None, writeFiles=True):
-        """ Compute the AGILE pointing direction and angular separation from a source in the sky.
+        """
+        Compute the AGILE pointing direction and angular separation from a source in the sky.
         Values which are None are retreived from the configuration file.
+        The pointing direction is extracted from the ATTITUDE_RA_Y and ATTITUDE_DEC_Y columns of the log files.
 
         Args:
             logfilesIndex (str): the index file for the logfiles wiith spacecraft information.
@@ -398,5 +354,88 @@ source:
                 logsFiles.append(logFilePath)
 
         return logsFiles
+
+
+
+    def getFermiPointing(self, fermiSpacecraftFile=None, tmin=None, tmax=None, timetype=None, src_x=None, src_y=None, frame=None, writeFiles=True):
+        """
+        Compute the Fermi pointing direction and angular separation from a source in the sky.
+        Values which are None are retreived from the configuration file.
+        The pointing direction is extracted from the RA_SCZ and DEC_SCZ columns of the spacecraft file.
+
+        Args:
+            fermiSpacecraftFile (str): the path to the Fermi spacecraft file. If None, it is retrieved from the configuration file.
+            tmin, tmax (float): inferior, superior observation time limit to analize.
+            timetype (str): the time format of tmin and tmax.
+            src_x, src_y (float): the coordinates of the source used to compute the offset, in degrees.
+            frame (str): the reference frame of the coordinates.
+            writeFiles (bool): if True, write the visibility table.
+
+        Returns:
+            visibility_tab (astropy.table.Table): the table with the Fermi pointing direction and source separation in degrees.
+        """
+        fermiSpacecraftFile = fermiSpacecraftFile if fermiSpacecraftFile is not None else self.config.getOptionValue("fermi_spacecraft_file")
+        if not os.path.isfile(fermiSpacecraftFile):
+            self.logger.error(f"Fermi spacecraft file {fermiSpacecraftFile} not found.")
+            raise FileNotFoundError(f"Fermi spacecraft file {fermiSpacecraftFile} not found.")
+
+        tmin = tmin if tmin is not None else self.config.getOptionValue("tmin")
+        tmax = tmax if tmax is not None else self.config.getOptionValue("tmax")
+        timetype = timetype if timetype is not None else self.config.getOptionValue("timetype")
+        if timetype != "TT":
+            tmin = AstroUtils.convert_time_to_agile_seconds(Time(tmin, format=timetype))
+            tmax = AstroUtils.convert_time_to_agile_seconds(Time(tmin, format=timetype))
+        
+        src_x = src_x if src_x is not None else self.config.getOptionValue("coord1")
+        src_y = src_y if src_y is not None else self.config.getOptionValue("coord2")
+        frame = frame if frame is not None else self.config.getOptionValue("frame")
+        
+        ##########################################################
+        # Read Fermi Spacecraft file
+        visibility_tab = Table.read(fermiSpacecraftFile, hdu="SC_DATA")
+        
+        # Select relevant columns
+        visibility_tab = visibility_tab[["START", "STOP", "RA_SCZ", "DEC_SCZ"]]
+        visibility_tab.rename_column("START", "MET_START")
+        visibility_tab.rename_column("STOP", "MET_STOP")
+        
+        # Select data in the requested time interval
+        tmin_met = AstroUtils.time_agile_to_fermi(tmin)
+        tmax_met = AstroUtils.time_agile_to_fermi(tmax)
+        visibility_tab = visibility_tab[(visibility_tab['MET_START'] >= tmin_met) & (visibility_tab['MET_STOP'] <= tmax_met)]
+        
+        # Time Conversion
+        visibility_tab['TT_START']= AstroUtils.time_fermi_to_agile(visibility_tab['MET_START'].data)
+        visibility_tab['TT_STOP'] = AstroUtils.time_fermi_to_agile(visibility_tab['MET_STOP'].data)
+        visibility_tab['MJD_START']= AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_START'].data).mjd
+        visibility_tab['MJD_STOP'] = AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_STOP'].data).mjd
+        
+        # Add Source offset column
+        try:
+            target = SkyCoord(src_x, src_y, frame=frame, unit="deg")
+            pointings = SkyCoord(ra=visibility_tab['RA_SCZ'], dec=visibility_tab['DEC_SCZ'], frame="icrs", unit="deg")
+            separations= target.separation(pointings)
+            visibility_tab['SOURCE_OFFSET_DEG'] = separations.to("deg").value
+            visibility_tab.meta["source_ra_deg"] = target.ra.deg
+            visibility_tab.meta["source_dec_deg"]= target.dec.deg
+            self.logger.info(f"Computed the source offset from the Fermi pointing direction for a source at RA={src_x}, DEC={src_y}, frame={frame}")
+        except Exception as e:
+            self.logger.error(f"Cannot compute the pointing-target distance: {e}")
+            
+        # Set variable
+        self._fermiTable = visibility_tab
+        
+        # Write file
+        if writeFiles:
+            self.logger.info(f"Writing Visibility table in: {self.outdir}")
+            output_directory = Path(self.outdir).absolute().joinpath("offaxis_data")
+            output_directory.mkdir(exist_ok=True, parents=True)
+            filenamePath =  output_directory.joinpath(f"fermi_offaxis_distances_{tmin}_{tmax}")
+            visibility_tab.write(filenamePath.with_suffix(".csv"), format="csv", overwrite=True)
+            self.logger.info(f"Produced: {filenamePath}")
+
+        self.logger.info(f"Done.")
+        return visibility_tab
+
 
 
