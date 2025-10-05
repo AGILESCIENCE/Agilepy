@@ -80,8 +80,8 @@ class AGVisibilityConfig:
         sectionDict = confDict['selection']
         CompletionStrategies._setDefaultValueNotNone(sectionDict, "step",  30.0)
         
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmin",   9469440)
-        CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmax", 632620800)
+        CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmin", 104371200) # 2007-04-23 00:00:00
+        CompletionStrategies._setDefaultValueNotNone(sectionDict, "tmax", 632620800) # 2024-01-18 00:00:00
         CompletionStrategies._setDefaultValueNotNone(sectionDict, "timetype", "TT")
         # Check that Tmin<Tmax
         if sectionDict['tmin']>=sectionDict['tmax']:

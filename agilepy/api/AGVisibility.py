@@ -37,6 +37,7 @@ from pathlib import Path
 
 from agilepy.core.AGBaseAnalysis import AGBaseAnalysis
 from agilepy.utils.AstroUtils import AstroUtils
+from agilepy.utils.Utils import Utils
 
 class AGVisibility(AGBaseAnalysis):
     """This class contains the high-level API methods you can use to run the visibility analysis.
@@ -76,7 +77,7 @@ class AGVisibility(AGBaseAnalysis):
 
     @staticmethod
     def getConfiguration(confFilePath, outputDir, logFile,
-                         step=30, timeType="tt", tMin="null", tMax="null",
+                         step=30, timeType="tt", tmin="null", tmax="null",
                          fermiSpacecraftFile=None,
                          coord1="null", coord2="null", frame="icrs",
                          userName="my_name", sourceName="vis-source", verboselvl=0
@@ -90,10 +91,10 @@ class AGVisibility(AGBaseAnalysis):
             
             fermiSpacecraftFile (str): the path to the Fermi spacecraft file. Optional.
             step (float): time interval in seconds between 2 consecutive points in the resulting table. Minimum accepted value: 0.1. Default is 30.
-            timeType (str): the time format of tMin and tMax.
-            tMin, tMax (floa): inferior, superior observation time limit to analize.
+            timeType (str): the time format of tmin and tmax.
+            tmin, tmax (float): inferior, superior observation time limit to analize.
             
-            coord1, coord2 (float): the coordinates of the source used to compute the offset.
+            coord1, coord2 (float): the coordinates of the source used to compute the offaxis angle.
             frame (str): the reference frame of the coordinates.
             
             userName (str): the username of who is running the software.
@@ -115,13 +116,13 @@ output:
 
 input:
   logfile: \"{logFile}\"
-  fermi_spacecraft_file: \"{fermiSpacecraftFile}\"
+  fermi_spacecraft_file: {fermiSpacecraftFile}
 
 selection:
   step: {step}
   timetype: \"{timeType}\"
-  tmin: {tMin}
-  tmax: {tMax}
+  tmin: {tmin}
+  tmax: {tmax}
 
 source:
   coord1: {coord1}
@@ -160,7 +161,7 @@ source:
             tmin, tmax (float): inferior, superior observation time limit to analize.
             timetype (str): the time format of tmin and tmax.
             step (integer): time interval in seconds between 2 consecutive points the table. Minimum accepted value: 0.1.
-            src_x, src_y (float): the coordinates of the source used to compute the offset, in degrees.
+            src_x, src_y (float): the coordinates of the source used to compute the offaxis angle, in degrees.
             frame (str): the reference frame of the coordinates.
             writeFiles (bool): if True, write the visibility table.
 
@@ -232,15 +233,15 @@ source:
         visibility_tab['MJD_start'] = AstroUtils.convert_time_from_agile_seconds(visibility_tab['TT_start'].data).mjd
         visibility_tab['MJD_stop' ] = AstroUtils.convert_time_from_agile_seconds(visibility_tab['TT_stop' ].data).mjd
 
-        # Add Source offset column
+        # Add Source offaxis angle column
         try:
             target = SkyCoord(src_x, src_y, frame=frame, unit="deg")
             pointings = SkyCoord(ra=all_agile_ra, dec=all_agile_dec, frame="icrs", unit="deg")
             separations= target.separation(pointings)
-            visibility_tab['SOURCE_OFFSET_DEG'] = separations.to("deg").value
+            visibility_tab['offaxis_angle_deg'] = separations.to("deg").value
             visibility_tab.meta["source_ra_deg"] = target.ra.deg
             visibility_tab.meta["source_dec_deg"]= target.dec.deg
-            self.logger.info(f"Computed the source offset from the AGILE pointing direction for a source at RA={src_x}, DEC={src_y}, frame={frame}")
+            self.logger.info(f"Computed the source offaxis angle from the AGILE pointing direction for a source at RA={src_x}, DEC={src_y}, frame={frame}")
         except Exception as e:
             self.logger.error(f"Cannot compute the pointing-target distance: {e}")
             
@@ -367,7 +368,7 @@ source:
             fermiSpacecraftFile (str): the path to the Fermi spacecraft file. If None, it is retrieved from the configuration file.
             tmin, tmax (float): inferior, superior observation time limit to analize.
             timetype (str): the time format of tmin and tmax.
-            src_x, src_y (float): the coordinates of the source used to compute the offset, in degrees.
+            src_x, src_y (float): the coordinates of the source used to compute the offaxis angle, in degrees.
             frame (str): the reference frame of the coordinates.
             writeFiles (bool): if True, write the visibility table.
 
@@ -405,20 +406,20 @@ source:
         visibility_tab = visibility_tab[(visibility_tab['MET_START'] >= tmin_met) & (visibility_tab['MET_STOP'] <= tmax_met)]
         
         # Time Conversion
-        visibility_tab['TT_START']= AstroUtils.time_fermi_to_agile(visibility_tab['MET_START'].data)
-        visibility_tab['TT_STOP'] = AstroUtils.time_fermi_to_agile(visibility_tab['MET_STOP'].data)
-        visibility_tab['MJD_START']= AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_START'].data).mjd
-        visibility_tab['MJD_STOP'] = AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_STOP'].data).mjd
+        visibility_tab['TT_start']= AstroUtils.time_fermi_to_agile(visibility_tab['MET_START'].data)
+        visibility_tab['TT_stop'] = AstroUtils.time_fermi_to_agile(visibility_tab['MET_STOP'].data)
+        visibility_tab['MJD_start']= AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_START'].data).mjd
+        visibility_tab['MJD_stop'] = AstroUtils.convert_time_from_fermi_seconds(visibility_tab['MET_STOP'].data).mjd
         
-        # Add Source offset column
+        # Add Source offaxis angle column
         try:
             target = SkyCoord(src_x, src_y, frame=frame, unit="deg")
             pointings = SkyCoord(ra=visibility_tab['RA_SCZ'], dec=visibility_tab['DEC_SCZ'], frame="icrs", unit="deg")
             separations= target.separation(pointings)
-            visibility_tab['SOURCE_OFFSET_DEG'] = separations.to("deg").value
+            visibility_tab['offaxis_angle_deg'] = separations.to("deg").value
             visibility_tab.meta["source_ra_deg"] = target.ra.deg
             visibility_tab.meta["source_dec_deg"]= target.dec.deg
-            self.logger.info(f"Computed the source offset from the Fermi pointing direction for a source at RA={src_x}, DEC={src_y}, frame={frame}")
+            self.logger.info(f"Computed the source offaxis angle from the Fermi pointing direction for a source at RA={src_x}, DEC={src_y}, frame={frame}")
         except Exception as e:
             self.logger.error(f"Cannot compute the pointing-target distance: {e}")
             
@@ -439,3 +440,70 @@ source:
 
 
 
+    def plotVisibility(self, sourceCoordinates=None, maxOffaxis=None, mjd_limits=None, plotFermi=True, showPositionPanels=False, plotHistogram=True, saveImages=True):
+        """
+        Plot the offaxis angle of a source from the AGILE and Fermi pointing directions as a function of time, and the histogram of the offaxis angles.
+        
+        Parameters:
+            sourceCoordinates (astropy.coordinates.SkyCoord): the coordinates of the source used to compute the offaxis angle, If None, the offaxis angle must already be computed in the visibility table.
+            maxOffaxis (float): maximum offaxis angle in degrees to be shown in the visibility plot.
+            mjd_limits (tuple(float,float), optional): Plot limits in MJD.
+            plotFermi (bool): if True, plot the Fermi offaxis angle distribution.
+            plotHistogram (bool): if True, plot the histogram of the offaxis angles.
+            saveImage (bool): if True, save the images in the output directory.
+            showPositionPanels (bool): if True, show satellite Direction.
+            
+        Returns:
+            plots (list(str) or None): Plot output paths.
+        """
+        plots = []
+        
+        # Get AGILE Data
+        if self._agileTable is None:
+            self.logger.error(f"AGILE Visibility not Computed. Call AGVisibility.computePointingDirection() first.")
+            return plots
+        # Get Offaxis angle
+        if sourceCoordinates is not None:
+            self.logger.warning(f"Overwrite Offaxis Angle, using Source Coordinates: {sourceCoordinates}")
+            pointings = SkyCoord(ra=self._agileTable['AGILE_RA'], dec=self._agileTable['AGILE_DEC'], frame="icrs", unit="deg")
+            separations= sourceCoordinates.separation(pointings)
+            self._agileTable['offaxis_angle_deg'] = separations.to("deg").value
+            self._agileTable.meta["source_ra_deg"] = sourceCoordinates.ra.deg
+            self._agileTable.meta["source_dec_deg"]= sourceCoordinates.dec.deg
+        
+        # Get Fermi
+        if plotFermi:
+            if self._fermiTable is None:
+                self.logger.error(f"Fermi Visibility not Computed. Call AGVisibility.computeFermiPointing() first.")
+                plotFermi=False
+            else:
+                if sourceCoordinates is not None:
+                    self.logger.warning(f"Overwrite Offaxis Angle, using Source Coordinates: {sourceCoordinates}")
+                    pointings = SkyCoord(ra=self._fermiTable['RA_SCZ'], dec=self._fermiTable['DEC_SCZ'], frame="icrs", unit="deg")
+                    separations= sourceCoordinates.separation(pointings)
+                    self._fermiTable['offaxis_angle_deg'] = separations.to("deg").value
+                    self._fermiTable.meta["source_ra_deg"] = sourceCoordinates.ra.deg
+                    self._fermiTable.meta["source_dec_deg"]= sourceCoordinates.dec.deg
+        
+        # Get Data Tables
+        agile_table = self._agileTable
+        fermi_table = self._fermiTable if plotFermi else None
+        source_flag = f"ra{self._agileTable.meta['source_ra_deg']:08.4f}_{self._agileTable.meta['source_dec_deg']:+08.4f}.reg"
+        try:
+            mjd_flag = f"_MJD_{mjd_limits[0]}_{mjd_limits[1]}"
+        except TypeError:
+            mjd_flag = ""
+        
+        # Plot Visibility Time Series
+        filePath = Path(self.outdir).absolute().joinpath(f"plots/offaxis_{source_flag}{mjd_flag}.png") if saveImages else None
+        plot = self.plottingUtils.plotVisibility(agile_table, fermi_table, maxOffaxis, mjd_limits, filePath, showPositionPanels)
+        plots.append(plot)
+        
+        # Plot Visibility Histogram
+        if plotHistogram:
+            filePath = Path(self.outdir).absolute().joinpath(f"plots/offaxis_hist_{source_flag}{mjd_flag}.png") if saveImages else None
+            bins = np.linspace(0,180,19)
+            plot = self.plottingUtils.plotVisibilityHistogram(agile_table, fermi_table, bins, mjd_limits, filePath)
+            plots.append(plot)
+            
+        return plots
