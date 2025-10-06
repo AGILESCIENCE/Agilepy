@@ -35,12 +35,10 @@ from os.path import dirname, realpath, join
 from pathlib import Path
 
 from agilepy.config.AGAnalysisConfig import AGAnalysisConfig
-from agilepy.config.AGEngAgileOffaxisVisibilityConfig import AGEngAgileOffaxisVisibilityConfig
-from agilepy.config.AGEngAgileFermiOffAxisVisibilityComparisonConfig import AGEngAgileFermiOffAxisVisibilityComparisonConfig
 from agilepy.config.AGAnalysisWaveletConfig import AGAnalysisWaveletConfig
 from agilepy.config.AGBayesianBlocksConfig import AGBayesianBlocksConfig
 from agilepy.config.AGRatemetersConfig import AGRatemetersConfig
-
+from agilepy.config.AGVisibilityConfig import AGVisibilityConfig
 from agilepy.config.ValidationStrategies import ValidationStrategies
 from agilepy.config.CompletionStrategies import CompletionStrategies
 from agilepy.utils.Observable import Observable
@@ -107,14 +105,9 @@ class AgilepyConfig(Observable):
             
             self.analysisConfig = AGAnalysisConfig()
 
-        elif className == "AGEngAgileOffaxisVisibility":
+        elif className == "AGVisibility":
 
-            self.analysisConfig = AGEngAgileOffaxisVisibilityConfig()
-
-
-        elif className == "AGEngAgileFermiOffAxisVisibilityComparison":
-
-            self.analysisConfig = AGEngAgileFermiOffAxisVisibilityComparisonConfig()
+            self.analysisConfig = AGVisibilityConfig()
 
         elif className == "AGAnalysisWavelet":
             

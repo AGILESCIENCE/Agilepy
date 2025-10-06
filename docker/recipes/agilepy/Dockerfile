@@ -22,4 +22,8 @@ RUN echo "bash /home/flareadvocate/Agilepy/agilepy/scripts/welcome.sh" >> /home/
 
 # Set the user and entrypoint script
 USER flareadvocate
+
+# Download the test dataset
+RUN download_test_dataset.sh
+
 ENTRYPOINT ["bash", "/home/flareadvocate/entrypoint.sh"]

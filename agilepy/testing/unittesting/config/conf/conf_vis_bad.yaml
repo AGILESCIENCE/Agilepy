@@ -1,0 +1,22 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: test_vis
+  sourcename: src-vis-test
+  username: user-test
+  verboselvl: 2
+
+input:
+  logfile: "$AGILE/agilepy-test-data/test_dataset_agn/LOG/LOG.index"
+  fermi_spacecraft_file: $AGILE/agilepy-test-data/visibility/Fermi_test_SC00.fits
+
+selection:
+  step: 30
+  timetype: "tt"
+  tmin: 104371200
+  tmax: 104371100
+
+source:
+  coord1: null
+  coord2: null
+  frame: "icrs"
+        
