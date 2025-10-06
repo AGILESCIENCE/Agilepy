@@ -53,6 +53,10 @@ jobs:
           python3 -m pip install -r requirements.lock 
           python3 -m pip install .
 
+      - name: Download test dataset
+        shell: bash -l {0}
+        run: download_test_dataset.sh
+
       - name: Running unit tests and code coverage
         shell: bash -l {0}
         run: start_coverage.sh
@@ -98,6 +102,10 @@ jobs:
           python3 -m pip install -r requirements.lock 
           python3 -m pip install .
 
+      - name: Download test dataset
+        shell: bash -l {0}
+        run: download_test_dataset.sh
+
       - name: Running REST API tests with SSDC data download
         shell: bash -l {0}
         run: start_test_rest_api.sh
@@ -132,6 +140,10 @@ jobs:
       run: |
         python3 -m pip install -r requirements.lock
         python3 -m pip install .
+
+    - name: Download test dataset
+      shell: bash -l {0}
+      run: download_test_dataset.sh
 
     - name: Running unit tests and code coverage
       shell: bash -l {0}
