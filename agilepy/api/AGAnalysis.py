@@ -29,7 +29,8 @@
 import os
 import re
 import numpy as np
-# from tqdm import tqdm, trange  
+
+from astropy.table import Table  
 from tqdm.notebook import trange, tqdm
 from time import time
 from pathlib import Path
@@ -98,6 +99,10 @@ class AGAnalysis(AGBaseAnalysis):
         self.config.attach(self.currentMapList, "isocoeff")
 
         self.lightCurveData = {
+            "mle" : None,
+            "ap" : None
+        }
+        self.lightCurveTable = {
             "mle" : None,
             "ap" : None
         }
@@ -1016,6 +1021,10 @@ plotting:
         self.logger.info( "Took %f seconds.", time()-timeStart)
 
         self.lightCurveData["mle"] = str(lcOutputFilePath)
+        
+        # Data Table
+        lc_table = Table.read(lcOutputFilePath, format='ascii')
+        self.lightCurveTable["mle"] = lc_table
 
         return str(lcOutputFilePath)
 
@@ -1040,9 +1049,20 @@ plotting:
         products = apTool.call()
         self.logger.info( f"Science tool AP produced:\n {products}")
 
-        self.lightCurveData["ap"] = products[0]
+        try:
+            self.lightCurveData["ap"] = products[0]
+            file_name = products[0]
+            file_optional = products[1]
+        except KeyError:
+            # This happens if the file already exists
+            file_name = self.lightCurveData["ap"]
+            file_optional = None
+        
+        # Read table
+        lc_table = Table.read(file_name, format='ascii', names=["tmin_TT","tmax_TT","exposure","counts"])
+        self.lightCurveTable["ap"] = lc_table
 
-        return products[0], products[1] 
+        return file_name, file_optional
 
 
     ############################################################################

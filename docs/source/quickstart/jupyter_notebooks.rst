@@ -16,10 +16,11 @@ The Tutorial notebooks show the execution of the ``agilepy`` analysis classes wi
 
 - Scientific Analysis Tutorials: they show the usage of agilepy ``AGAnalysis`` class to perform a scientific analysis for source detection and analysis.
 
-  - `VELA <../_static/notebooks/VELA.html>`_: analysis of Vela region
-  - `3C454.3 <../_static/notebooks/3C454d3-final.html>`_: analysis of November's 2010 gamma-ray flare of AGN 3C454.3.
-  - `AITOFF <../_static/notebooks/aitoff_maps.html>`_: how to produce a full sky AITOFF projection image.
-  - `PKS1510-089 <../_static/notebooks/PKS1510-089_2009.html>`_: analysis of 2009 gamma-ray flare, showing the usage of Agilepy REST API to download data from SSDC.
+  - `Analysis of the VELA Region <../_static/notebooks/VELA.html>`_: Maximum Likelihood analysis of Vela region (Source Hypothesis, Background Estimation, MLE analysis and Light Curve)
+  - `Analysis of a 3C454.3 Flare <../_static/notebooks/3C454d3-final.html>`_: analysis of November's 2010 gamma-ray flare of AGN 3C454.3.
+  - `Download and Analysis of PKS1510-089 flare <../_static/notebooks/PKS1510-089_2009.html>`_: analysis of 2009 gamma-ray flare, showing the usage of Agilepy REST API to download data from SSDC.
+  - `AGILE Full-Sky Map in AITOFF Projection <../_static/notebooks/aitoff_maps.html>`_: how to produce a full sky AITOFF projection image.
+  - `Aperture Photometry Light Curve <../_static/notebooks/AperturePhotometry_tutorial.html>`_: Tutorial for computing the Aperture Photometry Light Curve using the 3C454.3 data.
 
 - `Wavelet analysis <../_static/notebooks/wavelet_analysis.html>`_: it shows how to use the Agilepy's wavelet analysis API. 
 - `Bayesian Blocks analysis <../_static/notebooks/BayesianBlocks_tutorial.html>`_: run the Bayesian Blocks algorithm on AGILE light curves produced by Maximum Likelihood or Aperture Photometry algorithms, or on unbinnned data.
