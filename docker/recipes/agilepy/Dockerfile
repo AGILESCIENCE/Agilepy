@@ -15,8 +15,10 @@ RUN git clone --recursive https://github.com/AGILESCIENCE/Agilepy.git && \
     python3 -m pip install --no-cache-dir -r requirements.lock && \
     python3 -m pip install --no-cache-dir .
 
-# Add Shared Directory, Entrypoint and Welcome Script
+# Add Gosu for user management, Shared Directory, Entrypoint and Welcome Script
 USER root
+RUN yum install -y gosu \
+    yum clean all && rm -rf /var/cache/yum
 RUN mkdir /shared_dir && \
     chown -R flareadvocate:flareadvocate /shared_dir && \
     cp Agilepy/docker/recipes/agilepy/entrypoint.sh /home/flareadvocate/entrypoint.sh && \
