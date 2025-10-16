@@ -1,6 +1,19 @@
 # Changelog
 
-## Release 1.6.5 (May 20, 2025)
+## Release 1.7.0 (October 2025)
+* [PR!43](https://github.com/AGILESCIENCE/Agilepy/pull/43) solving [#42](https://github.com/AGILESCIENCE/Agilepy/issues/42). New feature: Bayesian Blocks Analysis. Added Classes `AGBayesianBlocks` and `AGBayesianBlocksConfig`, Unit Tests, Test Dataset, Tutorial Notebook and Documentation pages for the Bayesian Blocks Analysis.
+* [PR!55](https://github.com/AGILESCIENCE/Agilepy/pull/55) solving [#14](https://github.com/AGILESCIENCE/Agilepy/issues/14). New feature: Ratemeters Analysis.: Added Classes`AGRatemeters` and `AGRatemetersConfig`, Unit Tests, Test Dataset, Tutorial Notebook and Documentation pages for the AGILE Scientific Ratemeters Analysis.
+* [PR!47](https://github.com/AGILESCIENCE/Agilepy/pull/47) solving:
+  * [#35](https://github.com/AGILESCIENCE/Agilepy/issues/35). Minor Bugfix: remove the deprecated and unused parameter `logfilenameprefix` from the the configuration.
+  * [#61](https://github.com/AGILESCIENCE/Agilepy/issues/61). Minor Testing issue: Replace tests performed with `unittest` with equivalent `pytest` tests.
+* [PR!63](https://github.com/AGILESCIENCE/Agilepy/pull/63) solving [#12](https://github.com/AGILESCIENCE/Agilepy/issues/12), [#26](https://github.com/AGILESCIENCE/Agilepy/issues/26), [#63](https://github.com/AGILESCIENCE/Agilepy/issues/63). Major Class Review: Replace the classes and functions composing the "Engineering API" (`AGEngAgileOffaxisVisibility`,`AGEngAgileOffaxisVisibilityConfig`, `AGEngAgileFermiOffAxisVisibilityComparisonConfig`, `AGEngAgileFermiOffAxisVisibilityComparison`, `AGEngDisplayComparison`) with one class `AGVisibility`, with the goal of computing the pointing direction of the AGILE Spacecraft (and, optionally, Fermi) and the off-axis angle of asource. Add Classes `AGVisibility` and `AGVisibilityConfig`, Unit Tests, Test Dataset, Tutorial Notebook and documentation.
+* [PR!66](https://github.com/AGILESCIENCE/Agilepy/pull/66) solving [#59](https://github.com/AGILESCIENCE/Agilepy/issues/59). Improvements:
+  * Add `AGAnalysis.lightCurveTable` attribute to easily retrieve MLE and AP Light Curves.
+  * Add dedicated Tutorial on Aperture Photometry Light Curve Estimation.
+* Documentation updates and improvements.
+
+
+## Release 1.6.5 (May 20, 2025, d923ff5)
 * [#41](https://github.com/AGILESCIENCE/Agilepy/issues/41): Documentation update on installation procedures.
 * [#48](https://github.com/AGILESCIENCE/Agilepy/issues/48): Fix a bug in the `entrypoint.sh` script for `agilepy` container that caused it to crash.
 * [#46](https://github.com/AGILESCIENCE/Agilepy/issues/46): Implement `agilepy/scripts/start_test_rest_api.sh` to test the REST API with data download from SSDC, and use it in CI pipelines.

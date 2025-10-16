@@ -38,7 +38,7 @@ Add to the base image a specific release of Agilepy and push it to the DockerHub
 We provide a `build_agilepy.sh` script to wrap the commands necessary to build the `agilescience/agilepy` image.
 Its arguments are:
     - `BASE VERSION`: *tag* of the `agilescience/agilepy-recipe` base image to be used (e.g., `BUILD26`, [check available tags here](https://hub.docker.com/r/agilescience/agilepy-recipe/tags)).
-    - `AGILEPY_RELEASE`: tag, branch or commit of the `Agilepy` GitHub repository to be used to install `Agilepy` (e.g., `master`, `1.6.5`).
+    - `AGILEPY_RELEASE`: tag, branch or commit of the `Agilepy` GitHub repository to be used to install `Agilepy` (e.g., `master`, `1.7.0`).
     The Dockerfile performs `git checkout AGILEPY_RELEASE` and install the code from the specified commit.
     - `IMAGE_TAG`: tag of the `agilescience/agilepy` image that will be created.
 
