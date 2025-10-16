@@ -91,7 +91,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -it --name $CONTAINER_NAME -p 8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER} bash -l
+        docker run --rm -it --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER} bash -l
 
     You can exit the container with ``exit``.
     The container will be stopped (destroyed) when it exits.
@@ -102,7 +102,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -it --name $CONTAINER_NAME -p 8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -l
+        docker run --rm -it --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -l
 
 
     3. **Execute a command in a non-interactive mode**
@@ -113,7 +113,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm --name $CONTAINER_NAME -p 8888 -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
+        docker run --rm --name $CONTAINER_NAME -p 8888:8888 -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
 
 
 
@@ -123,7 +123,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
     
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -t -d --name $CONTAINER_NAME -p 8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER}
+        docker run --rm -t -d --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER}
 
 
 
