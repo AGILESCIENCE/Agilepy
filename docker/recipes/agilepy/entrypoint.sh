@@ -12,7 +12,7 @@ HOME_DIR="/home/$USER_NAME"
 
 # Current UID/GID in container
 CURRENT_UID=$(id -u $USER_NAME)
-CURRENT_GID=$(getent group $GROUP_NAME | cut -d: -f3)
+CURRENT_GID=$(id -g $USER_NAME)
 
 # Target UID/GID from host, defaults if not provided
 HOST_UID=${HOST_USER_ID:-1000}
@@ -66,7 +66,7 @@ if [[ "$START_JUPYTER" == "true" ]]; then
         echo "$RUNNING" | tee -a "$LOG_FILE"
     else
         echo "No Jupyter server. Starting a new one..." | tee -a "$LOG_FILE"
-        exec su-exec "$USER_NAME" jupyter notebook \
+        exec gosu "$USER_NAME" jupyter notebook \
             --ip="*" \
             --port=8888 \
             --no-browser \
@@ -84,8 +84,8 @@ clear
 
 # Now keep the container alive by running the passed command or just a shell if none provided
 if [[ $# -gt 0 ]]; then
-    exec su-exec $USER_NAME "$@"
+    exec gosu $"USER_NAME" "$@"
 else
-    # fallback: keep container alive with a tail (or you can use `bash` or another process)
-    tail -f /dev/null
+    # Fallback: keep container alive with a tail (or you can use `bash` or another process)
+    exec gosu "$USER_NAME" bash
 fi
