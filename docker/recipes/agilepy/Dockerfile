@@ -17,7 +17,7 @@ RUN git clone --recursive https://github.com/AGILESCIENCE/Agilepy.git && \
 
 # Add Gosu for user management, Shared Directory, Entrypoint and Welcome Script
 USER root
-RUN yum install -y gosu \
+RUN yum install -y gosu && \
     yum clean all && rm -rf /var/cache/yum
 RUN mkdir /shared_dir && \
     chown -R flareadvocate:flareadvocate /shared_dir && \
