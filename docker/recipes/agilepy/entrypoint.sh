@@ -22,20 +22,18 @@ HOST_GID=${HOST_GROUP_ID:-1000}
 if [[ "$CURRENT_UID" != "$HOST_UID" ]]; then
     echo "Changing UID of $USER_NAME: $CURRENT_UID -> $HOST_UID"
     usermod -u "$HOST_UID" "$USER_NAME"
-    # Update ownership of relevant files
-    find /home /shared_dir /tmp -user "$CURRENT_UID" -exec chown -h "$HOST_UID" {} \; 2>/dev/null || true
 fi
 
 # Change GID if needed
 if [[ "$CURRENT_GID" != "$HOST_GID" ]]; then
     echo "Changing GID of $GROUP_NAME: $CURRENT_GID -> $HOST_GID"
     groupmod -g "$HOST_GID" "$GROUP_NAME"
-    # Update group ownership of relevant files
-    find /home /shared_dir /tmp -group "$CURRENT_GID" -exec chown -h :"$HOST_GID" {} \; 2>/dev/null || true
 fi
 
 # Ensure home directory has correct ownership
-chown -R "$USER_NAME":"$USER_NAME" "$HOME_DIR"
+chown -R "$USER_NAME":"$GROUP_NAME" "$HOME_DIR"
+chown -R "$USER_NAME":"$GROUP_NAME" /shared_dir
+chown -R "$USER_NAME":"$GROUP_NAME" /tmp
 
 # Environment Setup
 export HOME="$HOME_DIR"
