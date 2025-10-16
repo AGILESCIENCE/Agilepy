@@ -1,18 +1,8 @@
-*****************
-Jupyter Notebooks
-*****************
+*********
+Tutorials
+*********
 
-Several Jupyter notebooks are available. You can check the available JupyterLab servers with:
-
-::
-
-   docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter server list
-
-
-Tutorial notebooks
-******************
-
-The Tutorial notebooks show the execution of the ``agilepy`` analysis classes with the test datesets provided in the package.
+Tutorials are available as Jupyter notebooks, showing the usage of ``agilepy`` analysis classes using the test datesets installed in the package:
 
 - Scientific Analysis Tutorials: they show the usage of agilepy ``AGAnalysis`` class to perform a scientific analysis for source detection and analysis.
 
@@ -27,7 +17,17 @@ The Tutorial notebooks show the execution of the ``agilepy`` analysis classes wi
 - `Ratemeters analysis <../_static/notebooks/Ratemeters_tutorial.html>`_: Tutorial for the analysis of the Light Curves produced by the AGILE Scientific Ratemeters.
 - `Visibility analysis <../_static/notebooks/Visibility_tutorial.html>`_: Tutorial to compute the Off-axis angle of a source to check its visibility. 
 
-The tutorial notebooks are available at: `agilepy/notebooks/tutorial_notebooks <https://github.com/AGILESCIENCE/Agilepy/tree/master/agilepy/notebooks/tutorial_notebooks>`_.
+The Tutorials shown above can be downloaded in ``.ipynb`` format from: `agilepy/notebooks/tutorial_notebooks <https://github.com/AGILESCIENCE/Agilepy/tree/master/agilepy/notebooks/tutorial_notebooks>`_.
+
+
+You can check the available Jupyter servers with:
+
+::
+
+   docker exec $CONTAINER_NAME /home/flareadvocate/.local/bin/jupyter server list
+
+
+
 
 Analysis notebooks
 ******************

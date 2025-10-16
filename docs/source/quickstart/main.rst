@@ -10,7 +10,7 @@ The analysis of the AGILE Scientific Ratemeters is also possible.
 
 Agilepy is similar to `Fermipy <https://fermipy.readthedocs.io/>`_ and `gammapy <https://docs.gammapy.org/>`_ tools, providing a common way to analyse gamma-ray data.
 
-Agilepy provides the last version of the available Science Tools (BUILD26), the H0025 instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
+Agilepy provides the last version of the available Science Tools (``BUILD26``), the ``H0025`` instrument response functions (IRFs), and the latest version of the diffuse Galactic emission model.
 
 Agilepy (and its dependencies) can be easily installed using `Docker <https://docs.docker.com/get-docker/>`_.
 
