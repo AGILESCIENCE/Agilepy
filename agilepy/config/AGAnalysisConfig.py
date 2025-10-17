@@ -135,7 +135,7 @@ class AGAnalysisConfig():
 
 
             # String
-            elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", "logfilenameprefix", \
+            elif optionName in ["evtfile", "logfile", "outdir", "filenameprefix", \
                                 "timetype", "timelist", "projtype", "proj", "modelfile", "minimizertype", \
                                 "minimizeralg", "maplistgen", "irf"]:
 

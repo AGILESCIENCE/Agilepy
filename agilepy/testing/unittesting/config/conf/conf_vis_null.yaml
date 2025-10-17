@@ -1,0 +1,21 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: test_vis
+  sourcename: src-vis-test
+  username: user-test
+  verboselvl: 2
+
+input:
+  logfile: null
+  fermi_spacecraft_file: null
+
+selection:
+  step: null
+  timetype: "tt"
+  tmin: null
+  tmax: null
+
+source:
+  coord1: null
+  coord2: null
+  frame: "icrs"

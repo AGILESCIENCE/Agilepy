@@ -26,10 +26,7 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import os
-import shutil
 import pytest
-import unittest
 from pathlib import Path
 from xml.etree.ElementTree import parse
 

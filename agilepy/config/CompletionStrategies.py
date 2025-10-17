@@ -182,6 +182,20 @@ class CompletionStrategies:
         confDict["input"][filetype] = Utils._expandEnvVar(confDict["input"][filetype])
 
     @staticmethod
+    def _expandEnvironmentalVariable(fieldToExpand):
+        expanded_path = Utils._expandEnvVar(fieldToExpand) if fieldToExpand is not None else None
+        return expanded_path
+    
+    @staticmethod
+    def _setDefaultValueNotNone(confSection, key, defaultValue):
+        # Set the default value if the key is not defined
+        confSection.setdefault(key, defaultValue)
+        # Do not allow None
+        if confSection.get(key) is None:
+            confSection[key] = defaultValue
+        return None
+
+    @staticmethod
     def _transformLoccl(confDict):
 
         userLoccl = confDict["mle"]["loccl"]

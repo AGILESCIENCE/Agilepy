@@ -181,120 +181,6 @@ class PlottingUtils(metaclass=Singleton):
             plt.show()
             return None
 
-    def visibilityPlot(self, separations, ti_tt, tf_tt, ti_mjd, tf_mjd, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        # self._updateRC()
-
-        """visibilityPlot makes a plot of the zenith distance of a given source
-           (src_ra and src_dec selected in the agilecheck parameters).
-        """
-
-        if len(separations) == 0:
-            self.logger.warning( "No data to plot")
-            return None
-
-        self.logger.info( "Loading visibility plot...")
-        # total_obs = (np.max(tf_mjd)-np.min(ti_mjd))//1 # in days
-
-        meantimes = (ti_mjd+tf_mjd)/2. # for plot
-
-        # This commented lines where to plot grey shade in the corresponding detected flares by AGILE for MWC 656
-        #        agile_i = np.array([217468930.0, 236347395.0, 252763332.0, 298123266.0, 299548866.0, 301708933.0, 324000132.0, 339724932.0, 384307200.0, 395107200.0])
-        #        agile_f = np.array([217598530.0, 236498595.0, 252979332.0, 298231266.0, 299721666.0, 301881732.0, 324172932.0, 339897732.0, 384393600.0, 395280000.0])
-
-        #        tref     = datetime.datetime(2001,1,1,0,0,0)
-        #        t_agilestart  = []
-        #        t_agilestop   = []
-        #        for i in np.arange(len(agile_i)):
-        #            time_i       = agile_i[i]
-        #            time_f       = agile_f[i]
-        #            t_start_temp = tref + datetime.timedelta(seconds=time_i)
-        #            t_stop_temp  = tref + datetime.timedelta(seconds=time_f)
-        #            tstart       = Time(t_start_temp, fileFormat='datetime')
-        #            tstop        = Time(t_stop_temp, fileFormat='datetime')
-        #            tstart_data  = tstart.mjd
-        #            tstop_data   = tstop.mjd
-        #            t_agilestart.append(tstart_data)
-        #            t_agilestop.append(tstop_data)
-
-        #        t_agilei_mjd = np.asfarray(t_agilestart)
-        #        t_agilef_mjd = np.asfarray(t_agilestop)
-
-        #        for i in np.arange(len(t_agilei_mjd)):
-        #            ax.fill_between([t_agilei_mjd[i], t_agilef_mjd[i]], 0, 200, color='grey', alpha=0.5)
-
-
-        f  = plt.figure()
-        ax = f.add_subplot(111)
-        ax.plot(meantimes, separations, '-b')
-#            ax.plot(meantimes[separations < zmax], separations[separations < zmax], '-r')
-
-        ax.set_title(title, fontsize='large')
-        ax.set_ylim(0., zmax+5.0)
-        ax.set_xlabel('MJD')
-        ax.set_ylabel('off-axis angle [$^{\\circ}$]')
-        ax.set_xlim(np.min(meantimes), np.max(meantimes))
-
-        if saveImage:
-            filePath = join(outDir,'agile_visibility_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
-            self.logger.info( "Visibility plot at: %s", filePath)
-            f.savefig(filePath)
-        else:
-            plt.show()
-
-        return filePath
-
-    def visibilityHisto(self, separations, ti_tt, tf_tt, src_ra, src_dec, zmax, step, saveImage, outDir, fileFormat, title):
-        # self._updateRC()
-
-        if len(separations) == 0:
-            self.logger.warning( "No data to plot")
-            return None
-
-        deltat = tf_tt - ti_tt
-        ttotal_obs = np.sum(deltat)
-        deltat1 = deltat[0] # for histogram always 0.1!!!
-
-        bins  = [0, 10, 20, 30, 40, 50, 60, 70, 80]
-        bins2 = [80, 180]
-        hist, bins = np.histogram(separations, bins=bins, density=False)
-        hist2, bins2 = np.histogram(separations, bins=bins2, density=False)
-
-        width = 1. * (bins[1] - bins[0])
-        center = (bins[:-1] + bins[1:]) / 2
-        width2 = 1. * (bins2[1] - bins2[0])
-        center2 = (bins2[:-1] + bins2[1:]) / 2
-
-        f2  = plt.figure()
-        ax2 = f2.add_subplot(111)
-        ax2.set_title(title, fontsize='large')
-        ax2 = f2.add_subplot(111)
-        ax2.bar(center, hist*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width)
-        ax2.bar(center2, hist2*deltat1/ttotal_obs*100., align='center', color='w', edgecolor='b', width=width2)
-
-        ax2.set_xlim(0., 100.)
-        ax2.set_ylim(0., 100.)
-        ax2.set_ylabel('\\% of time spent')
-        ax2.set_xlabel('off-axis angle $[^\\circ]$')
-        labels  = [0, 10, 20, 30, 40, 50, 60, 70, 80, 180]
-        xlabels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 180]
-        plt.xticks(xlabels, labels)
-
-        """
-        fil = open('agile_histogram_visibility'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'.txt', 'w')
-        for i in np.arange(len(center)):
-            fil.write("{} {} \n".format(center[i], hist[i]))
-        for i in np.arange(len(center2)):
-            fil.write("{} {} \n".format(center2[i], hist2[i]))
-        fil.close()
-        """
-        if saveImage:
-            filePath = join(outDir,'agile_histogram_ra'+str(src_ra)+'_dec'+str(src_dec)+'_tstart'+str(np.min(ti_tt))+'_tstop'+str(np.max(tf_tt))+'_zmax'+str(zmax)+'step'+str(step)+'.'+str(fileFormat))
-            f2.savefig(filePath)
-            self.logger.info( "Visibility histogram at: %s", filePath)
-        else:
-            f2.show()
-
-        return filePath
 
     def _getRegionsFiles(self, regFiles, catalogRegions):
 
@@ -636,3 +522,645 @@ class PlottingUtils(metaclass=Singleton):
         else:
             fig.show()
             return None
+        
+        
+    def plotBayesianBlocks(self, data, datamode, plotTDelta=True, plotYErr=True, edgePoints=True, dataCells=True, meanBlocks=True, sumBlocks=False, plotRate=False, saveImage=False):
+        """
+        Plot the results of the Bayesian Blocks analysis, including the light curve, detected blocks, and optionally the mean value of each block.
+        
+        Parameters:
+        -----------
+        data : dict
+            Dictionary with input (raw) and output (processed by Bayesian Blocks) data to plot.
+        datamode : int
+            Unbinned data=1, binned data=2.
+        plotTDelta, plotYErr : bool
+            If True, include error bars based on time resolution (dt) and Poisson uncertainties in the plot.
+        edgePoints : bool
+            If True, plots the positions of the edge points between blocks.
+        dataCells : bool
+            If True, plots the positions of data cells or segments identified by the algorithm. 
+        meanBlocks : bool
+            If True, plots the mean value within each identified block.
+        sumBlocks : bool
+            If True, plots the sum within each identified block.
+        plotRate : bool
+            if True, add a second plot with the rate.
+        saveImage : bool
+            If True, save a copy of the plot.
+        """
+        
+        data_in = data["in"]
+        data_out= data["out"]
+        
+        # Error bars
+        if plotTDelta:
+            try:
+                terr = data_in['t_delta'] / 2.0
+            except Exception:
+                terr = np.full_like(data_in['x'], data_in['dt'] / 2.0)
+        else:
+            terr = np.zeros_like(data_in['x'])
+        
+        
+        # Sanity Check
+        if isinstance(data_in['sigma'], int) and plotYErr:
+            self.logger.warning(f"Incoherent options: useerror=False and then plotYErr=True. Forcing plotYErr=False")
+            plotYErr = False
+        
+        if plotYErr:
+            yerr = data_in['sigma'] # np.sqrt(self.data_in['x'])
+        else:
+            yerr = np.zeros_like(data_in['x'])
+        
+        # Datamode
+        if datamode==1:
+            data_cells = data_in['t']
+        elif datamode==2:
+            data_cells = data_in['data_cells']
+        else:
+            raise ValueError(f"Datamode {datamode} not recognised, run selectEvents first.")
+        
+        #Plotting
+        fig = make_subplots(
+            rows=2 if plotRate else 1,
+            cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.1,
+            subplot_titles=["Light Curve", "Rate Vector"] if plotRate else ["Light Curve"]
+        )
+
+        # Plot vertical lines for edge points
+        shape_ep = []
+        if edgePoints:
+            for edge_point in data_out['edge_points']:
+                sh = fig.add_shape(
+                    type='line',
+                    x0=edge_point, x1=edge_point,
+                    y0=0, y1=max(data_in['x'] + yerr),
+                    line=dict(color="green", dash='dash', width=1.5),
+                    name='Edge blocks',  # note: shapes don't appear in legend
+                    row=1, col=1,
+                )
+                shape_ep.append(sh)
+            fig.add_trace(go.Scatter(x=[None],y=[None],
+                                     mode='lines',line=dict(color="green", dash='dash', width=1.5),
+                                     name='Edge blocks',
+                                     ),
+                                     row=1, col=1
+                          ) # For legend only
+        
+        # Plot the data cells if specified
+        shape_dc = []
+        if dataCells:
+            for data_cell in data_cells:
+                sh = fig.add_shape(
+                    type='line',
+                    x0=data_cell, x1=data_cell,
+                    y0=0, y1=max(data_in['x'] + yerr),
+                    line=dict(color='gray', dash='dash', width=0.5),
+                    name='Data cells', row=1, col=1,
+                )
+                shape_dc.append(sh)
+            fig.add_trace(go.Scatter(x=[None],y=[None],
+                                     mode='lines',line=dict(color='gray', dash='dash', width=0.5),
+                                     name='Data cells',
+                                     ),
+                          row=1, col=1
+                          ) # For legend only
+        
+        # Plot the light curve with error bars
+        trace1 = go.Scatter(
+            x=data_in['t'],
+            y=data_in['x'],
+            error_x=dict(type='data', array=terr),
+            error_y=dict(type='data', array=yerr),
+            mode='markers',
+            name='Data',
+            marker=dict(size=6, color='blue'),
+            # customdata=np.stack((data_in["time_start_mjd"], data_in["time_end_mjd"], data_in["sqrt(ts)"]), axis=-1),
+            # hovertemplate="tstart: %{customdata[0]:.4f} - tend:%{customdata[1]:.4f}, flux: %{y:.2f} +/- %{error_y.array:.2f}, sqrts: %{customdata[2]:.4f}",
+        )
+        fig.add_trace(trace1, row=1, col=1)
+
+        
+        
+        # Plot the mean values of the blocks if specified
+        if meanBlocks:
+            means = []
+            i_edge = 0
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                means.append(data_out['mean_blocks'][i_edge])
+            
+            trace2 = go.Scatter(
+                x=data_cells,
+                y=means,
+                mode='lines',
+                line_shape='hv',
+                name='Blocks Mean',
+                line=dict(color='purple'),
+            )
+            fig.add_trace(trace2, row=1, col=1)
+            
+        # Plot block sums as a step line
+        if sumBlocks:
+            sumb = []
+            i_edge = 0
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                sumb.append(data_out['sum_blocks'][i_edge])
+
+            trace3 = go.Scatter(
+                x=data_cells,
+                y=sumb,
+                mode='lines',
+                line_shape='hv',
+                name='Blocks Sum',
+                line=dict(color='red')
+            )
+            fig.add_trace(trace3, row=1, col=1)
+            
+            
+        # Plot rate in a second Plot if Required
+        if plotRate:
+            rates = []
+            rateblocks = []
+            i_edge = 0
+            rate_key = 'blockrate2' if data_in['datamode'] == 2 else 'blockrate'
+
+            for t in data_cells:
+                if i_edge < len(data_out['edge_points']) and t >= data_out['edge_points'][i_edge]:
+                    i_edge += 1
+                
+                event_rate = data_out['eventrate'][i_edge]
+                block_rate = data_out[rate_key][i_edge]
+
+                rates.append(event_rate if event_rate != np.inf else 0)
+                rateblocks.append(block_rate if block_rate != np.inf else 0)
+            
+            # --- Add edge points and data cells as vertical lines in subplot 2 ---
+            ymax_rate = max(rateblocks)
+            # --- Add step plot for block rate ---
+            trace4 = go.Scatter(x=data_cells,
+                                y=rateblocks,
+                                mode='lines',
+                                line=dict(shape='hv', color='blue'),
+                                name=rate_key
+                                )
+            fig.add_trace(trace4, row=2, col=1)
+
+
+            if edgePoints:
+                for x in data_out['edge_points']:
+                    fig.add_shape(
+                        type='line',
+                        x0=x, x1=x,
+                        y0=0, y1=ymax_rate,
+                        line=dict(color="green", dash='dash', width=1.5),
+                        row=2, col=1
+                    )
+
+            if dataCells:
+                for x in data_cells:
+                    fig.add_shape(
+                        type='line',
+                        x0=x, x1=x,
+                        y0=0, y1=ymax_rate,
+                        line=dict(color='gray', dash='dash', width=0.5),
+                        row=2, col=1
+                    )
+                    
+            # --- Axis labels and formatting ---
+            fig.update_yaxes(title_text="Rate", row=2, col=1)
+            fig.update_xaxes(title_text="Time",tickangle=45,tickmode="array",row=2, col=1)
+
+        
+        # Update layout
+        fig.update_xaxes(title_text="Time",tickangle=45, showline=True, linecolor="black", row=1, col=1)
+        fig.update_yaxes(title_text="Light Curve", showline=True, linecolor="black", row=1, col=1)
+        fig.update_layout(
+            title=f"Bayesian Blocks Analysis on a Time Series",
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            showlegend=True,
+            #legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(size=17)),
+            #margin=dict(t=60, b=60),
+            #height=600
+        )
+        
+        # Write plot
+        if saveImage:
+            fileName = "bayesianblocks"
+            fileName+= "_results" if edgePoints else "_data"
+            fileName+= "_rate" if plotRate else ""
+            fileName+= ".png"
+            filePath = join(self.outdir,fileName)
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+            return filePath
+        else:
+            fig.show()
+            return None
+
+    def plotRatemeters(self, data_dict, instruments, T0, x_limits=None, useDetrendedData=True, filePath=None):
+        """Plot the Light Curve of the AGILE Scientific Ratemeters.
+
+        Args:
+            data_dict (dict[str, Table]): Keys are instrument names, values are Astropy Tables with 'OBT', 'COUNTS', 'COUNTS_D' columns.
+            instruments (list[str]): Names of the instruments to plot.
+            T0 (float): Burst T0 in AGILE seconds.
+            x_limits (tuple(float,float)): plot limits in seconds relative to T0.
+            useDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            filePath (str): Output path of the plot.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Harcoded information
+        INSTRUMENT_COLORS = {
+            "SA": "blue",
+            "AC0": "green",
+            "AC1": "#006400",
+            "AC2": "#006400",
+            "AC3": "#006400",
+            "AC4": "#006400",
+            "MCAL": "red",
+        }
+        INSTRUMENT_RANGES = {
+            "SA": "SuperAGILE [18-60 keV]",
+            "AC0": "AC Top [50-200 keV]",
+            "AC1": "AC Lat 1 [80-200 keV]",
+            "AC2": "AC Lat 2 [80-200 keV]",
+            "AC3": "AC Lat 3 [80-200 keV]",
+            "AC4": "AC Lat 4 [80-200 keV]",
+            "MCAL": "MCAL [0.4-100 MeV]",
+            "GRID": "GRID [>50 MeV]",
+        }
+        
+        # Subplot layout: one row per instrument
+        fig = make_subplots(
+            rows=len(instruments),
+            cols=1,
+            subplot_titles=[INSTRUMENT_RANGES.get(inst, "NotFound") for inst in instruments]
+            )
+        
+        # Add traces for each instrument
+        for i, inst in enumerate(instruments, start=1):
+            # Select data
+            data_table = data_dict[inst]
+            if x_limits is not None:
+                mask = (data_table['OBT']>T0+x_limits[0])&(data_table['OBT']<T0+x_limits[1])
+                data_table = data_table[mask]
+            time = data_table['OBT'].data - T0
+            counts = data_table['COUNTS_D'].data if useDetrendedData else data_table['COUNTS'].data
+            time_width = data_table['OBT'][1]-data_table['OBT'][0]
+            rate = counts / time_width
+            
+            # Add Trace
+            trace_1 = go.Scatter(x=time,
+                                 y=rate,
+                                 mode='lines',
+                                 name=inst,
+                                 line=dict(shape='hv', color=INSTRUMENT_COLORS.get(inst, "black"))
+                                 )
+            fig.add_trace(trace_1, row=i, col=1)
+            # Axis labels and Limits
+            fig.update_yaxes(title_text="Counts Rate [cts/s]", row=i, col=1)
+            fig.update_xaxes(title_text="Time - T0 [s]",tickmode="array",row=i, col=1)
+            if x_limits is not None:
+                fig.update_xaxes(range=[x_limits[0], x_limits[1]], row=i, col=1)
+        
+        # Update layout
+        T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
+        detrended_flag = "Detrended " if useDetrendedData else ""
+        fig.update_layout(
+            title_text = f"{detrended_flag}AGILE Scientific Ratemeters<br>T0={T0_iso} (UTC)",
+            title_x=0.5,
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            height=300 * len(instruments),
+            showlegend=False
+        )
+        
+        # Show Image and Write Plot
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath
+
+
+    def plotRatemetersDuration(self, data_dict, instruments, T0, backgroundRange=(None,None), signalRange=(None,None), x_limits=None, filePath=None):
+        """Plot Ratemeters Light Curves for Burst Duration Computation.
+
+        Args:
+            data_dict (dict[str, Table]): Keys are instrument names, values are Astropy Tables with 'OBT', 'COUNTS', 'COUNTS_D' columns.
+            instruments (list[str]): Names of the instruments to plot.
+            T0 (float): Burst T0 in AGILE seconds.
+            x_limits (tuple(float,float)): plot limits in seconds relative to T0.
+            useDetrendedData (bool): If True, plot detrended counts, otherwise plot raw counts. Defaults to True.
+            filePath (str): Output path of the plot.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Harcoded information
+        INSTRUMENT_RANGES = {
+            "SA": "SuperAGILE [18-60 keV]",
+            "AC0": "AC Top [50-200 keV]",
+            "AC1": "AC Lat 1 [80-200 keV]",
+            "AC2": "AC Lat 2 [80-200 keV]",
+            "AC3": "AC Lat 3 [80-200 keV]",
+            "AC4": "AC Lat 4 [80-200 keV]",
+            "MCAL": "MCAL [0.4-100 MeV]",
+            "GRID": "GRID [>50 MeV]",
+        }
+        
+        # Subplot layout: one column per instrument, two rows
+        fig = make_subplots(rows=2,cols=len(instruments),
+                            subplot_titles=[f"Light Curve {INSTRUMENT_RANGES.get(inst, 'NotFound')}" for inst in instruments]+[f"Cumulative {INSTRUMENT_RANGES.get(inst, 'NotFound')}" for inst in instruments]
+                            )
+        
+        # Add traces for each instrument
+        for i, inst in enumerate(instruments, start=1):
+            # Select data
+            data_table = data_dict[inst]
+            time = data_table['time']
+            counts=data_table['counts']
+            counts_bkgsub=data_table['counts_bkgsub']
+            integral_counts=data_table['integral_counts']
+            sigrise_time=data_table['sigrise_time']
+            
+            # Add Light Curve Trace
+            trace_1 = go.Scatter(x=time,y=counts_bkgsub,mode='lines',name=inst,line=dict(shape='hv', color="black"))
+            fig.add_trace(trace_1, row=1, col=i)
+                
+            # Add Cumulative Light Curve Trace
+            trace_2 = go.Scatter(x=time,y=integral_counts,mode='lines',name=inst,line=dict(shape='hv', color="black"))
+            fig.add_trace(trace_2, row=2, col=i)
+
+            # Add Lines for the Rising Section if present
+            try:
+                fig.add_vline(x=sigrise_time[ 0],line=dict(color="green",width=2,dash="dash"),row="all",col=i)
+                fig.add_vline(x=sigrise_time[-1],line=dict(color="green",width=2,dash="dash"),row="all",col=i)
+            except IndexError:
+                pass
+            
+            # Graphis
+            fig.update_yaxes(title_text="Counts [cts]", row=1, col=i)
+            fig.update_xaxes(title_text="Time - T0 [s]",row=1, col=i)
+            fig.update_yaxes(title_text="Counts [cts]", row=2, col=i)
+            fig.update_xaxes(title_text="Time - T0 [s]",row=2, col=i)
+            
+
+        # Add the Background and Signal Bands
+        fig.add_vrect(x0=signalRange[0], x1=signalRange[1],
+                      fillcolor="blue", opacity=0.3, line_width=0,
+                      row="all", col="all"
+                      )
+        fig.add_vrect(x0=backgroundRange[0], x1=backgroundRange[1],
+                      fillcolor="red", opacity=0.2, line_width=0,
+                      row="all", col="all"
+                      )
+        
+        # Graphics
+        if x_limits is not None:
+            fig.update_xaxes(range=[x_limits[0], x_limits[1]], row="all", col="all")
+
+        # Update layout
+        T0_iso = AstroUtils.convert_time_from_agile_seconds(T0).iso
+        fig.update_layout(
+            title_text = f"AGILE Scientific Ratemeters (Background Subtracted)<br>T0={T0_iso} (UTC)",
+            title_x=0.5,
+            xaxis=dict(tickformat="g"),
+            template='plotly_white',
+            hovermode="closest",
+            height=900,
+            width=500 * len(instruments),
+            showlegend=False
+        )
+        
+        # Show Image and Write Plot
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Plot at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath
+    
+    
+    def _process_and_plot_visibility(self, table, label, color, x_limits, fig, show_position_panels=False):
+        """Low-level utility function to plot the visibility time series.
+
+        Args:
+            table (astropy.table.Table): data Table.
+            label (str): instrument name.
+            color (str): color string.
+            x_limits (tuple(float)): Time range.
+            fig (plotly.figure): figure object of plotly.
+            show_position_panels (bool): If True, plot position of the spacecraft.
+
+        """
+        if table is None:
+            return
+        # Time handling, apply x_limits if requested
+        time = 0.5*(table["MJD_stop"].data+table["MJD_start"].data)
+        mask = (time >= x_limits[0]) & (time <= x_limits[1]) if x_limits is not None else np.ones_like(time, dtype=bool)
+        time = time[mask]
+        
+        if label=="AGILE":
+            ra  = table["AGILE_RA" ].data[mask]
+            dec = table["AGILE_DEC"].data[mask]
+        elif label=="Fermi":
+            ra  = table["RA_SCZ" ].data[mask]
+            dec = table["DEC_SCZ"].data[mask]
+        offset = table["offaxis_angle_deg"].data[mask]
+
+        # RA, DEC vs Time
+        if show_position_panels:
+            fig.add_trace(go.Scatter(x=time, y=ra, mode="lines",
+                                     name=f"{label} RA",
+                                     line=dict(color=color)), col=1, row=1)
+            fig.add_trace(go.Scatter(x=time, y=dec, mode="lines",
+                                     name=f"{label} Dec",
+                                     line=dict(color=color)), col=1, row=2)
+        # Offset vs Time
+        fig.add_trace(go.Scatter(x=time, y=offset, mode="lines",
+                                 name=f"{label} Offaxis Angle",
+                                 line=dict(color=color)), col=1, row=(3 if show_position_panels else 1))
+        return None
+    
+    
+    def plotVisibility(self, agile_table, fermi_table=None, max_offaxis=None, mjd_limits=None, filePath=None, show_position_panels=False):
+        """Plot the spacecraft direction and source off-axis angle evolution for AGILE (and Fermi if available).
+
+        Args:
+            agile_table (Table): Astropy Table for AGILE.
+            fermi_table (Table, optional): Astropy Table for Fermi. Defaults to None.
+            max_offaxis (float, optional): Maximum y-axis value for the Offaxis angle panel (degrees).
+            mjd_limits (tuple(float,float), optional): Plot limits in MJD.
+            filePath (str, optional): Output path of the plot.
+            show_position_panels (bool): If True, plot position of the spacecraft.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Hardcoded colors for instruments
+        SPACECRAFT_COLORS = {
+            "AGILE": "blue",
+            "Fermi": "red",
+        }
+        
+        # Subplot layout: 2 optional rows for RA, Dec, 1 for Offaxis angle
+        if show_position_panels:
+            fig = make_subplots(rows=3, cols=1, subplot_titles=["RA vs Time", "Dec vs Time", "Offaxis Angle vs Time"])
+        else:
+            fig = make_subplots(rows=1, cols=1, subplot_titles=["Offaxis Angle vs Time"])
+        
+        # Plot AGILE and Fermi
+        self._process_and_plot_visibility(agile_table, "AGILE", SPACECRAFT_COLORS["AGILE"], mjd_limits, fig, show_position_panels)
+        self._process_and_plot_visibility(fermi_table, "Fermi", SPACECRAFT_COLORS["Fermi"], mjd_limits, fig, show_position_panels)
+
+
+        if show_position_panels:
+            # Update axes
+            fig.update_yaxes(title_text="RA [deg]", row=1, col=1)
+            fig.update_yaxes(title_text="Dec [deg]", row=2, col=1)
+            fig.update_yaxes(title_text="Offaxis Angle [deg]", row=3, col=1)
+            fig.update_xaxes(title_text="Time [MJD]", row=3, col=1)
+    
+            # Apply x-limits if provided
+            if mjd_limits is not None:
+                for i in range(1, 4):
+                    fig.update_xaxes(range=[mjd_limits[0], mjd_limits[1]], row=i, col=1)
+    
+        else:
+            fig.update_yaxes(title_text="Offaxis Angle [deg]", row=1, col=1)
+            fig.update_xaxes(title_text="Time [MJD]", row=1, col=1)
+            fig.update_xaxes(range=[mjd_limits[0], mjd_limits[1]], row=1, col=1)
+        
+        # Apply max Offaxis Angle if provided 
+        if max_offaxis is not None:
+            fig.update_yaxes(range=[0, max_offaxis], row=(3 if show_position_panels else 1), col=1)
+        
+        # Update layout
+        fermi_string = " and Fermi" if fermi_table is not None else ""
+        panels_string = " Pointing Evolution and" if show_position_panels else ""
+        title = f"AGILE{fermi_string}{panels_string} Source Offaxis Angle"
+                
+        fig.update_layout(
+            title_text=title,
+            title_x=0.5,
+            template="plotly_white",
+            hovermode="closest",
+            height=(900 if show_position_panels else 400),
+            showlegend=True
+        )
+
+        # Show figure
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Plot saved at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath
+    
+    
+    def _process_and_plot_visibility_histogram(self, table, bins, label, color, x_limits, fig):
+        """Low-level utility function to plot the visibility histogram.
+
+        Args:
+            table (astropy.table.Table): data Table.
+            bins (int or list, optional): Number or List of bins in the histogram. Defaults to 30.
+            label (str): instrument name.
+            color (str): color string.
+            x_limits (tuple(float)): Time range.
+            fig (plotly.figure): figure object of plotly.
+
+        """
+        if table is None:
+            return
+        # Time handling, apply x_limits if requested
+        time = 0.5*(table["MJD_stop"].data+table["MJD_start"].data)
+        mask = (time >= x_limits[0]) & (time <= x_limits[1]) if x_limits is not None else np.ones_like(time, dtype=bool)
+        time = time[mask]
+        
+        if label=="AGILE":
+            ra  = table["AGILE_RA" ].data[mask]
+            dec = table["AGILE_DEC"].data[mask]
+        elif label=="Fermi":
+            ra  = table["RA_SCZ" ].data[mask]
+            dec = table["DEC_SCZ"].data[mask]
+        offset = table["offaxis_angle_deg"].data[mask]
+        
+        # Plot
+        if isinstance(bins, (list, np.ndarray)):  
+            # Explicit bin edges: compute histogram manually
+            counts, edges = np.histogram(offset, bins=bins)
+            centers = 0.5 * (edges[:-1] + edges[1:])
+            fig.add_trace(go.Bar(x=centers,y=counts/np.sum(counts),
+                                 name=label,marker_color=color,opacity=0.6))
+        else:
+            # Integer bins: use Plotly’s built-in histogram
+            fig.add_trace(go.Histogram(x=offset, nbinsx=bins, histnorm="probability",  # normalize to fractions
+                                       name=label,marker_color=color,opacity=0.6))
+        
+        return None
+
+    
+    def plotVisibilityHistogram(self, agile_table, fermi_table=None, bins=30, mjd_limits=None, filePath=None):
+        """Plot the histogram of off-axis angle distribution for AGILE (and Fermi if available).
+
+        Args:
+            agile_table (Table): Astropy Table for AGILE.
+            fermi_table (Table, optional): Astropy Table for Fermi. Defaults to None.
+            bins (int or list, optional): Number or List of bins in the histogram. Defaults to 30.
+            max_offaxis (float, optional): Maximum y-axis value for the Offaxis angle panel (degrees).
+            mjd_limits (tuple(float,float), optional): Plot limits in MJD.
+            filePath (str, optional): Output path of the plot.
+
+        Returns:
+            filePath (str): Output path of the plot.
+        """
+        # Hardcoded colors
+        SPACECRAFT_COLORS = {
+            "AGILE": "blue",
+            "Fermi": "red",
+        }
+
+        # Plot figure
+        fig = go.Figure()
+        self._process_and_plot_visibility_histogram(agile_table, bins, "AGILE", SPACECRAFT_COLORS["AGILE"], mjd_limits, fig)
+        self._process_and_plot_visibility_histogram(fermi_table, bins, "Fermi", SPACECRAFT_COLORS["Fermi"], mjd_limits, fig)
+
+        fig.update_xaxes(title_text="Off-axis angle [deg]")
+        fig.update_yaxes(title_text="Distribution Fraction")
+        #fig.update_xaxes(range=[0, 105])
+
+        # Update layout
+        fig.update_layout(
+            title_text="Off-axis Angle Distribution",
+            title_x=0.5,
+            template="plotly_white",
+            barmode="overlay",
+            bargap=0.05,
+            height=500,
+            showlegend=True
+        )
+
+        # Show and optionally save
+        fig.show()
+        if filePath is not None:
+            self.logger.info(f"Histogram saved at: {filePath}")
+            fig.write_image(filePath)
+
+        return filePath
+
+
+

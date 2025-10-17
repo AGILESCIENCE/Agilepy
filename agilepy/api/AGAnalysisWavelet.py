@@ -97,7 +97,6 @@ class AGAnalysisWavelet(AGBaseAnalysis):
 output:
   outdir: %s
   filenameprefix: wavelet_product
-  logfilenameprefix: eng_log
   username: %s
   sourcename: wavelet
   verboselvl: %d

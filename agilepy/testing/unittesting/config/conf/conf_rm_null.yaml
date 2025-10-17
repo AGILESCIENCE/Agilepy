@@ -1,0 +1,17 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: null
+
+analysis:
+  timetype: null
+  T0: null
+  background_tmin: null
+  background_tmax: null
+  signal_tmin: null
+  signal_tmax: null

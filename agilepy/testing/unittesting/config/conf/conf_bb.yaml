@@ -1,0 +1,19 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: testcase
+  sourcename: source-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: "$AGILEPY_UNITTESTING_DIR/api/data/3C454.3_2010flare_86400s.ap"
+  file_mode: "AGILE_AP"
+  ratecorrection: 0
+  tstart: 55497
+  tstop: 55562
+
+bayesianblocks:
+  fitness: "events"
+  p0: null
+  gamma: 0.35
+  useerror: true

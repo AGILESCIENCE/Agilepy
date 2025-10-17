@@ -1,5 +1,8 @@
 include README.md
 include agilepy/testing/unittesting/api/data/testcase.maplist4
+include agilepy/testing/unittesting/api/data/test_data.ph
+include agilepy/testing/unittesting/api/data/PKP080686_1_3913_000.lv1.cor.gz
+include agilepy/testing/unittesting/api/data/PKP086465_1_3913_000.lv1.cor.gz
 include agilepy/testing/unittesting/core/test_data/sourceconf.wrongext
 include agilepy/testing/unittesting/core/test_data/AGILE_test_datacoverage
 include agilepy/testing/unittesting/core/test_out/.gitkeep
@@ -11,6 +14,7 @@ recursive-include * *.xml
 recursive-include * *.source
 recursive-include * *.sh
 recursive-include * *.txt
+recursive-include * *.csv
 recursive-include * *.ipynb
 recursive-include * *.cts.gz
 recursive-include * *.coveragerc

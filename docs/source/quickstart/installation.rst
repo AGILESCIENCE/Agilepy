@@ -24,7 +24,7 @@ The command below will download the image from Docker Hub and store it locally.
             
             .. code-block::
 
-                export AGILEPY_RELEASE=release-1.6.5
+                export AGILEPY_RELEASE=release-1.7.0
 
             You can find the available tags at `agilepy/tags <https://hub.docker.com/r/agilescience/agilepy/tags>`_.
             If you are using a different tag, please replace ``AGILEPY_RELEASE`` with the actual tag you want to use.
@@ -45,7 +45,7 @@ The command below will download the image from Docker Hub and store it locally.
     * Using the Docker Desktop GUI:
         * Open Docker Desktop.
         * In the left sidebar, click on Docker Hub and search for ``agilescience/agilepy``.
-        * Select the tag you want to download (e.g., ``release-1.6.5``), click on pull.
+        * Select the tag you want to download (e.g., ``release-1.7.0``), click on pull.
         * The image will be available in the Images tab of the left sidebar.
 
 
@@ -91,7 +91,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -it --name $CONTAINER_NAME --network host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER} bash -l
+        docker run --rm -it --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER} bash -l
 
     You can exit the container with ``exit``.
     The container will be stopped (destroyed) when it exits.
@@ -102,7 +102,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -it --name $CONTAINER_NAME --network host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -l
+        docker run --rm -it --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -l
 
 
     3. **Execute a command in a non-interactive mode**
@@ -113,7 +113,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
 
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm --name $CONTAINER_NAME --network host -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
+        docker run --rm --name $CONTAINER_NAME -p 8888:8888 -v $(pwd)/shared_dir:/shared_dir --entrypoint bash agilescience/agilepy:${AGILEPY_RELEASE}_${USER} -c "python3 -c 'import agilepy as _; print(_.__path__[0])'"
 
 
 
@@ -123,7 +123,7 @@ We provide a few examples below, but you can customize the command to suit your 
     .. code-block::
     
         export CONTAINER_NAME=my_agilepy_container
-        docker run --rm -t -d --name $CONTAINER_NAME --network host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER}
+        docker run --rm -t -d --name $CONTAINER_NAME -p 8888:8888 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $(pwd)/shared_dir:/shared_dir agilescience/agilepy:${AGILEPY_RELEASE}_${USER}
 
 
 
@@ -158,10 +158,19 @@ We provide a few examples below, but you can customize the command to suit your 
 
     
 
+Test Dataset
+""""""""""""
+
+Additional data for tests can be downloaded in the ``$AGILE/agilepy-test-data`` directory with:
+    
+    .. code-block::
+
+        download_test_dataset.sh
 
 
 Tips for using Docker and Jupyter Server
-"""""""""
+""""""""""""""""""""""""""""""""""""""""
+
 The general structure of a ``docker run`` command is:
 
     .. code-block::
@@ -175,13 +184,13 @@ The general structure of a ``docker run`` command is:
         - ``-v``: mount a volume, e.g. a shared directory to transfer data between the host and the container. Agilepy has a ``/shared_dir`` directory we suggest to use for this purpose. It is not necessary to create a shared directory, but it's useful for several cases (exporting analysis outside the container, link another dataset etc.).
         - ``-e``: set an environment variable inside the container.
         - ``-p``: publish a port from the container to the host, e.g. for a jupyter server.
-        - ``--network host``: share all ports between container and host.
+        - ``--network host``: share connection between container and host.
         - ``-it``: run the container in interactive mode with a terminal.
         - ``-d``: run the container in detached mode (in the background).
         - ``--rm``: remove the container when it exits.
         - ``--entrypoint``: override the default entrypoint script of the image.
         - ``--platform``: specify the platform to use (e.g., ``linux/amd64`` for Mac users).
-    - **IMAGE** is the name of the image you want to run, typically ``agilescience/agilepy:release-1.6.5`` (or ``agilescience/agilepy:release-1.6.5_${USER}`` if you performed the bootstrap).
+    - **IMAGE** is the name of the image you want to run, typically ``agilescience/agilepy:release-1.7.0`` (or ``agilescience/agilepy:release-1.7.0_${USER}`` if you performed the bootstrap).
     - **COMMAND** is the command you want to run inside the container (e.g., ``bash``, ``jupyter notebook``, etc.).
     - **ARG** are the arguments for the command you want to run.
 

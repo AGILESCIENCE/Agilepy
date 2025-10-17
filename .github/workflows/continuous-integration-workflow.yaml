@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       # Cache dependencies to speed up future pipelines. Each job has its own cache
       - name: Cache pip dependencies
@@ -51,6 +52,10 @@ jobs:
         run: |
           python3 -m pip install -r requirements.lock 
           python3 -m pip install .
+
+      - name: Download test dataset
+        shell: bash -l {0}
+        run: download_test_dataset.sh
 
       - name: Running unit tests and code coverage
         shell: bash -l {0}
@@ -74,6 +79,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       # Cache dependencies to speed up future pipelines. Each job has its own cache
       - name: Cache pip dependencies
@@ -96,6 +102,10 @@ jobs:
           python3 -m pip install -r requirements.lock 
           python3 -m pip install .
 
+      - name: Download test dataset
+        shell: bash -l {0}
+        run: download_test_dataset.sh
+
       - name: Running REST API tests with SSDC data download
         shell: bash -l {0}
         run: start_test_rest_api.sh
@@ -116,7 +126,8 @@ jobs:
     - name: Checking out code
       uses: actions/checkout@v4
       with:
-          fetch-depth: 0
+        fetch-depth: 0
+        submodules: recursive
 
     - name: Debug
       shell: bash -l {0}
@@ -129,6 +140,10 @@ jobs:
       run: |
         python3 -m pip install -r requirements.lock
         python3 -m pip install .
+
+    - name: Download test dataset
+      shell: bash -l {0}
+      run: download_test_dataset.sh
 
     - name: Running unit tests and code coverage
       shell: bash -l {0}
@@ -158,6 +173,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursives
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3

@@ -26,317 +26,260 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from genericpath import exists
 import os
 import shutil
-import unittest
+import pytest
 from pathlib import Path
 
 from agilepy.config.AgilepyConfig import AgilepyConfig
 from agilepy.core.CustomExceptions import OptionNotFoundInConfigFileError, ConfigFileOptionTypeError, CannotSetHiddenOptionError, CannotSetNotUpdatableOptionError, ConfigurationsNotValidError, OptionNameNotSupportedError, DeprecatedOptionError
 
+@pytest.fixture(autouse=True)
+def clean_test_env():
+    """Fixture to clean output dir before each test."""
+    current_dir_path = Path(__file__).parent.absolute()
+    agilepyconf_path = os.path.join(current_dir_path, "conf/agilepyconf.yaml")
+    out_dir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/config"))
+    if out_dir.exists() and out_dir.is_dir():
+        shutil.rmtree(out_dir)
+    yield
 
-class AgilepyConfigUT(unittest.TestCase):
+@pytest.mark.new
+class TestAGAnalysisConfig(): 
 
-    def setUp(self):
-        self.currentDirPath = Path(__file__).parent.absolute()
-        self.agilepyconfPath = os.path.join(self.currentDirPath,"conf/agilepyconf.yaml")
-
-        outDir = Path(os.path.join(os.environ["AGILE"], "agilepy-test-data/unittesting-output/config"))
-
-        if outDir.exists() and outDir.is_dir():
-            shutil.rmtree(outDir)
-
-    
-    ##### TEST NOT SUPPORTED AFTER REST FEATURE
-    """
-    def test_validation_tmin_not_in_index(self):
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
-
-
-    
-    def test_validation_tmax_not_in_index(self):
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
-                          tmin=433900000, tmax=456537946, timetype="TT")
-    """
- 
     def test_validation_min_max(self):
+        config = AgilepyConfig()
+        config.loadBaseConfigurations(os.path.join(Path(__file__).parent, "conf/agilepyconf.yaml"))
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, dq=0, fovradmin=10, fovradmax=0)
-
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(dq=0, fovradmin=10, fovradmax=0)
 
 
     def test_set_options(self):
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config = AgilepyConfig()
+        config.loadBaseConfigurations(os.path.join(Path(__file__).parent, "conf/agilepyconf.yaml"))
+        config.loadConfigurationsForClass("AGAnalysis")
 
         # float instead of int is ok.
-        self.assertEqual(None, self.config.setOptions(tmin=433857532., tmax=435153532., timetype="TT"))
+        assert config.setOptions(tmin=433857532., tmax=435153532., timetype="TT") is None
+        assert config.getOptionValue("timetype") == "TT"
 
-        self.assertEqual("TT", self.config.getOptionValue("timetype"))
+        assert config.setOptions(tmin=58026.5, tmax=58027.5, timetype="MJD") is None
+        assert config.getOptionValue("timetype") == "MJD"
 
-        self.assertEqual(None, self.config.setOptions(tmin=58026.5, tmax=58027.5, timetype="MJD"))
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            config.setOptions(tmin=58026.5)  # we must pass also timetype
 
-        self.assertEqual("MJD", self.config.getOptionValue("timetype"))
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            config.setOptions(verboselvl=2)
 
+        with pytest.raises(OptionNotFoundInConfigFileError):
+            config.setOptions(pdor="kmer")
 
-
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, tmin=58026.5) # we must pass also timetype
-
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, verboselvl=2)
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, logfilenameprefix="pippo")
-
-        self.assertRaises(OptionNotFoundInConfigFileError, self.config.setOptions, pdor="kmer")
-
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, minimizertype=666)
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=[1,2,3])
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=666)
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins="100, 300")
-
-        #self.assertRaises(CannotSetHiddenOptionError, self.config.setOptions, lonpole=100) depreacated
-
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, galcoeff=0.617196)
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=0.617196)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(minimizertype=666)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(energybins=[1, 2, 3])
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(energybins=666)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(energybins="100, 300")
+        
+        # with pytest.raises(CannotSetHiddenOptionError):
+        #     config.setOptions(lonpole=100)  # deprecated
 
         # len(energybins) = 2
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.617196])
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[0.617196])
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(galcoeff=0.617196)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(isocoeff=0.617196)
 
-        self.assertRaises(ConfigFileOptionTypeError,
-                          self.config.setOptions, fluxcorrection=3.14)
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(galcoeff=[0.617196])
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(isocoeff=[0.617196])
 
-        self.assertRaises(ConfigurationsNotValidError,
-                          self.config.setOptions, fluxcorrection=25)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(fluxcorrection=3.14)
 
-        # Test deprecated options
-        self.assertRaises(DeprecatedOptionError, self.config.setOptions, emin=100)
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(fluxcorrection=25)
+
+        with pytest.raises(DeprecatedOptionError):
+            config.setOptions(emin=100)
+
+
 
     def test_validation_wrong_AGAnalysis(self):
         """Test that reading a not valid configuration file raises an error."""
-
-        self.config = AgilepyConfig()
-        conf_path = os.path.join(self.currentDirPath,"conf/conf_notvalid.yaml")
-        self.config.loadBaseConfigurations(conf_path)
-        
-        with self.assertRaises(ConfigurationsNotValidError):
-            self.config.loadConfigurationsForClass("AGAnalysis")
+        config = AgilepyConfig()
+        conf_path = os.path.join(Path(__file__).parent, "conf/conf_notvalid.yaml")
+        config.loadBaseConfigurations(conf_path)
+        with pytest.raises(ConfigurationsNotValidError):
+            config.loadConfigurationsForClass("AGAnalysis")
 
     def test_energybins(self):
 
-        self.config = AgilepyConfig()
-
+        config = AgilepyConfig()
         # galcoeff and isocoeff are None
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf1.yaml")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
+        
+        assert config.getOptionValue("energybins")[0][0] == 100
+        assert config.getOptionValue("energybins")[0][1] == 300
+        assert config.getOptionValue("energybins")[1][0] == 300
+        assert config.getOptionValue("energybins")[1][1] == 1000
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config.setOptions(energybins=[[200, 400], [400, 1000]])
 
-        self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
-        self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
-        self.assertEqual(300, self.config.getOptionValue("energybins")[1][0])
-        self.assertEqual(1000, self.config.getOptionValue("energybins")[1][1])
-
-        self.config.setOptions(energybins=[[200, 400], [400, 1000]])
-
-        self.assertEqual(200, self.config.getOptionValue("energybins")[0][0])
-        self.assertEqual(400, self.config.getOptionValue("energybins")[0][1])
-        self.assertEqual(400, self.config.getOptionValue("energybins")[1][0])
-        self.assertEqual(1000, self.config.getOptionValue("energybins")[1][1])
+        assert config.getOptionValue("energybins")[0][0] == 200
+        assert config.getOptionValue("energybins")[0][1] == 400
+        assert config.getOptionValue("energybins")[1][0] == 400
+        assert config.getOptionValue("energybins")[1][1] == 1000
 
         # wrong type
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, energybins=["[200, 400]", "[400, 1000]"])
-
-        # wrong length
-        # self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, energybins=[[200, 400]])
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(energybins=["[200, 400]", "[400, 1000]"])
 
         # galcoeff and isocoeff are None and len(energybins) = 1
-        conf3Path = os.path.join(self.currentDirPath,"conf/conf3.yaml")
+        conf3Path = os.path.join(Path(__file__).parent, "conf/conf3.yaml")
+        config.loadBaseConfigurations(conf3Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.config.loadBaseConfigurations(conf3Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        assert config.getOptionValue("energybins")[0][0] == 100
+        assert config.getOptionValue("energybins")[0][1] == 300
 
-        self.assertEqual(100, self.config.getOptionValue("energybins")[0][0])
-        self.assertEqual(300, self.config.getOptionValue("energybins")[0][1])
-
-        self.config.setOptions(energybins=[[200, 400], [400, 1000]])
+        config.setOptions(energybins=[[200, 400], [400, 1000]])
 
 
     def test_bkg_coeff(self):
 
-        self.config = AgilepyConfig()
+        config = AgilepyConfig()
 
         # galcoeff and isocoeff are None
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf1.yaml")
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
+        assert len(config.getOptionValue("isocoeff")) == 4
+        assert len(config.getOptionValue("galcoeff")) == 4
 
         for i in range(4):
-            self.assertEqual(-1, self.config.getOptionValue("isocoeff")[i])
-            self.assertEqual(-1, self.config.getOptionValue("galcoeff")[i])
+            assert config.getOptionValue("isocoeff")[i] == -1
+            assert config.getOptionValue("galcoeff")[i] == -1
 
 
 
 
         # galcoeff isocoeff are lists
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf2.yaml")
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
+        assert len(config.getOptionValue("isocoeff")) == 4
+        assert len(config.getOptionValue("galcoeff")) == 4
 
-        self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
-        self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
-        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[0])
-        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[1])
+        assert config.getOptionValue("isocoeff")[0] == 10
+        assert config.getOptionValue("isocoeff")[1] == 15
+        assert config.getOptionValue("galcoeff")[0] == 0.6
+        assert config.getOptionValue("galcoeff")[1] == 0.8
 
 
         # galcoeff and isocoeff are changed at runtime
-
-        self.config.setOptions(isocoeff=[10, 15, 10, 15], galcoeff=[0.6, 0.8, 0.6, 0.8])
-        self.assertEqual(10, self.config.getOptionValue("isocoeff")[0])
-        self.assertEqual(15, self.config.getOptionValue("isocoeff")[1])
-        self.assertEqual(10, self.config.getOptionValue("isocoeff")[2])
-        self.assertEqual(15, self.config.getOptionValue("isocoeff")[3])
-        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[0])
-        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[1])
-        self.assertEqual(0.6, self.config.getOptionValue("galcoeff")[2])
-        self.assertEqual(0.8, self.config.getOptionValue("galcoeff")[3])
+        config.setOptions(isocoeff=[10, 15, 10, 15], galcoeff=[0.6, 0.8, 0.6, 0.8])
+        assert config.getOptionValue("isocoeff") == [10, 15, 10, 15]
+        assert config.getOptionValue("galcoeff") == [0.6, 0.8, 0.6, 0.8]
 
         # this should cause an error because len(energybins) == 2
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, isocoeff=[10])
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, galcoeff=[0.6])
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(isocoeff=[10])
+        with pytest.raises(ConfigurationsNotValidError):
+            config.setOptions(galcoeff=[0.6])
 
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=None, galcoeff=None)
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(isocoeff=None, galcoeff=None)
 
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff="Pluto", galcoeff="Pippo")
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(isocoeff="Pluto", galcoeff="Pippo")
 
         # this should create an error!!
-        self.assertRaises(ConfigFileOptionTypeError, self.config.setOptions, isocoeff=["Pluto"], galcoeff=["Pippo"])
-
+        with pytest.raises(ConfigFileOptionTypeError):
+            config.setOptions(isocoeff=["Pluto"], galcoeff=["Pippo"])
 
 
 
     def test_complete_configuration(self):
 
-        self.config = AgilepyConfig()
+        config = AgilepyConfig()
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf1.yaml")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
-
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertEqual(5.99147, self.config.getOptionValue("loccl"))
-
-        self.config.setOptions(loccl=99)
-
-        self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
-
-        self.assertEqual(4, len(self.config.getOptionValue("isocoeff")))
-        self.assertEqual(4, len(self.config.getOptionValue("galcoeff")))
+        assert config.getOptionValue("loccl") == 5.99147
+        config.setOptions(loccl=99)
+        assert config.getOptionValue("loccl") == 9.21034
+        assert len(config.getOptionValue("isocoeff")) == 4
+        assert len(config.getOptionValue("galcoeff")) == 4
 
 
 
-        conf2Path = os.path.join(self.currentDirPath,"conf/conf2.yaml")
+        conf2Path = os.path.join(Path(__file__).parent, "conf/conf2.yaml")
+        config.loadBaseConfigurations(conf2Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.config.loadBaseConfigurations(conf2Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertEqual(9.21034, self.config.getOptionValue("loccl"))
+        assert config.getOptionValue("loccl") == 9.21034
 
 
 
     def test_evt_log_files_env_vars(self):
 
-        self.config = AgilepyConfig()
+        config = AgilepyConfig()
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf1.yaml")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+        assert "$" not in config.getOptionValue("evtfile")
+        assert "$" not in config.getOptionValue("logfile")
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))
-        self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
-
-        self.config.setOptions(
-                    evtfile="$AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index",
-                    logfile="$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index"
-                )
-
-        self.assertEqual(True, "$" not in self.config.getOptionValue("evtfile"))
-        self.assertEqual(True, "$" not in self.config.getOptionValue("logfile"))
+        config.setOptions(
+            evtfile="$AGILE/agilepy-test-data/test_dataset_6.0/EVT/EVT.index",
+            logfile="$AGILE/agilepy-test-data/test_dataset_6.0/LOG/LOG.index",
+        )
+        assert "$" not in config.getOptionValue("evtfile")
+        assert "$" not in config.getOptionValue("logfile")
 
     
     def test_datapath_restapi(self):
         
-        self.config = AgilepyConfig()
+        config = AgilepyConfig()
 
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf1.yaml")
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf1.yaml")
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, datapath="/foo/bar")
-        self.assertRaises(CannotSetNotUpdatableOptionError, self.config.setOptions, userestapi=True)
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            config.setOptions(datapath="/foo/bar")
+        with pytest.raises(CannotSetNotUpdatableOptionError):
+            config.setOptions(userestapi=True)
 
-    def test_set_evtlog_ifdatapath(self):
-        self.config = AgilepyConfig()
+    def test_set_evtlog_ifdatapath(self, tmp_path):
+        config = AgilepyConfig()
 
-        conf1Path = os.path.join(self.currentDirPath,"conf/conf4.yaml")
+        conf1Path = os.path.join(Path(__file__).parent, "conf/conf4.yaml")
         
-        dirpath = Path("/tmp/foo/bar") 
+        dirpath = tmp_path / "foo" / "bar"
         dirpath.mkdir(parents=True, exist_ok=True)
 
-        self.config.loadBaseConfigurations(conf1Path)
-        self.config.loadConfigurationsForClass("AGAnalysis")
+        config.loadBaseConfigurations(conf1Path)
+        config.loadConfigurationsForClass("AGAnalysis")
 
-        self.assertEqual(self.config.getOptionValue("evtfile"), Path(self.config.getOptionValue("datapath")).joinpath("EVT.index"))
-        self.assertEqual(self.config.getOptionValue("logfile"), Path(self.config.getOptionValue("datapath")).joinpath("LOG.index"))
+        assert config.getOptionValue("evtfile") == Path(config.getOptionValue("datapath")).joinpath("EVT.index")
+        assert config.getOptionValue("logfile") == Path(config.getOptionValue("datapath")).joinpath("LOG.index")
 
         dirpath.rmdir()
 
-    ##### TEST NOT SUPPORTED AFTER REST FEATURE
-    """
-    def test_validation_tmin_not_in_index(self):
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions, tmin=40000000, tmax=433957532, timetype="TT")
-
-
-    
-    def test_validation_tmax_not_in_index(self):
-
-        self.config = AgilepyConfig()
-        self.config.loadBaseConfigurations(self.agilepyconfPath)
-        self.config.loadConfigurationsForClass("AGAnalysis")
-
-        self.assertRaises(ConfigurationsNotValidError, self.config.setOptions,
-                          tmin=433900000, tmax=456537946, timetype="TT")
-    """
-
-if __name__ == '__main__':
-    unittest.main()

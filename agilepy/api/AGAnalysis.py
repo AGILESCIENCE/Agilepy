@@ -29,7 +29,8 @@
 import os
 import re
 import numpy as np
-# from tqdm import tqdm, trange  
+
+from astropy.table import Table  
 from tqdm.notebook import trange, tqdm
 from time import time
 from pathlib import Path
@@ -101,6 +102,10 @@ class AGAnalysis(AGBaseAnalysis):
             "mle" : None,
             "ap" : None
         }
+        self.lightCurveTable = {
+            "mle" : None,
+            "ap" : None
+        }
 
         self.multiTool = Multi("AG_multi", self.logger)
 
@@ -159,7 +164,6 @@ input:
 output:
   outdir: {outputDir}
   filenameprefix: analysis_product
-  logfilenameprefix: analysis_log
   sourcename: {sourceName}
   username: {userName}
   verboselvl: {verboselvl}
@@ -955,7 +959,6 @@ plotting:
         (_, last) = Utils._getFirstAndLastLineInFile(configBKP.getConf("input", "evtfile"))
         idxTmax = float(Utils._extractTimes(last)[1])
 
-        # logFilenamePrefix = configBKP.getConf("output","logfilenameprefix")
         # verboseLvl = configBKP.getConf("output","verboselvl")
 
         self.logger.info( f"[LC] Number of processes: {processes}, Number of bins per process {len(binsForProcesses[0])}")
@@ -994,9 +997,8 @@ plotting:
         """
         processes = []
         for pID, pInputs in enumerate(binsForProcesses):
-            logFilenamePrefix += f"_thread_{pID}"
             self.logger.info("generating process...(%d). Chunk size for process: %d"%(pID, len(pInputs)))
-            p = Process(target=self._computeLcBin, args=(pID, pInputs, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl))
+            p = Process(target=self._computeLcBin, args=(pID, pInputs, configBKP, lcAnalysisDataDir, logsOutDir, verboseLvl))
             processes.append((pID,p,len(pInputs)))
 
         for pID, p, binsNumber in processes:
@@ -1019,6 +1021,10 @@ plotting:
         self.logger.info( "Took %f seconds.", time()-timeStart)
 
         self.lightCurveData["mle"] = str(lcOutputFilePath)
+        
+        # Data Table
+        lc_table = Table.read(lcOutputFilePath, format='ascii')
+        self.lightCurveTable["mle"] = lc_table
 
         return str(lcOutputFilePath)
 
@@ -1043,9 +1049,20 @@ plotting:
         products = apTool.call()
         self.logger.info( f"Science tool AP produced:\n {products}")
 
-        self.lightCurveData["ap"] = products[0]
+        try:
+            self.lightCurveData["ap"] = products[0]
+            file_name = products[0]
+            file_optional = products[1]
+        except KeyError:
+            # This happens if the file already exists
+            file_name = self.lightCurveData["ap"]
+            file_optional = None
+        
+        # Read table
+        lc_table = Table.read(file_name, format='ascii', names=["tmin_TT","tmax_TT","exposure","counts"])
+        self.lightCurveTable["ap"] = lc_table
 
-        return products[0], products[1] 
+        return file_name, file_optional
 
 
     ############################################################################
@@ -1381,11 +1398,11 @@ plotting:
 
     """
     The light curve data generation could be parallalezed..
-    def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, logFilenamePrefix, verboseLvl):
+    def _computeLcBin(self, threadID, bins, configBKP, lcAnalysisDataDir, logsOutDir, verboseLvl):
 
         logger = AgilepyLogger()
 
-        logger.initialize(logsOutDir, logFilenamePrefix, verboseLvl)
+        logger.initialize(logsOutDir, verboseLvl)
 
         # outputs = []
 

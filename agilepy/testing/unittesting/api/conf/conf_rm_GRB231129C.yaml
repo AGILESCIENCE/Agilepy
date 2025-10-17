@@ -1,0 +1,17 @@
+output:
+  outdir: $TEST_LOGS_DIR
+  filenameprefix: test_rm
+  sourcename: src-rm-test
+  username: user-test
+  verboselvl: 2
+
+selection:
+  file_path: "$AGILEPY_UNITTESTING_DIR/api/data/PKP086465_1_3913_000.lv1.cor.gz"
+
+analysis:
+  timetype: "isot"
+  T0: "2023-11-29T19:10:18"
+  background_tmin: -50.0
+  background_tmax: -25.0
+  signal_tmin: -2.0
+  signal_tmax: 10.0

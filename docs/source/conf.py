@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('../../agilepy'))
 
 project = 'Agilepy'
 copyright = '2022, AGILE TEAM'
-author = 'Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>'
+author = 'Baroncelli Leonardo <leonardo.baroncelli@inaf.it>, Addis Antonio <antonio.addis@inaf.it>, Bulgarelli Andrea <andrea.bulgarelli@inaf.it>, Parmiggiani Nicolò <nicolo.parmiggiani@inaf.it>, Gabriele Panebianco <gabriele.panebianco@inaf.it>'
 
 # The short X.Y version
 version = ''
@@ -42,12 +42,13 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'myst_nb',
 ]
 autodoc_typehints='none'
 autodoc_member_order='bysource' #groupwise  alphabetical
 napoleon_include_init_with_doc=True
-
+jupyter_execute_notebooks = "off"  # "auto", "force", "off".
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

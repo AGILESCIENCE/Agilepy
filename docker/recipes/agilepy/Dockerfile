@@ -8,7 +8,7 @@ WORKDIR /home/flareadvocate
 
 # Install Agilepy dependencies + library
 RUN git clone https://github.com/AGILESCIENCE/Agilepy.git 
-RUN cd Agilepy && git checkout ${AGILEPY_RELEASE}
+RUN cd Agilepy && git checkout ${AGILEPY_RELEASE} && git submodule update --init --recursive
 RUN cd Agilepy && python3 -m pip install -r requirements.lock
 RUN cd Agilepy && python3 -m pip install .
 
@@ -22,4 +22,8 @@ RUN echo "bash /home/flareadvocate/Agilepy/agilepy/scripts/welcome.sh" >> /home/
 
 # Set the user and entrypoint script
 USER flareadvocate
+
+# Download the test dataset
+RUN download_test_dataset.sh
+
 ENTRYPOINT ["bash", "/home/flareadvocate/entrypoint.sh"]
